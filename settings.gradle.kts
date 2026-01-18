@@ -23,7 +23,13 @@ dependencyResolutionManagement {
 rootProject.name = "SnapReceipt"
 
 include(":app")
-include(":base")
-include(":core")
-include(":data")
+include(":core-base")
+include(":core-foundation")
+include(":core-data")
+include(":core-domain")
 include(":feature_ocr")
+
+project(":core-base").projectDir = file("core-base")
+project(":core-foundation").projectDir = file("core-foundation")
+project(":core-data").projectDir = file("core-data")
+project(":core-domain").projectDir = file("core-domain")

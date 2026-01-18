@@ -2,17 +2,22 @@ package com.snapreceipt.io.ui.me
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.ViewGroup
 import android.view.View
-import android.widget.Toast
-import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.snapreceipt.io.R
 import com.snapreceipt.io.ui.login.LoginActivity
+import com.skybound.space.base.presentation.BaseFragment
+import com.skybound.space.base.presentation.UiEvent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class MeFragment : Fragment() {
+class MeFragment : BaseFragment<MeViewModel>(R.layout.fragment_me) {
+    override val viewModel: MeViewModel by viewModels()
+
     private lateinit var editProfileBtn: View
     private lateinit var exportBtn: View
     private lateinit var settingsBtn: View
@@ -20,15 +25,7 @@ class MeFragment : Fragment() {
     private lateinit var aboutBtn: View
     private lateinit var logoutBtn: View
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View = inflater.inflate(R.layout.fragment_me, container, false)
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
         editProfileBtn = view.findViewById(R.id.edit_profile_btn)
         exportBtn = view.findViewById(R.id.menu_export)
         settingsBtn = view.findViewById(R.id.menu_settings)
@@ -37,30 +34,50 @@ class MeFragment : Fragment() {
         logoutBtn = view.findViewById(R.id.logout_btn)
 
         setupListeners()
+        observeState()
+        super.onViewCreated(view, savedInstanceState)
+    }
+
+    private fun observeState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { renderState(it) }
+            }
+        }
+    }
+
+    private fun renderState(state: MeUiState) {
+        // No-op for now
+    }
+
+    override fun onCustomEvent(event: UiEvent.Custom) {
+        if (event.type == MeEventKeys.NAVIGATE_LOGIN) {
+            navigateToLogin()
+        }
     }
 
     private fun setupListeners() {
         editProfileBtn.setOnClickListener {
-            Toast.makeText(requireContext(), "编辑个人资料", Toast.LENGTH_SHORT).show()
+            viewModel.showToast(getString(R.string.edit_profile))
         }
         exportBtn.setOnClickListener {
-            Toast.makeText(requireContext(), "导出记录", Toast.LENGTH_SHORT).show()
+            viewModel.showToast(getString(R.string.export_records))
         }
         settingsBtn.setOnClickListener {
-            Toast.makeText(requireContext(), "设置", Toast.LENGTH_SHORT).show()
+            viewModel.showToast(getString(R.string.settings))
         }
         feedbackBtn.setOnClickListener {
-            Toast.makeText(requireContext(), "反馈", Toast.LENGTH_SHORT).show()
+            viewModel.showToast(getString(R.string.feedback))
         }
         aboutBtn.setOnClickListener {
-            Toast.makeText(requireContext(), "关于我们", Toast.LENGTH_SHORT).show()
+            viewModel.showToast(getString(R.string.about_us))
         }
         logoutBtn.setOnClickListener {
-            onLogout()
+            viewModel.logout()
         }
     }
 
-    private fun onLogout() {
+    private fun navigateToLogin() {
         startActivity(Intent(requireContext(), LoginActivity::class.java))
         activity?.finish()
     }

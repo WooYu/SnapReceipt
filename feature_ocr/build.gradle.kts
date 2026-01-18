@@ -50,8 +50,9 @@ kotlin {
 }
 
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":data"))
+    implementation(project(":core-foundation"))
+    implementation(project(":core-data"))
+    implementation(project(":core-domain"))
     
     implementation(libs.mlkit.text)
     implementation(libs.retrofit)

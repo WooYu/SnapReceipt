@@ -1,29 +1,28 @@
 package com.snapreceipt.io.ui.receipts
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
-import com.snapreceipt.io.data.db.ReceiptEntity
+import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.home.dialogs.EditReceiptDialog
+import com.skybound.space.base.presentation.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class ReceiptsFragment : Fragment() {
-    private val viewModel: ReceiptsViewModel by viewModels()
+class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_receipts) {
+    override val viewModel: ReceiptsViewModel by viewModels()
+
     private lateinit var receiptList: RecyclerView
     private lateinit var emptyState: FrameLayout
     private lateinit var actionBar: LinearLayout
@@ -32,17 +31,9 @@ class ReceiptsFragment : Fragment() {
     private lateinit var exportBtn: TextView
     private lateinit var selectAllBtn: Button
     private lateinit var deleteBtn: Button
-    private lateinit var adapter: SelectableReceiptAdapter
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View = inflater.inflate(R.layout.fragment_receipts, container, false)
+    private lateinit var adapter: ReceiptsSelectableAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
         receiptList = view.findViewById(R.id.receipt_list)
         emptyState = view.findViewById(R.id.empty_state)
         actionBar = view.findViewById(R.id.action_bar)
@@ -54,12 +45,35 @@ class ReceiptsFragment : Fragment() {
 
         setupAdapter()
         setupListeners()
-        observeData()
+        observeState()
+        super.onViewCreated(view, savedInstanceState)
+    }
+
+    private fun observeState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { renderState(it) }
+            }
+        }
+    }
+
+    private fun renderState(state: ReceiptsUiState) {
+        if (state.empty) {
+            emptyState.visibility = View.VISIBLE
+            receiptList.visibility = View.GONE
+            adapter.setReceipts(emptyList())
+        } else {
+            emptyState.visibility = View.GONE
+            receiptList.visibility = View.VISIBLE
+            adapter.setReceipts(state.receipts)
+        }
+        actionBar.visibility = if (state.selectedIds.isNotEmpty()) View.VISIBLE else View.GONE
+        adapter.updateSelection(state.selectedIds)
     }
 
     private fun setupAdapter() {
-        adapter = SelectableReceiptAdapter(
-            selectedIds = emptySet<Int>(),
+        adapter = ReceiptsSelectableAdapter(
+            selectedIds = emptySet(),
             onToggle = { id ->
                 viewModel.toggleSelection(id)
             },
@@ -72,58 +86,27 @@ class ReceiptsFragment : Fragment() {
 
     private fun setupListeners() {
         filterDateBtn.setOnClickListener {
-            Toast.makeText(requireContext(), "日期筛选", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.filter_date), Toast.LENGTH_SHORT).show()
         }
         filterTypeBtn.setOnClickListener {
-            Toast.makeText(requireContext(), "标题筛选", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.filter_type), Toast.LENGTH_SHORT).show()
         }
         exportBtn.setOnClickListener {
-            Toast.makeText(requireContext(), "类型筛选", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.export), Toast.LENGTH_SHORT).show()
         }
         selectAllBtn.setOnClickListener {
             viewModel.selectAll()
         }
         deleteBtn.setOnClickListener {
             viewModel.deleteSelected()
-            Toast.makeText(requireContext(), "已删除", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun observeData() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.receipts.collect { receipts ->
-                    if (receipts.isEmpty()) {
-                        emptyState.visibility = View.VISIBLE
-                        receiptList.visibility = View.GONE
-                        actionBar.visibility = View.GONE
-                    } else {
-                        emptyState.visibility = View.GONE
-                        receiptList.visibility = View.VISIBLE
-                        adapter.setReceipts(receipts)
-                    }
-                }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.selectedReceipts.collect { selected ->
-                    if (selected.isNotEmpty()) {
-                        actionBar.visibility = View.VISIBLE
-                    } else {
-                        actionBar.visibility = View.GONE
-                    }
-                    adapter.updateSelection(selected)
-                }
-            }
+            Toast.makeText(requireContext(), getString(R.string.delete_selected), Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun showEditDialog(receipt: ReceiptEntity) {
         EditReceiptDialog(receipt) { updatedReceipt ->
             viewModel.updateReceipt(updatedReceipt)
-            Toast.makeText(requireContext(), "已保存", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.success), Toast.LENGTH_SHORT).show()
         }.show(parentFragmentManager, "edit_receipt")
     }
 }

@@ -2,25 +2,80 @@ package com.snapreceipt.io.ui.login
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.viewModels
+import android.widget.Toast
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.snapreceipt.io.MainActivity
 import com.snapreceipt.io.R
+import com.skybound.space.base.presentation.BaseActivity
+import com.skybound.space.base.presentation.UiEvent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : BaseActivity<LoginViewModel>() {
+    override val viewModel: LoginViewModel by viewModels()
+    private var currentMode: LoginMode? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+        setupBackPress()
 
         if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, PhoneLoginFragment())
-                .commit()
+            viewModel.switchToPhone()
+        }
+        observeState()
+    }
+
+    private fun observeState() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { renderState(it) }
+            }
         }
     }
 
-    fun navigateToMainActivity() {
+    private fun renderState(state: LoginUiState) {
+        if (currentMode == state.mode) return
+        currentMode = state.mode
+        val fragment = when (state.mode) {
+            LoginMode.PHONE -> PhoneLoginFragment()
+            LoginMode.EMAIL -> EmailLoginFragment()
+        }
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .commit()
+    }
+
+    override fun onCustomEvent(event: UiEvent.Custom) {
+        when (event.type) {
+            LoginEventKeys.CODE_SENT -> {
+                val target = event.payload?.getString(LoginEventKeys.EXTRA_TARGET).orEmpty()
+                if (target.isNotEmpty()) {
+                    Toast.makeText(this, getString(R.string.code_sent, target), Toast.LENGTH_SHORT).show()
+                }
+            }
+            LoginEventKeys.NAVIGATE_MAIN -> navigateToMainActivity()
+        }
+    }
+
+    private fun setupBackPress() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (viewModel.uiState.value.mode == LoginMode.EMAIL) {
+                    viewModel.switchToPhone()
+                } else {
+                    finish()
+                }
+            }
+        })
+    }
+
+    private fun navigateToMainActivity() {
         startActivity(Intent(this, MainActivity::class.java))
         finish()
     }

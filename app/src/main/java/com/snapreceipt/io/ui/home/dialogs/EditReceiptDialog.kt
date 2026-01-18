@@ -8,7 +8,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.textfield.TextInputEditText
 import com.snapreceipt.io.R
-import com.snapreceipt.io.data.db.ReceiptEntity
+import com.snapreceipt.io.domain.model.ReceiptEntity
 
 class EditReceiptDialog(
     private val receipt: ReceiptEntity,

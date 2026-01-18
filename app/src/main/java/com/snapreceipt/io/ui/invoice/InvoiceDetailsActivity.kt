@@ -7,19 +7,20 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.snapreceipt.io.MainActivity
 import com.snapreceipt.io.R
-import com.snapreceipt.io.data.db.ReceiptEntity
-import com.snapreceipt.io.data.repository.ReceiptRepository
+import com.snapreceipt.io.domain.model.ReceiptEntity
+import com.skybound.space.base.presentation.BaseActivity
+import com.skybound.space.base.presentation.UiEvent
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
-class InvoiceDetailsActivity : AppCompatActivity() {
+class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     companion object {
         const val EXTRA_IMAGE_PATH = "extra_image_path"
         const val EXTRA_MERCHANT = "extra_merchant"
@@ -35,7 +36,7 @@ class InvoiceDetailsActivity : AppCompatActivity() {
         const val TAB_RECEIPTS = "receipts"
     }
 
-    @Inject lateinit var receiptRepository: ReceiptRepository
+    override val viewModel: InvoiceDetailsViewModel by viewModels()
 
     private lateinit var imageView: ImageView
     private lateinit var inputAmount: EditText
@@ -46,6 +47,7 @@ class InvoiceDetailsActivity : AppCompatActivity() {
     private lateinit var inputInvoiceType: EditText
     private lateinit var inputTitleType: EditText
     private lateinit var inputNote: EditText
+    private lateinit var saveButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +62,7 @@ class InvoiceDetailsActivity : AppCompatActivity() {
         inputInvoiceType = findViewById(R.id.input_invoice_type)
         inputTitleType = findViewById(R.id.input_title_type)
         inputNote = findViewById(R.id.input_note)
+        saveButton = findViewById(R.id.save_btn)
 
         val imagePath = intent.getStringExtra(EXTRA_IMAGE_PATH).orEmpty()
         if (imagePath.isNotEmpty()) {
@@ -78,8 +81,30 @@ class InvoiceDetailsActivity : AppCompatActivity() {
         findViewById<ImageView>(R.id.btn_back).setOnClickListener { finish() }
         findViewById<ImageView>(R.id.btn_delete).setOnClickListener { finish() }
 
-        findViewById<Button>(R.id.save_btn).setOnClickListener {
-            saveReceipt(imagePath)
+        saveButton.setOnClickListener { saveReceipt(imagePath) }
+        observeState()
+    }
+
+    private fun observeState() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { renderState(it) }
+            }
+        }
+    }
+
+    private fun renderState(state: InvoiceDetailsUiState) {
+        if (::saveButton.isInitialized) {
+            saveButton.isEnabled = !state.loading
+        }
+    }
+
+    override fun onCustomEvent(event: UiEvent.Custom) {
+        when (event.type) {
+            InvoiceDetailsEventKeys.SHOW_SUCCESS -> {
+                Toast.makeText(this, getString(R.string.success), Toast.LENGTH_SHORT).show()
+            }
+            InvoiceDetailsEventKeys.NAVIGATE_TO_MAIN -> navigateToMain()
         }
     }
 
@@ -96,19 +121,18 @@ class InvoiceDetailsActivity : AppCompatActivity() {
             invoiceType = invoiceTypeValue,
             category = titleTypeValue,
             imagePath = imagePath,
-            description = noteValue
+            description = noteValue,
+            date = System.currentTimeMillis()
         )
 
-        CoroutineScope(Dispatchers.IO).launch {
-            receiptRepository.insertReceipt(receipt)
-            runOnUiThread {
-                Toast.makeText(this@InvoiceDetailsActivity, getString(R.string.success), Toast.LENGTH_SHORT).show()
-                val intent = Intent(this@InvoiceDetailsActivity, MainActivity::class.java)
-                intent.putExtra(EXTRA_START_TAB, TAB_RECEIPTS)
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                startActivity(intent)
-                finish()
-            }
-        }
+        viewModel.saveReceipt(receipt)
+    }
+
+    private fun navigateToMain() {
+        val intent = Intent(this@InvoiceDetailsActivity, MainActivity::class.java)
+        intent.putExtra(EXTRA_START_TAB, TAB_RECEIPTS)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        startActivity(intent)
+        finish()
     }
 }

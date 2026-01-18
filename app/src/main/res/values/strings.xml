@@ -3,22 +3,27 @@
     <string name="app_name">SnapReceipt</string>
 
     <!-- Login -->
-    <string name="login_title">登录 SnapReceipt</string>
-    <string name="login_subtitle">通过手机号验证码快速登录</string>
-    <string name="login_with_email">通过邮箱和密码登录</string>
-    <string name="phone_hint">请输入手机号</string>
-    <string name="code_hint">验证码</string>
-    <string name="email_hint">请输入邮箱地址</string>
-    <string name="password_hint">请输入密码</string>
-    <string name="get_code">获取验证码</string>
-    <string name="login">登录</string>
-    <string name="switch_email_login">使用邮箱登录</string>
-    <string name="switch_phone_login">使用手机登录</string>
-    <string name="forgot_password">忘记密码？</string>
-    <string name="phone_empty">请输入手机号</string>
-    <string name="code_sent">验证码已发送至 %s</string>
-    <string name="input_required">请填写完整信息</string>
-    <string name="forgot_password_sent">密码重置邮件已发送</string>
+    <string name="login_welcome_title">Welcome to Invoice Assistant</string>
+    <string name="login_welcome_subtitle">Track your daily expenses effortlessly</string>
+    <string name="login_tab_email">Email</string>
+    <string name="login_tab_phone">Phone</string>
+    <string name="login_phone_label">Phone Number</string>
+    <string name="login_email_label">Email Address</string>
+    <string name="login_code_label">Verification Code</string>
+    <string name="login_email_code_label">Email Verification Code</string>
+    <string name="login_phone_hint">Mobile Phone Number</string>
+    <string name="login_email_hint">name@gmail.com</string>
+    <string name="login_code_hint">Enter code</string>
+    <string name="login_captcha">CAPTCHA</string>
+    <string name="login_countdown">%dS</string>
+    <string name="login_agreement_html">I have read and agree to the User Agreement and Privacy Policy</string>
+    <string name="login">Log In</string>
+    <string name="phone_empty">Please enter phone number</string>
+    <string name="email_empty">Please enter email address</string>
+    <string name="code_sent">Verification code sent to %s</string>
+    <string name="input_required">Please complete all required fields</string>
+    <string name="agreement_required">Please accept the User Agreement and Privacy Policy</string>
+    <string name="toggle_visibility">Toggle visibility</string>
 
     <!-- Main Navigation -->
     <string name="nav_home">首页</string>

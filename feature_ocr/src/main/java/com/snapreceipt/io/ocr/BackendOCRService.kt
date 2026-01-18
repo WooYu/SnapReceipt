@@ -6,7 +6,7 @@ import com.skybound.space.core.network.NetworkResult
 import com.snapreceipt.io.data.network.datasource.FileRemoteDataSource
 import com.snapreceipt.io.data.network.datasource.ReceiptRemoteDataSource
 import com.snapreceipt.io.data.network.datasource.UploadRemoteDataSource
-import com.snapreceipt.io.data.network.model.ReceiptScanResult
+import com.snapreceipt.io.data.network.model.ReceiptScanResultDto
 import java.io.File
 
 class BackendOCRService(
@@ -64,7 +64,7 @@ class BackendOCRService(
         }
     }
 
-    private fun toMap(result: ReceiptScanResult, imageUrl: String): Map<String, Any?> {
+    private fun toMap(result: ReceiptScanResultDto, imageUrl: String): Map<String, Any?> {
         return mapOf(
             "merchant" to result.merchant,
             "receiptDate" to result.receiptDate,

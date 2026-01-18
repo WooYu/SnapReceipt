@@ -92,9 +92,10 @@ kotlin {
 
 dependencies {
     // Core 依赖
-    implementation(project(":base"))
-    implementation(project(":core"))
-    implementation(project(":data"))
+    implementation(project(":core-base"))
+    implementation(project(":core-foundation"))
+    implementation(project(":core-data"))
+    implementation(project(":core-domain"))
     implementation(project(":feature_ocr"))
 
     // 应用依赖
@@ -107,14 +108,12 @@ dependencies {
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.lifecycle.livedata.ktx)
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
     implementation(libs.datastore.preferences)
     implementation(libs.coroutines.android)
     implementation(libs.coroutines.core)
     implementation(libs.hilt.android)
+    implementation(libs.timber)
     implementation(libs.ucrop)
-    ksp(libs.room.compiler)
     ksp(libs.hilt.compiler)
 
     // 测试依赖
