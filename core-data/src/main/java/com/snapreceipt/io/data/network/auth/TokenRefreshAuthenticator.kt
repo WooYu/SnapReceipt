@@ -7,6 +7,7 @@ import com.snapreceipt.io.data.network.model.RefreshRequestDto
 import com.skybound.space.core.network.BaseResponse
 import com.skybound.space.core.network.NetworkConfig
 import com.skybound.space.core.network.auth.AuthTokenStore
+import com.skybound.space.core.network.interceptor.LoggingInterceptor
 import okhttp3.Authenticator
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -14,6 +15,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okhttp3.Route
+import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
 
 class TokenRefreshAuthenticator(
@@ -28,6 +30,11 @@ class TokenRefreshAuthenticator(
             .connectTimeout(config.connectTimeoutSec, TimeUnit.SECONDS)
             .readTimeout(config.readTimeoutSec, TimeUnit.SECONDS)
             .writeTimeout(config.writeTimeoutSec, TimeUnit.SECONDS)
+            .apply {
+                if (config.enableLogging) {
+                    addInterceptor(LoggingInterceptor(HttpLoggingInterceptor.Level.HEADERS))
+                }
+            }
             .build()
     }
 

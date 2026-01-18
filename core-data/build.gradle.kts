@@ -42,6 +42,7 @@ dependencies {
 
     api(libs.retrofit)
     api(libs.okhttp)
+    implementation(libs.okhttp.logging)
     implementation(libs.gson)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)

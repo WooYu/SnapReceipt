@@ -13,6 +13,10 @@ class SnapReceiptApp : Application() {
         super.onCreate()
         AppConfig.init(isDebug = BuildConfig.DEBUG)
         LogHelper.init(isDebug = BuildConfig.DEBUG)
+        LogHelper.i(
+            "AppConfig",
+            "init debug=${BuildConfig.DEBUG} baseUrl=${AppConfig.baseUrl} version=${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
+        )
         AppInjector.applyConfig(AppDiConfig(this))
     }
 }

@@ -7,6 +7,7 @@ object LogHelper {
     private const val PRIORITY_INFO = 4
     private const val PRIORITY_WARN = 5
     private const val PRIORITY_ERROR = 6
+    private const val ROOT_TAG = "Snap"
 
     var isDebug: Boolean = true
         private set
@@ -30,16 +31,17 @@ object LogHelper {
 
     private fun log(level: String, tag: String, message: String, throwable: Throwable?) {
         val transformed = messageTransformer?.invoke(message) ?: message
+        val moduleMessage = if (tag.isBlank()) transformed else "[$tag] $transformed"
         if (isDebug) {
             when (level) {
-                "D" -> Timber.tag(tag).d(throwable, transformed)
-                "I" -> Timber.tag(tag).i(throwable, transformed)
-                "W" -> Timber.tag(tag).w(throwable, transformed)
-                "E" -> Timber.tag(tag).e(throwable, transformed)
-                else -> Timber.tag(tag).v(throwable, transformed)
+                "D" -> Timber.tag(ROOT_TAG).d(throwable, moduleMessage)
+                "I" -> Timber.tag(ROOT_TAG).i(throwable, moduleMessage)
+                "W" -> Timber.tag(ROOT_TAG).w(throwable, moduleMessage)
+                "E" -> Timber.tag(ROOT_TAG).e(throwable, moduleMessage)
+                else -> Timber.tag(ROOT_TAG).v(throwable, moduleMessage)
             }
         }
-        reporter?.invoke(level, tag, transformed, throwable)
+        reporter?.invoke(level, ROOT_TAG, moduleMessage, throwable)
     }
 
     private class ReportOnlyTree : Timber.Tree() {
@@ -51,7 +53,7 @@ object LogHelper {
                 PRIORITY_ERROR -> "E"
                 else -> "V"
             }
-            reporter?.invoke(level, tag ?: "LogHelper", message, t)
+            reporter?.invoke(level, tag ?: ROOT_TAG, message, t)
         }
     }
 }

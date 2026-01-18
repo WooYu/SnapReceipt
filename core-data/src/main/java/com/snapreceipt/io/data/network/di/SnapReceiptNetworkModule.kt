@@ -8,6 +8,7 @@ import android.content.Context
 import com.skybound.space.core.network.auth.AuthTokenStore
 import com.skybound.space.core.network.auth.EncryptedAuthTokenStore
 import com.skybound.space.core.network.interceptor.AuthInterceptor
+import com.skybound.space.core.network.interceptor.LoggingInterceptor
 import com.snapreceipt.io.data.network.auth.TokenRefreshAuthenticator
 import com.snapreceipt.io.data.network.datasource.AuthRemoteDataSource
 import com.snapreceipt.io.data.network.datasource.FileRemoteDataSource
@@ -26,6 +27,7 @@ import dagger.multibindings.IntoSet
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Authenticator
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 import javax.inject.Qualifier
@@ -100,6 +102,11 @@ object SnapReceiptNetworkModule {
             .connectTimeout(config.connectTimeoutSec, TimeUnit.SECONDS)
             .readTimeout(config.readTimeoutSec, TimeUnit.SECONDS)
             .writeTimeout(config.writeTimeoutSec, TimeUnit.SECONDS)
+            .apply {
+                if (config.enableLogging) {
+                    addInterceptor(LoggingInterceptor(HttpLoggingInterceptor.Level.HEADERS))
+                }
+            }
             .build()
 
     @Provides
