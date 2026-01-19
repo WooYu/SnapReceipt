@@ -74,6 +74,11 @@ class DateTimePickerBottomSheet(
         minutePicker.maxValue = 59
         minutePicker.value = calendar.get(Calendar.MINUTE)
 
+        monthPicker.setFormatter { value -> value.toString().padStart(2, '0') }
+        dayPicker.setFormatter { value -> value.toString().padStart(2, '0') }
+        hourPicker.setFormatter { value -> value.toString().padStart(2, '0') }
+        minutePicker.setFormatter { value -> value.toString().padStart(2, '0') }
+
         updateDayPicker()
 
         val listener = NumberPicker.OnValueChangeListener { _, _, _ ->
@@ -83,6 +88,7 @@ class DateTimePickerBottomSheet(
             calendar.set(Calendar.HOUR_OF_DAY, hourPicker.value)
             calendar.set(Calendar.MINUTE, minutePicker.value)
             updateDayPicker()
+            calendar.set(Calendar.DAY_OF_MONTH, dayPicker.value)
             updateSelectedText()
         }
 
@@ -102,7 +108,8 @@ class DateTimePickerBottomSheet(
     }
 
     private fun updateSelectedText() {
-        selectedText.text = formatDisplay(calendar.timeInMillis)
+        val display = formatDisplay(calendar.timeInMillis)
+        selectedText.text = getString(R.string.date_prefix, display)
     }
 
     private fun formatDate(timeMillis: Long): String =

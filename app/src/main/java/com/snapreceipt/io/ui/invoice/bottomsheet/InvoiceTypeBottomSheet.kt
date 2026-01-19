@@ -53,6 +53,9 @@ class InvoiceTypeBottomSheet(
     }
 
     private fun updateSelection() {
+        if (optionViews.none { it.text.toString().equals(selectedLabel, ignoreCase = true) }) {
+            selectedLabel = optionViews.firstOrNull()?.text?.toString().orEmpty()
+        }
         optionViews.forEach { option ->
             option.isSelected = option.text.toString().equals(selectedLabel, ignoreCase = true)
         }

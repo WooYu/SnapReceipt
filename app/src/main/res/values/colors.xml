@@ -18,5 +18,6 @@
     <color name="text_secondary">#8A93A6</color>
     <color name="text_muted">#B3BBCB</color>
     <color name="accent_blue">#0E4BFF</color>
+    <color name="chip_selected">#2F6BFF</color>
     <color name="card_shadow">#1A4BFF</color>
 </resources>

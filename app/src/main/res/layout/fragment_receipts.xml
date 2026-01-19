@@ -52,7 +52,7 @@
             android:gravity="center"
             android:drawableEnd="@drawable/ic_chevron_down"
             android:drawablePadding="6dp"
-            android:text="@string/filter_title"
+            android:text="@string/filter_type"
             android:textColor="@color/text_primary"
             android:textSize="14sp" />
 
@@ -64,7 +64,7 @@
             android:gravity="end"
             android:drawableEnd="@drawable/ic_chevron_down"
             android:drawablePadding="6dp"
-            android:text="@string/filter_type"
+            android:text="@string/export"
             android:textColor="@color/text_primary"
             android:textSize="14sp" />
     </LinearLayout>

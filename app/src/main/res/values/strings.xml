@@ -89,6 +89,14 @@
     <string name="select_invoice_type">Select Invoice Type</string>
     <string name="select_title_type">Select Title Type</string>
     <string name="select_date_time">Select date and time</string>
+    <string name="select_date_title">Select Date</string>
+    <string name="year_label">Year</string>
+    <string name="month_label">Month</string>
+    <string name="day_label">Day</string>
+    <string name="hour_label">Hour</string>
+    <string name="min_label">Min</string>
+    <string name="date_prefix">Date: %s</string>
+    <string name="date_range_separator">-</string>
     <string name="type_all">All</string>
     <string name="type_food">Food</string>
     <string name="type_travel">Travel</string>

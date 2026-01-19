@@ -1,8 +1,8 @@
 package com.skybound.space.core.network.interceptor
 
+import com.skybound.space.core.util.LogHelper
 import okhttp3.Interceptor
 import okhttp3.Response
-import com.skybound.space.core.util.LogHelper
 import okhttp3.logging.HttpLoggingInterceptor
 
 /**
@@ -16,9 +16,11 @@ class LoggingInterceptor(
 
     private val delegate = HttpLoggingInterceptor { message ->
         LogHelper.d(tag, message)
-    }.apply {
-        setLevel(level)
-        redactedHeaders.forEach { redactHeader(it) }
+    }
+
+    init {
+        delegate.level = level
+        redactedHeaders.forEach { delegate.redactHeader(it) }
     }
 
     override fun intercept(chain: Interceptor.Chain): Response = delegate.intercept(chain)

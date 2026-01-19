@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.home.dialogs.EditReceiptDialog
+import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceTypeBottomSheet
+import com.snapreceipt.io.ui.receipts.bottomsheet.DateRangeBottomSheet
 import com.skybound.space.base.presentation.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -31,6 +33,9 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     private lateinit var selectAllBtn: Button
     private lateinit var deleteBtn: Button
     private lateinit var adapter: ReceiptsSelectableAdapter
+    private var filterStartMillis: Long? = null
+    private var filterEndMillis: Long? = null
+    private var filterTypeLabel: String? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         receiptList = view.findViewById(R.id.receipt_list)
@@ -90,10 +95,20 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
 
     private fun setupListeners() {
         filterDateBtn.setOnClickListener {
-            Toast.makeText(requireContext(), getString(R.string.filter_date), Toast.LENGTH_SHORT).show()
+            DateRangeBottomSheet(filterStartMillis, filterEndMillis) { start, end ->
+                filterStartMillis = start
+                filterEndMillis = end
+                filterDateBtn.text = formatDateRange(start, end)
+                viewModel.filterByDateRange(start, end)
+            }.show(parentFragmentManager, "date_range_picker")
         }
         filterTypeBtn.setOnClickListener {
-            Toast.makeText(requireContext(), getString(R.string.filter_type), Toast.LENGTH_SHORT).show()
+            val initial = filterTypeLabel ?: filterTypeBtn.text.toString()
+            InvoiceTypeBottomSheet(initial) { selected ->
+                filterTypeLabel = selected
+                filterTypeBtn.text = selected
+                viewModel.filterByType(selected)
+            }.show(parentFragmentManager, "type_filter_picker")
         }
         exportBtn.setOnClickListener {
             Toast.makeText(requireContext(), getString(R.string.export), Toast.LENGTH_SHORT).show()
@@ -112,5 +127,10 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
             viewModel.updateReceipt(updatedReceipt)
             Toast.makeText(requireContext(), getString(R.string.success), Toast.LENGTH_SHORT).show()
         }.show(parentFragmentManager, "edit_receipt")
+    }
+
+    private fun formatDateRange(start: Long, end: Long): String {
+        val format = java.text.SimpleDateFormat("yyyy/MM/dd", java.util.Locale.getDefault())
+        return "${format.format(java.util.Date(start))} - ${format.format(java.util.Date(end))}"
     }
 }

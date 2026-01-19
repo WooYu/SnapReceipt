@@ -5,15 +5,29 @@
     android:orientation="vertical"
     android:padding="20dp">
 
-    <TextView
-        android:id="@+id/title"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/select_title_type"
-        android:textColor="@color/text_primary"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:contentDescription="@string/select_title_type"
+            android:src="@drawable/ic_bookmark_light" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/select_title_type"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,7 +43,7 @@
             android:background="@drawable/bg_chip_selector"
             android:gravity="center"
             android:text="@string/type_all"
-            android:textColor="@color/text_primary" />
+            android:textColor="@color/chip_text_selector" />
 
         <TextView
             android:id="@+id/title_individual"
@@ -40,7 +54,7 @@
             android:background="@drawable/bg_chip_selector"
             android:gravity="center"
             android:text="@string/type_individual"
-            android:textColor="@color/text_primary" />
+            android:textColor="@color/chip_text_selector" />
 
         <TextView
             android:id="@+id/title_company"
@@ -51,7 +65,7 @@
             android:background="@drawable/bg_chip_selector"
             android:gravity="center"
             android:text="@string/type_company"
-            android:textColor="@color/text_primary" />
+            android:textColor="@color/chip_text_selector" />
     </LinearLayout>
 
     <LinearLayout
