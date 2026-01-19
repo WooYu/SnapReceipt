@@ -13,7 +13,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.snapreceipt.io.MainActivity
 import com.snapreceipt.io.R
-import com.snapreceipt.io.domain.model.ReceiptEntity
+import com.snapreceipt.io.domain.model.ReceiptCategory
+import com.snapreceipt.io.domain.model.ReceiptSaveEntity
+import com.snapreceipt.io.ui.invoice.bottomsheet.DateTimePickerBottomSheet
+import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceTypeBottomSheet
+import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
 import com.skybound.space.base.presentation.BaseActivity
 import com.skybound.space.base.presentation.UiEvent
 import dagger.hilt.android.AndroidEntryPoint
@@ -23,11 +27,15 @@ import kotlinx.coroutines.launch
 class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     companion object {
         const val EXTRA_IMAGE_PATH = "extra_image_path"
+        const val EXTRA_IMAGE_URL = "extra_image_url"
         const val EXTRA_MERCHANT = "extra_merchant"
         const val EXTRA_AMOUNT = "extra_amount"
         const val EXTRA_ADDRESS = "extra_address"
         const val EXTRA_DATE = "extra_date"
+        const val EXTRA_TIME = "extra_time"
         const val EXTRA_CARD = "extra_card"
+        const val EXTRA_CONSUMER = "extra_consumer"
+        const val EXTRA_TIP_AMOUNT = "extra_tip_amount"
         const val EXTRA_INVOICE_TYPE = "extra_invoice_type"
         const val EXTRA_TITLE_TYPE = "extra_title_type"
         const val EXTRA_NOTE = "extra_note"
@@ -48,6 +56,11 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private lateinit var inputTitleType: EditText
     private lateinit var inputNote: EditText
     private lateinit var saveButton: Button
+    private var receiptImageUrl: String = ""
+    private var receiptDate: String = ""
+    private var receiptTime: String = ""
+    private var scanConsumer: String = ""
+    private var scanTipAmount: Double = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,15 +78,22 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         saveButton = findViewById(R.id.save_btn)
 
         val imagePath = intent.getStringExtra(EXTRA_IMAGE_PATH).orEmpty()
+        receiptImageUrl = intent.getStringExtra(EXTRA_IMAGE_URL).orEmpty()
         if (imagePath.isNotEmpty()) {
             imageView.setImageURI(Uri.fromFile(java.io.File(imagePath)))
+        } else if (receiptImageUrl.isNotEmpty()) {
+            imageView.setImageURI(Uri.parse(receiptImageUrl))
         }
 
         inputAmount.setText(intent.getStringExtra(EXTRA_AMOUNT).orEmpty())
         inputMerchant.setText(intent.getStringExtra(EXTRA_MERCHANT).orEmpty())
         inputAddress.setText(intent.getStringExtra(EXTRA_ADDRESS).orEmpty())
-        inputDate.setText(intent.getStringExtra(EXTRA_DATE).orEmpty())
+        receiptDate = intent.getStringExtra(EXTRA_DATE).orEmpty()
+        receiptTime = intent.getStringExtra(EXTRA_TIME).orEmpty()
+        inputDate.setText(buildDisplayDate(receiptDate, receiptTime))
         inputCard.setText(intent.getStringExtra(EXTRA_CARD).orEmpty())
+        scanConsumer = intent.getStringExtra(EXTRA_CONSUMER).orEmpty()
+        scanTipAmount = intent.getStringExtra(EXTRA_TIP_AMOUNT)?.toDoubleOrNull() ?: 0.0
         inputInvoiceType.setText(intent.getStringExtra(EXTRA_INVOICE_TYPE).orEmpty())
         inputTitleType.setText(intent.getStringExtra(EXTRA_TITLE_TYPE).orEmpty())
         inputNote.setText(intent.getStringExtra(EXTRA_NOTE).orEmpty())
@@ -81,6 +101,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         findViewById<ImageView>(R.id.btn_back).setOnClickListener { finish() }
         findViewById<ImageView>(R.id.btn_delete).setOnClickListener { finish() }
 
+        setupPickers()
         saveButton.setOnClickListener { saveReceipt(imagePath) }
         observeState()
     }
@@ -111,21 +132,34 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private fun saveReceipt(imagePath: String) {
         val amountValue = inputAmount.text.toString().trim().toDoubleOrNull() ?: 0.0
         val merchantValue = inputMerchant.text.toString().trim().ifEmpty { "Receipt" }
-        val invoiceTypeValue = inputInvoiceType.text.toString().trim().ifEmpty { "normal" }
+        val invoiceTypeInput = inputInvoiceType.text.toString().trim()
+        val invoiceTypeValue = if (invoiceTypeInput.equals(getString(R.string.type_all), true) || invoiceTypeInput.isBlank()) {
+            ReceiptCategory.all().firstOrNull()?.label ?: "Food"
+        } else {
+            invoiceTypeInput
+        }
         val titleTypeValue = inputTitleType.text.toString().trim().ifEmpty { "Individual" }
+        val cardValue = inputCard.text.toString().trim()
         val noteValue = inputNote.text.toString().trim()
+        val categoryId = ReceiptCategory.idForLabel(invoiceTypeValue).takeIf { it > 0 } ?: 1
+        val receiptUrl = if (receiptImageUrl.isNotEmpty()) receiptImageUrl else imagePath
+        val safeDate = receiptDate.ifEmpty { currentDate() }
+        val safeTime = receiptTime.ifEmpty { "00:00:00" }
 
-        val receipt = ReceiptEntity(
-            merchantName = merchantValue,
-            amount = amountValue,
-            invoiceType = invoiceTypeValue,
-            category = titleTypeValue,
-            imagePath = imagePath,
-            description = noteValue,
-            date = System.currentTimeMillis()
+        val request = ReceiptSaveEntity(
+            merchant = merchantValue,
+            receiptDate = safeDate,
+            receiptTime = safeTime,
+            totalAmount = amountValue,
+            tipAmount = scanTipAmount,
+            paymentCardNo = cardValue,
+            consumer = scanConsumer.ifEmpty { titleTypeValue },
+            remark = noteValue,
+            receiptUrl = receiptUrl,
+            categoryId = categoryId
         )
 
-        viewModel.saveReceipt(receipt)
+        viewModel.saveReceipt(request)
     }
 
     private fun navigateToMain() {
@@ -134,5 +168,73 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         startActivity(intent)
         finish()
+    }
+
+    private fun setupPickers() {
+        if (inputInvoiceType.text.isNullOrBlank()) {
+            inputInvoiceType.setText(ReceiptCategory.all().firstOrNull()?.label ?: "")
+        }
+        if (inputTitleType.text.isNullOrBlank()) {
+            inputTitleType.setText(getString(R.string.type_individual))
+        }
+        inputInvoiceType.apply {
+            isFocusable = false
+            isClickable = true
+            setOnClickListener { openInvoiceTypePicker() }
+        }
+        inputTitleType.apply {
+            isFocusable = false
+            isClickable = true
+            setOnClickListener { openTitleTypePicker() }
+        }
+        inputDate.apply {
+            isFocusable = false
+            isClickable = true
+            setOnClickListener { openDateTimePicker() }
+        }
+    }
+
+    private fun openInvoiceTypePicker() {
+        InvoiceTypeBottomSheet(inputInvoiceType.text.toString()) { selected ->
+            inputInvoiceType.setText(selected)
+        }.show(supportFragmentManager, "invoice_type_picker")
+    }
+
+    private fun openTitleTypePicker() {
+        TitleTypeBottomSheet(inputTitleType.text.toString()) { selected ->
+            inputTitleType.setText(selected)
+        }.show(supportFragmentManager, "title_type_picker")
+    }
+
+    private fun openDateTimePicker() {
+        val initial = parseDateTime(receiptDate, receiptTime)
+        DateTimePickerBottomSheet(initial) { date, time, display ->
+            receiptDate = date
+            receiptTime = time
+            inputDate.setText(display)
+        }.show(supportFragmentManager, "date_time_picker")
+    }
+
+    private fun buildDisplayDate(date: String, time: String): String {
+        if (date.isBlank()) return ""
+        val displayDate = date.replace('-', '/')
+        val displayTime = time.takeIf { it.isNotBlank() }?.substring(0, 5).orEmpty()
+        return if (displayTime.isNotEmpty()) "$displayDate $displayTime" else displayDate
+    }
+
+    private fun currentDate(): String {
+        return java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+            .format(System.currentTimeMillis())
+    }
+
+    private fun parseDateTime(date: String, time: String): Long? {
+        if (date.isBlank()) return null
+        val safeTime = if (time.isBlank()) "00:00:00" else time
+        val value = "$date $safeTime"
+        return runCatching {
+            java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
+                .parse(value)
+                ?.time
+        }.getOrNull()
     }
 }

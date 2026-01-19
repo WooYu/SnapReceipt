@@ -3,7 +3,6 @@ package com.snapreceipt.io.ui.receipts
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -24,7 +23,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     override val viewModel: ReceiptsViewModel by viewModels()
 
     private lateinit var receiptList: RecyclerView
-    private lateinit var emptyState: FrameLayout
+    private lateinit var emptyState: View
     private lateinit var actionBar: LinearLayout
     private lateinit var filterDateBtn: TextView
     private lateinit var filterTypeBtn: TextView
@@ -47,6 +46,11 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         setupListeners()
         observeState()
         super.onViewCreated(view, savedInstanceState)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadReceipts()
     }
 
     private fun observeState() {

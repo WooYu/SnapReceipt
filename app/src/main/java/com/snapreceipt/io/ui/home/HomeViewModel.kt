@@ -3,11 +3,12 @@ package com.snapreceipt.io.ui.home
 import android.os.Bundle
 import androidx.lifecycle.viewModelScope
 import com.snapreceipt.io.domain.model.ReceiptEntity
-import com.snapreceipt.io.domain.usecase.ocr.BuildReceiptPrefillUseCase
-import com.snapreceipt.io.domain.usecase.receipt.DeleteReceiptUseCase
-import com.snapreceipt.io.domain.usecase.receipt.GetReceiptsUseCase
-import com.snapreceipt.io.domain.usecase.receipt.InsertReceiptUseCase
-import com.snapreceipt.io.domain.usecase.receipt.UpdateReceiptUseCase
+import com.snapreceipt.io.domain.model.ReceiptCategory
+import com.snapreceipt.io.domain.model.ReceiptUpdateEntity
+import com.snapreceipt.io.domain.usecase.receipt.DeleteReceiptRemoteUseCase
+import com.snapreceipt.io.domain.usecase.receipt.FetchReceiptsUseCase
+import com.snapreceipt.io.domain.usecase.receipt.UpdateReceiptRemoteUseCase
+import com.snapreceipt.io.domain.usecase.receipt.UploadAndScanReceiptUseCase
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
@@ -22,11 +23,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val getReceiptsUseCase: GetReceiptsUseCase,
-    private val insertReceiptUseCase: InsertReceiptUseCase,
-    private val updateReceiptUseCase: UpdateReceiptUseCase,
-    private val deleteReceiptUseCase: DeleteReceiptUseCase,
-    private val buildReceiptPrefillUseCase: BuildReceiptPrefillUseCase,
+    private val fetchReceiptsUseCase: FetchReceiptsUseCase,
+    private val updateReceiptRemoteUseCase: UpdateReceiptRemoteUseCase,
+    private val deleteReceiptRemoteUseCase: DeleteReceiptRemoteUseCase,
+    private val uploadAndScanReceiptUseCase: UploadAndScanReceiptUseCase,
     private val dispatchers: CoroutineDispatchersProvider
 ) : BaseViewModel(dispatchers) {
 
@@ -34,7 +34,6 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     private var receiptsJob: Job? = null
-    private var hasSeededSampleData = false
 
     init {
         loadReceipts()
@@ -44,101 +43,94 @@ class HomeViewModel @Inject constructor(
         receiptsJob?.cancel()
         _uiState.update { it.copy(loading = true, error = null) }
         receiptsJob = viewModelScope.launch(dispatchers.io) {
-            getReceiptsUseCase()
-                .collect { result ->
-                    result.onSuccess { receipts ->
-                        _uiState.update { current ->
-                            current.copy(
-                                receipts = receipts,
-                                loading = false,
-                                error = null,
-                                empty = receipts.isEmpty()
-                            )
-                        }
-                        if (receipts.isEmpty()) {
-                            seedSampleData(buildSampleReceipts())
-                        }
-                    }.onFailure { updateError(it) }
-                }
-        }
-    }
-
-    fun deleteReceipt(receipt: ReceiptEntity) {
-        runOperation { deleteReceiptUseCase(receipt) }
-    }
-
-    fun insertReceipt(receipt: ReceiptEntity) {
-        runOperation { insertReceiptUseCase(receipt) }
-    }
-
-    fun updateReceipt(receipt: ReceiptEntity) {
-        runOperation { updateReceiptUseCase(receipt) }
-    }
-
-    fun processCroppedImage(imagePath: String) {
-        viewModelScope.launch(dispatchers.io) {
-            buildReceiptPrefillUseCase(imagePath)
-                .onSuccess { prefill ->
-                    emitEvent(
-                        UiEvent.Custom(
-                            HomeEventKeys.PREFILL_READY,
-                            Bundle().apply {
-                                putString(HomeEventKeys.EXTRA_IMAGE_PATH, prefill.imagePath)
-                                putString(HomeEventKeys.EXTRA_MERCHANT, prefill.merchant)
-                                putString(HomeEventKeys.EXTRA_AMOUNT, prefill.amount)
-                            }
+            fetchReceiptsUseCase()
+                .onSuccess { receipts ->
+                    _uiState.update { current ->
+                        current.copy(
+                            receipts = receipts,
+                            loading = false,
+                            error = null,
+                            empty = receipts.isEmpty()
                         )
-                    )
+                    }
                 }
                 .onFailure { updateError(it) }
         }
     }
 
-    private fun runOperation(block: suspend () -> Result<*>) {
+    fun deleteReceipt(receipt: ReceiptEntity) {
         viewModelScope.launch(dispatchers.io) {
-            block().onFailure { updateError(it) }
+            deleteReceiptRemoteUseCase(receipt.id.toLong())
+                .onSuccess { loadReceipts() }
+                .onFailure { updateError(it) }
         }
     }
 
-    private fun seedSampleData(receipts: List<ReceiptEntity>) {
-        if (hasSeededSampleData || receipts.isEmpty()) return
-        hasSeededSampleData = true
+    fun insertReceipt(receipt: ReceiptEntity) {
+        // No-op: remote save happens in InvoiceDetails.
+    }
+
+    fun updateReceipt(receipt: ReceiptEntity) {
         viewModelScope.launch(dispatchers.io) {
-            receipts.forEach { receipt ->
-                insertReceiptUseCase(receipt).onFailure { updateError(it) }
-            }
+            updateReceiptRemoteUseCase(receipt.toUpdateEntity())
+                .onSuccess { loadReceipts() }
+                .onFailure { updateError(it) }
         }
     }
 
-    private fun buildSampleReceipts(): List<ReceiptEntity> {
-        val now = System.currentTimeMillis()
-        return listOf(
-            ReceiptEntity(
-                merchantName = "Starbucks Coffee",
-                amount = 45.50,
-                date = now,
-                invoiceType = "normal",
-                category = "Food & Beverage"
-            ),
-            ReceiptEntity(
-                merchantName = "Apple Store",
-                amount = 899.99,
-                date = now - 86400000,
-                invoiceType = "normal",
-                category = "Electronics"
-            ),
-            ReceiptEntity(
-                merchantName = "Gas Station",
-                amount = 67.80,
-                date = now - 172800000,
-                invoiceType = "normal",
-                category = "Transportation"
-            )
-        )
+    fun processCroppedImage(imagePath: String) {
+        viewModelScope.launch(dispatchers.io) {
+            _uiState.update { it.copy(loading = true, error = null) }
+            uploadAndScanReceiptUseCase(imagePath)
+                .onSuccess { scan ->
+                    _uiState.update { it.copy(loading = false) }
+                    emitEvent(
+                        UiEvent.Custom(
+                            HomeEventKeys.PREFILL_READY,
+                            Bundle().apply {
+                                putString(HomeEventKeys.EXTRA_IMAGE_PATH, imagePath)
+                                putString(HomeEventKeys.EXTRA_IMAGE_URL, scan.receiptUrl.orEmpty())
+                                putString(HomeEventKeys.EXTRA_MERCHANT, scan.merchant.orEmpty())
+                                putString(HomeEventKeys.EXTRA_AMOUNT, scan.totalAmount?.toString().orEmpty())
+                                putString(HomeEventKeys.EXTRA_DATE, scan.receiptDate.orEmpty())
+                                putString(HomeEventKeys.EXTRA_TIME, scan.receiptTime.orEmpty())
+                                putString(HomeEventKeys.EXTRA_TIP_AMOUNT, scan.tipAmount?.toString().orEmpty())
+                                putString(HomeEventKeys.EXTRA_CARD, scan.paymentCardNo.orEmpty())
+                                putString(HomeEventKeys.EXTRA_CONSUMER, scan.consumer.orEmpty())
+                                putString(HomeEventKeys.EXTRA_REMARK, scan.remark.orEmpty())
+                            }
+                        )
+                    )
+                }
+                .onFailure { throwable ->
+                    _uiState.update { state ->
+                        state.copy(loading = false, error = throwable.message)
+                    }
+                    emitEvent(UiEvent.Custom(HomeEventKeys.SCAN_FAILED))
+                }
+        }
     }
 
     private fun updateError(throwable: Throwable) {
         _uiState.update { it.copy(loading = false, error = throwable.message ?: "Unexpected error") }
         handleError(throwable)
+    }
+
+    private fun ReceiptEntity.toUpdateEntity(): ReceiptUpdateEntity {
+        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+        val timeFormat = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
+        return ReceiptUpdateEntity(
+            receiptId = id.toLong(),
+            merchant = merchantName,
+            receiptDate = dateFormat.format(java.util.Date(date)),
+            receiptTime = timeFormat.format(java.util.Date(date)),
+            totalAmount = amount,
+            tipAmount = 0.0,
+            paymentCardNo = "",
+            consumer = "",
+            remark = description,
+            receiptUrl = imagePath,
+            categoryId = ReceiptCategory.idForLabel(category)
+        )
     }
 }

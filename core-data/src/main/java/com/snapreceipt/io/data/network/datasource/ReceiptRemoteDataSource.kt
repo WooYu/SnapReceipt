@@ -9,6 +9,7 @@ import com.snapreceipt.io.data.network.model.ReceiptListRequestDto
 import com.snapreceipt.io.data.network.model.ReceiptSaveRequestDto
 import com.snapreceipt.io.data.network.model.ReceiptScanResultDto
 import com.snapreceipt.io.data.network.model.ReceiptUpdateRequestDto
+import com.snapreceipt.io.data.network.model.ReceiptDeleteRequestDto
 import com.snapreceipt.io.data.network.model.ScanRequestDto
 import com.snapreceipt.io.data.network.service.ReceiptApi
 
@@ -30,5 +31,9 @@ class ReceiptRemoteDataSource(
 
     suspend fun list(request: ReceiptListRequestDto): NetworkResult<BasePagedResponse<ReceiptItemDto>> {
         return requestEnvelope({ api.list(request) }) { it }
+    }
+
+    suspend fun delete(receiptId: Long): NetworkResult<Unit> {
+        return requestUnit { api.delete(ReceiptDeleteRequestDto(receiptId)) }
     }
 }

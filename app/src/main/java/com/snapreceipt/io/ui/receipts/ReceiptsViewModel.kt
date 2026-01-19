@@ -1,18 +1,16 @@
 package com.snapreceipt.io.ui.receipts
 
 import androidx.lifecycle.viewModelScope
+import com.snapreceipt.io.domain.model.ReceiptCategory
 import com.snapreceipt.io.domain.model.ReceiptEntity
-import com.snapreceipt.io.domain.usecase.receipt.DeleteReceiptUseCase
-import com.snapreceipt.io.domain.usecase.receipt.DeleteReceiptsUseCase
-import com.snapreceipt.io.domain.usecase.receipt.GetReceiptsByDateRangeUseCase
-import com.snapreceipt.io.domain.usecase.receipt.GetReceiptsByTypeUseCase
-import com.snapreceipt.io.domain.usecase.receipt.GetReceiptsUseCase
-import com.snapreceipt.io.domain.usecase.receipt.UpdateReceiptUseCase
+import com.snapreceipt.io.domain.model.ReceiptListQueryEntity
+import com.snapreceipt.io.domain.model.ReceiptUpdateEntity
+import com.snapreceipt.io.domain.usecase.receipt.DeleteReceiptRemoteUseCase
+import com.snapreceipt.io.domain.usecase.receipt.FetchReceiptsUseCase
+import com.snapreceipt.io.domain.usecase.receipt.UpdateReceiptRemoteUseCase
 import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,34 +20,35 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReceiptsViewModel @Inject constructor(
-    private val getReceiptsUseCase: GetReceiptsUseCase,
-    private val getReceiptsByDateRangeUseCase: GetReceiptsByDateRangeUseCase,
-    private val getReceiptsByTypeUseCase: GetReceiptsByTypeUseCase,
-    private val deleteReceiptsUseCase: DeleteReceiptsUseCase,
-    private val deleteReceiptUseCase: DeleteReceiptUseCase,
-    private val updateReceiptUseCase: UpdateReceiptUseCase,
+    private val fetchReceiptsUseCase: FetchReceiptsUseCase,
+    private val deleteReceiptRemoteUseCase: DeleteReceiptRemoteUseCase,
+    private val updateReceiptRemoteUseCase: UpdateReceiptRemoteUseCase,
     private val dispatchers: CoroutineDispatchersProvider
 ) : BaseViewModel(dispatchers) {
 
     private val _uiState = MutableStateFlow(ReceiptsUiState())
     val uiState: StateFlow<ReceiptsUiState> = _uiState.asStateFlow()
 
-    private var receiptsJob: Job? = null
-
     init {
         loadReceipts()
     }
 
     fun loadReceipts() {
-        observeReceipts(getReceiptsUseCase())
+        fetchReceipts()
     }
 
     fun filterByDateRange(startDate: Long, endDate: Long) {
-        observeReceipts(getReceiptsByDateRangeUseCase(startDate, endDate))
+        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+        val query = ReceiptListQueryEntity(
+            receiptDateStart = dateFormat.format(java.util.Date(startDate)),
+            receiptDateEnd = dateFormat.format(java.util.Date(endDate))
+        )
+        fetchReceipts(query)
     }
 
     fun filterByType(type: String) {
-        observeReceipts(getReceiptsByTypeUseCase(type))
+        val categoryId = ReceiptCategory.idForLabel(type).takeIf { it > 0 }
+        fetchReceipts(ReceiptListQueryEntity(categoryId = categoryId))
     }
 
     fun toggleSelection(id: Int) {
@@ -77,25 +76,35 @@ class ReceiptsViewModel @Inject constructor(
         val ids = _uiState.value.selectedIds.toList()
         if (ids.isEmpty()) return
         viewModelScope.launch(dispatchers.io) {
-            deleteReceiptsUseCase(ids).onFailure { updateError(it) }
+            ids.forEach { id ->
+                deleteReceiptRemoteUseCase(id.toLong()).onFailure { updateError(it) }
+            }
+            fetchReceipts()
         }
         _uiState.update { it.copy(selectedIds = emptySet()) }
     }
 
     fun deleteReceipt(receipt: ReceiptEntity) {
-        runOperation { deleteReceiptUseCase(receipt) }
+        viewModelScope.launch(dispatchers.io) {
+            deleteReceiptRemoteUseCase(receipt.id.toLong())
+                .onSuccess { fetchReceipts() }
+                .onFailure { updateError(it) }
+        }
     }
 
     fun updateReceipt(receipt: ReceiptEntity) {
-        runOperation { updateReceiptUseCase(receipt) }
+        viewModelScope.launch(dispatchers.io) {
+            updateReceiptRemoteUseCase(receipt.toUpdateEntity())
+                .onSuccess { fetchReceipts() }
+                .onFailure { updateError(it) }
+        }
     }
 
-    private fun observeReceipts(flow: Flow<Result<List<ReceiptEntity>>>) {
-        receiptsJob?.cancel()
+    private fun fetchReceipts(query: ReceiptListQueryEntity = ReceiptListQueryEntity()) {
         _uiState.update { it.copy(loading = true, error = null) }
-        receiptsJob = viewModelScope.launch(dispatchers.io) {
-            flow.collect { result ->
-                result.onSuccess { receipts ->
+        viewModelScope.launch(dispatchers.io) {
+            fetchReceiptsUseCase(query)
+                .onSuccess { receipts ->
                     _uiState.update { current ->
                         val validIds = receipts.map { it.id }.toSet()
                         val nextSelected = current.selectedIds.intersect(validIds)
@@ -107,19 +116,31 @@ class ReceiptsViewModel @Inject constructor(
                             empty = receipts.isEmpty()
                         )
                     }
-                }.onFailure { updateError(it) }
-            }
-        }
-    }
-
-    private fun runOperation(block: suspend () -> Result<*>) {
-        viewModelScope.launch(dispatchers.io) {
-            block().onFailure { updateError(it) }
+                }
+                .onFailure { updateError(it) }
         }
     }
 
     private fun updateError(throwable: Throwable) {
         _uiState.update { it.copy(loading = false, error = throwable.message ?: "Unexpected error") }
         handleError(throwable)
+    }
+
+    private fun ReceiptEntity.toUpdateEntity(): ReceiptUpdateEntity {
+        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+        val timeFormat = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
+        return ReceiptUpdateEntity(
+            receiptId = id.toLong(),
+            merchant = merchantName,
+            receiptDate = dateFormat.format(java.util.Date(date)),
+            receiptTime = timeFormat.format(java.util.Date(date)),
+            totalAmount = amount,
+            tipAmount = 0.0,
+            paymentCardNo = "",
+            consumer = "",
+            remark = description,
+            receiptUrl = imagePath,
+            categoryId = ReceiptCategory.idForLabel(category)
+        )
     }
 }

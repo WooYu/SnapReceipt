@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.snapreceipt.io.R
 import com.skybound.space.base.presentation.BaseFragment
+import com.skybound.space.core.util.LogHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -91,6 +92,7 @@ class PhoneLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_phone_
     private fun onLoginClick() {
         val phone = phoneInput.text.toString().trim()
         val code = codeInput.text.toString().trim()
+        LogHelper.d("Login", "Phone login click phoneLength=${phone.length} codeLength=${code.length}")
         viewModel.submitPhoneLogin(phone, code)
     }
 

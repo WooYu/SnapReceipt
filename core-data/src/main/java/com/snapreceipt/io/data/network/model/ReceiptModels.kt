@@ -1,8 +1,12 @@
 package com.snapreceipt.io.data.network.model
 
 import com.google.gson.annotations.SerializedName
+import com.snapreceipt.io.domain.model.ReceiptCategory
 import com.snapreceipt.io.domain.model.ReceiptEntity
+import com.snapreceipt.io.domain.model.ReceiptListQueryEntity
+import com.snapreceipt.io.domain.model.ReceiptSaveEntity
 import com.snapreceipt.io.domain.model.ReceiptScanResultEntity
+import com.snapreceipt.io.domain.model.ReceiptUpdateEntity
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -50,6 +54,10 @@ data class ReceiptUpdateRequestDto(
     @SerializedName("receiptTime") val receiptTime: String? = null
 )
 
+data class ReceiptDeleteRequestDto(
+    @SerializedName("receiptId") val receiptId: Long
+)
+
 data class ReceiptListRequestDto(
     @SerializedName("categoryId") val categoryId: Int? = null,
     @SerializedName("receiptDateStart") val receiptDateStart: String? = null,
@@ -87,8 +95,8 @@ fun ReceiptItemDto.toEntity(): ReceiptEntity = ReceiptEntity(
     merchantName = merchant,
     amount = totalAmount,
     date = parseReceiptDateMillis(receiptDate, receiptTime),
-    category = categoryId.toString(),
-    invoiceType = receiptType ?: "normal",
+    category = ReceiptCategory.labelForId(categoryId),
+    invoiceType = receiptType ?: "Individual",
     imagePath = receiptUrl,
     description = remark.orEmpty()
 )
@@ -96,13 +104,50 @@ fun ReceiptItemDto.toEntity(): ReceiptEntity = ReceiptEntity(
 fun ReceiptEntity.toDto(): ReceiptItemDto = ReceiptItemDto(
     receiptId = id.toLong(),
     userId = 0L,
-    categoryId = category.toIntOrNull() ?: 0,
+    categoryId = ReceiptCategory.idForLabel(category),
     receiptType = invoiceType,
     receiptUrl = imagePath,
     merchant = merchantName,
     totalAmount = amount,
     receiptDate = formatDate(date, DATE_FORMAT),
     receiptTime = formatDate(date, TIME_FORMAT)
+)
+
+fun ReceiptSaveEntity.toDto(): ReceiptSaveRequestDto = ReceiptSaveRequestDto(
+    merchant = merchant,
+    receiptDate = receiptDate,
+    totalAmount = totalAmount,
+    tipAmount = tipAmount,
+    paymentCardNo = paymentCardNo,
+    consumer = consumer,
+    remark = remark,
+    receiptUrl = receiptUrl,
+    categoryId = categoryId,
+    receiptTime = receiptTime
+)
+
+fun ReceiptUpdateEntity.toDto(): ReceiptUpdateRequestDto = ReceiptUpdateRequestDto(
+    receiptId = receiptId,
+    merchant = merchant,
+    receiptDate = receiptDate,
+    totalAmount = totalAmount,
+    tipAmount = tipAmount,
+    paymentCardNo = paymentCardNo,
+    consumer = consumer,
+    remark = remark,
+    receiptUrl = receiptUrl,
+    categoryId = categoryId,
+    receiptTime = receiptTime
+)
+
+fun ReceiptListQueryEntity.toDto(): ReceiptListRequestDto = ReceiptListRequestDto(
+    categoryId = categoryId,
+    receiptDateStart = receiptDateStart,
+    receiptDateEnd = receiptDateEnd,
+    createTimeStart = createTimeStart,
+    createTimeEnd = createTimeEnd,
+    pageNum = pageNum,
+    pageSize = pageSize
 )
 
 fun ReceiptScanResultDto.toEntity(): ReceiptScanResultEntity = ReceiptScanResultEntity(

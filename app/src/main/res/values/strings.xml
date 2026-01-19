@@ -86,6 +86,18 @@
     <string name="filter_title">Title</string>
     <string name="filter_type">Type</string>
     <string name="no_content">No content</string>
+    <string name="select_invoice_type">Select Invoice Type</string>
+    <string name="select_title_type">Select Title Type</string>
+    <string name="select_date_time">Select date and time</string>
+    <string name="type_all">All</string>
+    <string name="type_food">Food</string>
+    <string name="type_travel">Travel</string>
+    <string name="type_office">Office</string>
+    <string name="type_hotel">Hotel</string>
+    <string name="type_other">Other</string>
+    <string name="type_add">+ Type</string>
+    <string name="type_individual">Individual</string>
+    <string name="type_company">Company</string>
 
     <!-- Me Fragment -->
     <string name="profile">个人资料</string>
@@ -131,4 +143,7 @@
     <string name="retry">重试</string>
     <string name="confirm">确认</string>
     <string name="recognition_failed">识别失败，请重试</string>
+    <string name="recognition_failed_title">Image recognition failed</string>
+    <string name="recognition_failed_message">Return to the homepage to continue taking photos and recognizing them</string>
+    <string name="return_home">Return to Home</string>
 </resources>

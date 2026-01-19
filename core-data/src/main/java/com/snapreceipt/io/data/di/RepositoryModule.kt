@@ -1,10 +1,14 @@
 package com.snapreceipt.io.data.di
 
 import com.snapreceipt.io.data.repository.AuthRepositoryImpl
+import com.snapreceipt.io.data.repository.FileRepositoryImpl
 import com.snapreceipt.io.data.repository.ReceiptRepositoryImpl
+import com.snapreceipt.io.data.repository.ReceiptRemoteRepositoryImpl
 import com.snapreceipt.io.data.repository.UserRepositoryImpl
 import com.snapreceipt.io.domain.repository.AuthRepository
+import com.snapreceipt.io.domain.repository.FileRepository
 import com.snapreceipt.io.domain.repository.ReceiptRepository
+import com.snapreceipt.io.domain.repository.ReceiptRemoteRepository
 import com.snapreceipt.io.domain.repository.UserRepository
 import dagger.Binds
 import dagger.Module
@@ -20,6 +24,18 @@ abstract class RepositoryModule {
     abstract fun bindReceiptRepository(
         impl: ReceiptRepositoryImpl
     ): ReceiptRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindReceiptRemoteRepository(
+        impl: ReceiptRemoteRepositoryImpl
+    ): ReceiptRemoteRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindFileRepository(
+        impl: FileRepositoryImpl
+    ): FileRepository
 
     @Binds
     @Singleton

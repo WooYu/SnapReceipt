@@ -87,7 +87,7 @@
                 android:layout_width="140dp"
                 android:layout_height="140dp"
                 android:contentDescription="@string/app_name"
-                android:src="@drawable/ic_receipts"
+                android:src="@drawable/ic_empty_state"
                 android:tint="@color/text_muted"
                 android:layout_marginBottom="16dp" />
 

@@ -273,15 +273,29 @@
                         android:textColor="@color/text_secondary"
                         android:textSize="13sp" />
 
-                    <EditText
-                        android:id="@+id/input_invoice_type"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
                         android:background="@drawable/bg_field"
-                        android:padding="12dp"
-                        android:textColor="@color/text_primary"
-                        android:textSize="15sp" />
+                        android:gravity="center_vertical"
+                        android:padding="12dp">
+
+                        <EditText
+                            android:id="@+id/input_invoice_type"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@android:color/transparent"
+                            android:textColor="@color/text_primary"
+                            android:textSize="15sp" />
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:contentDescription="@string/invoice_type"
+                            android:src="@drawable/ic_chevron_down" />
+                    </LinearLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -291,15 +305,29 @@
                         android:textColor="@color/text_secondary"
                         android:textSize="13sp" />
 
-                    <EditText
-                        android:id="@+id/input_title_type"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
                         android:background="@drawable/bg_field"
-                        android:padding="12dp"
-                        android:textColor="@color/text_primary"
-                        android:textSize="15sp" />
+                        android:gravity="center_vertical"
+                        android:padding="12dp">
+
+                        <EditText
+                            android:id="@+id/input_title_type"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@android:color/transparent"
+                            android:textColor="@color/text_primary"
+                            android:textSize="15sp" />
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:contentDescription="@string/title_type"
+                            android:src="@drawable/ic_chevron_down" />
+                    </LinearLayout>
 
                     <TextView
                         android:layout_width="wrap_content"

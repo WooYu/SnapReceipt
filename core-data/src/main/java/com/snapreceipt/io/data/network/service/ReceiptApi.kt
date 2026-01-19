@@ -5,6 +5,7 @@ import com.skybound.space.core.network.BaseEmptyResponse
 import com.skybound.space.core.network.BasePagedResponse
 import com.snapreceipt.io.data.network.model.ReceiptItemDto
 import com.snapreceipt.io.data.network.model.ReceiptListRequestDto
+import com.snapreceipt.io.data.network.model.ReceiptDeleteRequestDto
 import com.snapreceipt.io.data.network.model.ReceiptSaveRequestDto
 import com.snapreceipt.io.data.network.model.ReceiptScanResultDto
 import com.snapreceipt.io.data.network.model.ReceiptUpdateRequestDto
@@ -24,4 +25,7 @@ interface ReceiptApi {
 
     @POST("api/receipt/list")
     suspend fun list(@Body request: ReceiptListRequestDto): BasePagedResponse<ReceiptItemDto>
+
+    @POST("api/receipt/delete")
+    suspend fun delete(@Body request: ReceiptDeleteRequestDto): BaseEmptyResponse
 }

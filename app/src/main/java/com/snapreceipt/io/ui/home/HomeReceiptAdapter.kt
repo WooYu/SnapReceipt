@@ -41,7 +41,7 @@ class HomeReceiptAdapter(
                 amount.text = "$${String.format("%.2f", receipt.amount)}"
 
                 val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
-                val metaText = "${receipt.category} ? ${receipt.invoiceType} ? ${dateFormat.format(java.util.Date(receipt.date))}"
+                val metaText = "${receipt.category} | ${receipt.invoiceType} | ${dateFormat.format(java.util.Date(receipt.date))}"
                 meta.text = metaText
 
                 root.setOnClickListener { onEditClick(receipt) }

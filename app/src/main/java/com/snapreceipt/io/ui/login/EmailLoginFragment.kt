@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.snapreceipt.io.R
 import com.skybound.space.base.presentation.BaseFragment
+import com.skybound.space.core.util.LogHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -91,6 +92,7 @@ class EmailLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_email_
     private fun onLoginClick() {
         val email = emailInput.text.toString().trim()
         val code = codeInput.text.toString().trim()
+        LogHelper.d("Login", "Email login click emailLength=${email.length} codeLength=${code.length}")
         viewModel.submitEmailLogin(email, code)
     }
 

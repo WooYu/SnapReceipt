@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
@@ -17,6 +18,7 @@ import com.google.android.material.card.MaterialCardView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.home.dialogs.EditReceiptDialog
+import com.snapreceipt.io.ui.home.dialogs.ScanFailedDialog
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
 import com.skybound.space.base.presentation.BaseFragment
 import com.skybound.space.base.presentation.UiEvent
@@ -37,6 +39,8 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     private lateinit var uploadCard: MaterialCardView
     private lateinit var previewCard: MaterialCardView
     private lateinit var previewImage: ImageView
+    private lateinit var emptyState: View
+    private lateinit var loadingIndicator: ProgressBar
     private lateinit var adapter: HomeReceiptAdapter
     private var pendingCameraUri: Uri? = null
 
@@ -79,11 +83,18 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         uploadCard = view.findViewById(R.id.card_upload)
         previewCard = view.findViewById(R.id.preview_card)
         previewImage = view.findViewById(R.id.preview_image)
+        emptyState = view.findViewById(R.id.empty_state)
+        loadingIndicator = view.findViewById(R.id.loading_indicator)
 
         setupAdapter()
         setupListeners()
         observeState()
         super.onViewCreated(view, savedInstanceState)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadReceipts()
     }
 
     private fun observeState() {
@@ -96,6 +107,11 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
 
     private fun renderState(state: HomeUiState) {
         adapter.setReceipts(state.receipts)
+        emptyState.visibility = if (state.empty) View.VISIBLE else View.GONE
+        receiptList.visibility = if (state.empty) View.GONE else View.VISIBLE
+        loadingIndicator.visibility = if (state.loading) View.VISIBLE else View.GONE
+        scanCard.isEnabled = !state.loading
+        uploadCard.isEnabled = !state.loading
     }
 
     private fun setupAdapter() {
@@ -166,27 +182,65 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     }
 
     private fun handleCroppedImage(uri: Uri) {
-        previewImage.setImageURI(uri)
-        previewCard.visibility = View.VISIBLE
-
         val path = uri.path ?: return
         viewModel.processCroppedImage(path)
     }
 
     override fun onCustomEvent(event: UiEvent.Custom) {
-        if (event.type == HomeEventKeys.PREFILL_READY) {
-            val imagePath = event.payload?.getString(HomeEventKeys.EXTRA_IMAGE_PATH).orEmpty()
-            val merchant = event.payload?.getString(HomeEventKeys.EXTRA_MERCHANT).orEmpty()
-            val amount = event.payload?.getString(HomeEventKeys.EXTRA_AMOUNT).orEmpty()
-            openInvoiceDetails(imagePath, merchant, amount)
+        when (event.type) {
+            HomeEventKeys.PREFILL_READY -> {
+                val imagePath = event.payload?.getString(HomeEventKeys.EXTRA_IMAGE_PATH).orEmpty()
+                val imageUrl = event.payload?.getString(HomeEventKeys.EXTRA_IMAGE_URL).orEmpty()
+                val merchant = event.payload?.getString(HomeEventKeys.EXTRA_MERCHANT).orEmpty()
+                val amount = event.payload?.getString(HomeEventKeys.EXTRA_AMOUNT).orEmpty()
+                val date = event.payload?.getString(HomeEventKeys.EXTRA_DATE).orEmpty()
+                val time = event.payload?.getString(HomeEventKeys.EXTRA_TIME).orEmpty()
+                val tipAmount = event.payload?.getString(HomeEventKeys.EXTRA_TIP_AMOUNT).orEmpty()
+                val card = event.payload?.getString(HomeEventKeys.EXTRA_CARD).orEmpty()
+                val consumer = event.payload?.getString(HomeEventKeys.EXTRA_CONSUMER).orEmpty()
+                val remark = event.payload?.getString(HomeEventKeys.EXTRA_REMARK).orEmpty()
+                openInvoiceDetails(
+                    imagePath,
+                    imageUrl,
+                    merchant,
+                    amount,
+                    date,
+                    time,
+                    tipAmount,
+                    card,
+                    consumer,
+                    remark
+                )
+            }
+            HomeEventKeys.SCAN_FAILED -> {
+                ScanFailedDialog().show(parentFragmentManager, "scan_failed")
+            }
         }
     }
 
-    private fun openInvoiceDetails(imagePath: String, merchant: String, amount: String) {
+    private fun openInvoiceDetails(
+        imagePath: String,
+        imageUrl: String,
+        merchant: String,
+        amount: String,
+        date: String,
+        time: String,
+        tipAmount: String,
+        card: String,
+        consumer: String,
+        remark: String
+    ) {
         val intent = android.content.Intent(requireContext(), InvoiceDetailsActivity::class.java)
         intent.putExtra(InvoiceDetailsActivity.EXTRA_IMAGE_PATH, imagePath)
+        intent.putExtra(InvoiceDetailsActivity.EXTRA_IMAGE_URL, imageUrl)
         intent.putExtra(InvoiceDetailsActivity.EXTRA_MERCHANT, merchant)
         intent.putExtra(InvoiceDetailsActivity.EXTRA_AMOUNT, amount)
+        intent.putExtra(InvoiceDetailsActivity.EXTRA_DATE, date)
+        intent.putExtra(InvoiceDetailsActivity.EXTRA_TIME, time)
+        intent.putExtra(InvoiceDetailsActivity.EXTRA_TIP_AMOUNT, tipAmount)
+        intent.putExtra(InvoiceDetailsActivity.EXTRA_CARD, card)
+        intent.putExtra(InvoiceDetailsActivity.EXTRA_CONSUMER, consumer)
+        intent.putExtra(InvoiceDetailsActivity.EXTRA_NOTE, remark)
         startActivity(intent)
     }
 }
