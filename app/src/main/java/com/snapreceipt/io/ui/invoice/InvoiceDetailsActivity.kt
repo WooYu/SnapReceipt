@@ -18,10 +18,14 @@ import com.snapreceipt.io.domain.model.ReceiptSaveEntity
 import com.snapreceipt.io.ui.invoice.bottomsheet.DateTimePickerBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceTypeBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
+import com.snapreceipt.io.ui.login.LoginActivity
 import com.skybound.space.base.presentation.BaseActivity
 import com.skybound.space.base.presentation.UiEvent
+import com.skybound.space.core.network.auth.SessionEvent
+import com.skybound.space.core.network.auth.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
@@ -45,6 +49,10 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     override val viewModel: InvoiceDetailsViewModel by viewModels()
+    @Inject
+    lateinit var injectedSessionManager: SessionManager
+    override val sessionManager: SessionManager
+        get() = injectedSessionManager
 
     private lateinit var imageView: ImageView
     private lateinit var inputAmount: EditText
@@ -236,5 +244,14 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
                 .parse(value)
                 ?.time
         }.getOrNull()
+    }
+
+    override fun onSessionExpired(event: SessionEvent) {
+        startActivity(
+            Intent(this, LoginActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        )
+        finish()
     }
 }

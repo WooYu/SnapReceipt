@@ -7,6 +7,7 @@ import com.snapreceipt.io.data.network.model.RefreshRequestDto
 import com.skybound.space.core.network.BaseResponse
 import com.skybound.space.core.network.NetworkConfig
 import com.skybound.space.core.network.auth.AuthTokenStore
+import com.skybound.space.core.network.auth.SessionManager
 import com.skybound.space.core.network.interceptor.LoggingInterceptor
 import okhttp3.Authenticator
 import okhttp3.MediaType.Companion.toMediaType
@@ -21,7 +22,8 @@ import java.util.concurrent.TimeUnit
 class TokenRefreshAuthenticator(
     private val tokenStore: AuthTokenStore,
     private val config: NetworkConfig,
-    private val gson: Gson
+    private val gson: Gson,
+    private val sessionManager: SessionManager
 ) : Authenticator {
 
     private val refreshLock = Any()
@@ -57,15 +59,25 @@ class TokenRefreshAuthenticator(
                     .build()
             }
 
-            val refreshed = refreshTokens(latestRefresh) ?: return null
-            tokenStore.update(refreshed.accessToken, refreshed.refreshToken)
-            return request.newBuilder()
-                .header(AUTH_HEADER, bearer(refreshed.accessToken))
-                .build()
+            return when (val refreshed = refreshTokens(latestRefresh)) {
+                is RefreshResult.Success -> {
+                    sessionManager.updateTokens(refreshed.tokens.accessToken, refreshed.tokens.refreshToken)
+                    request.newBuilder()
+                        .header(AUTH_HEADER, bearer(refreshed.tokens.accessToken))
+                        .build()
+                }
+
+                RefreshResult.RefreshTokenInvalid -> {
+                    sessionManager.refreshTokenInvalid()
+                    null
+                }
+
+                RefreshResult.Failed -> null
+            }
         }
     }
 
-    private fun refreshTokens(refreshToken: String): AuthTokensDto? {
+    private fun refreshTokens(refreshToken: String): RefreshResult {
         val url = "${config.baseUrl.trimEnd('/')}/api/auth/refresh"
         val payload = gson.toJson(RefreshRequestDto(refreshToken))
         val body = payload.toRequestBody(JSON)
@@ -75,12 +87,15 @@ class TokenRefreshAuthenticator(
             .build()
 
         refreshClient.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) return null
-            val raw = response.body?.string() ?: return null
+            if (response.code == 403) return RefreshResult.RefreshTokenInvalid
+            if (!response.isSuccessful) return RefreshResult.Failed
+            val raw = response.body?.string() ?: return RefreshResult.Failed
             val type = object : TypeToken<BaseResponse<AuthTokensDto>>() {}.type
             val envelope: BaseResponse<AuthTokensDto> = gson.fromJson(raw, type)
-            if (!envelope.isSuccess()) return null
-            return envelope.data
+            if (envelope.code == 403) return RefreshResult.RefreshTokenInvalid
+            if (!envelope.isSuccess()) return RefreshResult.Failed
+            val tokens = envelope.data ?: return RefreshResult.Failed
+            return RefreshResult.Success(tokens)
         }
     }
 
@@ -99,5 +114,11 @@ class TokenRefreshAuthenticator(
     private companion object {
         const val AUTH_HEADER = "Authorization"
         val JSON = "application/json; charset=utf-8".toMediaType()
+    }
+
+    private sealed class RefreshResult {
+        data class Success(val tokens: AuthTokensDto) : RefreshResult()
+        object RefreshTokenInvalid : RefreshResult()
+        object Failed : RefreshResult()
     }
 }

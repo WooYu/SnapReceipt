@@ -12,16 +12,26 @@ import com.snapreceipt.io.MainActivity
 import com.snapreceipt.io.R
 import com.skybound.space.base.presentation.BaseActivity
 import com.skybound.space.base.presentation.UiEvent
+import com.skybound.space.core.network.auth.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class LoginActivity : BaseActivity<LoginViewModel>() {
     override val viewModel: LoginViewModel by viewModels()
+    @Inject
+    lateinit var injectedSessionManager: SessionManager
+    override val sessionManager: SessionManager
+        get() = injectedSessionManager
     private var currentMode: LoginMode? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (sessionManager.hasActiveSession()) {
+            navigateToMainActivity()
+            return
+        }
         setContentView(R.layout.activity_login)
         setupBackPress()
 

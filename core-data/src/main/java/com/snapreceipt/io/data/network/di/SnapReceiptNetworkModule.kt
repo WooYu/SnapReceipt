@@ -7,7 +7,9 @@ import com.skybound.space.core.config.AppConfig
 import android.content.Context
 import com.skybound.space.core.network.auth.AuthTokenStore
 import com.skybound.space.core.network.auth.EncryptedAuthTokenStore
+import com.skybound.space.core.network.auth.SessionManager
 import com.skybound.space.core.network.interceptor.AuthInterceptor
+import com.skybound.space.core.network.interceptor.AuthFailureInterceptor
 import com.skybound.space.core.network.interceptor.LoggingInterceptor
 import com.snapreceipt.io.data.network.auth.TokenRefreshAuthenticator
 import com.snapreceipt.io.data.network.datasource.AuthRemoteDataSource
@@ -60,13 +62,19 @@ object SnapReceiptNetworkModule {
     fun provideTokenRefreshAuthenticator(
         tokenStore: AuthTokenStore,
         config: NetworkConfig,
-        gson: com.google.gson.Gson
-    ): Authenticator = TokenRefreshAuthenticator(tokenStore, config, gson)
+        gson: com.google.gson.Gson,
+        sessionManager: SessionManager
+    ): Authenticator = TokenRefreshAuthenticator(tokenStore, config, gson, sessionManager)
 
     @Provides
     @IntoSet
     fun provideAuthInterceptor(tokenStore: AuthTokenStore): Interceptor =
         AuthInterceptor(tokenStore)
+
+    @Provides
+    @IntoSet
+    fun provideAuthFailureInterceptor(sessionManager: SessionManager): Interceptor =
+        AuthFailureInterceptor(sessionManager)
 
     @Provides
     @Singleton

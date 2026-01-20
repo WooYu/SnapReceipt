@@ -10,12 +10,12 @@ import com.snapreceipt.io.domain.repository.AuthRepository
 import com.skybound.space.core.network.ApiException
 import com.skybound.space.core.network.NetworkError
 import com.skybound.space.core.network.NetworkResult
-import com.skybound.space.core.network.auth.AuthTokenStore
+import com.skybound.space.core.network.auth.SessionManager
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
     private val remoteDataSource: AuthRemoteDataSource,
-    private val tokenStore: AuthTokenStore,
+    private val sessionManager: SessionManager,
     private val mapper: AuthTokensDtoToDomainMapper
 ) : AuthRepository {
     override suspend fun requestCode(target: String) {
@@ -30,7 +30,7 @@ class AuthRepositoryImpl @Inject constructor(
         return when (val result = remoteDataSource.login(request)) {
             is NetworkResult.Success -> {
                 val tokens = mapper.map(result.data)
-                tokenStore.update(tokens.accessToken, tokens.refreshToken)
+                sessionManager.updateTokens(tokens.accessToken, tokens.refreshToken)
                 tokens
             }
             is NetworkResult.Failure -> throw result.toApiException()

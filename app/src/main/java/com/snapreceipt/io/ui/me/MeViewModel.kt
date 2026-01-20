@@ -3,6 +3,7 @@ package com.snapreceipt.io.ui.me
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
+import com.skybound.space.core.network.auth.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,7 +13,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MeViewModel @Inject constructor(
-    dispatchers: CoroutineDispatchersProvider
+    dispatchers: CoroutineDispatchersProvider,
+    private val sessionManager: SessionManager
 ) : BaseViewModel(dispatchers) {
 
     private val _uiState = MutableStateFlow(MeUiState())
@@ -23,6 +25,7 @@ class MeViewModel @Inject constructor(
     }
 
     fun logout() {
+        sessionManager.logout()
         emitEvent(UiEvent.Custom(MeEventKeys.NAVIGATE_LOGIN))
     }
 }

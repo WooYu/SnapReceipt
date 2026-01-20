@@ -14,13 +14,21 @@ import com.snapreceipt.io.ui.main.MainUiState
 import com.snapreceipt.io.ui.main.MainViewModel
 import com.snapreceipt.io.ui.me.MeFragment
 import com.snapreceipt.io.ui.receipts.ReceiptsFragment
+import com.snapreceipt.io.ui.login.LoginActivity
 import com.skybound.space.base.presentation.BaseActivity
+import com.skybound.space.core.network.auth.SessionEvent
+import com.skybound.space.core.network.auth.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity<MainViewModel>() {
     override val viewModel: MainViewModel by viewModels()
+    @Inject
+    lateinit var injectedSessionManager: SessionManager
+    override val sessionManager: SessionManager
+        get() = injectedSessionManager
 
     private lateinit var bottomNav: BottomNavigationView
     private var suppressSelection = false
@@ -89,5 +97,14 @@ class MainActivity : BaseActivity<MainViewModel>() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .commit()
+    }
+
+    override fun onSessionExpired(event: SessionEvent) {
+        startActivity(
+            android.content.Intent(this, LoginActivity::class.java).apply {
+                addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        )
+        finish()
     }
 }

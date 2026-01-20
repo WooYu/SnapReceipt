@@ -44,7 +44,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     private lateinit var adapter: HomeReceiptAdapter
     private var pendingCameraUri: Uri? = null
 
-    private val permissionHelper by lazy { FragmentPermissionHelper(this) }
+    private lateinit var permissionHelper: FragmentPermissionHelper
 
     private val takePictureLauncher = registerForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -75,6 +75,11 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         } else if (result.resultCode == UCrop.RESULT_ERROR) {
             Toast.makeText(requireContext(), getString(R.string.image_crop_failed), Toast.LENGTH_SHORT).show()
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        permissionHelper = FragmentPermissionHelper(this)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
