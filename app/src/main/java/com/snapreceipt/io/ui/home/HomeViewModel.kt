@@ -80,6 +80,7 @@ class HomeViewModel @Inject constructor(
 
     fun processCroppedImage(imagePath: String) {
         viewModelScope.launch(dispatchers.io) {
+            emitEvent(UiEvent.Toast(message = "正在解析收据，请稍候…", long = true))
             _uiState.update { it.copy(loading = true, error = null) }
             uploadAndScanReceiptUseCase(imagePath)
                 .onSuccess { scan ->
