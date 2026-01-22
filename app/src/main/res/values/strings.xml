@@ -154,4 +154,6 @@
     <string name="recognition_failed_title">Image recognition failed</string>
     <string name="recognition_failed_message">Return to the homepage to continue taking photos and recognizing them</string>
     <string name="return_home">Return to Home</string>
+    <string name="uploading_receipt">正在上传收据，请稍候…</string>
+    <string name="scanning_receipt">正在识别收据，请稍候…</string>
 </resources>

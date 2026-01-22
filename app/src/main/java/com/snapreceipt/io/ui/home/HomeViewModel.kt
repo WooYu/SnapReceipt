@@ -2,8 +2,9 @@ package com.snapreceipt.io.ui.home
 
 import android.os.Bundle
 import androidx.lifecycle.viewModelScope
-import com.snapreceipt.io.domain.model.ReceiptEntity
+import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ReceiptCategory
+import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.domain.model.ReceiptUpdateEntity
 import com.snapreceipt.io.domain.usecase.receipt.DeleteReceiptRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.FetchReceiptsUseCase
@@ -80,9 +81,30 @@ class HomeViewModel @Inject constructor(
 
     fun processCroppedImage(imagePath: String) {
         viewModelScope.launch(dispatchers.io) {
-            emitEvent(UiEvent.Toast(message = "正在解析收据，请稍候…", long = true))
             _uiState.update { it.copy(loading = true, error = null) }
-            uploadAndScanReceiptUseCase(imagePath)
+            uploadAndScanReceiptUseCase(
+                imagePath,
+                onProgress = { stage ->
+                    when (stage) {
+                        UploadAndScanReceiptUseCase.Stage.REQUESTING_UPLOAD_URL,
+                        UploadAndScanReceiptUseCase.Stage.UPLOADING -> emitEvent(
+                            UiEvent.Toast(
+                                message = "",
+                                resId = R.string.uploading_receipt,
+                                long = true
+                            )
+                        )
+
+                        UploadAndScanReceiptUseCase.Stage.SCANNING -> emitEvent(
+                            UiEvent.Toast(
+                                message = "",
+                                resId = R.string.scanning_receipt,
+                                long = true
+                            )
+                        )
+                    }
+                }
+            )
                 .onSuccess { scan ->
                     _uiState.update { it.copy(loading = false) }
                     emitEvent(

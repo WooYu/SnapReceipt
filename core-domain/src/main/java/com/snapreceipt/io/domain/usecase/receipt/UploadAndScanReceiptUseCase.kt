@@ -1,33 +1,52 @@
 package com.snapreceipt.io.domain.usecase.receipt
 
-import android.util.Base64
 import com.snapreceipt.io.domain.model.ReceiptScanResultEntity
 import com.snapreceipt.io.domain.repository.ReceiptRemoteRepository
+import com.snapreceipt.io.domain.usecase.file.RequestUploadUrlUseCase
+import com.snapreceipt.io.domain.usecase.file.UploadFileUseCase
 import java.io.File
-import java.net.URLConnection
 import javax.inject.Inject
 
 class UploadAndScanReceiptUseCase @Inject constructor(
-    private val receiptRepository: ReceiptRemoteRepository
+    private val receiptRepository: ReceiptRemoteRepository,
+    private val requestUploadUrlUseCase: RequestUploadUrlUseCase,
+    private val uploadFileUseCase: UploadFileUseCase
 ) {
-    suspend operator fun invoke(filePath: String): Result<ReceiptScanResultEntity> =
+    enum class Stage {
+        REQUESTING_UPLOAD_URL,
+        UPLOADING,
+        SCANNING
+    }
+
+    suspend operator fun invoke(
+        filePath: String,
+        onProgress: (Stage) -> Unit = {}
+    ): Result<ReceiptScanResultEntity> =
         runCatching {
             val file = File(filePath)
             if (!file.exists()) error("File not found: ${file.absolutePath}")
-            val dataUri = encodeToDataUri(file)
-            val scanResult = receiptRepository.scan(dataUri)
+
+            onProgress(Stage.REQUESTING_UPLOAD_URL)
+            val uploadInfo = requestUploadUrlUseCase(file.name).getOrThrow()
+
+            onProgress(Stage.UPLOADING)
+            val contentType = guessContentType(file)
+            uploadFileUseCase(uploadInfo.uploadUrl, filePath, contentType).getOrThrow()
+
+            onProgress(Stage.SCANNING)
+            val scanResult = receiptRepository.scan(uploadInfo.publicUrl)
             if (scanResult.receiptUrl.isNullOrBlank()) {
-                scanResult.copy(receiptUrl = dataUri)
+                scanResult.copy(receiptUrl = uploadInfo.publicUrl)
             } else {
                 scanResult
             }
         }
 
-    private fun encodeToDataUri(file: File): String {
-        val bytes = file.readBytes()
-        val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
-        val mime = URLConnection.guessContentTypeFromName(file.name)?.takeIf { it.isNotBlank() }
-            ?: "image/jpeg"
-        return "data:$mime;base64,$base64"
+    private fun guessContentType(file: File): String {
+        return when (file.extension.lowercase()) {
+            "png" -> "image/png"
+            "webp" -> "image/webp"
+            else -> "image/jpeg"
+        }
     }
 }
