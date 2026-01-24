@@ -1,6 +1,7 @@
 package com.skybound.space.core.network
 
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
+import com.skybound.space.core.util.LogHelper
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import retrofit2.Response
@@ -54,16 +55,21 @@ suspend fun <E : BaseResponseEnvelope, T> safeApiCallEnvelope(
             if (data != null) {
                 NetworkResult.Success(data)
             } else {
+                logNetworkFailure("Empty body from API response", null)
                 NetworkResult.Failure(NetworkError.Serialization("Empty body"))
             }
         } else {
+            logNetworkFailure("API error code=${response.code}, message=${response.message}", null)
             NetworkResult.Failure(NetworkError.Http(response.code, response.message))
         }
     } catch (http: HttpException) {
+        logNetworkFailure("HTTP exception code=${http.code()} message=${http.message()}", http)
         NetworkResult.Failure(NetworkError.Http(http.code(), http.message(), http))
     } catch (io: IOException) {
+        logNetworkFailure("Network IO error: ${io.message ?: "IO error"}", io)
         NetworkResult.Failure(NetworkError.Network(io.message ?: "IO error", io))
     } catch (throwable: Throwable) {
+        logNetworkFailure("Unexpected error: ${throwable.message ?: "Unexpected"}", throwable)
         NetworkResult.Failure(NetworkError.Unexpected(throwable.message ?: "Unexpected", throwable))
     }
 }
@@ -98,9 +104,11 @@ suspend fun <T> safeResponseCall(
             if (body != null) {
                 NetworkResult.Success(body)
             } else {
+                logNetworkFailure("Empty body from HTTP response code=${response.code()}", null)
                 NetworkResult.Failure(NetworkError.Serialization("Empty body"))
             }
         } else {
+            logNetworkFailure("HTTP error code=${response.code()}, message=${response.message()}", null)
             NetworkResult.Failure(
                 NetworkError.Http(
                     code = response.code(),
@@ -109,10 +117,41 @@ suspend fun <T> safeResponseCall(
             )
         }
     } catch (http: HttpException) {
+        logNetworkFailure("HTTP exception code=${http.code()} message=${http.message()}", http)
         NetworkResult.Failure(NetworkError.Http(http.code(), http.message(), http))
     } catch (io: IOException) {
+        logNetworkFailure("Network IO error: ${io.message ?: "IO error"}", io)
         NetworkResult.Failure(NetworkError.Network(io.message ?: "IO error", io))
     } catch (throwable: Throwable) {
+        logNetworkFailure("Unexpected error: ${throwable.message ?: "Unexpected"}", throwable)
         NetworkResult.Failure(NetworkError.Unexpected(throwable.message ?: "Unexpected", throwable))
     }
+}
+
+/**
+ * 处理不带响应体/信封的请求，只要 HTTP 成功就认为成功。
+ */
+suspend fun safeApiCallNoEnvelope(
+    dispatchers: CoroutineDispatchersProvider,
+    apiCall: suspend () -> Unit
+): NetworkResult<Unit> = withContext(dispatchers.io) {
+    return@withContext try {
+        apiCall()
+        NetworkResult.Success(Unit)
+    } catch (http: HttpException) {
+        logNetworkFailure("HTTP exception code=${http.code()} message=${http.message()}", http)
+        NetworkResult.Failure(NetworkError.Http(http.code(), http.message(), http))
+    } catch (io: IOException) {
+        logNetworkFailure("Network IO error: ${io.message ?: "IO error"}", io)
+        NetworkResult.Failure(NetworkError.Network(io.message ?: "IO error", io))
+    } catch (throwable: Throwable) {
+        logNetworkFailure("Unexpected error: ${throwable.message ?: "Unexpected"}", throwable)
+        NetworkResult.Failure(NetworkError.Unexpected(throwable.message ?: "Unexpected", throwable))
+    }
+}
+
+private const val NETWORK_LOG_TAG = "Network"
+
+private fun logNetworkFailure(message: String, throwable: Throwable?) {
+    LogHelper.e(NETWORK_LOG_TAG, message, throwable)
 }

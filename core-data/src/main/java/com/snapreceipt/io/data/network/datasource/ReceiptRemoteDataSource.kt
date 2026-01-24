@@ -45,7 +45,7 @@ class ReceiptRemoteDataSource(
     }
 
     suspend fun export(receiptIds: List<Long>): NetworkResult<Unit> {
-        return requestUnit { api.export(ReceiptExportRequestDto(receiptIds)) }
+        return requestNoEnvelope { api.export(ReceiptExportRequestDto(receiptIds)) }
     }
 
     suspend fun exportRecords(request: ExportRecordListRequestDto): NetworkResult<BasePagedResponse<ExportRecordItemDto>> {

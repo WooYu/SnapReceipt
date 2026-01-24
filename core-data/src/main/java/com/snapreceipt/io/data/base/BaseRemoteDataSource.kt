@@ -7,6 +7,7 @@ import com.skybound.space.core.network.NetworkResult
 import com.skybound.space.core.network.safeApiCall
 import com.skybound.space.core.network.safeApiCallBasic
 import com.skybound.space.core.network.safeApiCallEnvelope
+import com.skybound.space.core.network.safeApiCallNoEnvelope
 import com.skybound.space.core.network.BaseResponseEnvelope
 
 abstract class BaseRemoteDataSource(
@@ -18,6 +19,10 @@ abstract class BaseRemoteDataSource(
 
     protected suspend fun requestUnit(call: suspend () -> BaseEmptyResponse): NetworkResult<Unit> {
         return safeApiCallBasic(dispatchers, call)
+    }
+
+    protected suspend fun requestNoEnvelope(call: suspend () -> Unit): NetworkResult<Unit> {
+        return safeApiCallNoEnvelope(dispatchers, call)
     }
 
     protected suspend fun <E : BaseResponseEnvelope, T> requestEnvelope(
