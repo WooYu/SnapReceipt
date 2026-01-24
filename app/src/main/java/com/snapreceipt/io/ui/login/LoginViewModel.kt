@@ -38,6 +38,11 @@ class LoginViewModel @Inject constructor(
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
     private var codeCountdownJob: Job? = null
     private var policyCache: PolicyEntity? = null
+    private var policyPrefetchJob: Job? = null
+
+    init {
+        prefetchPolicy()
+    }
 
     fun switchToPhone() {
         _uiState.update { it.copy(mode = LoginMode.PHONE) }
@@ -133,18 +138,13 @@ class LoginViewModel @Inject constructor(
 
     private fun openPolicy(target: PolicyTarget) {
         viewModelScope.launch(dispatchers.io) {
-            val cached = policyCache
-            val policy = if (cached != null) {
-                cached
-            } else {
-                val result = fetchPolicyUseCase()
-                val fetched = result.getOrNull()
-                if (fetched == null) {
-                    emitEvent(UiEvent.Toast(message = "", resId = R.string.unexpected_error))
-                    return@launch
-                }
-                policyCache = fetched
-                fetched
+            val prefetch = policyPrefetchJob
+            if (policyCache == null && prefetch?.isActive == true) {
+                prefetch.join()
+            }
+            val policy = policyCache ?: run {
+                emitEvent(UiEvent.Toast(message = "", resId = R.string.unexpected_error))
+                return@launch
             }
             val url = when (target) {
                 PolicyTarget.USER_AGREEMENT -> policy.userAgreement
@@ -160,6 +160,14 @@ class LoginViewModel @Inject constructor(
                     Bundle().apply { putString(LoginEventKeys.EXTRA_URL, url) }
                 )
             )
+        }
+    }
+
+    private fun prefetchPolicy() {
+        if (policyCache != null || policyPrefetchJob?.isActive == true) return
+        policyPrefetchJob = viewModelScope.launch(dispatchers.io) {
+            fetchPolicyUseCase()
+                .onSuccess { policyCache = it }
         }
     }
 

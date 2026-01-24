@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.snapreceipt.io.BuildConfig
 import com.snapreceipt.io.R
+import com.snapreceipt.io.domain.model.PolicyEntity
 import com.snapreceipt.io.domain.usecase.config.FetchPolicyUseCase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -19,12 +20,15 @@ class AboutUsActivity : AppCompatActivity() {
 
     @Inject
     lateinit var fetchPolicyUseCase: FetchPolicyUseCase
+    private var policyCache: PolicyEntity? = null
+    private var policyPrefetchJob: kotlinx.coroutines.Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_about_us)
 
         findViewById<TextView>(R.id.app_version).text = "V${BuildConfig.VERSION_NAME}"
+        prefetchPolicy()
         findViewById<android.view.View>(R.id.btn_back).setOnClickListener { finish() }
         findViewById<android.view.View>(R.id.menu_user_agreement).setOnClickListener {
             openPolicyUrl(isUserAgreement = true)
@@ -36,18 +40,21 @@ class AboutUsActivity : AppCompatActivity() {
 
     private fun openPolicyUrl(isUserAgreement: Boolean) {
         lifecycleScope.launch {
-            fetchPolicyUseCase()
-                .onSuccess { policy ->
-                    val url = if (isUserAgreement) {
-                        policy.userAgreement
-                    } else {
-                        policy.privacyPolicy
-                    }
-                    openUrl(url)
-                }
-                .onFailure {
-                    Toast.makeText(this@AboutUsActivity, getString(R.string.unexpected_error), Toast.LENGTH_SHORT).show()
-                }
+            val prefetch = policyPrefetchJob
+            if (policyCache == null && prefetch?.isActive == true) {
+                prefetch.join()
+            }
+            val policy = policyCache
+            if (policy == null) {
+                Toast.makeText(this@AboutUsActivity, getString(R.string.unexpected_error), Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+            val url = if (isUserAgreement) {
+                policy.userAgreement
+            } else {
+                policy.privacyPolicy
+            }
+            openUrl(url)
         }
     }
 
@@ -58,5 +65,13 @@ class AboutUsActivity : AppCompatActivity() {
             return
         }
         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(trimmed)))
+    }
+
+    private fun prefetchPolicy() {
+        if (policyCache != null || policyPrefetchJob?.isActive == true) return
+        policyPrefetchJob = lifecycleScope.launch {
+            fetchPolicyUseCase()
+                .onSuccess { policyCache = it }
+        }
     }
 }
