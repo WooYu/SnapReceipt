@@ -4,8 +4,10 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.snapreceipt.io.BuildConfig
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.usecase.config.FetchPolicyUseCase
 import dagger.hilt.android.AndroidEntryPoint
@@ -22,6 +24,7 @@ class AboutUsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_about_us)
 
+        findViewById<TextView>(R.id.app_version).text = "V${BuildConfig.VERSION_NAME}"
         findViewById<android.view.View>(R.id.btn_back).setOnClickListener { finish() }
         findViewById<android.view.View>(R.id.menu_user_agreement).setOnClickListener {
             openPolicyUrl(isUserAgreement = true)

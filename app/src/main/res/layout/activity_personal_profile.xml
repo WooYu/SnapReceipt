@@ -96,7 +96,7 @@
                             android:id="@+id/profile_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/profile_name_example"
+                            android:text="@string/placeholder_dash"
                             android:textColor="@color/text_primary"
                             android:textSize="15sp" />
 
@@ -131,7 +131,7 @@
                             android:id="@+id/profile_email"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/profile_email_example"
+                            android:text="@string/placeholder_dash"
                             android:textColor="@color/text_primary"
                             android:textSize="15sp" />
 
@@ -166,7 +166,7 @@
                             android:id="@+id/profile_phone"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/profile_phone_example"
+                            android:text="@string/placeholder_dash"
                             android:textColor="@color/text_primary"
                             android:textSize="15sp" />
 

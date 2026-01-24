@@ -138,22 +138,21 @@
     <string name="phone">手机</string>
     <string name="avatar">头像</string>
     <string name="change_avatar">更换头像</string>
-    <string name="profile_name_example">Alex Johnson</string>
-    <string name="profile_email_example">Alex@gmail.com</string>
+    
     <string name="export_records">Export Records</string>
     <string name="about_us">About Us</string>
-    <string name="app_version_label">V1.0.2</string>
+    <string name="app_version_label">Version</string>
     <string name="user_agreement">User Agreement</string>
     <string name="privacy_policy_label">Privacy Policy</string>
     <string name="feedback_message">If you have any comments or suggestions regarding the software, please contact the email address below to provide feedback.</string>
-    <string name="feedback_email">Service@gmail.com</string>
+    <string name="feedback_email">receiptfold@gmail.com</string>
     <string name="personal_profile">Personal Profile</string>
     <string name="name_label">Name</string>
     <string name="email_label">Email</string>
     <string name="mobile_number">Mobile Number</string>
-    <string name="profile_phone_example">1-415-578-7342</string>
+    
     <string name="switch_account">Switch Account</string>
-    <string name="cache_size_example">52MB</string>
+    
     <string name="receipt_count">Invoice Count</string>
     <string name="export_success_title">Export Successful!</string>
     <string name="export_success_message">You can view the export records in your personal center</string>

@@ -24,6 +24,8 @@ class MeFragment : BaseFragment<MeViewModel>(R.layout.fragment_me) {
     override val viewModel: MeViewModel by viewModels()
 
     private lateinit var editProfileBtn: View
+    private lateinit var usernameText: android.widget.TextView
+    private lateinit var emailText: android.widget.TextView
     private lateinit var exportBtn: View
     private lateinit var settingsBtn: View
     private lateinit var feedbackBtn: View
@@ -32,6 +34,8 @@ class MeFragment : BaseFragment<MeViewModel>(R.layout.fragment_me) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         editProfileBtn = view.findViewById(R.id.edit_profile_btn)
+        usernameText = view.findViewById(R.id.username)
+        emailText = view.findViewById(R.id.email)
         exportBtn = view.findViewById(R.id.menu_export)
         settingsBtn = view.findViewById(R.id.menu_settings)
         feedbackBtn = view.findViewById(R.id.menu_feedback)
@@ -52,7 +56,8 @@ class MeFragment : BaseFragment<MeViewModel>(R.layout.fragment_me) {
     }
 
     private fun renderState(state: MeUiState) {
-        // No-op for now
+        usernameText.text = state.username.ifBlank { getString(R.string.placeholder_dash) }
+        emailText.text = state.email.ifBlank { getString(R.string.placeholder_dash) }
     }
 
     override fun onCustomEvent(event: UiEvent.Custom) {

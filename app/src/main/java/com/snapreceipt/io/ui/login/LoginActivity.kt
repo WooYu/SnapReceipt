@@ -81,11 +81,7 @@ class LoginActivity : BaseActivity<LoginViewModel>() {
     private fun setupBackPress() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (viewModel.uiState.value.mode == LoginMode.EMAIL) {
-                    viewModel.switchToPhone()
-                } else {
-                    finish()
-                }
+                finish()
             }
         })
     }
