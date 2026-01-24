@@ -166,7 +166,8 @@ class ReceiptsViewModel @Inject constructor(
                             selectedIds = nextSelected,
                             loading = false,
                             error = null,
-                            empty = filtered.isEmpty()
+                            empty = filtered.isEmpty(),
+                            hasLoaded = true
                         )
                     }
                 }

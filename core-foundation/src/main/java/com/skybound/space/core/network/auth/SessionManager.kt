@@ -3,6 +3,10 @@ package com.skybound.space.core.network.auth
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import com.skybound.space.core.util.LogHelper
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,6 +31,14 @@ class SessionManager @Inject constructor(
 
     fun updateTokens(accessToken: String?, refreshToken: String?) {
         tokenStore.update(accessToken, refreshToken)
+        val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            .format(Date())
+        val accessSuffix = accessToken?.takeLast(6) ?: "null"
+        val refreshSuffix = refreshToken?.takeLast(6) ?: "null"
+        LogHelper.i(
+            "Auth",
+            "Token updated at $timestamp. access=...$accessSuffix refresh=...$refreshSuffix"
+        )
     }
 
     fun refreshTokenInvalid() {

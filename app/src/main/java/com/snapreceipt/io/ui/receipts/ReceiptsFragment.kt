@@ -84,7 +84,8 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
 
     private fun renderState(state: ReceiptsUiState) {
         currentState = state
-        if (state.empty) {
+        val showEmpty = state.hasLoaded && state.empty
+        if (showEmpty) {
             emptyState.visibility = View.VISIBLE
             receiptList.visibility = View.GONE
             adapter.setReceipts(emptyList())

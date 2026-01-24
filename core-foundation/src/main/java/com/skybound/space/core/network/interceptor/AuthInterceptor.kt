@@ -1,6 +1,7 @@
 package com.skybound.space.core.network.interceptor
 
 import com.skybound.space.core.network.auth.AuthTokenStore
+import com.skybound.space.core.util.LogHelper
 import okhttp3.Interceptor
 import okhttp3.Response
 
@@ -14,6 +15,7 @@ class AuthInterceptor(
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         if (request.header("No-Auth") != null) {
+            LogHelper.d("Auth", "Authorization skipped (No-Auth)")
             return chain.proceed(
                 request.newBuilder()
                     .removeHeader("No-Auth")
@@ -23,8 +25,15 @@ class AuthInterceptor(
 
         val token = tokenStore.accessToken()
         val builder = request.newBuilder()
-        if (!token.isNullOrBlank() && request.header("Authorization") == null) {
-            builder.header("Authorization", "Bearer $token")
+        var authorization = request.header("Authorization")
+        if (!token.isNullOrBlank() && authorization == null) {
+            authorization = "Bearer $token"
+            builder.header("Authorization", authorization)
+        }
+        if (authorization.isNullOrBlank()) {
+            LogHelper.d("Auth", "Authorization: <empty>")
+        } else {
+            LogHelper.d("Auth", "Authorization: $authorization")
         }
         return chain.proceed(builder.build())
     }

@@ -8,5 +8,6 @@ data class ReceiptsUiState(
     val loading: Boolean = false,
     val exporting: Boolean = false,
     val error: String? = null,
-    val empty: Boolean = true
+    val empty: Boolean = true,
+    val hasLoaded: Boolean = false
 )
