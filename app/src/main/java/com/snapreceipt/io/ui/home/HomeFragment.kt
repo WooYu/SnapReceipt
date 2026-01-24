@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ReceiptEntity
-import com.snapreceipt.io.ui.home.dialogs.EditReceiptDialog
 import com.snapreceipt.io.ui.home.dialogs.ScanFailedDialog
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
 import com.skybound.space.base.presentation.BaseFragment
@@ -121,7 +120,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
 
     private fun setupAdapter() {
         adapter = HomeReceiptAdapter { receipt ->
-            showEditDialog(receipt)
+            openReceiptForEdit(receipt)
         }
         receiptList.adapter = adapter
     }
@@ -131,11 +130,20 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         uploadCard.setOnClickListener { pickImageFromGallery() }
     }
 
-    private fun showEditDialog(receipt: ReceiptEntity) {
-        EditReceiptDialog(receipt) { updatedReceipt ->
-            viewModel.updateReceipt(updatedReceipt)
-            Toast.makeText(requireContext(), getString(R.string.success), Toast.LENGTH_SHORT).show()
-        }.show(parentFragmentManager, "edit_receipt")
+    private fun openReceiptForEdit(receipt: ReceiptEntity) {
+        val intent = android.content.Intent(requireContext(), InvoiceDetailsActivity::class.java).apply {
+            putExtra(InvoiceDetailsActivity.EXTRA_RECEIPT_ID, receipt.id.toLong())
+            putExtra(InvoiceDetailsActivity.EXTRA_MERCHANT, receipt.merchantName)
+            putExtra(InvoiceDetailsActivity.EXTRA_AMOUNT, receipt.amount.toString())
+            putExtra(InvoiceDetailsActivity.EXTRA_INVOICE_TYPE, receipt.category)
+            putExtra(InvoiceDetailsActivity.EXTRA_TITLE_TYPE, receipt.invoiceType)
+            putExtra(InvoiceDetailsActivity.EXTRA_NOTE, receipt.description)
+            putExtra(InvoiceDetailsActivity.EXTRA_IMAGE_URL, receipt.imagePath)
+            val formatted = formatDateTime(receipt.date)
+            putExtra(InvoiceDetailsActivity.EXTRA_DATE, formatted.first)
+            putExtra(InvoiceDetailsActivity.EXTRA_TIME, formatted.second)
+        }
+        startActivity(intent)
     }
 
     private fun openCameraWithPermission() {
@@ -247,5 +255,11 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         intent.putExtra(InvoiceDetailsActivity.EXTRA_CONSUMER, consumer)
         intent.putExtra(InvoiceDetailsActivity.EXTRA_NOTE, remark)
         startActivity(intent)
+    }
+
+    private fun formatDateTime(timestamp: Long): Pair<String, String> {
+        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+        val timeFormat = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
+        return dateFormat.format(java.util.Date(timestamp)) to timeFormat.format(java.util.Date(timestamp))
     }
 }

@@ -165,15 +165,17 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     }
 
     private fun openReceiptDetails(receipt: ReceiptEntity) {
-        val intent = android.content.Intent(requireContext(), ReceiptDetailsActivity::class.java).apply {
-            putExtra(ReceiptDetailsActivity.EXTRA_ID, receipt.id)
-            putExtra(ReceiptDetailsActivity.EXTRA_MERCHANT, receipt.merchantName)
-            putExtra(ReceiptDetailsActivity.EXTRA_AMOUNT, receipt.amount)
-            putExtra(ReceiptDetailsActivity.EXTRA_CATEGORY, receipt.category)
-            putExtra(ReceiptDetailsActivity.EXTRA_INVOICE_TYPE, receipt.invoiceType)
-            putExtra(ReceiptDetailsActivity.EXTRA_DATE, receipt.date)
-            putExtra(ReceiptDetailsActivity.EXTRA_IMAGE_PATH, receipt.imagePath)
-            putExtra(ReceiptDetailsActivity.EXTRA_NOTE, receipt.description)
+        val intent = android.content.Intent(requireContext(), com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity::class.java).apply {
+            putExtra(com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.EXTRA_RECEIPT_ID, receipt.id.toLong())
+            putExtra(com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.EXTRA_MERCHANT, receipt.merchantName)
+            putExtra(com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.EXTRA_AMOUNT, receipt.amount.toString())
+            putExtra(com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.EXTRA_INVOICE_TYPE, receipt.category)
+            putExtra(com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.EXTRA_TITLE_TYPE, receipt.invoiceType)
+            putExtra(com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.EXTRA_NOTE, receipt.description)
+            putExtra(com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.EXTRA_IMAGE_URL, receipt.imagePath)
+            val formatted = formatDateTime(receipt.date)
+            putExtra(com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.EXTRA_DATE, formatted.first)
+            putExtra(com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.EXTRA_TIME, formatted.second)
         }
         startActivity(intent)
     }
@@ -181,6 +183,12 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     private fun formatDateRange(start: Long, end: Long): String {
         val format = java.text.SimpleDateFormat("yyyy/MM/dd", java.util.Locale.getDefault())
         return "${format.format(java.util.Date(start))} - ${format.format(java.util.Date(end))}"
+    }
+
+    private fun formatDateTime(timestamp: Long): Pair<String, String> {
+        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+        val timeFormat = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
+        return dateFormat.format(java.util.Date(timestamp)) to timeFormat.format(java.util.Date(timestamp))
     }
 
     override fun onCustomEvent(event: com.skybound.space.base.presentation.UiEvent.Custom) {

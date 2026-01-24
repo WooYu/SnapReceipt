@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -86,11 +87,15 @@ class ExportRecordsActivity : AppCompatActivity() {
     private fun resolveLocalFile(raw: String): java.io.File? {
         val direct = java.io.File(raw)
         if (direct.isAbsolute && direct.exists()) return direct
+        val downloadsDir = runCatching {
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        }.getOrNull()
         val candidates = listOfNotNull(
             java.io.File(filesDir, raw),
             java.io.File(cacheDir, raw),
             externalCacheDir?.let { java.io.File(it, raw) },
-            getExternalFilesDir(null)?.let { java.io.File(it, raw) }
+            getExternalFilesDir(null)?.let { java.io.File(it, raw) },
+            downloadsDir?.let { java.io.File(it, raw) }
         )
         return candidates.firstOrNull { it.exists() }
     }

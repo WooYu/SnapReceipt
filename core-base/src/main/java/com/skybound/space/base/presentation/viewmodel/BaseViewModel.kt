@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import android.util.Log
+import kotlinx.coroutines.CancellationException
 
 /**
  * 轻量化的 ViewModel 基类，负责：
@@ -92,6 +94,10 @@ abstract class BaseViewModel(
      * 子类可根据业务重写错误处理逻辑。
      */
     open fun handleError(throwable: Throwable) {
+        if (throwable is CancellationException) {
+            Log.d("BaseViewModel", "Coroutine cancelled: ${throwable.message}")
+            return
+        }
         emitEvent(
             UiEvent.Toast(
                 message = throwable.message ?: "Unexpected error"

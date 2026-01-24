@@ -43,6 +43,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         const val EXTRA_INVOICE_TYPE = "extra_invoice_type"
         const val EXTRA_TITLE_TYPE = "extra_title_type"
         const val EXTRA_NOTE = "extra_note"
+        const val EXTRA_RECEIPT_ID = "extra_receipt_id"
 
         const val EXTRA_START_TAB = "extra_start_tab"
         const val TAB_RECEIPTS = "receipts"
@@ -64,11 +65,14 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private lateinit var inputTitleType: EditText
     private lateinit var inputNote: EditText
     private lateinit var saveButton: Button
+    private lateinit var deleteButton: ImageView
     private var receiptImageUrl: String = ""
     private var receiptDate: String = ""
     private var receiptTime: String = ""
     private var scanConsumer: String = ""
     private var scanTipAmount: Double = 0.0
+    private var receiptId: Long = 0L
+    private var isEditMode: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,9 +88,13 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         inputTitleType = findViewById(R.id.input_title_type)
         inputNote = findViewById(R.id.input_note)
         saveButton = findViewById(R.id.save_btn)
+        deleteButton = findViewById(R.id.btn_delete)
 
         val imagePath = intent.getStringExtra(EXTRA_IMAGE_PATH).orEmpty()
         receiptImageUrl = intent.getStringExtra(EXTRA_IMAGE_URL).orEmpty()
+        receiptId = intent.getLongExtra(EXTRA_RECEIPT_ID, 0L)
+        isEditMode = receiptId > 0L
+        deleteButton.visibility = if (isEditMode) android.view.View.VISIBLE else android.view.View.GONE
         if (imagePath.isNotEmpty()) {
             imageView.setImageURI(Uri.fromFile(java.io.File(imagePath)))
         } else if (receiptImageUrl.isNotEmpty()) {
@@ -107,7 +115,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         inputNote.setText(intent.getStringExtra(EXTRA_NOTE).orEmpty())
 
         findViewById<ImageView>(R.id.btn_back).setOnClickListener { finish() }
-        findViewById<ImageView>(R.id.btn_delete).setOnClickListener { finish() }
+        deleteButton.setOnClickListener { deleteReceiptIfNeeded() }
 
         setupPickers()
         saveButton.setOnClickListener { saveReceipt(imagePath) }
@@ -154,20 +162,36 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         val safeDate = receiptDate.ifEmpty { currentDate() }
         val safeTime = receiptTime.ifEmpty { "00:00:00" }
 
-        val request = ReceiptSaveEntity(
-            merchant = merchantValue,
-            receiptDate = safeDate,
-            receiptTime = safeTime,
-            totalAmount = amountValue,
-            tipAmount = scanTipAmount,
-            paymentCardNo = cardValue,
-            consumer = scanConsumer.ifEmpty { titleTypeValue },
-            remark = noteValue,
-            receiptUrl = receiptUrl,
-            categoryId = categoryId
-        )
-
-        viewModel.saveReceipt(request)
+        if (isEditMode) {
+            val updateRequest = com.snapreceipt.io.domain.model.ReceiptUpdateEntity(
+                receiptId = receiptId,
+                merchant = merchantValue,
+                receiptDate = safeDate,
+                receiptTime = safeTime,
+                totalAmount = amountValue,
+                tipAmount = scanTipAmount,
+                paymentCardNo = cardValue,
+                consumer = scanConsumer.ifEmpty { titleTypeValue },
+                remark = noteValue,
+                receiptUrl = receiptUrl,
+                categoryId = categoryId
+            )
+            viewModel.updateReceipt(updateRequest)
+        } else {
+            val request = ReceiptSaveEntity(
+                merchant = merchantValue,
+                receiptDate = safeDate,
+                receiptTime = safeTime,
+                totalAmount = amountValue,
+                tipAmount = scanTipAmount,
+                paymentCardNo = cardValue,
+                consumer = scanConsumer.ifEmpty { titleTypeValue },
+                remark = noteValue,
+                receiptUrl = receiptUrl,
+                categoryId = categoryId
+            )
+            viewModel.saveReceipt(request)
+        }
     }
 
     private fun navigateToMain() {
@@ -221,6 +245,17 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             receiptTime = time
             inputDate.setText(display)
         }.show(supportFragmentManager, "date_time_picker")
+    }
+
+    private fun deleteReceiptIfNeeded() {
+        if (!isEditMode) return
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setMessage(getString(R.string.delete_receipt_confirm))
+            .setPositiveButton(R.string.confirm) { _, _ ->
+                viewModel.deleteReceipt(receiptId)
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     private fun buildDisplayDate(date: String, time: String): String {

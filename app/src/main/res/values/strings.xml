@@ -114,6 +114,7 @@
     <string name="add_category_failed">Failed to add category</string>
     <string name="delete_category_failed">Failed to delete category</string>
     <string name="delete_category_confirm">Delete "%s"?</string>
+    <string name="delete_receipt_confirm">Delete this receipt?</string>
 
     <!-- Me Fragment -->
     <string name="profile">个人资料</string>
