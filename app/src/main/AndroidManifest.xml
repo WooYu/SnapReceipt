@@ -33,6 +33,30 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.receipts.ReceiptDetailsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.me.about.AboutUsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.me.feedback.FeedbackActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.me.profile.PersonalProfileActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.me.settings.SettingsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.me.export.ExportRecordsActivity"
+            android:exported="false" />
+
+        <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 

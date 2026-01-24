@@ -6,6 +6,7 @@ import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.domain.model.ReceiptListQueryEntity
 import com.snapreceipt.io.domain.model.ReceiptUpdateEntity
 import com.snapreceipt.io.domain.usecase.receipt.DeleteReceiptRemoteUseCase
+import com.snapreceipt.io.domain.usecase.receipt.ExportReceiptsRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.FetchReceiptsUseCase
 import com.snapreceipt.io.domain.usecase.receipt.UpdateReceiptRemoteUseCase
 import com.skybound.space.base.presentation.viewmodel.BaseViewModel
@@ -23,11 +24,14 @@ class ReceiptsViewModel @Inject constructor(
     private val fetchReceiptsUseCase: FetchReceiptsUseCase,
     private val deleteReceiptRemoteUseCase: DeleteReceiptRemoteUseCase,
     private val updateReceiptRemoteUseCase: UpdateReceiptRemoteUseCase,
+    private val exportReceiptsRemoteUseCase: ExportReceiptsRemoteUseCase,
     private val dispatchers: CoroutineDispatchersProvider
 ) : BaseViewModel(dispatchers) {
 
     private val _uiState = MutableStateFlow(ReceiptsUiState())
     val uiState: StateFlow<ReceiptsUiState> = _uiState.asStateFlow()
+    private var titleTypeFilter: String? = null
+    private var lastFetchedReceipts: List<ReceiptEntity> = emptyList()
 
     init {
         loadReceipts()
@@ -51,6 +55,19 @@ class ReceiptsViewModel @Inject constructor(
         fetchReceipts(ReceiptListQueryEntity(categoryId = categoryId))
     }
 
+    fun filterByTitleType(type: String) {
+        titleTypeFilter = type
+        val filtered = applyTitleFilter(lastFetchedReceipts)
+        _uiState.update { current ->
+            val validIds = filtered.map { it.id }.toSet()
+            current.copy(
+                receipts = filtered,
+                selectedIds = current.selectedIds.intersect(validIds),
+                empty = filtered.isEmpty()
+            )
+        }
+    }
+
     fun toggleSelection(id: Int) {
         _uiState.update { current ->
             val updated = current.selectedIds.toMutableSet()
@@ -70,6 +87,20 @@ class ReceiptsViewModel @Inject constructor(
 
     fun clearSelection() {
         _uiState.update { it.copy(selectedIds = emptySet()) }
+    }
+
+    fun exportSelected() {
+        val ids = _uiState.value.selectedIds.map { it.toLong() }
+        if (ids.isEmpty() || _uiState.value.exporting) return
+        _uiState.update { it.copy(exporting = true) }
+        viewModelScope.launch(dispatchers.io) {
+            val result = exportReceiptsRemoteUseCase(ids)
+            result.onSuccess {
+                _uiState.update { it.copy(selectedIds = emptySet()) }
+                emitEvent(com.skybound.space.base.presentation.UiEvent.Custom(ReceiptsEventKeys.SHOW_EXPORT_SUCCESS))
+            }.onFailure { updateError(it) }
+            _uiState.update { it.copy(exporting = false) }
+        }
     }
 
     fun deleteSelected() {
@@ -105,15 +136,17 @@ class ReceiptsViewModel @Inject constructor(
         viewModelScope.launch(dispatchers.io) {
             fetchReceiptsUseCase(query)
                 .onSuccess { receipts ->
+                    lastFetchedReceipts = receipts
+                    val filtered = applyTitleFilter(lastFetchedReceipts)
                     _uiState.update { current ->
-                        val validIds = receipts.map { it.id }.toSet()
+                        val validIds = filtered.map { it.id }.toSet()
                         val nextSelected = current.selectedIds.intersect(validIds)
                         current.copy(
-                            receipts = receipts,
+                            receipts = filtered,
                             selectedIds = nextSelected,
                             loading = false,
                             error = null,
-                            empty = receipts.isEmpty()
+                            empty = filtered.isEmpty()
                         )
                     }
                 }
@@ -124,6 +157,12 @@ class ReceiptsViewModel @Inject constructor(
     private fun updateError(throwable: Throwable) {
         _uiState.update { it.copy(loading = false, error = throwable.message ?: "Unexpected error") }
         handleError(throwable)
+    }
+
+    private fun applyTitleFilter(receipts: List<ReceiptEntity> = _uiState.value.receipts): List<ReceiptEntity> {
+        val label = titleTypeFilter?.trim().orEmpty()
+        if (label.isBlank() || label.equals("All", ignoreCase = true)) return receipts
+        return receipts.filter { it.invoiceType.equals(label, ignoreCase = true) }
     }
 
     private fun ReceiptEntity.toUpdateEntity(): ReceiptUpdateEntity {

@@ -4,6 +4,9 @@ import com.snapreceipt.io.data.base.BaseRemoteDataSource
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import com.skybound.space.core.network.NetworkResult
 import com.skybound.space.core.network.BasePagedResponse
+import com.snapreceipt.io.data.network.model.ExportRecordItemDto
+import com.snapreceipt.io.data.network.model.ExportRecordListRequestDto
+import com.snapreceipt.io.data.network.model.ReceiptExportRequestDto
 import com.snapreceipt.io.data.network.model.ReceiptItemDto
 import com.snapreceipt.io.data.network.model.ReceiptListRequestDto
 import com.snapreceipt.io.data.network.model.ReceiptSaveRequestDto
@@ -35,5 +38,13 @@ class ReceiptRemoteDataSource(
 
     suspend fun delete(receiptId: Long): NetworkResult<Unit> {
         return requestUnit { api.delete(ReceiptDeleteRequestDto(receiptId)) }
+    }
+
+    suspend fun export(receiptIds: List<Long>): NetworkResult<Unit> {
+        return requestUnit { api.export(ReceiptExportRequestDto(receiptIds)) }
+    }
+
+    suspend fun exportRecords(request: ExportRecordListRequestDto): NetworkResult<BasePagedResponse<ExportRecordItemDto>> {
+        return requestEnvelope({ api.exportRecords(request) }) { it }
     }
 }

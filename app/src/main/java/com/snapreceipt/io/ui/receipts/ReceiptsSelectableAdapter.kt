@@ -46,18 +46,19 @@ class ReceiptsSelectableAdapter(
 
         fun bind(receipt: ReceiptEntity, isSelected: Boolean) {
             binding.apply {
-                checkbox.setOnCheckedChangeListener(null)
-                checkbox.isChecked = isSelected
-                checkbox.setOnCheckedChangeListener { _, _ -> onToggle(receipt.id) }
+                selectIcon.isSelected = isSelected
+                selectIcon.setOnClickListener { onToggle(receipt.id) }
 
                 merchantName.text = receipt.merchantName
-                amount.text = "$${String.format("%.2f", receipt.amount)}"
+                amount.text = String.format(Locale.getDefault(), "$%.2f", receipt.amount)
 
                 val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
-                val metaText = "${receipt.category} | ${receipt.invoiceType} | ${dateFormat.format(java.util.Date(receipt.date))}"
+                val category = receipt.category.ifBlank { "Other" }
+                val titleType = receipt.invoiceType.ifBlank { "Individual" }
+                val metaText = "$category • $titleType • ${dateFormat.format(java.util.Date(receipt.date))}"
                 meta.text = metaText
 
-                root.setOnClickListener { onEditClick(receipt) }
+                receiptCard.setOnClickListener { onEditClick(receipt) }
             }
         }
     }

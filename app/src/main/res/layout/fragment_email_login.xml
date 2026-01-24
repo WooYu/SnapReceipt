@@ -26,8 +26,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:contentDescription="@string/back"
-            android:src="@drawable/ic_back_white"
-            android:tint="@color/text_primary"
+            android:src="@drawable/ic_login_back"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -61,7 +60,7 @@
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_marginTop="24dp"
-            android:background="@drawable/bg_segment_container"
+            android:background="@drawable/bg_login_tab_email"
             android:orientation="horizontal"
             android:padding="4dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -122,8 +121,7 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:contentDescription="@null"
-                android:src="@drawable/ic_email"
-                android:tint="@color/text_secondary" />
+                android:src="@drawable/ic_login_mail" />
 
             <EditText
                 android:id="@+id/email_input"
@@ -180,8 +178,7 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:contentDescription="@null"
-                android:src="@drawable/ic_lock"
-                android:tint="@color/text_secondary" />
+                android:src="@drawable/ic_login_lock" />
 
             <EditText
                 android:id="@+id/code_input"
@@ -201,8 +198,7 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:contentDescription="@string/toggle_visibility"
-                android:src="@drawable/ic_eye"
-                android:tint="@color/text_secondary" />
+                android:src="@drawable/ic_login_eye_off" />
         </LinearLayout>
 
         <Button
@@ -210,7 +206,7 @@
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_marginTop="28dp"
-            android:background="@drawable/bg_login_button_selector"
+            android:background="@drawable/bg_login_button_selector_image"
             android:enabled="false"
             android:text="@string/login"
             android:textAllCaps="false"
@@ -237,7 +233,7 @@
                 android:id="@+id/agreement_check"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:buttonTint="@color/accent_blue" />
+                android:button="@drawable/ic_login_checkbox_selector" />
 
             <TextView
                 android:id="@+id/agreement_text"

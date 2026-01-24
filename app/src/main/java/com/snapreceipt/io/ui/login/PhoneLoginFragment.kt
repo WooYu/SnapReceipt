@@ -102,14 +102,10 @@ class PhoneLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_phone_
 
     private fun updateTabStyle(isPhoneSelected: Boolean) {
         if (isPhoneSelected) {
-            phoneTab.setBackgroundResource(R.drawable.bg_segment_selected)
             phoneTab.setTextColor(requireContext().getColor(R.color.text_primary))
-            emailTab.background = null
             emailTab.setTextColor(requireContext().getColor(R.color.text_secondary))
         } else {
-            emailTab.setBackgroundResource(R.drawable.bg_segment_selected)
             emailTab.setTextColor(requireContext().getColor(R.color.text_primary))
-            phoneTab.background = null
             phoneTab.setTextColor(requireContext().getColor(R.color.text_secondary))
         }
     }
@@ -160,7 +156,7 @@ class PhoneLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_phone_
             InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
         }
         toggleCodeVisibility.setImageResource(
-            if (isCodeVisible) R.drawable.ic_eye_off else R.drawable.ic_eye
+            if (isCodeVisible) R.drawable.ic_login_eye_off else R.drawable.ic_eye
         )
         codeInput.setSelection(selection)
     }

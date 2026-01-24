@@ -86,6 +86,8 @@
     <string name="filter_title">Title</string>
     <string name="filter_type">Type</string>
     <string name="no_content">No content</string>
+    <string name="selected_count">Selected: %d</string>
+    <string name="total_label">Total</string>
     <string name="select_invoice_type">Select Invoice Type</string>
     <string name="select_title_type">Select Title Type</string>
     <string name="select_date_time">Select date and time</string>
@@ -106,6 +108,9 @@
     <string name="type_add">+ Type</string>
     <string name="type_individual">Individual</string>
     <string name="type_company">Company</string>
+    <string name="custom_type_title">Custom Type</string>
+    <string name="custom_type_hint">Enter custom type</string>
+    <string name="custom_type_empty">Please enter a custom type</string>
 
     <!-- Me Fragment -->
     <string name="profile">个人资料</string>
@@ -123,6 +128,26 @@
     <string name="profile_email_example">Alex@gmail.com</string>
     <string name="export_records">Export Records</string>
     <string name="about_us">About Us</string>
+    <string name="app_version_label">V1.0.2</string>
+    <string name="user_agreement">User Agreement</string>
+    <string name="privacy_policy_label">Privacy Policy</string>
+    <string name="feedback_message">If you have any comments or suggestions regarding the software, please contact the email address below to provide feedback.</string>
+    <string name="feedback_email">Service@gmail.com</string>
+    <string name="personal_profile">Personal Profile</string>
+    <string name="name_label">Name</string>
+    <string name="email_label">Email</string>
+    <string name="mobile_number">Mobile Number</string>
+    <string name="profile_phone_example">1-415-578-7342</string>
+    <string name="switch_account">Switch Account</string>
+    <string name="cache_size_example">52MB</string>
+    <string name="receipt_count">Invoice Count</string>
+    <string name="export_success_title">Export Successful!</string>
+    <string name="export_success_message">You can view the export records in your personal center</string>
+    <string name="view_export_records">View Export Records</string>
+    <string name="exporting_receipts">Exporting receipts…</string>
+    <string name="opening_export_file">Opening export file…</string>
+    <string name="export_file_unavailable">Export file not ready</string>
+    <string name="no_app_to_open">No app available to open this file</string>
 
     <!-- Settings -->
     <string name="notification">通知</string>

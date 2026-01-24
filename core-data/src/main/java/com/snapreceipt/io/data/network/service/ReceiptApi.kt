@@ -3,6 +3,9 @@ package com.snapreceipt.io.data.network.service
 import com.skybound.space.core.network.BaseResponse
 import com.skybound.space.core.network.BaseEmptyResponse
 import com.skybound.space.core.network.BasePagedResponse
+import com.snapreceipt.io.data.network.model.ExportRecordItemDto
+import com.snapreceipt.io.data.network.model.ExportRecordListRequestDto
+import com.snapreceipt.io.data.network.model.ReceiptExportRequestDto
 import com.snapreceipt.io.data.network.model.ReceiptItemDto
 import com.snapreceipt.io.data.network.model.ReceiptListRequestDto
 import com.snapreceipt.io.data.network.model.ReceiptDeleteRequestDto
@@ -28,4 +31,10 @@ interface ReceiptApi {
 
     @POST("api/receipt/delete")
     suspend fun delete(@Body request: ReceiptDeleteRequestDto): BaseEmptyResponse
+
+    @POST("api/receipt/export")
+    suspend fun export(@Body request: ReceiptExportRequestDto): BaseEmptyResponse
+
+    @POST("api/record/list")
+    suspend fun exportRecords(@Body request: ExportRecordListRequestDto): BasePagedResponse<ExportRecordItemDto>
 }

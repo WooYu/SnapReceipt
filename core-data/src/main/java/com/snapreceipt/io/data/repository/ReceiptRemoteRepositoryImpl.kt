@@ -3,6 +3,8 @@ package com.snapreceipt.io.data.repository
 import com.snapreceipt.io.data.network.datasource.ReceiptRemoteDataSource
 import com.snapreceipt.io.data.network.model.toDto
 import com.snapreceipt.io.data.network.model.toEntity
+import com.snapreceipt.io.domain.model.ExportRecordEntity
+import com.snapreceipt.io.domain.model.ExportRecordListQueryEntity
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.domain.model.ReceiptListQueryEntity
 import com.snapreceipt.io.domain.model.ReceiptSaveEntity
@@ -47,6 +49,20 @@ class ReceiptRemoteRepositoryImpl @Inject constructor(
 
     override suspend fun list(query: ReceiptListQueryEntity): List<ReceiptEntity> {
         return when (val result = remoteDataSource.list(query.toDto())) {
+            is NetworkResult.Success -> result.data.rows.map { it.toEntity() }
+            is NetworkResult.Failure -> throw result.toApiException()
+        }
+    }
+
+    override suspend fun export(receiptIds: List<Long>) {
+        when (val result = remoteDataSource.export(receiptIds)) {
+            is NetworkResult.Success -> Unit
+            is NetworkResult.Failure -> throw result.toApiException()
+        }
+    }
+
+    override suspend fun listExportRecords(query: ExportRecordListQueryEntity): List<ExportRecordEntity> {
+        return when (val result = remoteDataSource.exportRecords(query.toDto())) {
             is NetworkResult.Success -> result.data.rows.map { it.toEntity() }
             is NetworkResult.Failure -> throw result.toApiException()
         }

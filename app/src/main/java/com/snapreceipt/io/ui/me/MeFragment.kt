@@ -9,6 +9,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.snapreceipt.io.R
 import com.snapreceipt.io.ui.login.LoginActivity
+import com.snapreceipt.io.ui.me.about.AboutUsActivity
+import com.snapreceipt.io.ui.me.export.ExportRecordsActivity
+import com.snapreceipt.io.ui.me.feedback.FeedbackActivity
+import com.snapreceipt.io.ui.me.profile.PersonalProfileActivity
+import com.snapreceipt.io.ui.me.settings.SettingsActivity
 import com.skybound.space.base.presentation.BaseFragment
 import com.skybound.space.base.presentation.UiEvent
 import dagger.hilt.android.AndroidEntryPoint
@@ -58,19 +63,19 @@ class MeFragment : BaseFragment<MeViewModel>(R.layout.fragment_me) {
 
     private fun setupListeners() {
         editProfileBtn.setOnClickListener {
-            viewModel.showToast(getString(R.string.edit_profile))
+            startActivity(Intent(requireContext(), PersonalProfileActivity::class.java))
         }
         exportBtn.setOnClickListener {
-            viewModel.showToast(getString(R.string.export_records))
+            startActivity(Intent(requireContext(), ExportRecordsActivity::class.java))
         }
         settingsBtn.setOnClickListener {
-            viewModel.showToast(getString(R.string.settings))
+            startActivity(Intent(requireContext(), SettingsActivity::class.java))
         }
         feedbackBtn.setOnClickListener {
-            viewModel.showToast(getString(R.string.feedback))
+            startActivity(Intent(requireContext(), FeedbackActivity::class.java))
         }
         aboutBtn.setOnClickListener {
-            viewModel.showToast(getString(R.string.about_us))
+            startActivity(Intent(requireContext(), AboutUsActivity::class.java))
         }
         logoutBtn.setOnClickListener {
             viewModel.logout()

@@ -47,8 +47,7 @@
                             android:layout_height="36dp"
                             android:layout_gravity="center"
                             android:contentDescription="@string/avatar"
-                            android:src="@drawable/ic_receipts"
-                            android:tint="@android:color/white" />
+                            android:src="@drawable/img_app_icon" />
                     </FrameLayout>
 
                     <LinearLayout
@@ -104,9 +103,16 @@
                         android:gravity="center_vertical"
                         android:padding="16dp">
 
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:contentDescription="@string/export_records"
+                            android:src="@drawable/ic_me_export" />
+
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
                             android:layout_weight="1"
                             android:text="@string/export_records"
                             android:textColor="@color/text_primary"
@@ -116,7 +122,7 @@
                             android:layout_width="18dp"
                             android:layout_height="18dp"
                             android:contentDescription="@string/export_records"
-                            android:src="@drawable/ic_chevron_right" />
+                            android:src="@drawable/ic_me_chevron" />
                     </LinearLayout>
 
                     <View
@@ -131,9 +137,16 @@
                         android:gravity="center_vertical"
                         android:padding="16dp">
 
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:contentDescription="@string/about_us"
+                            android:src="@drawable/ic_me_about" />
+
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
                             android:layout_weight="1"
                             android:text="@string/about_us"
                             android:textColor="@color/text_primary"
@@ -143,7 +156,7 @@
                             android:layout_width="18dp"
                             android:layout_height="18dp"
                             android:contentDescription="@string/about_us"
-                            android:src="@drawable/ic_chevron_right" />
+                            android:src="@drawable/ic_me_chevron" />
                     </LinearLayout>
 
                     <View
@@ -158,9 +171,16 @@
                         android:gravity="center_vertical"
                         android:padding="16dp">
 
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:contentDescription="@string/feedback"
+                            android:src="@drawable/ic_me_feedback" />
+
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
                             android:layout_weight="1"
                             android:text="@string/feedback"
                             android:textColor="@color/text_primary"
@@ -170,7 +190,7 @@
                             android:layout_width="18dp"
                             android:layout_height="18dp"
                             android:contentDescription="@string/feedback"
-                            android:src="@drawable/ic_chevron_right" />
+                            android:src="@drawable/ic_me_chevron" />
                     </LinearLayout>
 
                     <View
@@ -185,9 +205,16 @@
                         android:gravity="center_vertical"
                         android:padding="16dp">
 
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:contentDescription="@string/settings"
+                            android:src="@drawable/ic_me_settings" />
+
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
                             android:layout_weight="1"
                             android:text="@string/settings"
                             android:textColor="@color/text_primary"
@@ -197,7 +224,7 @@
                             android:layout_width="18dp"
                             android:layout_height="18dp"
                             android:contentDescription="@string/settings"
-                            android:src="@drawable/ic_chevron_right" />
+                            android:src="@drawable/ic_me_chevron" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

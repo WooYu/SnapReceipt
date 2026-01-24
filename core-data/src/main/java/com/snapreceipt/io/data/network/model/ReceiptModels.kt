@@ -1,6 +1,8 @@
 package com.snapreceipt.io.data.network.model
 
 import com.google.gson.annotations.SerializedName
+import com.snapreceipt.io.domain.model.ExportRecordEntity
+import com.snapreceipt.io.domain.model.ExportRecordListQueryEntity
 import com.snapreceipt.io.domain.model.ReceiptCategory
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.domain.model.ReceiptListQueryEntity
@@ -58,6 +60,10 @@ data class ReceiptDeleteRequestDto(
     @SerializedName("receiptId") val receiptId: Long
 )
 
+data class ReceiptExportRequestDto(
+    @SerializedName("receiptIds") val receiptIds: List<Long>
+)
+
 data class ReceiptListRequestDto(
     @SerializedName("categoryId") val categoryId: Int? = null,
     @SerializedName("receiptDateStart") val receiptDateStart: String? = null,
@@ -66,6 +72,23 @@ data class ReceiptListRequestDto(
     @SerializedName("createTimeEnd") val createTimeEnd: String? = null,
     @SerializedName("pageNum") val pageNum: Int? = null,
     @SerializedName("pageSize") val pageSize: Int? = null
+)
+
+data class ExportRecordListRequestDto(
+    @SerializedName("pageNum") val pageNum: Int? = null,
+    @SerializedName("pageSize") val pageSize: Int? = null
+)
+
+data class ExportRecordItemDto(
+    @SerializedName("createTime") val createTime: String? = null,
+    @SerializedName("exportId") val exportId: Long,
+    @SerializedName("beginDate") val beginDate: String? = null,
+    @SerializedName("endDate") val endDate: String? = null,
+    @SerializedName("receiptCount") val receiptCount: Int? = null,
+    @SerializedName("exportType") val exportType: String? = null,
+    @SerializedName("totalAmount") val totalAmount: Double? = null,
+    @SerializedName("fileUrl") val fileUrl: String? = null,
+    @SerializedName("status") val status: String? = null
 )
 
 data class ReceiptItemDto(
@@ -99,6 +122,18 @@ fun ReceiptItemDto.toEntity(): ReceiptEntity = ReceiptEntity(
     invoiceType = receiptType ?: "Individual",
     imagePath = receiptUrl,
     description = remark.orEmpty()
+)
+
+fun ExportRecordItemDto.toEntity(): ExportRecordEntity = ExportRecordEntity(
+    exportId = exportId,
+    beginDate = beginDate.orEmpty(),
+    endDate = endDate.orEmpty(),
+    receiptCount = receiptCount ?: 0,
+    exportType = exportType.orEmpty(),
+    totalAmount = totalAmount ?: 0.0,
+    fileUrl = fileUrl.orEmpty(),
+    createTime = createTime,
+    status = status
 )
 
 fun ReceiptEntity.toDto(): ReceiptItemDto = ReceiptItemDto(
@@ -146,6 +181,11 @@ fun ReceiptListQueryEntity.toDto(): ReceiptListRequestDto = ReceiptListRequestDt
     receiptDateEnd = receiptDateEnd,
     createTimeStart = createTimeStart,
     createTimeEnd = createTimeEnd,
+    pageNum = pageNum,
+    pageSize = pageSize
+)
+
+fun ExportRecordListQueryEntity.toDto(): ExportRecordListRequestDto = ExportRecordListRequestDto(
     pageNum = pageNum,
     pageSize = pageSize
 )
