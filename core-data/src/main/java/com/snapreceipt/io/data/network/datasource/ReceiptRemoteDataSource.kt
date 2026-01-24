@@ -14,6 +14,10 @@ import com.snapreceipt.io.data.network.model.ReceiptScanResultDto
 import com.snapreceipt.io.data.network.model.ReceiptUpdateRequestDto
 import com.snapreceipt.io.data.network.model.ReceiptDeleteRequestDto
 import com.snapreceipt.io.data.network.model.ScanRequestDto
+import com.snapreceipt.io.data.network.model.CategoryCreateRequestDto
+import com.snapreceipt.io.data.network.model.CategoryDeleteRequestDto
+import com.snapreceipt.io.data.network.model.CategoryItemDto
+import com.snapreceipt.io.data.network.model.CategoryListRequestDto
 import com.snapreceipt.io.data.network.service.ReceiptApi
 
 class ReceiptRemoteDataSource(
@@ -46,5 +50,17 @@ class ReceiptRemoteDataSource(
 
     suspend fun exportRecords(request: ExportRecordListRequestDto): NetworkResult<BasePagedResponse<ExportRecordItemDto>> {
         return requestEnvelope({ api.exportRecords(request) }) { it }
+    }
+
+    suspend fun listCategories(): NetworkResult<List<CategoryItemDto>> {
+        return request { api.listCategories(CategoryListRequestDto()) }
+    }
+
+    suspend fun addCategory(name: String): NetworkResult<Unit> {
+        return requestUnit { api.addCategory(CategoryCreateRequestDto(name)) }
+    }
+
+    suspend fun deleteCategories(ids: List<Int>): NetworkResult<Unit> {
+        return requestUnit { api.deleteCategory(CategoryDeleteRequestDto(ids)) }
     }
 }

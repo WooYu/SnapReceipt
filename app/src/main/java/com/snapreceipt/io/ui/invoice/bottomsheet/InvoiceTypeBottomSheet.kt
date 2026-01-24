@@ -4,130 +4,206 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.snapreceipt.io.R
+import com.snapreceipt.io.domain.model.ReceiptCategory
+import com.snapreceipt.io.domain.usecase.category.AddCategoryUseCase
+import com.snapreceipt.io.domain.usecase.category.DeleteCategoryUseCase
+import com.snapreceipt.io.domain.usecase.category.FetchCategoriesUseCase
 import com.snapreceipt.io.ui.invoice.dialogs.CustomTypeDialog
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class InvoiceTypeBottomSheet(
-    private val initialSelection: String?,
-    private val onSelected: (String) -> Unit
-) : BottomSheetDialogFragment() {
+@AndroidEntryPoint
+class InvoiceTypeBottomSheet : BottomSheetDialogFragment() {
 
     companion object {
-        private val savedCustomTypes = mutableListOf<String>()
+        private const val ARG_INITIAL = "arg_initial"
+
+        fun newInstance(initialSelection: String?, onSelected: (String) -> Unit): InvoiceTypeBottomSheet {
+            return InvoiceTypeBottomSheet().apply {
+                arguments = bundleOf(ARG_INITIAL to initialSelection)
+                this.onSelected = onSelected
+            }
+        }
     }
 
-    private lateinit var optionViews: MutableList<TextView>
-    private lateinit var customTypeContainer: LinearLayout
-    private var selectedLabel: String = initialSelection ?: ""
+    @Inject
+    lateinit var fetchCategoriesUseCase: FetchCategoriesUseCase
+
+    @Inject
+    lateinit var addCategoryUseCase: AddCategoryUseCase
+
+    @Inject
+    lateinit var deleteCategoryUseCase: DeleteCategoryUseCase
+
+    private var onSelected: ((String) -> Unit)? = null
+    private lateinit var adapter: CategoryChipAdapter
+    private var selectedLabel: String = ""
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = BottomSheetDialog(requireContext())
         val view = LayoutInflater.from(context).inflate(R.layout.bottom_sheet_invoice_type, null)
         dialog.setContentView(view)
 
-        optionViews = mutableListOf(
-            view.findViewById(R.id.type_all),
-            view.findViewById(R.id.type_food),
-            view.findViewById(R.id.type_travel),
-            view.findViewById(R.id.type_office),
-            view.findViewById(R.id.type_hotel),
-            view.findViewById(R.id.type_other)
-        )
-        customTypeContainer = view.findViewById(R.id.custom_type_container)
+        selectedLabel = arguments?.getString(ARG_INITIAL).orEmpty()
 
-        optionViews.forEach { option -> bindOption(option) }
+        val recycler = view.findViewById<RecyclerView>(R.id.category_list)
+        adapter = CategoryChipAdapter(
+            onSelect = { option ->
+                selectedLabel = option.label
+                adapter.updateSelection(selectedLabel)
+            },
+            onLongPress = { option ->
+                if (option.isCustom && !option.isAll) {
+                    confirmDelete(option)
+                }
+            }
+        )
+        recycler.layoutManager = GridLayoutManager(requireContext(), 3)
+        recycler.adapter = adapter
 
         view.findViewById<TextView>(R.id.type_add).setOnClickListener {
-            CustomTypeDialog { customType ->
-                addCustomType(customType)
-                selectedLabel = customType
-                updateSelection()
-            }.show(parentFragmentManager, "custom_type_dialog")
+            CustomTypeDialog { customType -> addCustomType(customType) }
+                .show(parentFragmentManager, "custom_type_dialog")
         }
 
         view.findViewById<View>(R.id.cancel_btn).setOnClickListener { dismiss() }
         view.findViewById<View>(R.id.confirm_btn).setOnClickListener {
-            onSelected(selectedLabel)
+            onSelected?.invoke(selectedLabel)
             dismiss()
         }
 
-        savedCustomTypes.forEach { addCustomType(it, persist = false) }
-        if (selectedLabel.isNotBlank()) {
-            addCustomType(selectedLabel)
-        }
-        updateSelection()
+        loadCategories()
         return dialog
     }
 
-    private fun bindOption(option: TextView) {
-        option.setOnClickListener {
-            selectedLabel = option.text.toString()
-            updateSelection()
+    private fun loadCategories() {
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) { fetchCategoriesUseCase() }
+            val list = result.getOrElse { ReceiptCategory.all() }
+            ReceiptCategory.update(list)
+            val options = buildOptions(list)
+            adapter.submitList(options, selectedLabel)
         }
     }
 
-    private fun addCustomType(label: String, persist: Boolean = true) {
-        val trimmed = label.trim()
-        if (trimmed.isBlank()) return
-        if (optionViews.any { it.text.toString().equals(trimmed, ignoreCase = true) }) return
-        if (persist) {
-            savedCustomTypes.add(trimmed)
-        }
-        val chip = TextView(requireContext()).apply {
-            text = trimmed
-            textSize = 14f
-            gravity = android.view.Gravity.CENTER
-            background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_chip_selector)
-            setTextColor(ContextCompat.getColorStateList(requireContext(), R.color.chip_text_selector))
-        }
-        bindOption(chip)
-        optionViews.add(chip)
-        addChipToRow(chip)
-    }
-
-    private fun addChipToRow(chip: TextView) {
-        val row = findOrCreateRow()
-        val margin = if (row.childCount > 0) dpToPx(12) else 0
-        val params = LinearLayout.LayoutParams(0, dpToPx(44), 1f).apply {
-            marginStart = margin
-        }
-        row.addView(chip, params)
-    }
-
-    private fun findOrCreateRow(): LinearLayout {
-        if (customTypeContainer.childCount > 0) {
-            val last = customTypeContainer.getChildAt(customTypeContainer.childCount - 1) as LinearLayout
-            if (last.childCount < 3) return last
-        }
-        val row = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.HORIZONTAL
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                if (customTypeContainer.childCount > 0) {
-                    topMargin = dpToPx(12)
-                }
+    private fun addCustomType(label: String) {
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) { addCategoryUseCase(label) }
+            result.onSuccess {
+                selectedLabel = label
+                loadCategories()
+            }.onFailure {
+                Toast.makeText(requireContext(), getString(R.string.add_category_failed), Toast.LENGTH_SHORT).show()
             }
         }
-        customTypeContainer.addView(row)
-        return row
     }
 
-    private fun dpToPx(value: Int): Int =
-        (value * resources.displayMetrics.density).toInt()
+    private fun confirmDelete(option: CategoryOption) {
+        AlertDialog.Builder(requireContext())
+            .setMessage(getString(R.string.delete_category_confirm, option.label))
+            .setPositiveButton(R.string.confirm) { _, _ -> deleteCategory(option) }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
 
-    private fun updateSelection() {
-        if (optionViews.none { it.text.toString().equals(selectedLabel, ignoreCase = true) }) {
-            selectedLabel = optionViews.firstOrNull()?.text?.toString().orEmpty()
+    private fun deleteCategory(option: CategoryOption) {
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) { deleteCategoryUseCase(listOf(option.id)) }
+            result.onSuccess {
+                if (selectedLabel.equals(option.label, ignoreCase = true)) {
+                    selectedLabel = getString(R.string.type_all)
+                }
+                loadCategories()
+            }.onFailure {
+                Toast.makeText(requireContext(), getString(R.string.delete_category_failed), Toast.LENGTH_SHORT).show()
+            }
         }
-        optionViews.forEach { option ->
-            option.isSelected = option.text.toString().equals(selectedLabel, ignoreCase = true)
+    }
+
+    private fun buildOptions(list: List<ReceiptCategory.Item>): List<CategoryOption> {
+        val options = mutableListOf<CategoryOption>()
+        options.add(CategoryOption(0, getString(R.string.type_all), isCustom = false, isAll = true))
+        list.forEach { item ->
+            options.add(CategoryOption(item.id, item.label, item.isCustom, isAll = false))
+        }
+        if (selectedLabel.isBlank() || options.none { it.label.equals(selectedLabel, ignoreCase = true) }) {
+            selectedLabel = options.first().label
+        }
+        return options
+    }
+
+    data class CategoryOption(
+        val id: Int,
+        val label: String,
+        val isCustom: Boolean,
+        val isAll: Boolean
+    )
+
+    class CategoryChipAdapter(
+        private val onSelect: (CategoryOption) -> Unit,
+        private val onLongPress: (CategoryOption) -> Unit
+    ) : RecyclerView.Adapter<CategoryChipAdapter.ViewHolder>() {
+
+        private var items: List<CategoryOption> = emptyList()
+        private var selectedLabel: String = ""
+
+        fun submitList(list: List<CategoryOption>, selected: String) {
+            items = list
+            selectedLabel = selected
+            notifyDataSetChanged()
+        }
+
+        fun updateSelection(label: String) {
+            selectedLabel = label
+            notifyDataSetChanged()
+        }
+
+        override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): ViewHolder {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_category_chip, parent, false)
+            return ViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            holder.bind(items[position], selectedLabel, onSelect, onLongPress)
+        }
+
+        override fun getItemCount(): Int = items.size
+
+        class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            private val text: TextView = itemView.findViewById(R.id.chip_text)
+
+            fun bind(
+                option: CategoryOption,
+                selectedLabel: String,
+                onSelect: (CategoryOption) -> Unit,
+                onLongPress: (CategoryOption) -> Unit
+            ) {
+                text.text = option.label
+                text.isSelected = option.label.equals(selectedLabel, ignoreCase = true)
+                text.setOnClickListener { onSelect(option) }
+                text.setOnLongClickListener {
+                    if (option.isCustom && !option.isAll) {
+                        onLongPress(option)
+                        true
+                    } else {
+                        false
+                    }
+                }
+            }
         }
     }
 }

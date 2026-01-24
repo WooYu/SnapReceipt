@@ -136,7 +136,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         }
         filterTypeBtn.setOnClickListener {
             val initial = filterTypeLabel ?: filterTypeBtn.text.toString()
-            InvoiceTypeBottomSheet(initial) { selected ->
+            InvoiceTypeBottomSheet.newInstance(initial) { selected ->
                 filterTypeLabel = selected
                 filterTypeBtn.text = selected
                 viewModel.filterByType(selected)

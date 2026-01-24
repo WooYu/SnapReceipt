@@ -203,7 +203,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun openInvoiceTypePicker() {
-        InvoiceTypeBottomSheet(inputInvoiceType.text.toString()) { selected ->
+        InvoiceTypeBottomSheet.newInstance(inputInvoiceType.text.toString()) { selected ->
             inputInvoiceType.setText(selected)
         }.show(supportFragmentManager, "invoice_type_picker")
     }

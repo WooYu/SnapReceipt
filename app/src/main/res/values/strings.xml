@@ -111,6 +111,9 @@
     <string name="custom_type_title">Custom Type</string>
     <string name="custom_type_hint">Enter custom type</string>
     <string name="custom_type_empty">Please enter a custom type</string>
+    <string name="add_category_failed">Failed to add category</string>
+    <string name="delete_category_failed">Failed to delete category</string>
+    <string name="delete_category_confirm">Delete "%s"?</string>
 
     <!-- Me Fragment -->
     <string name="profile">个人资料</string>

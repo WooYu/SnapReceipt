@@ -3,8 +3,10 @@ package com.snapreceipt.io.data.repository
 import com.snapreceipt.io.data.network.datasource.ReceiptRemoteDataSource
 import com.snapreceipt.io.data.network.model.toDto
 import com.snapreceipt.io.data.network.model.toEntity
+import com.snapreceipt.io.data.network.model.toItem
 import com.snapreceipt.io.domain.model.ExportRecordEntity
 import com.snapreceipt.io.domain.model.ExportRecordListQueryEntity
+import com.snapreceipt.io.domain.model.ReceiptCategory
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.domain.model.ReceiptListQueryEntity
 import com.snapreceipt.io.domain.model.ReceiptSaveEntity
@@ -64,6 +66,29 @@ class ReceiptRemoteRepositoryImpl @Inject constructor(
     override suspend fun listExportRecords(query: ExportRecordListQueryEntity): List<ExportRecordEntity> {
         return when (val result = remoteDataSource.exportRecords(query.toDto())) {
             is NetworkResult.Success -> result.data.rows.map { it.toEntity() }
+            is NetworkResult.Failure -> throw result.toApiException()
+        }
+    }
+
+    override suspend fun listCategories(): List<ReceiptCategory.Item> {
+        return when (val result = remoteDataSource.listCategories()) {
+            is NetworkResult.Success -> result.data
+                .sortedWith(compareBy({ it.orderNum ?: Int.MAX_VALUE }, { it.categoryId }))
+                .map { it.toItem() }
+            is NetworkResult.Failure -> throw result.toApiException()
+        }
+    }
+
+    override suspend fun addCategory(name: String) {
+        when (val result = remoteDataSource.addCategory(name)) {
+            is NetworkResult.Success -> Unit
+            is NetworkResult.Failure -> throw result.toApiException()
+        }
+    }
+
+    override suspend fun removeCategories(ids: List<Int>) {
+        when (val result = remoteDataSource.deleteCategories(ids)) {
+            is NetworkResult.Success -> Unit
             is NetworkResult.Failure -> throw result.toApiException()
         }
     }

@@ -29,96 +29,18 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <LinearLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/category_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="240dp"
         android:layout_marginTop="16dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/type_all"
-            android:layout_width="0dp"
-            android:layout_height="44dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_chip_selector"
-            android:gravity="center"
-            android:text="@string/type_all"
-            android:textColor="@color/chip_text_selector" />
-
-        <TextView
-            android:id="@+id/type_food"
-            android:layout_width="0dp"
-            android:layout_height="44dp"
-            android:layout_marginStart="12dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_chip_selector"
-            android:gravity="center"
-            android:text="@string/type_food"
-            android:textColor="@color/chip_text_selector" />
-
-        <TextView
-            android:id="@+id/type_travel"
-            android:layout_width="0dp"
-            android:layout_height="44dp"
-            android:layout_marginStart="12dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_chip_selector"
-            android:gravity="center"
-            android:text="@string/type_travel"
-            android:textColor="@color/chip_text_selector" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/type_office"
-            android:layout_width="0dp"
-            android:layout_height="44dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_chip_selector"
-            android:gravity="center"
-            android:text="@string/type_office"
-            android:textColor="@color/chip_text_selector" />
-
-        <TextView
-            android:id="@+id/type_hotel"
-            android:layout_width="0dp"
-            android:layout_height="44dp"
-            android:layout_marginStart="12dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_chip_selector"
-            android:gravity="center"
-            android:text="@string/type_hotel"
-            android:textColor="@color/chip_text_selector" />
-
-        <TextView
-            android:id="@+id/type_other"
-            android:layout_width="0dp"
-            android:layout_height="44dp"
-            android:layout_marginStart="12dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_chip_selector"
-            android:gravity="center"
-            android:text="@string/type_other"
-            android:textColor="@color/chip_text_selector" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/custom_type_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:orientation="vertical" />
+        android:overScrollMode="ifContentScrolls" />
 
     <TextView
         android:id="@+id/type_add"
         android:layout_width="120dp"
         android:layout_height="44dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         android:background="@drawable/bg_chip_dashed"
         android:gravity="center"
         android:text="@string/type_add"

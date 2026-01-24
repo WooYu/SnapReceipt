@@ -29,6 +29,25 @@ data class ReceiptScanResultDto(
     @SerializedName("receiptUrl") val receiptUrl: String? = null
 )
 
+data class CategoryListRequestDto(
+    @SerializedName("unused") val unused: String? = null
+)
+
+data class CategoryCreateRequestDto(
+    @SerializedName("categoryName") val categoryName: String
+)
+
+data class CategoryDeleteRequestDto(
+    @SerializedName("categoryIds") val categoryIds: List<Int>
+)
+
+data class CategoryItemDto(
+    @SerializedName("categoryId") val categoryId: Int,
+    @SerializedName("userId") val userId: Int? = null,
+    @SerializedName("categoryName") val categoryName: String,
+    @SerializedName("orderNum") val orderNum: Int? = null
+)
+
 data class ReceiptSaveRequestDto(
     @SerializedName("merchant") val merchant: String,
     @SerializedName("receiptDate") val receiptDate: String,
@@ -134,6 +153,12 @@ fun ExportRecordItemDto.toEntity(): ExportRecordEntity = ExportRecordEntity(
     fileUrl = fileUrl.orEmpty(),
     createTime = createTime,
     status = status
+)
+
+fun CategoryItemDto.toItem(): ReceiptCategory.Item = ReceiptCategory.Item(
+    id = categoryId,
+    label = categoryName,
+    isCustom = (userId ?: 0) != 0
 )
 
 fun ReceiptEntity.toDto(): ReceiptItemDto = ReceiptItemDto(
