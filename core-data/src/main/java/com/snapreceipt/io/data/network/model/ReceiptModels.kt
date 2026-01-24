@@ -19,6 +19,7 @@ data class ScanRequestDto(
 
 data class ReceiptScanResultDto(
     @SerializedName("merchant") val merchant: String? = null,
+    @SerializedName("address") val address: String? = null,
     @SerializedName("receiptDate") val receiptDate: String? = null,
     @SerializedName("receiptTime") val receiptTime: String? = null,
     @SerializedName("totalAmount") val totalAmount: Double? = null,
@@ -217,6 +218,7 @@ fun ExportRecordListQueryEntity.toDto(): ExportRecordListRequestDto = ExportReco
 
 fun ReceiptScanResultDto.toEntity(): ReceiptScanResultEntity = ReceiptScanResultEntity(
     merchant = merchant,
+    address = address,
     receiptDate = receiptDate,
     receiptTime = receiptTime,
     totalAmount = totalAmount,
@@ -229,6 +231,7 @@ fun ReceiptScanResultDto.toEntity(): ReceiptScanResultEntity = ReceiptScanResult
 
 fun ReceiptScanResultEntity.toDto(): ReceiptScanResultDto = ReceiptScanResultDto(
     merchant = merchant,
+    address = address,
     receiptDate = receiptDate,
     receiptTime = receiptTime,
     totalAmount = totalAmount,

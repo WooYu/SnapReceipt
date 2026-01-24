@@ -3,8 +3,11 @@ package com.snapreceipt.io.ui.login
 import android.os.Bundle
 import android.view.View
 import android.text.InputType
+import android.text.TextPaint
 import android.text.SpannableString
 import android.text.Spanned
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
 import android.widget.Button
 import android.widget.CheckBox
@@ -58,6 +61,8 @@ class PhoneLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_phone_
         agreementCheck.setOnCheckedChangeListener { _, checked ->
             viewModel.setAgreementAccepted(checked)
         }
+        agreementText.movementMethod = LinkMovementMethod.getInstance()
+        agreementText.highlightColor = android.graphics.Color.TRANSPARENT
 
         observeState()
         super.onViewCreated(view, savedInstanceState)
@@ -125,8 +130,18 @@ class PhoneLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_phone_
         val text = getString(R.string.login_agreement_html)
         val spannable = SpannableString(text)
         val highlightColor = requireContext().getColor(R.color.accent_blue)
-        highlightPhrase(spannable, text, getString(R.string.user_agreement), highlightColor)
-        highlightPhrase(spannable, text, getString(R.string.privacy_policy_label), highlightColor)
+        highlightPhrase(
+            spannable,
+            text,
+            getString(R.string.user_agreement),
+            highlightColor
+        ) { viewModel.openUserAgreement() }
+        highlightPhrase(
+            spannable,
+            text,
+            getString(R.string.privacy_policy_label),
+            highlightColor
+        ) { viewModel.openPrivacyPolicy() }
         return spannable
     }
 
@@ -134,7 +149,8 @@ class PhoneLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_phone_
         spannable: SpannableString,
         fullText: String,
         phrase: String,
-        color: Int
+        color: Int,
+        onClick: (() -> Unit)? = null
     ) {
         val start = fullText.indexOf(phrase)
         if (start < 0) return
@@ -145,6 +161,23 @@ class PhoneLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_phone_
             end,
             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
+        if (onClick != null) {
+            spannable.setSpan(
+                object : ClickableSpan() {
+                    override fun onClick(widget: View) {
+                        onClick()
+                    }
+
+                    override fun updateDrawState(ds: TextPaint) {
+                        super.updateDrawState(ds)
+                        ds.isUnderlineText = false
+                    }
+                },
+                start,
+                end,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
     }
 
     private fun toggleCodeVisibility() {

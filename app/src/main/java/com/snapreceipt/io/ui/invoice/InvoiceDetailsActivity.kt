@@ -10,7 +10,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -70,6 +69,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private lateinit var cardHelper: TextView
     private lateinit var saveButton: Button
     private lateinit var deleteButton: ImageView
+    private var receiptImagePath: String = ""
     private var receiptImageUrl: String = ""
     private var receiptDate: String = ""
     private var receiptTime: String = ""
@@ -96,6 +96,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         deleteButton = findViewById(R.id.btn_delete)
 
         val imagePath = intent.getStringExtra(EXTRA_IMAGE_PATH).orEmpty()
+        receiptImagePath = imagePath
         receiptImageUrl = intent.getStringExtra(EXTRA_IMAGE_URL).orEmpty()
         receiptId = intent.getLongExtra(EXTRA_RECEIPT_ID, 0L)
         isEditMode = receiptId > 0L
@@ -121,6 +122,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
 
         findViewById<ImageView>(R.id.btn_back).setOnClickListener { finish() }
         deleteButton.setOnClickListener { deleteReceiptIfNeeded() }
+        imageView.setOnClickListener { openImagePreview() }
 
         setupPickers()
         setupCardValidation()
@@ -239,10 +241,8 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun setupCardValidation() {
-        inputCard.addTextChangedListener {
-            updateCardHelper(it?.toString().orEmpty())
-        }
-        updateCardHelper(inputCard.text?.toString().orEmpty())
+        // TODO: temporarily disable validation to show backend values as-is.
+        cardHelper.visibility = View.GONE
     }
 
     private fun updateCardHelper(raw: String) {
@@ -256,12 +256,17 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun cardValidationErrorResId(raw: String): Int? {
-        val trimmed = raw.trim()
-        if (trimmed.isBlank()) return null
-        val allowed = trimmed.all { it.isDigit() || it == ' ' || it == '-' }
-        if (!allowed) return R.string.card_number_invalid_chars
-        val digits = trimmed.filter { it.isDigit() }
-        return if (digits.length in 12..19) null else R.string.card_number_length
+        // TODO: validation rules will be re-enabled later.
+        return null
+    }
+
+    private fun openImagePreview() {
+        if (receiptImagePath.isBlank() && receiptImageUrl.isBlank()) return
+        val intent = Intent(this, com.snapreceipt.io.ui.preview.ImagePreviewActivity::class.java).apply {
+            putExtra(com.snapreceipt.io.ui.preview.ImagePreviewActivity.EXTRA_IMAGE_PATH, receiptImagePath)
+            putExtra(com.snapreceipt.io.ui.preview.ImagePreviewActivity.EXTRA_IMAGE_URL, receiptImageUrl)
+        }
+        startActivity(intent)
     }
 
     private fun openInvoiceTypePicker() {

@@ -1,11 +1,22 @@
 package com.snapreceipt.io.ui.me.about
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.snapreceipt.io.R
+import com.snapreceipt.io.domain.usecase.config.FetchPolicyUseCase
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class AboutUsActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var fetchPolicyUseCase: FetchPolicyUseCase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -13,10 +24,36 @@ class AboutUsActivity : AppCompatActivity() {
 
         findViewById<android.view.View>(R.id.btn_back).setOnClickListener { finish() }
         findViewById<android.view.View>(R.id.menu_user_agreement).setOnClickListener {
-            Toast.makeText(this, getString(R.string.user_agreement), Toast.LENGTH_SHORT).show()
+            openPolicyUrl(isUserAgreement = true)
         }
         findViewById<android.view.View>(R.id.menu_privacy_policy).setOnClickListener {
-            Toast.makeText(this, getString(R.string.privacy_policy_label), Toast.LENGTH_SHORT).show()
+            openPolicyUrl(isUserAgreement = false)
         }
+    }
+
+    private fun openPolicyUrl(isUserAgreement: Boolean) {
+        lifecycleScope.launch {
+            fetchPolicyUseCase()
+                .onSuccess { policy ->
+                    val url = if (isUserAgreement) {
+                        policy.userAgreement
+                    } else {
+                        policy.privacyPolicy
+                    }
+                    openUrl(url)
+                }
+                .onFailure {
+                    Toast.makeText(this@AboutUsActivity, getString(R.string.unexpected_error), Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
+
+    private fun openUrl(url: String) {
+        val trimmed = url.trim()
+        if (trimmed.isBlank()) {
+            Toast.makeText(this, getString(R.string.unexpected_error), Toast.LENGTH_SHORT).show()
+            return
+        }
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(trimmed)))
     }
 }

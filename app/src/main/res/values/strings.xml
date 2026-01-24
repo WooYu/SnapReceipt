@@ -36,6 +36,7 @@
     <string name="upload_receipt">上传收据</string>
     <string name="scan_receipt_title">Scan Receipt</string>
     <string name="scan_receipt_subtitle">Use Camera</string>
+    <string name="image_missing">Image not available</string>
     <string name="upload_title">Upload</string>
     <string name="upload_subtitle">From Gallery</string>
     <string name="recently_imported">Recently imported</string>

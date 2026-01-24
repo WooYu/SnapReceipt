@@ -67,6 +67,7 @@ class BackendOCRService(
     private fun toMap(result: ReceiptScanResultDto, imageUrl: String): Map<String, Any?> {
         return mapOf(
             "merchant" to result.merchant,
+            "address" to result.address,
             "receiptDate" to result.receiptDate,
             "receiptTime" to result.receiptTime,
             "totalAmount" to result.totalAmount,

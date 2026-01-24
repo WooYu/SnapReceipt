@@ -114,6 +114,7 @@ class HomeViewModel @Inject constructor(
                                 putString(HomeEventKeys.EXTRA_IMAGE_PATH, imagePath)
                                 putString(HomeEventKeys.EXTRA_IMAGE_URL, scan.receiptUrl.orEmpty())
                                 putString(HomeEventKeys.EXTRA_MERCHANT, scan.merchant.orEmpty())
+                                putString(HomeEventKeys.EXTRA_ADDRESS, scan.address.orEmpty())
                                 putString(HomeEventKeys.EXTRA_AMOUNT, scan.totalAmount?.toString().orEmpty())
                                 putString(HomeEventKeys.EXTRA_DATE, scan.receiptDate.orEmpty())
                                 putString(HomeEventKeys.EXTRA_TIME, scan.receiptTime.orEmpty())

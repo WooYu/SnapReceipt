@@ -2,6 +2,7 @@ package com.snapreceipt.io.domain.model
 
 data class ReceiptScanResultEntity(
     val merchant: String? = null,
+    val address: String? = null,
     val receiptDate: String? = null,
     val receiptTime: String? = null,
     val totalAmount: Double? = null,

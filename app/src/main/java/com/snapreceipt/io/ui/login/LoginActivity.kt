@@ -1,6 +1,7 @@
 package com.snapreceipt.io.ui.login
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
@@ -70,6 +71,10 @@ class LoginActivity : BaseActivity<LoginViewModel>() {
                 }
             }
             LoginEventKeys.NAVIGATE_MAIN -> navigateToMainActivity()
+            LoginEventKeys.OPEN_POLICY -> {
+                val url = event.payload?.getString(LoginEventKeys.EXTRA_URL).orEmpty()
+                openUrl(url)
+            }
         }
     }
 
@@ -88,5 +93,14 @@ class LoginActivity : BaseActivity<LoginViewModel>() {
     private fun navigateToMainActivity() {
         startActivity(Intent(this, MainActivity::class.java))
         finish()
+    }
+
+    private fun openUrl(url: String) {
+        val trimmed = url.trim()
+        if (trimmed.isBlank()) {
+            Toast.makeText(this, getString(R.string.unexpected_error), Toast.LENGTH_SHORT).show()
+            return
+        }
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(trimmed)))
     }
 }

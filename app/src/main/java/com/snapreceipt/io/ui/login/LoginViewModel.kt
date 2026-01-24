@@ -3,9 +3,11 @@ package com.snapreceipt.io.ui.login
 import android.os.Bundle
 import androidx.lifecycle.viewModelScope
 import com.snapreceipt.io.R
+import com.snapreceipt.io.domain.model.PolicyEntity
 import com.snapreceipt.io.domain.usecase.auth.AuthFetchUserProfileUseCase
 import com.snapreceipt.io.domain.usecase.auth.AuthLoginUseCase
 import com.snapreceipt.io.domain.usecase.auth.AuthRequestCodeUseCase
+import com.snapreceipt.io.domain.usecase.config.FetchPolicyUseCase
 import com.snapreceipt.io.domain.usecase.user.InsertUserUseCase
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.presentation.viewmodel.BaseViewModel
@@ -27,6 +29,7 @@ class LoginViewModel @Inject constructor(
     private val loginUseCase: AuthLoginUseCase,
     private val fetchUserProfileUseCase: AuthFetchUserProfileUseCase,
     private val insertUserUseCase: InsertUserUseCase,
+    private val fetchPolicyUseCase: FetchPolicyUseCase,
     private val dispatchers: CoroutineDispatchersProvider
 ) :
     BaseViewModel(dispatchers, R.string.unexpected_error) {
@@ -34,6 +37,7 @@ class LoginViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
     private var codeCountdownJob: Job? = null
+    private var policyCache: PolicyEntity? = null
 
     fun switchToPhone() {
         _uiState.update { it.copy(mode = LoginMode.PHONE) }
@@ -97,6 +101,14 @@ class LoginViewModel @Inject constructor(
         emitEvent(UiEvent.Toast(message = message))
     }
 
+    fun openUserAgreement() {
+        openPolicy(PolicyTarget.USER_AGREEMENT)
+    }
+
+    fun openPrivacyPolicy() {
+        openPolicy(PolicyTarget.PRIVACY_POLICY)
+    }
+
     private fun login(target: String, code: String) {
         if (!_uiState.value.agreementAccepted) {
             emitEvent(UiEvent.Toast(message = "", resId = R.string.agreement_required))
@@ -119,6 +131,38 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    private fun openPolicy(target: PolicyTarget) {
+        viewModelScope.launch(dispatchers.io) {
+            val cached = policyCache
+            val policy = if (cached != null) {
+                cached
+            } else {
+                val result = fetchPolicyUseCase()
+                val fetched = result.getOrNull()
+                if (fetched == null) {
+                    emitEvent(UiEvent.Toast(message = "", resId = R.string.unexpected_error))
+                    return@launch
+                }
+                policyCache = fetched
+                fetched
+            }
+            val url = when (target) {
+                PolicyTarget.USER_AGREEMENT -> policy.userAgreement
+                PolicyTarget.PRIVACY_POLICY -> policy.privacyPolicy
+            }.trim()
+            if (url.isBlank()) {
+                emitEvent(UiEvent.Toast(message = "", resId = R.string.unexpected_error))
+                return@launch
+            }
+            emitEvent(
+                UiEvent.Custom(
+                    LoginEventKeys.OPEN_POLICY,
+                    Bundle().apply { putString(LoginEventKeys.EXTRA_URL, url) }
+                )
+            )
+        }
+    }
+
     private fun startCodeCountdown() {
         codeCountdownJob?.cancel()
         codeCountdownJob = viewModelScope.launch(dispatchers.default) {
@@ -133,5 +177,10 @@ class LoginViewModel @Inject constructor(
     private fun updateError(throwable: Throwable) {
         _uiState.update { it.copy(loading = false, error = throwable.message) }
         handleError(throwable)
+    }
+
+    private enum class PolicyTarget {
+        USER_AGREEMENT,
+        PRIVACY_POLICY
     }
 }

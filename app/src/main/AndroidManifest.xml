@@ -33,6 +33,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.preview.ImagePreviewActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.receipts.ReceiptDetailsActivity"
             android:exported="false" />
 

@@ -6,6 +6,7 @@ object HomeEventKeys {
     const val EXTRA_IMAGE_PATH = "extra_image_path"
     const val EXTRA_IMAGE_URL = "extra_image_url"
     const val EXTRA_MERCHANT = "extra_merchant"
+    const val EXTRA_ADDRESS = "extra_address"
     const val EXTRA_AMOUNT = "extra_amount"
     const val EXTRA_DATE = "extra_date"
     const val EXTRA_TIME = "extra_time"

@@ -205,6 +205,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
                 val imagePath = event.payload?.getString(HomeEventKeys.EXTRA_IMAGE_PATH).orEmpty()
                 val imageUrl = event.payload?.getString(HomeEventKeys.EXTRA_IMAGE_URL).orEmpty()
                 val merchant = event.payload?.getString(HomeEventKeys.EXTRA_MERCHANT).orEmpty()
+                val address = event.payload?.getString(HomeEventKeys.EXTRA_ADDRESS).orEmpty()
                 val amount = event.payload?.getString(HomeEventKeys.EXTRA_AMOUNT).orEmpty()
                 val date = event.payload?.getString(HomeEventKeys.EXTRA_DATE).orEmpty()
                 val time = event.payload?.getString(HomeEventKeys.EXTRA_TIME).orEmpty()
@@ -216,6 +217,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
                     imagePath,
                     imageUrl,
                     merchant,
+                    address,
                     amount,
                     date,
                     time,
@@ -235,6 +237,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         imagePath: String,
         imageUrl: String,
         merchant: String,
+        address: String,
         amount: String,
         date: String,
         time: String,
@@ -247,6 +250,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         intent.putExtra(InvoiceDetailsActivity.EXTRA_IMAGE_PATH, imagePath)
         intent.putExtra(InvoiceDetailsActivity.EXTRA_IMAGE_URL, imageUrl)
         intent.putExtra(InvoiceDetailsActivity.EXTRA_MERCHANT, merchant)
+        intent.putExtra(InvoiceDetailsActivity.EXTRA_ADDRESS, address)
         intent.putExtra(InvoiceDetailsActivity.EXTRA_AMOUNT, amount)
         intent.putExtra(InvoiceDetailsActivity.EXTRA_DATE, date)
         intent.putExtra(InvoiceDetailsActivity.EXTRA_TIME, time)

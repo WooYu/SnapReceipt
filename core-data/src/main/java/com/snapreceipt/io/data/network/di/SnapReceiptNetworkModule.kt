@@ -14,10 +14,12 @@ import com.skybound.space.core.network.interceptor.ExportTimeoutInterceptor
 import com.skybound.space.core.network.interceptor.LoggingInterceptor
 import com.snapreceipt.io.data.network.auth.TokenRefreshAuthenticator
 import com.snapreceipt.io.data.network.datasource.AuthRemoteDataSource
+import com.snapreceipt.io.data.network.datasource.ConfigRemoteDataSource
 import com.snapreceipt.io.data.network.datasource.FileRemoteDataSource
 import com.snapreceipt.io.data.network.datasource.ReceiptRemoteDataSource
 import com.snapreceipt.io.data.network.datasource.UploadRemoteDataSource
 import com.snapreceipt.io.data.network.service.AuthApi
+import com.snapreceipt.io.data.network.service.ConfigApi
 import com.snapreceipt.io.data.network.service.FileApi
 import com.snapreceipt.io.data.network.service.ReceiptApi
 import com.google.gson.Gson
@@ -138,10 +140,21 @@ object SnapReceiptNetworkModule {
 
     @Provides
     @Singleton
+    fun provideConfigApi(retrofit: Retrofit): ConfigApi = retrofit.create(ConfigApi::class.java)
+
+    @Provides
+    @Singleton
     fun provideAuthRemoteDataSource(
         api: AuthApi,
         dispatchers: CoroutineDispatchersProvider
     ): AuthRemoteDataSource = AuthRemoteDataSource(api, dispatchers)
+
+    @Provides
+    @Singleton
+    fun provideConfigRemoteDataSource(
+        api: ConfigApi,
+        dispatchers: CoroutineDispatchersProvider
+    ): ConfigRemoteDataSource = ConfigRemoteDataSource(api, dispatchers)
 
     @Provides
     @Singleton
