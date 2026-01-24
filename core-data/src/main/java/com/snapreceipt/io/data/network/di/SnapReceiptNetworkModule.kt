@@ -10,6 +10,7 @@ import com.skybound.space.core.network.auth.EncryptedAuthTokenStore
 import com.skybound.space.core.network.auth.SessionManager
 import com.skybound.space.core.network.interceptor.AuthInterceptor
 import com.skybound.space.core.network.interceptor.AuthFailureInterceptor
+import com.skybound.space.core.network.interceptor.ExportTimeoutInterceptor
 import com.skybound.space.core.network.interceptor.LoggingInterceptor
 import com.snapreceipt.io.data.network.auth.TokenRefreshAuthenticator
 import com.snapreceipt.io.data.network.datasource.AuthRemoteDataSource
@@ -77,13 +78,19 @@ object SnapReceiptNetworkModule {
         AuthFailureInterceptor(sessionManager)
 
     @Provides
+    @IntoSet
+    fun provideExportTimeoutInterceptor(config: NetworkConfig): Interceptor =
+        ExportTimeoutInterceptor(timeoutSec = config.exportTimeoutSec)
+
+    @Provides
     @Singleton
     fun provideNetworkConfig(): NetworkConfig = NetworkConfig(
         baseUrl = AppConfig.baseUrl,
         enableLogging = AppConfig.isDebug,
         defaultHeaders = mapOf(
             "Accept" to "application/json"
-        )
+        ),
+        exportTimeoutSec = 60
     )
 
     @Provides

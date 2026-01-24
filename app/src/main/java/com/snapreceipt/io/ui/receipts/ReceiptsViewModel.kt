@@ -1,6 +1,8 @@
 package com.snapreceipt.io.ui.receipts
 
+import android.os.Bundle
 import androidx.lifecycle.viewModelScope
+import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ReceiptCategory
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.domain.model.ReceiptListQueryEntity
@@ -26,7 +28,7 @@ class ReceiptsViewModel @Inject constructor(
     private val updateReceiptRemoteUseCase: UpdateReceiptRemoteUseCase,
     private val exportReceiptsRemoteUseCase: ExportReceiptsRemoteUseCase,
     private val dispatchers: CoroutineDispatchersProvider
-) : BaseViewModel(dispatchers) {
+) : BaseViewModel(dispatchers, R.string.unexpected_error) {
 
     private val _uiState = MutableStateFlow(ReceiptsUiState())
     val uiState: StateFlow<ReceiptsUiState> = _uiState.asStateFlow()
@@ -55,8 +57,8 @@ class ReceiptsViewModel @Inject constructor(
         fetchReceipts(ReceiptListQueryEntity(categoryId = categoryId))
     }
 
-    fun filterByTitleType(type: String) {
-        titleTypeFilter = type
+    fun filterByTitleType(type: String?) {
+        titleTypeFilter = type?.trim().takeIf { !it.isNullOrBlank() }
         val filtered = applyTitleFilter(lastFetchedReceipts)
         _uiState.update { current ->
             val validIds = filtered.map { it.id }.toSet()
@@ -97,7 +99,25 @@ class ReceiptsViewModel @Inject constructor(
             val result = exportReceiptsRemoteUseCase(ids)
             result.onSuccess {
                 _uiState.update { it.copy(selectedIds = emptySet()) }
-                emitEvent(com.skybound.space.base.presentation.UiEvent.Custom(ReceiptsEventKeys.SHOW_EXPORT_SUCCESS))
+                val exportUrl = it.trim()
+                if (exportUrl.isBlank()) {
+                    emitEvent(
+                        com.skybound.space.base.presentation.UiEvent.Toast(
+                            message = "",
+                            resId = R.string.export_file_unavailable
+                        )
+                    )
+                } else {
+                    val payload = Bundle().apply {
+                        putString(ReceiptsEventKeys.EXPORT_URL, exportUrl)
+                    }
+                    emitEvent(
+                        com.skybound.space.base.presentation.UiEvent.Custom(
+                            ReceiptsEventKeys.SHOW_EXPORT_SUCCESS,
+                            payload
+                        )
+                    )
+                }
             }.onFailure { updateError(it) }
             _uiState.update { it.copy(exporting = false) }
         }
@@ -155,13 +175,13 @@ class ReceiptsViewModel @Inject constructor(
     }
 
     private fun updateError(throwable: Throwable) {
-        _uiState.update { it.copy(loading = false, error = throwable.message ?: "Unexpected error") }
+        _uiState.update { it.copy(loading = false, error = throwable.message) }
         handleError(throwable)
     }
 
     private fun applyTitleFilter(receipts: List<ReceiptEntity> = _uiState.value.receipts): List<ReceiptEntity> {
         val label = titleTypeFilter?.trim().orEmpty()
-        if (label.isBlank() || label.equals("All", ignoreCase = true)) return receipts
+        if (label.isBlank()) return receipts
         return receipts.filter { it.invoiceType.equals(label, ignoreCase = true) }
     }
 

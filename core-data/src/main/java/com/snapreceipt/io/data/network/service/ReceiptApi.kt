@@ -37,7 +37,7 @@ interface ReceiptApi {
     suspend fun delete(@Body request: ReceiptDeleteRequestDto): BaseEmptyResponse
 
     @POST("api/receipt/export")
-    suspend fun export(@Body request: ReceiptExportRequestDto)
+    suspend fun export(@Body request: ReceiptExportRequestDto): BaseResponse<String>
 
     @POST("api/record/list")
     suspend fun exportRecords(@Body request: ExportRecordListRequestDto): BasePagedResponse<ExportRecordItemDto>

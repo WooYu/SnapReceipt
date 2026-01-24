@@ -3,6 +3,7 @@ package com.snapreceipt.io.ui.receipts
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ItemReceiptSelectBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import java.text.SimpleDateFormat
@@ -46,16 +47,22 @@ class ReceiptsSelectableAdapter(
 
         fun bind(receipt: ReceiptEntity, isSelected: Boolean) {
             binding.apply {
+                val context = root.context
                 selectIcon.isSelected = isSelected
                 selectIcon.setOnClickListener { onToggle(receipt.id) }
 
                 merchantName.text = receipt.merchantName
-                amount.text = String.format(Locale.getDefault(), "$%.2f", receipt.amount)
+                amount.text = context.getString(R.string.amount_currency_format, receipt.amount)
 
                 val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
-                val category = receipt.category.ifBlank { "Other" }
-                val titleType = receipt.invoiceType.ifBlank { "Individual" }
-                val metaText = "$category • $titleType • ${dateFormat.format(java.util.Date(receipt.date))}"
+                val category = receipt.category.ifBlank { context.getString(R.string.type_other) }
+                val titleType = receipt.invoiceType.ifBlank { context.getString(R.string.type_individual) }
+                val metaText = context.getString(
+                    R.string.receipt_meta_format,
+                    category,
+                    titleType,
+                    dateFormat.format(java.util.Date(receipt.date))
+                )
                 meta.text = metaText
 
                 receiptCard.setOnClickListener { onEditClick(receipt) }

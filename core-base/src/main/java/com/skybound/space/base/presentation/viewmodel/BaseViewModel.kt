@@ -26,7 +26,8 @@ import kotlinx.coroutines.CancellationException
  * - 为页面提供标准的状态流处理工具
  */
 abstract class BaseViewModel(
-    private val dispatchers: CoroutineDispatchersProvider = CoroutineDispatchersProvider.Default
+    private val dispatchers: CoroutineDispatchersProvider = CoroutineDispatchersProvider.Default,
+    private val fallbackErrorResId: Int? = null
 ): ViewModel() {
 
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
@@ -53,7 +54,7 @@ abstract class BaseViewModel(
         loadingState: UiState<T> = UiState.Loading(),
         onError: (Throwable) -> UiState<T> = { throwable ->
             UiState.Error(
-                message = throwable.message ?: "Unexpected error",
+                message = throwable.message.orEmpty(),
                 cause = throwable
             )
         },
@@ -100,7 +101,8 @@ abstract class BaseViewModel(
         }
         emitEvent(
             UiEvent.Toast(
-                message = throwable.message ?: "Unexpected error"
+                message = throwable.message.orEmpty(),
+                resId = fallbackErrorResId
             )
         )
     }

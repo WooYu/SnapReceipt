@@ -3,11 +3,14 @@ package com.snapreceipt.io.ui.invoice
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -64,6 +67,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private lateinit var inputInvoiceType: EditText
     private lateinit var inputTitleType: EditText
     private lateinit var inputNote: EditText
+    private lateinit var cardHelper: TextView
     private lateinit var saveButton: Button
     private lateinit var deleteButton: ImageView
     private var receiptImageUrl: String = ""
@@ -87,6 +91,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         inputInvoiceType = findViewById(R.id.input_invoice_type)
         inputTitleType = findViewById(R.id.input_title_type)
         inputNote = findViewById(R.id.input_note)
+        cardHelper = findViewById(R.id.card_helper)
         saveButton = findViewById(R.id.save_btn)
         deleteButton = findViewById(R.id.btn_delete)
 
@@ -118,6 +123,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         deleteButton.setOnClickListener { deleteReceiptIfNeeded() }
 
         setupPickers()
+        setupCardValidation()
         saveButton.setOnClickListener { saveReceipt(imagePath) }
         observeState()
     }
@@ -147,15 +153,21 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
 
     private fun saveReceipt(imagePath: String) {
         val amountValue = inputAmount.text.toString().trim().toDoubleOrNull() ?: 0.0
-        val merchantValue = inputMerchant.text.toString().trim().ifEmpty { "Receipt" }
+        val merchantValue = inputMerchant.text.toString().trim().ifEmpty { getString(R.string.receipt_default_name) }
         val invoiceTypeInput = inputInvoiceType.text.toString().trim()
         val invoiceTypeValue = if (invoiceTypeInput.equals(getString(R.string.type_all), true) || invoiceTypeInput.isBlank()) {
-            ReceiptCategory.all().firstOrNull()?.label ?: "Food"
+            ReceiptCategory.all().firstOrNull()?.label ?: getString(R.string.type_food)
         } else {
             invoiceTypeInput
         }
-        val titleTypeValue = inputTitleType.text.toString().trim().ifEmpty { "Individual" }
+        val titleTypeValue = inputTitleType.text.toString().trim().ifEmpty { getString(R.string.type_individual) }
         val cardValue = inputCard.text.toString().trim()
+        val cardError = cardValidationErrorResId(cardValue)
+        if (cardError != null) {
+            updateCardHelper(cardValue)
+            Toast.makeText(this, getString(cardError), Toast.LENGTH_SHORT).show()
+            return
+        }
         val noteValue = inputNote.text.toString().trim()
         val categoryId = ReceiptCategory.idForLabel(invoiceTypeValue).takeIf { it > 0 } ?: 1
         val receiptUrl = if (receiptImageUrl.isNotEmpty()) receiptImageUrl else imagePath
@@ -204,7 +216,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
 
     private fun setupPickers() {
         if (inputInvoiceType.text.isNullOrBlank()) {
-            inputInvoiceType.setText(ReceiptCategory.all().firstOrNull()?.label ?: "")
+            inputInvoiceType.setText(ReceiptCategory.all().firstOrNull()?.label ?: getString(R.string.type_food))
         }
         if (inputTitleType.text.isNullOrBlank()) {
             inputTitleType.setText(getString(R.string.type_individual))
@@ -224,6 +236,32 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             isClickable = true
             setOnClickListener { openDateTimePicker() }
         }
+    }
+
+    private fun setupCardValidation() {
+        inputCard.addTextChangedListener {
+            updateCardHelper(it?.toString().orEmpty())
+        }
+        updateCardHelper(inputCard.text?.toString().orEmpty())
+    }
+
+    private fun updateCardHelper(raw: String) {
+        val errorRes = cardValidationErrorResId(raw)
+        if (errorRes == null) {
+            cardHelper.visibility = View.GONE
+            return
+        }
+        cardHelper.text = getString(errorRes)
+        cardHelper.visibility = View.VISIBLE
+    }
+
+    private fun cardValidationErrorResId(raw: String): Int? {
+        val trimmed = raw.trim()
+        if (trimmed.isBlank()) return null
+        val allowed = trimmed.all { it.isDigit() || it == ' ' || it == '-' }
+        if (!allowed) return R.string.card_number_invalid_chars
+        val digits = trimmed.filter { it.isDigit() }
+        return if (digits.length in 12..19) null else R.string.card_number_length
     }
 
     private fun openInvoiceTypePicker() {

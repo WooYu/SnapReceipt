@@ -128,28 +128,6 @@ suspend fun <T> safeResponseCall(
     }
 }
 
-/**
- * 处理不带响应体/信封的请求，只要 HTTP 成功就认为成功。
- */
-suspend fun safeApiCallNoEnvelope(
-    dispatchers: CoroutineDispatchersProvider,
-    apiCall: suspend () -> Unit
-): NetworkResult<Unit> = withContext(dispatchers.io) {
-    return@withContext try {
-        apiCall()
-        NetworkResult.Success(Unit)
-    } catch (http: HttpException) {
-        logNetworkFailure("HTTP exception code=${http.code()} message=${http.message()}", http)
-        NetworkResult.Failure(NetworkError.Http(http.code(), http.message(), http))
-    } catch (io: IOException) {
-        logNetworkFailure("Network IO error: ${io.message ?: "IO error"}", io)
-        NetworkResult.Failure(NetworkError.Network(io.message ?: "IO error", io))
-    } catch (throwable: Throwable) {
-        logNetworkFailure("Unexpected error: ${throwable.message ?: "Unexpected"}", throwable)
-        NetworkResult.Failure(NetworkError.Unexpected(throwable.message ?: "Unexpected", throwable))
-    }
-}
-
 private const val NETWORK_LOG_TAG = "Network"
 
 private fun logNetworkFailure(message: String, throwable: Throwable?) {

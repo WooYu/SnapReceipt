@@ -15,7 +15,7 @@ interface ReceiptRemoteRepository {
     suspend fun update(request: ReceiptUpdateEntity)
     suspend fun delete(receiptId: Long)
     suspend fun list(query: ReceiptListQueryEntity): List<ReceiptEntity>
-    suspend fun export(receiptIds: List<Long>)
+    suspend fun export(receiptIds: List<Long>): String
     suspend fun listExportRecords(query: ExportRecordListQueryEntity): List<ExportRecordEntity>
     suspend fun listCategories(): List<ReceiptCategory.Item>
     suspend fun addCategory(name: String)

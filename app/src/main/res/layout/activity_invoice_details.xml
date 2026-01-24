@@ -261,9 +261,21 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
                         android:background="@drawable/bg_field"
+                        android:digits="0123456789 -"
+                        android:hint="@string/bank_card_hint"
+                        android:inputType="phone"
                         android:padding="12dp"
                         android:textColor="@color/text_primary"
                         android:textSize="15sp" />
+
+                    <TextView
+                        android:id="@+id/card_helper"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textColor="@color/colorError"
+                        android:textSize="12sp"
+                        android:visibility="gone" />
 
                     <TextView
                         android:layout_width="wrap_content"

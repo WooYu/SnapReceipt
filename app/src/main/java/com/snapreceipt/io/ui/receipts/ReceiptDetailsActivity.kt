@@ -80,7 +80,7 @@ class ReceiptDetailsActivity : AppCompatActivity() {
             merchantName = merchant,
             amount = amount,
             category = category,
-            invoiceType = invoiceType.ifBlank { "Individual" },
+            invoiceType = invoiceType.ifBlank { getString(R.string.type_individual) },
             date = date,
             imagePath = imagePath,
             description = note
@@ -91,16 +91,16 @@ class ReceiptDetailsActivity : AppCompatActivity() {
 
     private fun bindReceipt(receipt: ReceiptEntity) {
         merchantValue.text = receipt.merchantName
-        invoiceTypeValue.text = receipt.category.ifBlank { "Other" }
-        titleTypeValue.text = receipt.invoiceType.ifBlank { "Individual" }
-        noteValue.text = receipt.description.ifBlank { "-" }
-        amountValue.text = String.format(Locale.getDefault(), "%.2f", receipt.amount)
+        invoiceTypeValue.text = receipt.category.ifBlank { getString(R.string.type_other) }
+        titleTypeValue.text = receipt.invoiceType.ifBlank { getString(R.string.type_individual) }
+        noteValue.text = receipt.description.ifBlank { getString(R.string.placeholder_dash) }
+        amountValue.text = getString(R.string.amount_number_format, receipt.amount)
         dateValue.text = formatDisplayDate(receipt.date)
 
         val address = intent.getStringExtra(EXTRA_ADDRESS).orEmpty()
         val card = intent.getStringExtra(EXTRA_CARD).orEmpty()
-        addressValue.text = address.ifBlank { "-" }
-        cardValue.text = card.ifBlank { "-" }
+        addressValue.text = address.ifBlank { getString(R.string.placeholder_dash) }
+        cardValue.text = card.ifBlank { getString(R.string.placeholder_dash) }
 
         val imagePath = receipt.imagePath
         if (imagePath.isNotBlank() && File(imagePath).exists()) {

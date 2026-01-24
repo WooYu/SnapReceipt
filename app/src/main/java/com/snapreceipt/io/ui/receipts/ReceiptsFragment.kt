@@ -1,11 +1,15 @@
 package com.snapreceipt.io.ui.receipts
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -17,7 +21,7 @@ import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceTypeBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
 import com.snapreceipt.io.ui.receipts.bottomsheet.DateRangeBottomSheet
 import com.snapreceipt.io.ui.receipts.dialogs.ExportSuccessDialog
-import com.snapreceipt.io.ui.me.export.ExportRecordsActivity
+import com.skybound.space.core.config.AppConfig
 import com.skybound.space.base.presentation.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -101,7 +105,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         val selectedTotal = state.receipts
             .filter { state.selectedIds.contains(it.id) }
             .sumOf { it.amount }
-        totalAmount.text = String.format(java.util.Locale.getDefault(), "$%.2f", selectedTotal)
+        totalAmount.text = getString(R.string.amount_currency_format, selectedTotal)
 
         val allSelected = state.receipts.isNotEmpty() && state.selectedIds.size == state.receipts.size
         selectAllIcon.isSelected = allSelected
@@ -145,9 +149,11 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         filterTitleBtn.setOnClickListener {
             val initial = filterTitleLabel ?: filterTitleBtn.text.toString()
             TitleTypeBottomSheet(initial) { selected ->
+                val allLabel = getString(R.string.type_all)
+                val normalized = if (selected.equals(allLabel, ignoreCase = true)) "" else selected
                 filterTitleLabel = selected
                 filterTitleBtn.text = selected
-                viewModel.filterByTitleType(selected)
+                viewModel.filterByTitleType(normalized)
             }.show(parentFragmentManager, "title_filter_picker")
         }
         exportActionBtn.setOnClickListener {
@@ -182,7 +188,11 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
 
     private fun formatDateRange(start: Long, end: Long): String {
         val format = java.text.SimpleDateFormat("yyyy/MM/dd", java.util.Locale.getDefault())
-        return "${format.format(java.util.Date(start))} - ${format.format(java.util.Date(end))}"
+        return getString(
+            R.string.date_range_format,
+            format.format(java.util.Date(start)),
+            format.format(java.util.Date(end))
+        )
     }
 
     private fun formatDateTime(timestamp: Long): Pair<String, String> {
@@ -193,9 +203,31 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
 
     override fun onCustomEvent(event: com.skybound.space.base.presentation.UiEvent.Custom) {
         if (event.type == ReceiptsEventKeys.SHOW_EXPORT_SUCCESS) {
+            val exportUrl = event.payload?.getString(ReceiptsEventKeys.EXPORT_URL).orEmpty()
             ExportSuccessDialog {
-                startActivity(android.content.Intent(requireContext(), ExportRecordsActivity::class.java))
+                openExportUrl(exportUrl)
             }.show(parentFragmentManager, "export_success")
+        }
+    }
+
+    private fun openExportUrl(raw: String) {
+        val trimmed = raw.trim()
+        if (trimmed.isBlank()) {
+            Toast.makeText(requireContext(), getString(R.string.export_file_unavailable), Toast.LENGTH_SHORT).show()
+            return
+        }
+        val url = if (trimmed.startsWith("http", ignoreCase = true)) {
+            trimmed
+        } else {
+            val base = AppConfig.baseUrl.trimEnd('/')
+            val path = if (trimmed.startsWith("/")) trimmed else "/$trimmed"
+            "$base$path"
+        }
+        Toast.makeText(requireContext(), getString(R.string.opening_export_file), Toast.LENGTH_SHORT).show()
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        } catch (ex: ActivityNotFoundException) {
+            Toast.makeText(requireContext(), getString(R.string.no_app_to_open), Toast.LENGTH_SHORT).show()
         }
     }
 }

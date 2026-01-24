@@ -125,8 +125,8 @@ class EmailLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_email_
         val text = getString(R.string.login_agreement_html)
         val spannable = SpannableString(text)
         val highlightColor = requireContext().getColor(R.color.accent_blue)
-        highlightPhrase(spannable, text, "User Agreement", highlightColor)
-        highlightPhrase(spannable, text, "Privacy Policy", highlightColor)
+        highlightPhrase(spannable, text, getString(R.string.user_agreement), highlightColor)
+        highlightPhrase(spannable, text, getString(R.string.privacy_policy_label), highlightColor)
         return spannable
     }
 

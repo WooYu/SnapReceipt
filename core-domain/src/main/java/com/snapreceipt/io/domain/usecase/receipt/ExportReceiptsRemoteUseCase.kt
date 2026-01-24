@@ -6,6 +6,6 @@ import javax.inject.Inject
 class ExportReceiptsRemoteUseCase @Inject constructor(
     private val repository: ReceiptRemoteRepository
 ) {
-    suspend operator fun invoke(receiptIds: List<Long>): Result<Unit> =
+    suspend operator fun invoke(receiptIds: List<Long>): Result<String> =
         runCatching { repository.export(receiptIds) }
 }

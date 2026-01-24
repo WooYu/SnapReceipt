@@ -10,5 +10,6 @@ data class NetworkConfig(
     val writeTimeoutSec: Long = 20,
     val enableLogging: Boolean = false,
     val retryCount: Int = 0,
-    val defaultHeaders: Map<String, String> = emptyMap()
+    val defaultHeaders: Map<String, String> = emptyMap(),
+    val exportTimeoutSec: Long = 60
 )

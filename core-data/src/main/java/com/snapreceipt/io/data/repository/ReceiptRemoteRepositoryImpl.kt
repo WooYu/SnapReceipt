@@ -56,9 +56,9 @@ class ReceiptRemoteRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun export(receiptIds: List<Long>) {
-        when (val result = remoteDataSource.export(receiptIds)) {
-            is NetworkResult.Success -> Unit
+    override suspend fun export(receiptIds: List<Long>): String {
+        return when (val result = remoteDataSource.export(receiptIds)) {
+            is NetworkResult.Success -> result.data
             is NetworkResult.Failure -> throw result.toApiException()
         }
     }

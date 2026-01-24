@@ -44,8 +44,8 @@ class ReceiptRemoteDataSource(
         return requestUnit { api.delete(ReceiptDeleteRequestDto(receiptId)) }
     }
 
-    suspend fun export(receiptIds: List<Long>): NetworkResult<Unit> {
-        return requestNoEnvelope { api.export(ReceiptExportRequestDto(receiptIds)) }
+    suspend fun export(receiptIds: List<Long>): NetworkResult<String> {
+        return request { api.export(ReceiptExportRequestDto(receiptIds)) }
     }
 
     suspend fun exportRecords(request: ExportRecordListRequestDto): NetworkResult<BasePagedResponse<ExportRecordItemDto>> {

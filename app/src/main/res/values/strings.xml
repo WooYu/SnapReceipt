@@ -67,6 +67,9 @@
     <string name="merchant">Merchant</string>
     <string name="address">Address</string>
     <string name="bank_card">Bank Card</string>
+    <string name="bank_card_hint">Card number</string>
+    <string name="card_number_invalid_chars">Only digits, spaces, or - are allowed</string>
+    <string name="card_number_length">Card number should be 12-19 digits</string>
     <string name="title_type">Title Type</string>
     <string name="note">Note</string>
     <string name="save_upload">Save Upload</string>
@@ -88,6 +91,11 @@
     <string name="no_content">No content</string>
     <string name="selected_count">Selected: %d</string>
     <string name="total_label">Total</string>
+    <string name="amount_currency_format">$%1$.2f</string>
+    <string name="amount_number_format">%1$.2f</string>
+    <string name="receipt_meta_format">%1$s • %2$s • %3$s</string>
+    <string name="home_receipt_meta_format">%1$s | %2$s | %3$s</string>
+    <string name="date_range_format">%1$s - %2$s</string>
     <string name="select_invoice_type">Select Invoice Type</string>
     <string name="select_title_type">Select Title Type</string>
     <string name="select_date_time">Select date and time</string>
@@ -115,6 +123,7 @@
     <string name="delete_category_failed">Failed to delete category</string>
     <string name="delete_category_confirm">Delete "%s"?</string>
     <string name="delete_receipt_confirm">Delete this receipt?</string>
+    <string name="receipt_default_name">Receipt</string>
 
     <!-- Me Fragment -->
     <string name="profile">个人资料</string>
@@ -152,6 +161,7 @@
     <string name="opening_export_file">Opening export file…</string>
     <string name="export_file_unavailable">Export file not ready</string>
     <string name="no_app_to_open">No app available to open this file</string>
+    <string name="placeholder_dash">-</string>
 
     <!-- Settings -->
     <string name="notification">通知</string>
@@ -176,6 +186,7 @@
     <!-- Messages -->
     <string name="success">操作成功</string>
     <string name="error">出错了</string>
+    <string name="unexpected_error">Unexpected error</string>
     <string name="loading">加载中...</string>
     <string name="retry">重试</string>
     <string name="confirm">确认</string>

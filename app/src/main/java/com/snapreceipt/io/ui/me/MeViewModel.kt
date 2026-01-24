@@ -1,5 +1,6 @@
 package com.snapreceipt.io.ui.me
 
+import com.snapreceipt.io.R
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
@@ -15,7 +16,7 @@ import javax.inject.Inject
 class MeViewModel @Inject constructor(
     dispatchers: CoroutineDispatchersProvider,
     private val sessionManager: SessionManager
-) : BaseViewModel(dispatchers) {
+) : BaseViewModel(dispatchers, R.string.unexpected_error) {
 
     private val _uiState = MutableStateFlow(MeUiState())
     val uiState: StateFlow<MeUiState> = _uiState.asStateFlow()

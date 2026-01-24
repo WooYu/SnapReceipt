@@ -1,6 +1,7 @@
 package com.snapreceipt.io.ui.me.export
 
 import androidx.lifecycle.viewModelScope
+import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ExportRecordListQueryEntity
 import com.snapreceipt.io.domain.usecase.receipt.FetchExportRecordsUseCase
 import com.skybound.space.base.presentation.viewmodel.BaseViewModel
@@ -17,7 +18,7 @@ import javax.inject.Inject
 class ExportRecordsViewModel @Inject constructor(
     private val fetchExportRecordsUseCase: FetchExportRecordsUseCase,
     private val dispatchers: CoroutineDispatchersProvider
-) : BaseViewModel(dispatchers) {
+) : BaseViewModel(dispatchers, R.string.unexpected_error) {
 
     private val _uiState = MutableStateFlow(ExportRecordsUiState())
     val uiState: StateFlow<ExportRecordsUiState> = _uiState.asStateFlow()
@@ -45,7 +46,7 @@ class ExportRecordsViewModel @Inject constructor(
     }
 
     private fun updateError(throwable: Throwable) {
-        _uiState.update { it.copy(loading = false, error = throwable.message ?: "Unexpected error") }
+        _uiState.update { it.copy(loading = false, error = throwable.message) }
         handleError(throwable)
     }
 }

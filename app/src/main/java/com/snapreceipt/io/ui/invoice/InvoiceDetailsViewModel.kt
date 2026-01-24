@@ -1,6 +1,7 @@
 package com.snapreceipt.io.ui.invoice
 
 import androidx.lifecycle.viewModelScope
+import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ReceiptSaveEntity
 import com.snapreceipt.io.domain.model.ReceiptUpdateEntity
 import com.snapreceipt.io.domain.usecase.receipt.DeleteReceiptRemoteUseCase
@@ -23,7 +24,7 @@ class InvoiceDetailsViewModel @Inject constructor(
     private val updateReceiptRemoteUseCase: UpdateReceiptRemoteUseCase,
     private val deleteReceiptRemoteUseCase: DeleteReceiptRemoteUseCase,
     private val dispatchers: CoroutineDispatchersProvider
-) : BaseViewModel(dispatchers) {
+) : BaseViewModel(dispatchers, R.string.unexpected_error) {
 
     private val _uiState = MutableStateFlow(InvoiceDetailsUiState())
     val uiState: StateFlow<InvoiceDetailsUiState> = _uiState.asStateFlow()
@@ -68,7 +69,7 @@ class InvoiceDetailsViewModel @Inject constructor(
     }
 
     private fun updateError(throwable: Throwable) {
-        _uiState.update { it.copy(loading = false, error = throwable.message ?: "Unexpected error") }
+        _uiState.update { it.copy(loading = false, error = throwable.message) }
         handleError(throwable)
     }
 }

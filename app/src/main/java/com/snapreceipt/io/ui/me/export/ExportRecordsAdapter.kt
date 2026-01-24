@@ -3,6 +3,7 @@ package com.snapreceipt.io.ui.me.export
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ItemExportRecordBinding
 import com.snapreceipt.io.domain.model.ExportRecordEntity
 import java.text.SimpleDateFormat
@@ -35,20 +36,27 @@ class ExportRecordsAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(record: ExportRecordEntity, onRecordClick: (ExportRecordEntity) -> Unit) {
+            val context = binding.root.context
             binding.dateRange.text = buildDateRange(record.beginDate, record.endDate)
             binding.receiptCount.text = record.receiptCount.toString()
-            binding.titleType.text = record.exportType.ifBlank { "-" }
-            binding.amount.text = String.format(Locale.getDefault(), "$%.2f", record.totalAmount)
+            binding.titleType.text = record.exportType.ifBlank { context.getString(R.string.placeholder_dash) }
+            binding.amount.text = context.getString(R.string.amount_currency_format, record.totalAmount)
             binding.root.setOnClickListener { onRecordClick(record) }
         }
 
         private fun buildDateRange(begin: String, end: String): String {
+            val context = binding.root.context
+            val placeholder = context.getString(R.string.placeholder_dash)
             val start = formatDate(begin)
             val finish = formatDate(end)
             return if (start.isBlank() && finish.isBlank()) {
-                "-"
+                placeholder
             } else {
-                "${start.ifBlank { "-" }} - ${finish.ifBlank { "-" }}"
+                context.getString(
+                    R.string.date_range_format,
+                    start.ifBlank { placeholder },
+                    finish.ifBlank { placeholder }
+                )
             }
         }
 

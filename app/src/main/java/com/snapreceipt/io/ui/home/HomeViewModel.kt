@@ -29,7 +29,7 @@ class HomeViewModel @Inject constructor(
     private val deleteReceiptRemoteUseCase: DeleteReceiptRemoteUseCase,
     private val uploadAndScanReceiptUseCase: UploadAndScanReceiptUseCase,
     private val dispatchers: CoroutineDispatchersProvider
-) : BaseViewModel(dispatchers) {
+) : BaseViewModel(dispatchers, R.string.unexpected_error) {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
@@ -135,7 +135,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun updateError(throwable: Throwable) {
-        _uiState.update { it.copy(loading = false, error = throwable.message ?: "Unexpected error") }
+        _uiState.update { it.copy(loading = false, error = throwable.message) }
         handleError(throwable)
     }
 
