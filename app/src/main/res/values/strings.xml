@@ -158,6 +158,7 @@
     <string name="export_success_message">You can view the export records in your personal center</string>
     <string name="view_export_records">View Export Records</string>
     <string name="exporting_receipts">Exporting receipts…</string>
+    <string name="no_more_records">No more records</string>
     <string name="opening_export_file">Opening export file…</string>
     <string name="export_file_unavailable">Export file not ready</string>
     <string name="no_app_to_open">No app available to open this file</string>

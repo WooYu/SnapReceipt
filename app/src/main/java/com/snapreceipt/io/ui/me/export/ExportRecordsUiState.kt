@@ -9,5 +9,6 @@ data class ExportRecordsUiState(
     val loadingMore: Boolean = false,
     val error: String? = null,
     val empty: Boolean = true,
-    val hasLoaded: Boolean = false
+    val hasLoaded: Boolean = false,
+    val hasMore: Boolean = true
 )

@@ -154,7 +154,7 @@ class ReceiptsViewModel @Inject constructor(
     private fun fetchReceipts(query: ReceiptListQueryEntity = ReceiptListQueryEntity()) {
         _uiState.update { it.copy(loading = true, error = null) }
         viewModelScope.launch(dispatchers.io) {
-            fetchReceiptsUseCase(query)
+            fetchReceiptsUseCase(applyDefaultDateFilter(query))
                 .onSuccess { receipts ->
                     lastFetchedReceipts = receipts
                     val filtered = applyTitleFilter(lastFetchedReceipts)
@@ -173,6 +173,15 @@ class ReceiptsViewModel @Inject constructor(
                 }
                 .onFailure { updateError(it) }
         }
+    }
+
+    private fun applyDefaultDateFilter(query: ReceiptListQueryEntity): ReceiptListQueryEntity {
+        if (!query.receiptDateStart.isNullOrBlank() || !query.receiptDateEnd.isNullOrBlank()) {
+            return query
+        }
+        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+        val today = dateFormat.format(java.util.Date())
+        return query.copy(receiptDateStart = today)
     }
 
     private fun updateError(throwable: Throwable) {

@@ -72,7 +72,8 @@ class ExportRecordsViewModel @Inject constructor(
                             loadingMore = false,
                             error = null,
                             empty = merged.isEmpty(),
-                            hasLoaded = true
+                            hasLoaded = true,
+                            hasMore = hasMore
                         )
                     }
                 }
@@ -87,7 +88,8 @@ class ExportRecordsViewModel @Inject constructor(
                 refreshing = false,
                 loadingMore = false,
                 error = throwable.message,
-                hasLoaded = true
+                hasLoaded = true,
+                hasMore = hasMore
             )
         }
         handleError(throwable)

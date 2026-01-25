@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ExportRecordEntity
 import com.snapreceipt.io.ui.common.shouldShowEmpty
+import com.snapreceipt.io.ui.common.shouldShowNoMore
 import com.skybound.space.core.config.AppConfig
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -31,6 +32,7 @@ class ExportRecordsActivity : AppCompatActivity() {
     private lateinit var emptyState: View
     private lateinit var loadingIndicator: View
     private lateinit var loadMoreIndicator: View
+    private lateinit var noMoreHint: View
     private lateinit var adapter: ExportRecordsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,6 +44,7 @@ class ExportRecordsActivity : AppCompatActivity() {
         emptyState = findViewById(R.id.empty_state)
         loadingIndicator = findViewById(R.id.loading_indicator)
         loadMoreIndicator = findViewById(R.id.load_more_indicator)
+        noMoreHint = findViewById(R.id.no_more_hint)
 
         adapter = ExportRecordsAdapter { record -> openExportFile(record) }
         val layoutManager = LinearLayoutManager(this)
@@ -76,6 +79,9 @@ class ExportRecordsActivity : AppCompatActivity() {
         loadingIndicator.visibility = if (state.loading && !state.hasLoaded) View.VISIBLE else View.GONE
         swipeRefresh.isRefreshing = state.refreshing
         loadMoreIndicator.visibility = if (state.loadingMore) View.VISIBLE else View.GONE
+        noMoreHint.visibility = if (
+            shouldShowNoMore(state.hasLoaded, state.hasMore, state.records.size, state.loadingMore)
+        ) View.VISIBLE else View.GONE
         val showEmpty = shouldShowEmpty(state.hasLoaded, state.empty)
         emptyState.visibility = if (showEmpty) View.VISIBLE else View.GONE
         recordsList.visibility = if (showEmpty) View.GONE else View.VISIBLE
