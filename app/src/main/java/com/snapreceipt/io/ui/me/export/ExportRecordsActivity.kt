@@ -13,9 +13,11 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ExportRecordEntity
+import com.snapreceipt.io.ui.common.shouldShowEmpty
 import com.skybound.space.core.config.AppConfig
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -25,8 +27,10 @@ class ExportRecordsActivity : AppCompatActivity() {
 
     private val viewModel: ExportRecordsViewModel by viewModels()
     private lateinit var recordsList: RecyclerView
+    private lateinit var swipeRefresh: androidx.swiperefreshlayout.widget.SwipeRefreshLayout
     private lateinit var emptyState: View
     private lateinit var loadingIndicator: View
+    private lateinit var loadMoreIndicator: View
     private lateinit var adapter: ExportRecordsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,13 +38,28 @@ class ExportRecordsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_export_records)
 
         recordsList = findViewById(R.id.records_list)
+        swipeRefresh = findViewById(R.id.swipe_refresh)
         emptyState = findViewById(R.id.empty_state)
         loadingIndicator = findViewById(R.id.loading_indicator)
+        loadMoreIndicator = findViewById(R.id.load_more_indicator)
 
         adapter = ExportRecordsAdapter { record -> openExportFile(record) }
+        val layoutManager = LinearLayoutManager(this)
+        recordsList.layoutManager = layoutManager
         recordsList.adapter = adapter
+        recordsList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (dy <= 0) return
+                val total = layoutManager.itemCount
+                val lastVisible = layoutManager.findLastVisibleItemPosition()
+                if (total > 0 && lastVisible >= total - 3) {
+                    viewModel.loadMore()
+                }
+            }
+        })
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
+        swipeRefresh.setOnRefreshListener { viewModel.refresh() }
 
         observeState()
     }
@@ -54,9 +73,12 @@ class ExportRecordsActivity : AppCompatActivity() {
     }
 
     private fun renderState(state: ExportRecordsUiState) {
-        loadingIndicator.visibility = if (state.loading) View.VISIBLE else View.GONE
-        emptyState.visibility = if (state.empty && !state.loading) View.VISIBLE else View.GONE
-        recordsList.visibility = if (state.empty) View.GONE else View.VISIBLE
+        loadingIndicator.visibility = if (state.loading && !state.hasLoaded) View.VISIBLE else View.GONE
+        swipeRefresh.isRefreshing = state.refreshing
+        loadMoreIndicator.visibility = if (state.loadingMore) View.VISIBLE else View.GONE
+        val showEmpty = shouldShowEmpty(state.hasLoaded, state.empty)
+        emptyState.visibility = if (showEmpty) View.VISIBLE else View.GONE
+        recordsList.visibility = if (showEmpty) View.GONE else View.VISIBLE
         adapter.submitList(state.records)
     }
 
