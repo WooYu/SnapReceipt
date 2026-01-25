@@ -51,7 +51,8 @@ class HomeViewModel @Inject constructor(
                             receipts = receipts,
                             loading = false,
                             error = null,
-                            empty = receipts.isEmpty()
+                            empty = receipts.isEmpty(),
+                            hasLoaded = true
                         )
                     }
                 }
@@ -136,7 +137,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun updateError(throwable: Throwable) {
-        _uiState.update { it.copy(loading = false, error = throwable.message) }
+        _uiState.update { it.copy(loading = false, error = throwable.message, hasLoaded = true) }
         handleError(throwable)
     }
 

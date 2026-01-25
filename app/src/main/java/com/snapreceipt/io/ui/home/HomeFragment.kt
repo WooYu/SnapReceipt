@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ReceiptEntity
+import com.snapreceipt.io.ui.common.shouldShowEmpty
 import com.snapreceipt.io.ui.home.dialogs.ScanFailedDialog
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
 import com.skybound.space.base.presentation.BaseFragment
@@ -111,8 +112,9 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
 
     private fun renderState(state: HomeUiState) {
         adapter.setReceipts(state.receipts)
-        emptyState.visibility = if (state.empty) View.VISIBLE else View.GONE
-        receiptList.visibility = if (state.empty) View.GONE else View.VISIBLE
+        val showEmpty = shouldShowEmpty(state.hasLoaded, state.empty)
+        emptyState.visibility = if (showEmpty) View.VISIBLE else View.GONE
+        receiptList.visibility = if (showEmpty) View.GONE else View.VISIBLE
         loadingIndicator.visibility = if (state.loading) View.VISIBLE else View.GONE
         scanCard.isEnabled = !state.loading
         uploadCard.isEnabled = !state.loading

@@ -17,6 +17,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ReceiptEntity
+import com.snapreceipt.io.ui.common.shouldShowEmpty
 import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceTypeBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
 import com.snapreceipt.io.ui.receipts.bottomsheet.DateRangeBottomSheet
@@ -84,7 +85,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
 
     private fun renderState(state: ReceiptsUiState) {
         currentState = state
-        val showEmpty = state.hasLoaded && state.empty
+        val showEmpty = shouldShowEmpty(state.hasLoaded, state.empty)
         if (showEmpty) {
             emptyState.visibility = View.VISIBLE
             receiptList.visibility = View.GONE
