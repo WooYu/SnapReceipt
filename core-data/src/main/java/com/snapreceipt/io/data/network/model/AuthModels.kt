@@ -5,13 +5,13 @@ import com.snapreceipt.io.domain.model.AuthTokensEntity
 import com.snapreceipt.io.domain.model.UserEntity
 
 data class AuthCodeRequestDto(
-    @SerializedName("to") val to: String
+    val to: String
 )
 
 data class LoginRequestDto(
-    @SerializedName("to") val to: String,
-    @SerializedName("code") val code: String,
-    @SerializedName("timezone") val timezone: String
+    val to: String,
+    val code: String,
+    val timezone: String
 )
 
 data class RefreshRequestDto(
@@ -24,20 +24,20 @@ data class AuthTokensDto(
 )
 
 data class UserProfileDto(
-    @SerializedName("createBy") val createBy: String? = null,
-    @SerializedName("createTime") val createTime: String? = null,
-    @SerializedName("updateBy") val updateBy: String? = null,
-    @SerializedName("updateTime") val updateTime: String? = null,
-    @SerializedName("remark") val remark: String? = null,
-    @SerializedName("userId") val userId: Long,
-    @SerializedName("nickName") val nickName: String? = null,
-    @SerializedName("email") val email: String? = null,
-    @SerializedName("phonenumber") val phoneNumber: String? = null,
-    @SerializedName("avatar") val avatar: String? = null,
-    @SerializedName("status") val status: String? = null,
-    @SerializedName("delFlag") val delFlag: String? = null,
-    @SerializedName("timezone") val timezone: String? = null,
-    @SerializedName("lastLoginDate") val lastLoginDate: String? = null
+    val createBy: String? = null,
+    val createTime: String? = null,
+    val updateBy: String? = null,
+    val updateTime: String? = null,
+    val remark: String? = null,
+    val userId: Long,
+    val nickName: String? = null,
+    val email: String? = null,
+    val phoneNumber: String? = null,
+    val avatar: String? = null,
+    val status: String? = null,
+    val delFlag: String? = null,
+    val timezone: String? = null,
+    val lastLoginDate: String? = null
 )
 
 fun AuthTokensDto.toEntity(): AuthTokensEntity = AuthTokensEntity(
