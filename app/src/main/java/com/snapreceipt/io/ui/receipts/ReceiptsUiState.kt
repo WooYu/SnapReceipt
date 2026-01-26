@@ -4,7 +4,7 @@ import com.snapreceipt.io.domain.model.ReceiptEntity
 
 data class ReceiptsUiState(
     val receipts: List<ReceiptEntity> = emptyList(),
-    val selectedIds: Set<Int> = emptySet(),
+    val selectedIds: Set<Long> = emptySet(),
     val loading: Boolean = false,
     val exporting: Boolean = false,
     val error: String? = null,

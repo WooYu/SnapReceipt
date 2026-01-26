@@ -19,5 +19,5 @@ interface ReceiptRemoteRepository {
     suspend fun listExportRecords(query: ExportRecordListQueryEntity): List<ExportRecordEntity>
     suspend fun listCategories(): List<ReceiptCategory.Item>
     suspend fun addCategory(name: String)
-    suspend fun removeCategories(ids: List<Int>)
+    suspend fun removeCategories(ids: List<Long>)
 }

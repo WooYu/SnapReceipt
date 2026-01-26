@@ -7,6 +7,6 @@ import javax.inject.Inject
 class GetReceiptByIdUseCase @Inject constructor(
     private val repository: ReceiptRepository
 ) {
-    suspend operator fun invoke(id: Int): Result<ReceiptEntity?> =
+    suspend operator fun invoke(id: Long): Result<ReceiptEntity?> =
         runCatching { repository.getReceiptById(id) }
 }

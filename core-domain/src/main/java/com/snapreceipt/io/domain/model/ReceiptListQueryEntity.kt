@@ -4,7 +4,6 @@ package com.snapreceipt.io.domain.model
  * 发票列表查询条件（对应 /api/receipt/list 请求体）。
  *
  * @property categoryId 分类ID
- * @property categoryName 分类名称（可选，后端支持时使用）
  * @property receiptType 发票类型（Business/Individual）
  * @property receiptDateStart 发票开始日期（yyyy-MM-dd）
  * @property receiptDateEnd 发票结束日期（yyyy-MM-dd）
@@ -14,9 +13,8 @@ package com.snapreceipt.io.domain.model
  * @property pageSize 每页数量
  */
 data class ReceiptListQueryEntity(
-    val categoryId: Int? = null,
-    val categoryName: String? = null,
-    val receiptType: String? = "Individual",
+    val categoryId: Long? = null,
+    val receiptType: String? = null,
     val receiptDateStart: String? = null,
     val receiptDateEnd: String? = null,
     val createTimeStart: String? = null,

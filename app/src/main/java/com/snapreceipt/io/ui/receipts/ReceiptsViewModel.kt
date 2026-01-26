@@ -53,7 +53,7 @@ class ReceiptsViewModel @Inject constructor(
     }
 
     fun filterByType(type: String) {
-        val categoryId = ReceiptCategory.idForLabel(type).takeIf { it > 0 }
+        val categoryId = ReceiptCategory.idForLabel(type).takeIf { it > 0L }
         fetchReceipts(ReceiptListQueryEntity(categoryId = categoryId))
     }
 
@@ -70,7 +70,7 @@ class ReceiptsViewModel @Inject constructor(
         }
     }
 
-    fun toggleSelection(id: Int) {
+    fun toggleSelection(id: Long) {
         _uiState.update { current ->
             val updated = current.selectedIds.toMutableSet()
             if (updated.contains(id)) {
@@ -92,7 +92,7 @@ class ReceiptsViewModel @Inject constructor(
     }
 
     fun exportSelected() {
-        val ids = _uiState.value.selectedIds.map { it.toLong() }
+        val ids = _uiState.value.selectedIds.toList()
         if (ids.isEmpty() || _uiState.value.exporting) return
         _uiState.update { it.copy(exporting = true) }
         viewModelScope.launch(dispatchers.io) {
@@ -128,7 +128,7 @@ class ReceiptsViewModel @Inject constructor(
         if (ids.isEmpty()) return
         viewModelScope.launch(dispatchers.io) {
             ids.forEach { id ->
-                deleteReceiptRemoteUseCase(id.toLong()).onFailure { updateError(it) }
+                deleteReceiptRemoteUseCase(id).onFailure { updateError(it) }
             }
             fetchReceipts()
         }
@@ -137,7 +137,7 @@ class ReceiptsViewModel @Inject constructor(
 
     fun deleteReceipt(receipt: ReceiptEntity) {
         viewModelScope.launch(dispatchers.io) {
-            deleteReceiptRemoteUseCase(receipt.id.toLong())
+            deleteReceiptRemoteUseCase(receipt.id)
                 .onSuccess { fetchReceipts() }
                 .onFailure { updateError(it) }
         }
@@ -199,7 +199,7 @@ class ReceiptsViewModel @Inject constructor(
         val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
         val timeFormat = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
         return ReceiptUpdateEntity(
-            receiptId = id.toLong(),
+            receiptId = id,
             merchant = merchantName,
             receiptDate = dateFormat.format(java.util.Date(date)),
             receiptTime = timeFormat.format(java.util.Date(date)),

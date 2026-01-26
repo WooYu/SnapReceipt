@@ -23,6 +23,6 @@ data class ReceiptSaveEntity(
     val consumer: String,
     val remark: String? = null,
     val receiptUrl: String,
-    val categoryId: Int,
+    val categoryId: Long,
     val receiptTime: String? = null
 )

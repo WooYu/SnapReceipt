@@ -175,7 +175,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         }
         val noteValue = inputNote.text.toString().trim()
         val categoryId = ReceiptCategory.idForLabel(invoiceCategoryInput)
-        if (categoryId <= 0) {
+        if (categoryId <= 0L) {
             Toast.makeText(this, getString(R.string.select_invoice_category), Toast.LENGTH_SHORT).show()
             return
         }

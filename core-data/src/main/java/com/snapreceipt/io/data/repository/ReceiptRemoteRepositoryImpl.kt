@@ -85,7 +85,7 @@ class ReceiptRemoteRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun removeCategories(ids: List<Int>) {
+    override suspend fun removeCategories(ids: List<Long>) {
         when (val result = remoteDataSource.deleteCategories(ids)) {
             is NetworkResult.Success -> Unit
             is NetworkResult.Failure -> throw result.toApiException()

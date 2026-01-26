@@ -63,7 +63,7 @@ class HomeViewModel @Inject constructor(
 
     fun deleteReceipt(receipt: ReceiptEntity) {
         viewModelScope.launch(dispatchers.io) {
-            deleteReceiptRemoteUseCase(receipt.id.toLong())
+            deleteReceiptRemoteUseCase(receipt.id)
                 .onSuccess { loadReceipts() }
                 .onFailure { updateError(it) }
         }
@@ -139,7 +139,7 @@ class HomeViewModel @Inject constructor(
         val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
         val timeFormat = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
         return ReceiptUpdateEntity(
-            receiptId = id.toLong(),
+            receiptId = id,
             merchant = merchantName,
             receiptDate = dateFormat.format(java.util.Date(date)),
             receiptTime = timeFormat.format(java.util.Date(date)),

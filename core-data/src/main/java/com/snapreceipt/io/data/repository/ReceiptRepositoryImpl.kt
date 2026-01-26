@@ -21,7 +21,7 @@ class ReceiptRepositoryImpl @Inject constructor(
         return localDataSource.getAllReceipts().map { entityToDomainMapper.mapList(it) }
     }
 
-    override suspend fun getReceiptById(id: Int): ReceiptEntity? {
+    override suspend fun getReceiptById(id: Long): ReceiptEntity? {
         return localDataSource.getReceiptById(id)?.let { entityToDomainMapper.map(it) }
     }
 
@@ -37,7 +37,7 @@ class ReceiptRepositoryImpl @Inject constructor(
         localDataSource.deleteReceipt(domainToEntityMapper.map(receipt))
     }
 
-    override suspend fun deleteReceipts(ids: List<Int>) {
+    override suspend fun deleteReceipts(ids: List<Long>) {
         localDataSource.deleteReceipts(ids)
     }
 

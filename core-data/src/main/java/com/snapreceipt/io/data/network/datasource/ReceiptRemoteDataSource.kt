@@ -60,7 +60,7 @@ class ReceiptRemoteDataSource(
         return requestUnit { api.addCategory(CategoryCreateRequestDto(name)) }
     }
 
-    suspend fun deleteCategories(ids: List<Int>): NetworkResult<Unit> {
+    suspend fun deleteCategories(ids: List<Long>): NetworkResult<Unit> {
         return requestUnit { api.deleteCategory(CategoryDeleteRequestDto(ids)) }
     }
 }

@@ -10,8 +10,8 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class ReceiptsSelectableAdapter(
-    private var selectedIds: Set<Int>,
-    private val onToggle: (Int) -> Unit,
+    private var selectedIds: Set<Long>,
+    private val onToggle: (Long) -> Unit,
     private val onEditClick: (ReceiptEntity) -> Unit
 ) : RecyclerView.Adapter<ReceiptsSelectableAdapter.ViewHolder>() {
 
@@ -22,7 +22,7 @@ class ReceiptsSelectableAdapter(
         notifyDataSetChanged()
     }
 
-    fun updateSelection(selected: Set<Int>) {
+    fun updateSelection(selected: Set<Long>) {
         selectedIds = selected
         notifyDataSetChanged()
     }
@@ -42,7 +42,7 @@ class ReceiptsSelectableAdapter(
 
     class ViewHolder(
         private val binding: ItemReceiptSelectBinding,
-        private val onToggle: (Int) -> Unit,
+        private val onToggle: (Long) -> Unit,
         private val onEditClick: (ReceiptEntity) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 

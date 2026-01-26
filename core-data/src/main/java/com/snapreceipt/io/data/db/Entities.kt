@@ -19,7 +19,7 @@ import androidx.room.PrimaryKey
 data class ReceiptEntity(
     @PrimaryKey(autoGenerate = true)
     /** 主键ID（本地生成） */
-    val id: Int = 0,
+    val id: Long = 0L,
     /** 商户名称 */
     val merchantName: String,
     /** 消费总额 */

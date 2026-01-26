@@ -18,10 +18,10 @@ interface ReceiptDao {
     fun getAllReceipts(): Flow<List<ReceiptEntity>>
 
     @Query("SELECT * FROM receipts WHERE id = :id")
-    suspend fun getReceiptById(id: Int): ReceiptEntity?
+    suspend fun getReceiptById(id: Long): ReceiptEntity?
 
     @Query("DELETE FROM receipts WHERE id IN (:ids)")
-    suspend fun deleteMultiple(ids: List<Int>)
+    suspend fun deleteMultiple(ids: List<Long>)
 
     @Query("SELECT * FROM receipts WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC")
     fun getReceiptsByDateRange(startDate: Long, endDate: Long): Flow<List<ReceiptEntity>>

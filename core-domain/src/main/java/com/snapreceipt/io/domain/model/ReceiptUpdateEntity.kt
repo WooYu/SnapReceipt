@@ -25,6 +25,6 @@ data class ReceiptUpdateEntity(
     val consumer: String,
     val remark: String? = null,
     val receiptUrl: String? = null,
-    val categoryId: Int,
+    val categoryId: Long,
     val receiptTime: String? = null
 )

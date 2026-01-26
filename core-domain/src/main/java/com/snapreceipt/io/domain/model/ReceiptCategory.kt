@@ -12,16 +12,16 @@ object ReceiptCategory {
      * @property isCustom 是否用户自定义分类
      */
     data class Item(
-        val id: Int,
+        val id: Long,
         val label: String,
         val isCustom: Boolean = false
     )
 
     private val defaultCategories = listOf(
-        Item(id = 100, label = "Dining"),
-        Item(id = 101, label = "Grocery"),
-        Item(id = 102, label = "Gas/Fuel"),
-        Item(id = 103, label = "Travel")
+        Item(id = 100L, label = "Dining"),
+        Item(id = 101L, label = "Grocery"),
+        Item(id = 102L, label = "Gas/Fuel"),
+        Item(id = 103L, label = "Travel")
     )
 
     @Volatile
@@ -33,17 +33,17 @@ object ReceiptCategory {
         categories = items.ifEmpty { defaultCategories }
     }
 
-    fun labelForId(id: Int): String {
+    fun labelForId(id: Long): String {
         val fromList = categories.firstOrNull { it.id == id }?.label
         if (!fromList.isNullOrBlank()) return fromList
         val fallback = defaultCategories.firstOrNull { it.id == id }?.label
         return fallback ?: "Other"
     }
 
-    fun idForLabel(label: String): Int {
+    fun idForLabel(label: String): Long {
         val fromList = categories.firstOrNull { it.label.equals(label, ignoreCase = true) }?.id
         if (fromList != null) return fromList
         val fallback = defaultCategories.firstOrNull { it.label.equals(label, ignoreCase = true) }?.id
-        return fallback ?: -1
+        return fallback ?: -1L
     }
 }

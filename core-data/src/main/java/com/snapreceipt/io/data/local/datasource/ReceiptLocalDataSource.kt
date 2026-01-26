@@ -13,7 +13,7 @@ class ReceiptLocalDataSource @Inject constructor(
 ) : BaseLocalDataSource(dispatchers) {
     fun getAllReceipts(): Flow<List<ReceiptEntity>> = receiptDao.getAllReceipts()
 
-    suspend fun getReceiptById(id: Int): ReceiptEntity? = withIo { receiptDao.getReceiptById(id) }
+    suspend fun getReceiptById(id: Long): ReceiptEntity? = withIo { receiptDao.getReceiptById(id) }
 
     suspend fun insertReceipt(receipt: ReceiptEntity): Long = withIo { receiptDao.insert(receipt) }
 
@@ -21,7 +21,7 @@ class ReceiptLocalDataSource @Inject constructor(
 
     suspend fun deleteReceipt(receipt: ReceiptEntity) = withIo { receiptDao.delete(receipt) }
 
-    suspend fun deleteReceipts(ids: List<Int>) = withIo { receiptDao.deleteMultiple(ids) }
+    suspend fun deleteReceipts(ids: List<Long>) = withIo { receiptDao.deleteMultiple(ids) }
 
     fun getReceiptsByDateRange(startDate: Long, endDate: Long): Flow<List<ReceiptEntity>> =
         receiptDao.getReceiptsByDateRange(startDate, endDate)

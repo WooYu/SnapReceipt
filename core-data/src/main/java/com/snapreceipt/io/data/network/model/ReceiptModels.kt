@@ -35,7 +35,7 @@ data class CategoryCreateRequestDto(
  * @property categoryIds 分类ID列表
  */
 data class CategoryDeleteRequestDto(
-    val categoryIds: List<Int>
+    val categoryIds: List<Long>
 )
 
 /**
@@ -60,8 +60,8 @@ data class CategoryItemDto(
     val updateBy: String? = null,
     val updateTime: String? = null,
     val remark: String? = null,
-    val categoryId: Int,
-    val userId: Int? = null,
+    val categoryId: Long,
+    val userId: Long? = null,
     val categoryName: String,
     val categoryIcon: String? = null,
     val orderNum: Int? = null,
@@ -122,7 +122,7 @@ data class ReceiptItemDto(
     val remark: String? = null,
     val receiptId: Long,
     val userId: Long,
-    val categoryId: Int,
+    val categoryId: Long,
     val receiptType: String? = null,
     val receiptUrl: String,
     val merchant: String,
@@ -144,7 +144,7 @@ data class ReceiptItemDto(
  * 将列表条目映射为本地展示实体。
  */
 fun ReceiptItemDto.toEntity(): ReceiptEntity = ReceiptEntity(
-    id = receiptId.toInt(),
+    id = receiptId,
     merchantName = merchant,
     amount = totalAmount,
     date = parseReceiptDateMillis(receiptDate, receiptTime),
@@ -160,15 +160,17 @@ fun ReceiptItemDto.toEntity(): ReceiptEntity = ReceiptEntity(
 fun CategoryItemDto.toItem(): ReceiptCategory.Item = ReceiptCategory.Item(
     id = categoryId,
     label = categoryName,
-    isCustom = (userId ?: 0) != 0
+    isCustom = (userId ?: 0L) != 0L
 )
 
 private const val DATE_FORMAT = "yyyy-MM-dd"
 private const val TIME_FORMAT = "HH:mm:ss"
 
 private fun parseReceiptDateMillis(date: String?, time: String?): Long {
+    // 将日期/时间拼成统一字符串，缺省时回退到当前时间
     val value = listOfNotNull(date, time).joinToString(" ").trim()
     if (value.isBlank()) return System.currentTimeMillis()
+    // 如果没有时间字段，则只按日期解析
     val format = if (time.isNullOrBlank()) DATE_FORMAT else "$DATE_FORMAT $TIME_FORMAT"
     return runCatching {
         SimpleDateFormat(format, Locale.getDefault()).parse(value)?.time

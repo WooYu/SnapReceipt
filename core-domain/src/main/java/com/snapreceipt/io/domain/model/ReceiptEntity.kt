@@ -18,7 +18,7 @@ package com.snapreceipt.io.domain.model
  * @property updatedAt 更新时间戳（本地）
  */
 data class ReceiptEntity(
-    val id: Int = 0,
+    val id: Long = 0L,
     val merchantName: String,
     val amount: Double,
     val currency: String = "CNY",
