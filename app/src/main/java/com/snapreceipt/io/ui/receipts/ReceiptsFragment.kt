@@ -18,7 +18,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.common.shouldShowEmpty
-import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceTypeBottomSheet
+import com.snapreceipt.io.ui.invoice.InvoiceDetailsArgs
+import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceCategoryBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
 import com.snapreceipt.io.ui.receipts.bottomsheet.DateRangeBottomSheet
 import com.snapreceipt.io.ui.receipts.dialogs.ExportSuccessDialog
@@ -142,7 +143,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         }
         filterTypeBtn.setOnClickListener {
             val initial = filterTypeLabel ?: filterTypeBtn.text.toString()
-            InvoiceTypeBottomSheet.newInstance(initial) { selected ->
+            InvoiceCategoryBottomSheet.newInstance(initial) { selected ->
                 filterTypeLabel = selected
                 filterTypeBtn.text = selected
                 viewModel.filterByType(selected)
@@ -151,11 +152,9 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         filterTitleBtn.setOnClickListener {
             val initial = filterTitleLabel ?: filterTitleBtn.text.toString()
             TitleTypeBottomSheet(initial) { selected ->
-                val allLabel = getString(R.string.type_all)
-                val normalized = if (selected.equals(allLabel, ignoreCase = true)) "" else selected
                 filterTitleLabel = selected
                 filterTitleBtn.text = selected
-                viewModel.filterByTitleType(normalized)
+                viewModel.filterByTitleType(selected)
             }.show(parentFragmentManager, "title_filter_picker")
         }
         exportActionBtn.setOnClickListener {
@@ -173,19 +172,10 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     }
 
     private fun openReceiptDetails(receipt: ReceiptEntity) {
-        val intent = android.content.Intent(requireContext(), com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity::class.java).apply {
-            putExtra(com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.EXTRA_RECEIPT_ID, receipt.id.toLong())
-            putExtra(com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.EXTRA_MERCHANT, receipt.merchantName)
-            putExtra(com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.EXTRA_AMOUNT, receipt.amount.toString())
-            putExtra(com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.EXTRA_INVOICE_TYPE, receipt.category)
-            putExtra(com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.EXTRA_TITLE_TYPE, receipt.invoiceType)
-            putExtra(com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.EXTRA_NOTE, receipt.description)
-            putExtra(com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.EXTRA_IMAGE_URL, receipt.imagePath)
-            val formatted = formatDateTime(receipt.date)
-            putExtra(com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.EXTRA_DATE, formatted.first)
-            putExtra(com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.EXTRA_TIME, formatted.second)
-        }
-        startActivity(intent)
+        val args = InvoiceDetailsArgs.fromReceipt(receipt)
+        startActivity(
+            com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.createIntent(requireContext(), args)
+        )
     }
 
     private fun formatDateRange(start: Long, end: Long): String {
@@ -195,12 +185,6 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
             format.format(java.util.Date(start)),
             format.format(java.util.Date(end))
         )
-    }
-
-    private fun formatDateTime(timestamp: Long): Pair<String, String> {
-        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
-        val timeFormat = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
-        return dateFormat.format(java.util.Date(timestamp)) to timeFormat.format(java.util.Date(timestamp))
     }
 
     override fun onCustomEvent(event: com.skybound.space.base.presentation.UiEvent.Custom) {

@@ -1,5 +1,6 @@
 package com.snapreceipt.io.ui.invoice
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -13,18 +14,18 @@ import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.skybound.space.base.presentation.BaseActivity
+import com.skybound.space.base.presentation.UiEvent
+import com.skybound.space.core.network.auth.SessionEvent
+import com.skybound.space.core.network.auth.SessionManager
 import com.snapreceipt.io.MainActivity
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ReceiptCategory
 import com.snapreceipt.io.domain.model.ReceiptSaveEntity
 import com.snapreceipt.io.ui.invoice.bottomsheet.DateTimePickerBottomSheet
-import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceTypeBottomSheet
+import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceCategoryBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
 import com.snapreceipt.io.ui.login.LoginActivity
-import com.skybound.space.base.presentation.BaseActivity
-import com.skybound.space.base.presentation.UiEvent
-import com.skybound.space.core.network.auth.SessionEvent
-import com.skybound.space.core.network.auth.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,26 +33,20 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     companion object {
-        const val EXTRA_IMAGE_PATH = "extra_image_path"
-        const val EXTRA_IMAGE_URL = "extra_image_url"
-        const val EXTRA_MERCHANT = "extra_merchant"
-        const val EXTRA_AMOUNT = "extra_amount"
-        const val EXTRA_ADDRESS = "extra_address"
-        const val EXTRA_DATE = "extra_date"
-        const val EXTRA_TIME = "extra_time"
-        const val EXTRA_CARD = "extra_card"
-        const val EXTRA_CONSUMER = "extra_consumer"
-        const val EXTRA_TIP_AMOUNT = "extra_tip_amount"
-        const val EXTRA_INVOICE_TYPE = "extra_invoice_type"
-        const val EXTRA_TITLE_TYPE = "extra_title_type"
-        const val EXTRA_NOTE = "extra_note"
-        const val EXTRA_RECEIPT_ID = "extra_receipt_id"
+        const val EXTRA_ARGS = "extra_invoice_args"
 
         const val EXTRA_START_TAB = "extra_start_tab"
         const val TAB_RECEIPTS = "receipts"
+
+        fun createIntent(context: Context, args: InvoiceDetailsArgs): Intent {
+            return Intent(context, InvoiceDetailsActivity::class.java).apply {
+                putExtra(EXTRA_ARGS, args)
+            }
+        }
     }
 
     override val viewModel: InvoiceDetailsViewModel by viewModels()
+
     @Inject
     lateinit var injectedSessionManager: SessionManager
     override val sessionManager: SessionManager
@@ -63,7 +58,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private lateinit var inputAddress: EditText
     private lateinit var inputDate: EditText
     private lateinit var inputCard: EditText
-    private lateinit var inputInvoiceType: EditText
+    private lateinit var inputInvoiceCategory: EditText
     private lateinit var inputTitleType: EditText
     private lateinit var inputNote: EditText
     private lateinit var cardHelper: TextView
@@ -88,37 +83,38 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         inputAddress = findViewById(R.id.input_address)
         inputDate = findViewById(R.id.input_date)
         inputCard = findViewById(R.id.input_card)
-        inputInvoiceType = findViewById(R.id.input_invoice_type)
+        inputInvoiceCategory = findViewById(R.id.input_invoice_category)
         inputTitleType = findViewById(R.id.input_title_type)
         inputNote = findViewById(R.id.input_note)
         cardHelper = findViewById(R.id.card_helper)
         saveButton = findViewById(R.id.save_btn)
         deleteButton = findViewById(R.id.btn_delete)
 
-        val imagePath = intent.getStringExtra(EXTRA_IMAGE_PATH).orEmpty()
-        receiptImagePath = imagePath
-        receiptImageUrl = intent.getStringExtra(EXTRA_IMAGE_URL).orEmpty()
-        receiptId = intent.getLongExtra(EXTRA_RECEIPT_ID, 0L)
+        val args = intent.getParcelableExtra(EXTRA_ARGS) as? InvoiceDetailsArgs ?: InvoiceDetailsArgs()
+        receiptImagePath = args.imagePath
+        receiptImageUrl = args.imageUrl
+        receiptId = args.receiptId
         isEditMode = receiptId > 0L
-        deleteButton.visibility = if (isEditMode) android.view.View.VISIBLE else android.view.View.GONE
-        if (imagePath.isNotEmpty()) {
-            imageView.setImageURI(Uri.fromFile(java.io.File(imagePath)))
+        deleteButton.visibility =
+            if (isEditMode) android.view.View.VISIBLE else android.view.View.GONE
+        if (receiptImagePath.isNotEmpty()) {
+            imageView.setImageURI(Uri.fromFile(java.io.File(receiptImagePath)))
         } else if (receiptImageUrl.isNotEmpty()) {
             imageView.setImageURI(Uri.parse(receiptImageUrl))
         }
 
-        inputAmount.setText(intent.getStringExtra(EXTRA_AMOUNT).orEmpty())
-        inputMerchant.setText(intent.getStringExtra(EXTRA_MERCHANT).orEmpty())
-        inputAddress.setText(intent.getStringExtra(EXTRA_ADDRESS).orEmpty())
-        receiptDate = intent.getStringExtra(EXTRA_DATE).orEmpty()
-        receiptTime = intent.getStringExtra(EXTRA_TIME).orEmpty()
+        inputAmount.setText(args.amount?.toString().orEmpty())
+        inputMerchant.setText(args.merchant)
+        inputAddress.setText(args.address)
+        receiptDate = args.date
+        receiptTime = args.time
         inputDate.setText(buildDisplayDate(receiptDate, receiptTime))
-        inputCard.setText(intent.getStringExtra(EXTRA_CARD).orEmpty())
-        scanConsumer = intent.getStringExtra(EXTRA_CONSUMER).orEmpty()
-        scanTipAmount = intent.getStringExtra(EXTRA_TIP_AMOUNT)?.toDoubleOrNull() ?: 0.0
-        inputInvoiceType.setText(intent.getStringExtra(EXTRA_INVOICE_TYPE).orEmpty())
-        inputTitleType.setText(intent.getStringExtra(EXTRA_TITLE_TYPE).orEmpty())
-        inputNote.setText(intent.getStringExtra(EXTRA_NOTE).orEmpty())
+        inputCard.setText(args.card)
+        scanConsumer = args.consumer
+        scanTipAmount = args.tipAmount ?: 0.0
+        inputInvoiceCategory.setText(args.invoiceCategory)
+        inputTitleType.setText(args.titleType)
+        inputNote.setText(args.note)
 
         findViewById<ImageView>(R.id.btn_back).setOnClickListener { finish() }
         deleteButton.setOnClickListener { deleteReceiptIfNeeded() }
@@ -126,7 +122,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
 
         setupPickers()
         setupCardValidation()
-        saveButton.setOnClickListener { saveReceipt(imagePath) }
+        saveButton.setOnClickListener { saveReceipt(receiptImagePath) }
         observeState()
     }
 
@@ -149,20 +145,27 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             InvoiceDetailsEventKeys.SHOW_SUCCESS -> {
                 Toast.makeText(this, getString(R.string.success), Toast.LENGTH_SHORT).show()
             }
+
             InvoiceDetailsEventKeys.NAVIGATE_TO_MAIN -> navigateToMain()
         }
     }
 
     private fun saveReceipt(imagePath: String) {
         val amountValue = inputAmount.text.toString().trim().toDoubleOrNull() ?: 0.0
-        val merchantValue = inputMerchant.text.toString().trim().ifEmpty { getString(R.string.receipt_default_name) }
-        val invoiceTypeInput = inputInvoiceType.text.toString().trim()
-        val invoiceTypeValue = if (invoiceTypeInput.equals(getString(R.string.type_all), true) || invoiceTypeInput.isBlank()) {
-            ReceiptCategory.all().firstOrNull()?.label ?: getString(R.string.type_food)
-        } else {
-            invoiceTypeInput
+        val merchantValue = inputMerchant.text.toString().trim()
+            .ifEmpty { getString(R.string.receipt_default_name) }
+        val invoiceCategoryInput = inputInvoiceCategory.text.toString().trim()
+        if (invoiceCategoryInput.isBlank()) {
+            Toast.makeText(this, getString(R.string.select_invoice_category), Toast.LENGTH_SHORT)
+                .show()
+            return
         }
-        val titleTypeValue = inputTitleType.text.toString().trim().ifEmpty { getString(R.string.type_individual) }
+        val titleTypeValue =
+            inputTitleType.text.toString().trim()
+        if (titleTypeValue.isBlank()) {
+            Toast.makeText(this, getString(R.string.select_invoice_type), Toast.LENGTH_SHORT).show()
+            return
+        }
         val cardValue = inputCard.text.toString().trim()
         val cardError = cardValidationErrorResId(cardValue)
         if (cardError != null) {
@@ -171,8 +174,12 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             return
         }
         val noteValue = inputNote.text.toString().trim()
-        val categoryId = ReceiptCategory.idForLabel(invoiceTypeValue).takeIf { it > 0 } ?: 1
-        val receiptUrl = if (receiptImageUrl.isNotEmpty()) receiptImageUrl else imagePath
+        val categoryId = ReceiptCategory.idForLabel(invoiceCategoryInput)
+        if (categoryId <= 0) {
+            Toast.makeText(this, getString(R.string.select_invoice_category), Toast.LENGTH_SHORT).show()
+            return
+        }
+        val receiptUrl = receiptImageUrl.ifEmpty { imagePath }
         val safeDate = receiptDate.ifEmpty { currentDate() }
         val safeTime = receiptTime.ifEmpty { "00:00:00" }
 
@@ -217,13 +224,15 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun setupPickers() {
-        if (inputInvoiceType.text.isNullOrBlank()) {
-            inputInvoiceType.setText(ReceiptCategory.all().firstOrNull()?.label ?: getString(R.string.type_food))
+        if (inputInvoiceCategory.text.isNullOrBlank()) {
+            inputInvoiceCategory.setText(
+                ReceiptCategory.all().firstOrNull()?.label ?: getString(R.string.type_other)
+            )
         }
         if (inputTitleType.text.isNullOrBlank()) {
             inputTitleType.setText(getString(R.string.type_individual))
         }
-        inputInvoiceType.apply {
+        inputInvoiceCategory.apply {
             isFocusable = false
             isClickable = true
             setOnClickListener { openInvoiceTypePicker() }
@@ -262,16 +271,23 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
 
     private fun openImagePreview() {
         if (receiptImagePath.isBlank() && receiptImageUrl.isBlank()) return
-        val intent = Intent(this, com.snapreceipt.io.ui.preview.ImagePreviewActivity::class.java).apply {
-            putExtra(com.snapreceipt.io.ui.preview.ImagePreviewActivity.EXTRA_IMAGE_PATH, receiptImagePath)
-            putExtra(com.snapreceipt.io.ui.preview.ImagePreviewActivity.EXTRA_IMAGE_URL, receiptImageUrl)
-        }
+        val intent =
+            Intent(this, com.snapreceipt.io.ui.preview.ImagePreviewActivity::class.java).apply {
+                putExtra(
+                    com.snapreceipt.io.ui.preview.ImagePreviewActivity.EXTRA_IMAGE_PATH,
+                    receiptImagePath
+                )
+                putExtra(
+                    com.snapreceipt.io.ui.preview.ImagePreviewActivity.EXTRA_IMAGE_URL,
+                    receiptImageUrl
+                )
+            }
         startActivity(intent)
     }
 
     private fun openInvoiceTypePicker() {
-        InvoiceTypeBottomSheet.newInstance(inputInvoiceType.text.toString()) { selected ->
-            inputInvoiceType.setText(selected)
+        InvoiceCategoryBottomSheet.newInstance(inputInvoiceCategory.text.toString()) { selected ->
+            inputInvoiceCategory.setText(selected)
         }.show(supportFragmentManager, "invoice_type_picker")
     }
 

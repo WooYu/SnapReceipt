@@ -1,7 +1,6 @@
 package com.snapreceipt.io.data.repository
 
 import com.snapreceipt.io.data.network.datasource.ReceiptRemoteDataSource
-import com.snapreceipt.io.data.network.model.toDto
 import com.snapreceipt.io.data.network.model.toEntity
 import com.snapreceipt.io.data.network.model.toItem
 import com.snapreceipt.io.domain.model.ExportRecordEntity
@@ -23,20 +22,20 @@ class ReceiptRemoteRepositoryImpl @Inject constructor(
 
     override suspend fun scan(imageUrl: String): ReceiptScanResultEntity {
         return when (val result = remoteDataSource.scan(imageUrl)) {
-            is NetworkResult.Success -> result.data.toEntity()
+            is NetworkResult.Success -> result.data
             is NetworkResult.Failure -> throw result.toApiException()
         }
     }
 
     override suspend fun save(request: ReceiptSaveEntity) {
-        when (val result = remoteDataSource.save(request.toDto())) {
+        when (val result = remoteDataSource.save(request)) {
             is NetworkResult.Success -> Unit
             is NetworkResult.Failure -> throw result.toApiException()
         }
     }
 
     override suspend fun update(request: ReceiptUpdateEntity) {
-        when (val result = remoteDataSource.update(request.toDto())) {
+        when (val result = remoteDataSource.update(request)) {
             is NetworkResult.Success -> Unit
             is NetworkResult.Failure -> throw result.toApiException()
         }
@@ -50,7 +49,7 @@ class ReceiptRemoteRepositoryImpl @Inject constructor(
     }
 
     override suspend fun list(query: ReceiptListQueryEntity): List<ReceiptEntity> {
-        return when (val result = remoteDataSource.list(query.toDto())) {
+        return when (val result = remoteDataSource.list(query)) {
             is NetworkResult.Success -> result.data.rows.map { it.toEntity() }
             is NetworkResult.Failure -> throw result.toApiException()
         }
@@ -64,8 +63,8 @@ class ReceiptRemoteRepositoryImpl @Inject constructor(
     }
 
     override suspend fun listExportRecords(query: ExportRecordListQueryEntity): List<ExportRecordEntity> {
-        return when (val result = remoteDataSource.exportRecords(query.toDto())) {
-            is NetworkResult.Success -> result.data.rows.map { it.toEntity() }
+        return when (val result = remoteDataSource.exportRecords(query)) {
+            is NetworkResult.Success -> result.data.rows
             is NetworkResult.Failure -> throw result.toApiException()
         }
     }

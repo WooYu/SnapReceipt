@@ -1,6 +1,16 @@
 package com.snapreceipt.io.domain.model
 
+/**
+ * 分类内存缓存（来自 /api/category/list）。
+ */
 object ReceiptCategory {
+    /**
+     * 分类条目。
+     *
+     * @property id 分类ID
+     * @property label 分类名称
+     * @property isCustom 是否用户自定义分类
+     */
     data class Item(
         val id: Int,
         val label: String,
@@ -8,11 +18,10 @@ object ReceiptCategory {
     )
 
     private val defaultCategories = listOf(
-        Item(1, "Food"),
-        Item(2, "Travel"),
-        Item(3, "Office"),
-        Item(4, "Hotel"),
-        Item(5, "Other")
+        Item(id = 100, label = "Dining"),
+        Item(id = 101, label = "Grocery"),
+        Item(id = 102, label = "Gas/Fuel"),
+        Item(id = 103, label = "Travel")
     )
 
     @Volatile
@@ -21,7 +30,7 @@ object ReceiptCategory {
     fun all(): List<Item> = categories
 
     fun update(items: List<Item>) {
-        categories = if (items.isEmpty()) defaultCategories else items
+        categories = items.ifEmpty { defaultCategories }
     }
 
     fun labelForId(id: Int): String {
@@ -32,9 +41,9 @@ object ReceiptCategory {
     }
 
     fun idForLabel(label: String): Int {
-        if (label.isBlank() || label.equals("All", ignoreCase = true)) return 0
         val fromList = categories.firstOrNull { it.label.equals(label, ignoreCase = true) }?.id
         if (fromList != null) return fromList
-        return defaultCategories.firstOrNull { it.label.equals(label, ignoreCase = true) }?.id ?: 0
+        val fallback = defaultCategories.firstOrNull { it.label.equals(label, ignoreCase = true) }?.id
+        return fallback ?: -1
     }
 }

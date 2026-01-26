@@ -4,14 +4,8 @@ import com.snapreceipt.io.data.base.BaseRemoteDataSource
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import com.skybound.space.core.network.NetworkResult
 import com.skybound.space.core.network.BasePagedResponse
-import com.snapreceipt.io.data.network.model.ExportRecordItemDto
-import com.snapreceipt.io.data.network.model.ExportRecordListRequestDto
 import com.snapreceipt.io.data.network.model.ReceiptExportRequestDto
 import com.snapreceipt.io.data.network.model.ReceiptItemDto
-import com.snapreceipt.io.data.network.model.ReceiptListRequestDto
-import com.snapreceipt.io.data.network.model.ReceiptSaveRequestDto
-import com.snapreceipt.io.data.network.model.ReceiptScanResultDto
-import com.snapreceipt.io.data.network.model.ReceiptUpdateRequestDto
 import com.snapreceipt.io.data.network.model.ReceiptDeleteRequestDto
 import com.snapreceipt.io.data.network.model.ScanRequestDto
 import com.snapreceipt.io.data.network.model.CategoryCreateRequestDto
@@ -19,24 +13,30 @@ import com.snapreceipt.io.data.network.model.CategoryDeleteRequestDto
 import com.snapreceipt.io.data.network.model.CategoryItemDto
 import com.snapreceipt.io.data.network.model.CategoryListRequestDto
 import com.snapreceipt.io.data.network.service.ReceiptApi
+import com.snapreceipt.io.domain.model.ExportRecordEntity
+import com.snapreceipt.io.domain.model.ExportRecordListQueryEntity
+import com.snapreceipt.io.domain.model.ReceiptListQueryEntity
+import com.snapreceipt.io.domain.model.ReceiptSaveEntity
+import com.snapreceipt.io.domain.model.ReceiptScanResultEntity
+import com.snapreceipt.io.domain.model.ReceiptUpdateEntity
 
 class ReceiptRemoteDataSource(
     private val api: ReceiptApi,
     dispatchers: CoroutineDispatchersProvider
 ) : BaseRemoteDataSource(dispatchers) {
-    suspend fun scan(imageUrl: String): NetworkResult<ReceiptScanResultDto> {
+    suspend fun scan(imageUrl: String): NetworkResult<ReceiptScanResultEntity> {
         return request { api.scan(ScanRequestDto(imageUrl)) }
     }
 
-    suspend fun save(request: ReceiptSaveRequestDto): NetworkResult<Unit> {
+    suspend fun save(request: ReceiptSaveEntity): NetworkResult<Unit> {
         return requestUnit { api.save(request) }
     }
 
-    suspend fun update(request: ReceiptUpdateRequestDto): NetworkResult<Unit> {
+    suspend fun update(request: ReceiptUpdateEntity): NetworkResult<Unit> {
         return requestUnit { api.update(request) }
     }
 
-    suspend fun list(request: ReceiptListRequestDto): NetworkResult<BasePagedResponse<ReceiptItemDto>> {
+    suspend fun list(request: ReceiptListQueryEntity): NetworkResult<BasePagedResponse<ReceiptItemDto>> {
         return requestEnvelope({ api.list(request) }) { it }
     }
 
@@ -48,7 +48,7 @@ class ReceiptRemoteDataSource(
         return request { api.export(ReceiptExportRequestDto(receiptIds)) }
     }
 
-    suspend fun exportRecords(request: ExportRecordListRequestDto): NetworkResult<BasePagedResponse<ExportRecordItemDto>> {
+    suspend fun exportRecords(request: ExportRecordListQueryEntity): NetworkResult<BasePagedResponse<ExportRecordEntity>> {
         return requestEnvelope({ api.exportRecords(request) }) { it }
     }
 

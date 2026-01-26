@@ -74,7 +74,7 @@
             <ImageView
                 android:layout_width="18dp"
                 android:layout_height="18dp"
-                android:contentDescription="@string/title_type"
+                android:contentDescription="@string/invoice_type"
                 android:src="@drawable/ic_record_type" />
 
             <TextView

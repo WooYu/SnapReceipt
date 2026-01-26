@@ -1,115 +1,119 @@
 package com.snapreceipt.io.data.network.model
 
-import com.snapreceipt.io.domain.model.ExportRecordEntity
-import com.snapreceipt.io.domain.model.ExportRecordListQueryEntity
+import com.google.gson.annotations.SerializedName
 import com.snapreceipt.io.domain.model.ReceiptCategory
 import com.snapreceipt.io.domain.model.ReceiptEntity
-import com.snapreceipt.io.domain.model.ReceiptListQueryEntity
-import com.snapreceipt.io.domain.model.ReceiptSaveEntity
-import com.snapreceipt.io.domain.model.ReceiptScanResultEntity
-import com.snapreceipt.io.domain.model.ReceiptUpdateEntity
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
+/**
+ * 扫码解析请求（/api/receipt/scan）。
+ *
+ * @property imageUrl 图片URL
+ */
 data class ScanRequestDto(
     val imageUrl: String
 )
 
-data class ReceiptScanResultDto(
-    val merchant: String? = null,
-    val address: String? = null,
-    val receiptDate: String? = null,
-    val receiptTime: String? = null,
-    val totalAmount: Double? = null,
-    val tipAmount: Double? = null,
-    val paymentCardNo: String? = null,
-    val consumer: String? = null,
-    val remark: String? = null,
-    val receiptUrl: String? = null
-)
+/**
+ * 分类列表请求（/api/category/list，无参数）。
+ */
+class CategoryListRequestDto
 
-data class CategoryListRequestDto(
-    val unused: String? = null
-)
-
+/**
+ * 分类新增请求（/api/category/remove，后端实际路径以接口为准）。
+ *
+ * @property categoryName 分类名称
+ */
 data class CategoryCreateRequestDto(
     val categoryName: String
 )
 
+/**
+ * 分类删除请求（/api/category/remove）。
+ *
+ * @property categoryIds 分类ID列表
+ */
 data class CategoryDeleteRequestDto(
     val categoryIds: List<Int>
 )
 
+/**
+ * 分类条目（/api/category/list 返回的 data 列表项）。
+ *
+ * @property createBy 创建人
+ * @property createTime 创建时间
+ * @property updateBy 更新人
+ * @property updateTime 更新时间
+ * @property remark 备注
+ * @property categoryId 分类ID
+ * @property userId 用户ID（0 表示后台默认分类）
+ * @property categoryName 分类名称
+ * @property categoryIcon 分类图标（备用）
+ * @property orderNum 排序
+ * @property status 状态
+ * @property delFlag 删除标记
+ */
 data class CategoryItemDto(
+    val createBy: String? = null,
+    val createTime: String? = null,
+    val updateBy: String? = null,
+    val updateTime: String? = null,
+    val remark: String? = null,
     val categoryId: Int,
     val userId: Int? = null,
     val categoryName: String,
-    val orderNum: Int? = null
+    val categoryIcon: String? = null,
+    val orderNum: Int? = null,
+    val status: String? = null,
+    val delFlag: String? = null
 )
 
-data class ReceiptSaveRequestDto(
-    val merchant: String,
-    val receiptDate: String,
-    val totalAmount: Double,
-    val tipAmount: Double,
-    val paymentCardNo: String,
-    val consumer: String,
-    val remark: String? = null,
-    val receiptUrl: String,
-    val categoryId: Int,
-    val receiptTime: String? = null
-)
-
-data class ReceiptUpdateRequestDto(
-    val receiptId: Long,
-    val merchant: String,
-    val receiptDate: String,
-    val totalAmount: Double,
-    val tipAmount: Double,
-    val paymentCardNo: String,
-    val consumer: String,
-    val remark: String? = null,
-    val receiptUrl: String? = null,
-    val categoryId: Int,
-    val receiptTime: String? = null
-)
-
+/**
+ * 发票删除请求（/api/receipt/delete）。
+ *
+ * @property receiptId 发票ID
+ */
 data class ReceiptDeleteRequestDto(
     val receiptId: Long
 )
 
+/**
+ * 发票导出请求（/api/receipt/export）。
+ *
+ * @property receiptIds 发票ID列表
+ */
 data class ReceiptExportRequestDto(
     val receiptIds: List<Long>
 )
 
-data class ReceiptListRequestDto(
-    val categoryId: Int? = null,
-    val receiptDateStart: String? = null,
-    val receiptDateEnd: String? = null,
-    val createTimeStart: String? = null,
-    val createTimeEnd: String? = null,
-    val pageNum: Int? = null,
-    val pageSize: Int? = null
-)
-
-data class ExportRecordListRequestDto(
-    val pageNum: Int? = null,
-    val pageSize: Int? = null
-)
-
-data class ExportRecordItemDto(
-    val createTime: String? = null,
-    val exportId: Long,
-    val beginDate: String? = null,
-    val endDate: String? = null,
-    val receiptCount: Int? = null,
-    val exportType: String? = null,
-    val totalAmount: Double? = null,
-    val fileUrl: String? = null,
-    val status: String? = null
-)
-
+/**
+ * 发票列表条目（/api/receipt/list 返回 rows）。
+ *
+ * @property createBy 创建人
+ * @property createTime 上传时间
+ * @property updateBy 更新人
+ * @property updateTime 更新时间
+ * @property remark 备注
+ * @property receiptId 发票ID
+ * @property userId 用户ID
+ * @property categoryId 分类ID
+ * @property receiptType 发票类型（Business/Individual）
+ * @property receiptUrl 发票图片地址
+ * @property merchant 商户名称
+ * @property totalAmount 消费总额
+ * @property tipAmount 小费
+ * @property paymentCardNo 卡号
+ * @property consumer 消费者
+ * @property receiptDate 发票日期
+ * @property receiptTime 发票时间
+ * @property status 状态
+ * @property delFlag 删除标记
+ * @property categoryName 分类名称
+ * @property email 邮箱
+ * @property phoneNumber 电话（脱敏）
+ * @property address 地址
+ */
 data class ReceiptItemDto(
     val createBy: String? = null,
     val createTime: String? = null,
@@ -129,9 +133,16 @@ data class ReceiptItemDto(
     val receiptDate: String? = null,
     val receiptTime: String? = null,
     val status: String? = null,
-    val delFlag: String? = null
+    val delFlag: String? = null,
+    val categoryName: String? = null,
+    val email: String? = null,
+    @SerializedName("phonenumber") val phoneNumber: String? = null,
+    val address: String? = null
 )
 
+/**
+ * 将列表条目映射为本地展示实体。
+ */
 fun ReceiptItemDto.toEntity(): ReceiptEntity = ReceiptEntity(
     id = receiptId.toInt(),
     merchantName = merchant,
@@ -143,102 +154,13 @@ fun ReceiptItemDto.toEntity(): ReceiptEntity = ReceiptEntity(
     description = remark.orEmpty()
 )
 
-fun ExportRecordItemDto.toEntity(): ExportRecordEntity = ExportRecordEntity(
-    exportId = exportId,
-    beginDate = beginDate.orEmpty(),
-    endDate = endDate.orEmpty(),
-    receiptCount = receiptCount ?: 0,
-    exportType = exportType.orEmpty(),
-    totalAmount = totalAmount ?: 0.0,
-    fileUrl = fileUrl.orEmpty(),
-    createTime = createTime,
-    status = status
-)
-
+/**
+ * 将分类条目映射为 UI 使用的分类项。
+ */
 fun CategoryItemDto.toItem(): ReceiptCategory.Item = ReceiptCategory.Item(
     id = categoryId,
     label = categoryName,
     isCustom = (userId ?: 0) != 0
-)
-
-fun ReceiptEntity.toDto(): ReceiptItemDto = ReceiptItemDto(
-    receiptId = id.toLong(),
-    userId = 0L,
-    categoryId = ReceiptCategory.idForLabel(category),
-    receiptType = invoiceType,
-    receiptUrl = imagePath,
-    merchant = merchantName,
-    totalAmount = amount,
-    receiptDate = formatDate(date, DATE_FORMAT),
-    receiptTime = formatDate(date, TIME_FORMAT)
-)
-
-fun ReceiptSaveEntity.toDto(): ReceiptSaveRequestDto = ReceiptSaveRequestDto(
-    merchant = merchant,
-    receiptDate = receiptDate,
-    totalAmount = totalAmount,
-    tipAmount = tipAmount,
-    paymentCardNo = paymentCardNo,
-    consumer = consumer,
-    remark = remark,
-    receiptUrl = receiptUrl,
-    categoryId = categoryId,
-    receiptTime = receiptTime
-)
-
-fun ReceiptUpdateEntity.toDto(): ReceiptUpdateRequestDto = ReceiptUpdateRequestDto(
-    receiptId = receiptId,
-    merchant = merchant,
-    receiptDate = receiptDate,
-    totalAmount = totalAmount,
-    tipAmount = tipAmount,
-    paymentCardNo = paymentCardNo,
-    consumer = consumer,
-    remark = remark,
-    receiptUrl = receiptUrl,
-    categoryId = categoryId,
-    receiptTime = receiptTime
-)
-
-fun ReceiptListQueryEntity.toDto(): ReceiptListRequestDto = ReceiptListRequestDto(
-    categoryId = categoryId,
-    receiptDateStart = receiptDateStart,
-    receiptDateEnd = receiptDateEnd,
-    createTimeStart = createTimeStart,
-    createTimeEnd = createTimeEnd,
-    pageNum = pageNum,
-    pageSize = pageSize
-)
-
-fun ExportRecordListQueryEntity.toDto(): ExportRecordListRequestDto = ExportRecordListRequestDto(
-    pageNum = pageNum,
-    pageSize = pageSize
-)
-
-fun ReceiptScanResultDto.toEntity(): ReceiptScanResultEntity = ReceiptScanResultEntity(
-    merchant = merchant,
-    address = address,
-    receiptDate = receiptDate,
-    receiptTime = receiptTime,
-    totalAmount = totalAmount,
-    tipAmount = tipAmount,
-    paymentCardNo = paymentCardNo,
-    consumer = consumer,
-    remark = remark,
-    receiptUrl = receiptUrl
-)
-
-fun ReceiptScanResultEntity.toDto(): ReceiptScanResultDto = ReceiptScanResultDto(
-    merchant = merchant,
-    address = address,
-    receiptDate = receiptDate,
-    receiptTime = receiptTime,
-    totalAmount = totalAmount,
-    tipAmount = tipAmount,
-    paymentCardNo = paymentCardNo,
-    consumer = consumer,
-    remark = remark,
-    receiptUrl = receiptUrl
 )
 
 private const val DATE_FORMAT = "yyyy-MM-dd"
@@ -252,6 +174,3 @@ private fun parseReceiptDateMillis(date: String?, time: String?): Long {
         SimpleDateFormat(format, Locale.getDefault()).parse(value)?.time
     }.getOrNull() ?: System.currentTimeMillis()
 }
-
-private fun formatDate(timestamp: Long, pattern: String): String =
-    SimpleDateFormat(pattern, Locale.getDefault()).format(Date(timestamp))

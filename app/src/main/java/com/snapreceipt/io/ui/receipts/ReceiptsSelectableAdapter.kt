@@ -28,7 +28,8 @@ class ReceiptsSelectableAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemReceiptSelectBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding =
+            ItemReceiptSelectBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding, onToggle, onEditClick)
     }
 
@@ -55,8 +56,8 @@ class ReceiptsSelectableAdapter(
                 amount.text = context.getString(R.string.amount_currency_format, receipt.amount)
 
                 val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
-                val category = receipt.category.ifBlank { context.getString(R.string.type_other) }
-                val titleType = receipt.invoiceType.ifBlank { context.getString(R.string.type_individual) }
+                val category = receipt.category
+                val titleType = receipt.invoiceType
                 val metaText = context.getString(
                     R.string.receipt_meta_format,
                     category,

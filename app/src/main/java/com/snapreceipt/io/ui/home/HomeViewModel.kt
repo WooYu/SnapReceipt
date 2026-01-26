@@ -10,6 +10,7 @@ import com.snapreceipt.io.domain.usecase.receipt.DeleteReceiptRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.FetchReceiptsUseCase
 import com.snapreceipt.io.domain.usecase.receipt.UpdateReceiptRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.UploadAndScanReceiptUseCase
+import com.snapreceipt.io.ui.invoice.InvoiceDetailsArgs
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
@@ -112,17 +113,10 @@ class HomeViewModel @Inject constructor(
                         UiEvent.Custom(
                             HomeEventKeys.PREFILL_READY,
                             Bundle().apply {
-                                putString(HomeEventKeys.EXTRA_IMAGE_PATH, imagePath)
-                                putString(HomeEventKeys.EXTRA_IMAGE_URL, scan.receiptUrl.orEmpty())
-                                putString(HomeEventKeys.EXTRA_MERCHANT, scan.merchant.orEmpty())
-                                putString(HomeEventKeys.EXTRA_ADDRESS, scan.address.orEmpty())
-                                putString(HomeEventKeys.EXTRA_AMOUNT, scan.totalAmount?.toString().orEmpty())
-                                putString(HomeEventKeys.EXTRA_DATE, scan.receiptDate.orEmpty())
-                                putString(HomeEventKeys.EXTRA_TIME, scan.receiptTime.orEmpty())
-                                putString(HomeEventKeys.EXTRA_TIP_AMOUNT, scan.tipAmount?.toString().orEmpty())
-                                putString(HomeEventKeys.EXTRA_CARD, scan.paymentCardNo.orEmpty())
-                                putString(HomeEventKeys.EXTRA_CONSUMER, scan.consumer.orEmpty())
-                                putString(HomeEventKeys.EXTRA_REMARK, scan.remark.orEmpty())
+                                putParcelable(
+                                    HomeEventKeys.EXTRA_ARGS,
+                                    InvoiceDetailsArgs.fromScan(imagePath, scan)
+                                )
                             }
                         )
                     )

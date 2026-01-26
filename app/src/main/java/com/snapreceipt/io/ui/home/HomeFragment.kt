@@ -20,6 +20,7 @@ import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.common.shouldShowEmpty
 import com.snapreceipt.io.ui.home.dialogs.ScanFailedDialog
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
+import com.snapreceipt.io.ui.invoice.InvoiceDetailsArgs
 import com.skybound.space.base.presentation.BaseFragment
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.platform.permission.FragmentPermissionHelper
@@ -133,19 +134,8 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     }
 
     private fun openReceiptForEdit(receipt: ReceiptEntity) {
-        val intent = android.content.Intent(requireContext(), InvoiceDetailsActivity::class.java).apply {
-            putExtra(InvoiceDetailsActivity.EXTRA_RECEIPT_ID, receipt.id.toLong())
-            putExtra(InvoiceDetailsActivity.EXTRA_MERCHANT, receipt.merchantName)
-            putExtra(InvoiceDetailsActivity.EXTRA_AMOUNT, receipt.amount.toString())
-            putExtra(InvoiceDetailsActivity.EXTRA_INVOICE_TYPE, receipt.category)
-            putExtra(InvoiceDetailsActivity.EXTRA_TITLE_TYPE, receipt.invoiceType)
-            putExtra(InvoiceDetailsActivity.EXTRA_NOTE, receipt.description)
-            putExtra(InvoiceDetailsActivity.EXTRA_IMAGE_URL, receipt.imagePath)
-            val formatted = formatDateTime(receipt.date)
-            putExtra(InvoiceDetailsActivity.EXTRA_DATE, formatted.first)
-            putExtra(InvoiceDetailsActivity.EXTRA_TIME, formatted.second)
-        }
-        startActivity(intent)
+        val args = InvoiceDetailsArgs.fromReceipt(receipt)
+        startActivity(InvoiceDetailsActivity.createIntent(requireContext(), args))
     }
 
     private fun openCameraWithPermission() {
@@ -204,30 +194,10 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     override fun onCustomEvent(event: UiEvent.Custom) {
         when (event.type) {
             HomeEventKeys.PREFILL_READY -> {
-                val imagePath = event.payload?.getString(HomeEventKeys.EXTRA_IMAGE_PATH).orEmpty()
-                val imageUrl = event.payload?.getString(HomeEventKeys.EXTRA_IMAGE_URL).orEmpty()
-                val merchant = event.payload?.getString(HomeEventKeys.EXTRA_MERCHANT).orEmpty()
-                val address = event.payload?.getString(HomeEventKeys.EXTRA_ADDRESS).orEmpty()
-                val amount = event.payload?.getString(HomeEventKeys.EXTRA_AMOUNT).orEmpty()
-                val date = event.payload?.getString(HomeEventKeys.EXTRA_DATE).orEmpty()
-                val time = event.payload?.getString(HomeEventKeys.EXTRA_TIME).orEmpty()
-                val tipAmount = event.payload?.getString(HomeEventKeys.EXTRA_TIP_AMOUNT).orEmpty()
-                val card = event.payload?.getString(HomeEventKeys.EXTRA_CARD).orEmpty()
-                val consumer = event.payload?.getString(HomeEventKeys.EXTRA_CONSUMER).orEmpty()
-                val remark = event.payload?.getString(HomeEventKeys.EXTRA_REMARK).orEmpty()
-                openInvoiceDetails(
-                    imagePath,
-                    imageUrl,
-                    merchant,
-                    address,
-                    amount,
-                    date,
-                    time,
-                    tipAmount,
-                    card,
-                    consumer,
-                    remark
-                )
+                val args = event.payload?.getParcelable(HomeEventKeys.EXTRA_ARGS) as? InvoiceDetailsArgs
+                if (args != null) {
+                    openInvoiceDetails(args)
+                }
             }
             HomeEventKeys.SCAN_FAILED -> {
                 ScanFailedDialog().show(parentFragmentManager, "scan_failed")
@@ -235,37 +205,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         }
     }
 
-    private fun openInvoiceDetails(
-        imagePath: String,
-        imageUrl: String,
-        merchant: String,
-        address: String,
-        amount: String,
-        date: String,
-        time: String,
-        tipAmount: String,
-        card: String,
-        consumer: String,
-        remark: String
-    ) {
-        val intent = android.content.Intent(requireContext(), InvoiceDetailsActivity::class.java)
-        intent.putExtra(InvoiceDetailsActivity.EXTRA_IMAGE_PATH, imagePath)
-        intent.putExtra(InvoiceDetailsActivity.EXTRA_IMAGE_URL, imageUrl)
-        intent.putExtra(InvoiceDetailsActivity.EXTRA_MERCHANT, merchant)
-        intent.putExtra(InvoiceDetailsActivity.EXTRA_ADDRESS, address)
-        intent.putExtra(InvoiceDetailsActivity.EXTRA_AMOUNT, amount)
-        intent.putExtra(InvoiceDetailsActivity.EXTRA_DATE, date)
-        intent.putExtra(InvoiceDetailsActivity.EXTRA_TIME, time)
-        intent.putExtra(InvoiceDetailsActivity.EXTRA_TIP_AMOUNT, tipAmount)
-        intent.putExtra(InvoiceDetailsActivity.EXTRA_CARD, card)
-        intent.putExtra(InvoiceDetailsActivity.EXTRA_CONSUMER, consumer)
-        intent.putExtra(InvoiceDetailsActivity.EXTRA_NOTE, remark)
-        startActivity(intent)
-    }
-
-    private fun formatDateTime(timestamp: Long): Pair<String, String> {
-        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
-        val timeFormat = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
-        return dateFormat.format(java.util.Date(timestamp)) to timeFormat.format(java.util.Date(timestamp))
+    private fun openInvoiceDetails(args: InvoiceDetailsArgs) {
+        startActivity(InvoiceDetailsActivity.createIntent(requireContext(), args))
     }
 }

@@ -37,10 +37,6 @@
             android:exported="false" />
 
         <activity
-            android:name=".ui.receipts.ReceiptDetailsActivity"
-            android:exported="false" />
-
-        <activity
             android:name=".ui.me.about.AboutUsActivity"
             android:exported="false" />
 

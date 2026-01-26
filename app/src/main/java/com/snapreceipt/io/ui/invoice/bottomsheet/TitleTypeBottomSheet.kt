@@ -23,7 +23,6 @@ class TitleTypeBottomSheet(
         dialog.setContentView(view)
 
         optionViews = listOf(
-            view.findViewById(R.id.title_all),
             view.findViewById(R.id.title_individual),
             view.findViewById(R.id.title_company)
         )

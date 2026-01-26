@@ -50,7 +50,8 @@
     <string name="amount">金额</string>
     <string name="date">日期</string>
     <string name="category">分类</string>
-    <string name="invoice_type">发票类型</string>
+    <string name="invoice_category">Invoice Category</string>
+    <string name="invoice_type">Invoice Type</string>
     <string name="description">备注</string>
     <string name="save">保存</string>
     <string name="cancel">取消</string>
@@ -71,7 +72,6 @@
     <string name="bank_card_hint">Card number</string>
     <string name="card_number_invalid_chars">Only digits, spaces, or - are allowed</string>
     <string name="card_number_length">Card number should be 12-19 digits</string>
-    <string name="title_type">Title Type</string>
     <string name="note">Note</string>
     <string name="save_upload">Save Upload</string>
 
@@ -98,7 +98,7 @@
     <string name="home_receipt_meta_format">%1$s | %2$s | %3$s</string>
     <string name="date_range_format">%1$s - %2$s</string>
     <string name="select_invoice_type">Select Invoice Type</string>
-    <string name="select_title_type">Select Title Type</string>
+    <string name="select_invoice_category">Select Invoice Category</string>
     <string name="select_date_time">Select date and time</string>
     <string name="select_date_title">Select Date</string>
     <string name="year_label">Year</string>
@@ -108,11 +108,6 @@
     <string name="min_label">Min</string>
     <string name="date_prefix">Date: %s</string>
     <string name="date_range_separator">-</string>
-    <string name="type_all">All</string>
-    <string name="type_food">Food</string>
-    <string name="type_travel">Travel</string>
-    <string name="type_office">Office</string>
-    <string name="type_hotel">Hotel</string>
     <string name="type_other">Other</string>
     <string name="type_add">+ Type</string>
     <string name="type_individual">Individual</string>
@@ -138,7 +133,7 @@
     <string name="phone">手机</string>
     <string name="avatar">头像</string>
     <string name="change_avatar">更换头像</string>
-    
+
     <string name="export_records">Export Records</string>
     <string name="about_us">About Us</string>
     <string name="app_version_label">Version</string>
@@ -150,9 +145,9 @@
     <string name="name_label">Name</string>
     <string name="email_label">Email</string>
     <string name="mobile_number">Mobile Number</string>
-    
+
     <string name="switch_account">Switch Account</string>
-    
+
     <string name="receipt_count">Invoice Count</string>
     <string name="export_success_title">Export Successful!</string>
     <string name="export_success_message">You can view the export records in your personal center</string>

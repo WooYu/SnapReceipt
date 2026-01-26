@@ -2,7 +2,6 @@ package com.snapreceipt.io.data.repository
 
 import com.snapreceipt.io.data.network.datasource.FileRemoteDataSource
 import com.snapreceipt.io.data.network.datasource.UploadRemoteDataSource
-import com.snapreceipt.io.data.network.model.toEntity
 import com.snapreceipt.io.domain.model.UploadUrlEntity
 import com.snapreceipt.io.domain.repository.FileRepository
 import com.skybound.space.core.network.ApiException
@@ -15,7 +14,7 @@ class FileRepositoryImpl @Inject constructor(
 ) : FileRepository {
     override suspend fun requestUploadUrl(fileName: String): UploadUrlEntity {
         return when (val result = fileRemoteDataSource.requestUploadUrl(fileName)) {
-            is NetworkResult.Success -> result.data.toEntity()
+            is NetworkResult.Success -> result.data
             is NetworkResult.Failure -> throw result.toApiException()
         }
     }
