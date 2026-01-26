@@ -49,7 +49,7 @@ data class ReceiptEntity(
 data class UserEntity(
     @PrimaryKey
     /** 用户ID */
-    val id: Int = 1,
+    val id: Long = 1L,
     /** 昵称（接口字段 nickName） */
     val username: String = "",
     /** 邮箱 */

@@ -92,7 +92,7 @@ fun AuthTokensEntity.toDto(): AuthTokensDto = AuthTokensDto(
 )
 
 fun UserProfileDto.toEntity(): UserEntity = UserEntity(
-    id = userId.toInt(),
+    id = userId,
     username = nickName.orEmpty(),
     email = email.orEmpty(),
     phone = phoneNumber.orEmpty(),
@@ -100,7 +100,7 @@ fun UserProfileDto.toEntity(): UserEntity = UserEntity(
 )
 
 fun UserEntity.toDto(): UserProfileDto = UserProfileDto(
-    userId = id.toLong(),
+    userId = id,
     nickName = username,
     email = email,
     phoneNumber = phone,
