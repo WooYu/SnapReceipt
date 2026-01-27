@@ -1,6 +1,8 @@
 package com.snapreceipt.io.ui.home
 
 import android.app.Activity
+import android.content.ContentResolver
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -25,6 +27,7 @@ import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.platform.permission.FragmentPermissionHelper
 import com.skybound.space.base.platform.permission.PermissionManager
 import com.skybound.space.base.platform.permission.Permissions
+import com.skybound.space.core.util.LogHelper
 import com.yalantis.ucrop.UCrop
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -73,7 +76,13 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
                 handleCroppedImage(output)
             }
         } else if (result.resultCode == UCrop.RESULT_ERROR) {
-            Toast.makeText(requireContext(), getString(R.string.image_crop_failed), Toast.LENGTH_SHORT).show()
+            val error = UCrop.getError(result.data ?: return@registerForActivityResult)
+            LogHelper.e("Crop", "Crop failed", error)
+            Toast.makeText(
+                requireContext(),
+                error?.localizedMessage ?: getString(R.string.image_crop_failed),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -170,6 +179,10 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     }
 
     private fun startCrop(sourceUri: Uri) {
+        val safeSource = resolveCropSourceUri(sourceUri) ?: run {
+            Toast.makeText(requireContext(), getString(R.string.image_crop_failed), Toast.LENGTH_SHORT).show()
+            return
+        }
         val destination = Uri.fromFile(
             File(requireContext().cacheDir, "crop_${System.currentTimeMillis()}.jpg")
         )
@@ -178,15 +191,32 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
             setFreeStyleCropEnabled(true)
             setHideBottomControls(false)
         }
-        val intent = UCrop.of(sourceUri, destination)
+        val intent = UCrop.of(safeSource, destination)
             .withOptions(options)
             .getIntent(requireContext())
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
         cropLauncher.launch(intent)
     }
 
     private fun handleCroppedImage(uri: Uri) {
         val path = uri.path ?: return
         viewModel.processCroppedImage(path)
+    }
+
+    private fun resolveCropSourceUri(sourceUri: Uri): Uri? {
+        if (sourceUri.scheme != ContentResolver.SCHEME_CONTENT) return sourceUri
+        return runCatching {
+            val cacheFile = File(
+                requireContext().cacheDir,
+                "crop_source_${System.currentTimeMillis()}.jpg"
+            )
+            requireContext().contentResolver.openInputStream(sourceUri)?.use { input ->
+                cacheFile.outputStream().use { output -> input.copyTo(output) }
+            } ?: return null
+            Uri.fromFile(cacheFile)
+        }.onFailure { error ->
+            LogHelper.e("Crop", "Failed to prepare crop source", error)
+        }.getOrNull()
     }
 
     override fun onCustomEvent(event: UiEvent.Custom) {

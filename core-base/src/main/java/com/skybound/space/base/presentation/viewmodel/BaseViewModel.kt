@@ -5,19 +5,17 @@ import androidx.lifecycle.viewModelScope
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.presentation.UiState
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
+import com.skybound.space.core.util.LogHelper
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import android.util.Log
-import kotlinx.coroutines.CancellationException
 
 /**
  * 轻量化的 ViewModel 基类，负责：
@@ -96,7 +94,7 @@ abstract class BaseViewModel(
      */
     open fun handleError(throwable: Throwable) {
         if (throwable is CancellationException) {
-            Log.d("BaseViewModel", "Coroutine cancelled: ${throwable.message}")
+            LogHelper.d("BaseViewModel", "Coroutine cancelled: ${throwable.message}")
             return
         }
         emitEvent(

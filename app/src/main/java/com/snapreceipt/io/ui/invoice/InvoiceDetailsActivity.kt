@@ -233,14 +233,6 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun setupPickers() {
-        if (inputInvoiceCategory.text.isNullOrBlank()) {
-            inputInvoiceCategory.setText(
-                ReceiptCategory.all().firstOrNull()?.label ?: getString(R.string.type_other)
-            )
-        }
-        if (inputTitleType.text.isNullOrBlank()) {
-            inputTitleType.setText(getString(R.string.type_individual))
-        }
         inputInvoiceCategory.apply {
             isFocusable = false
             isClickable = true

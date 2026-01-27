@@ -101,6 +101,7 @@ dependencies {
     // 应用依赖
     implementation(libs.appcompat)
     implementation(libs.core.ktx)
+    implementation(libs.exifinterface)
     implementation(libs.material)
     implementation(libs.constraintlayout)
     implementation(libs.fragment.ktx)
