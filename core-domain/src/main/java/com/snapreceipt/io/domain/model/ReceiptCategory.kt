@@ -2,6 +2,10 @@ package com.snapreceipt.io.domain.model
 
 /**
  * 分类内存缓存（来自 /api/category/list）。
+ *
+ * 缓存更新时机：
+ * - FetchCategoriesUseCase 成功返回后调用 update。
+ * - 分类新增/删除后重新拉取并 update。
  */
 object ReceiptCategory {
     /**
@@ -17,33 +21,28 @@ object ReceiptCategory {
         val isCustom: Boolean = false
     )
 
-    private val defaultCategories = listOf(
-        Item(id = 100L, label = "Dining"),
-        Item(id = 101L, label = "Grocery"),
-        Item(id = 102L, label = "Gas/Fuel"),
-        Item(id = 103L, label = "Travel")
-    )
+    @Volatile
+    private var categories: List<Item> = emptyList()
 
     @Volatile
-    private var categories: List<Item> = defaultCategories
+    private var lastUpdatedAt: Long? = null
 
     fun all(): List<Item> = categories
 
     fun update(items: List<Item>) {
-        categories = items.ifEmpty { defaultCategories }
+        categories = items
+        lastUpdatedAt = System.currentTimeMillis()
     }
 
     fun labelForId(id: Long): String {
-        val fromList = categories.firstOrNull { it.id == id }?.label
-        if (!fromList.isNullOrBlank()) return fromList
-        val fallback = defaultCategories.firstOrNull { it.id == id }?.label
-        return fallback ?: "Other"
+        return categories.firstOrNull { it.id == id }?.label.orEmpty()
     }
 
     fun idForLabel(label: String): Long {
         val fromList = categories.firstOrNull { it.label.equals(label, ignoreCase = true) }?.id
         if (fromList != null) return fromList
-        val fallback = defaultCategories.firstOrNull { it.label.equals(label, ignoreCase = true) }?.id
-        return fallback ?: -1L
+        return -1L
     }
+
+    fun lastUpdatedAt(): Long? = lastUpdatedAt
 }

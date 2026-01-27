@@ -1,4 +1,4 @@
-package com.snapreceipt.io.data.network.model
+package com.snapreceipt.io.data.network.model.auth
 
 import com.google.gson.annotations.SerializedName
 import com.snapreceipt.io.domain.model.AuthTokensEntity
@@ -100,7 +100,7 @@ fun UserProfileDto.toEntity(): UserEntity = UserEntity(
 )
 
 fun UserEntity.toDto(): UserProfileDto = UserProfileDto(
-    userId = id,
+    userId = id ?: 0L,
     nickName = username,
     email = email,
     phoneNumber = phone,

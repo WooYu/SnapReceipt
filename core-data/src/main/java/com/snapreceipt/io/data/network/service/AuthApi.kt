@@ -2,11 +2,11 @@ package com.snapreceipt.io.data.network.service
 
 import com.skybound.space.core.network.BaseResponse
 import com.skybound.space.core.network.BaseEmptyResponse
-import com.snapreceipt.io.data.network.model.AuthCodeRequestDto
-import com.snapreceipt.io.data.network.model.AuthTokensDto
-import com.snapreceipt.io.data.network.model.LoginRequestDto
-import com.snapreceipt.io.data.network.model.RefreshRequestDto
-import com.snapreceipt.io.data.network.model.UserProfileDto
+import com.snapreceipt.io.data.network.model.auth.AuthCodeRequestDto
+import com.snapreceipt.io.data.network.model.auth.AuthTokensDto
+import com.snapreceipt.io.data.network.model.auth.LoginRequestDto
+import com.snapreceipt.io.data.network.model.auth.RefreshRequestDto
+import com.snapreceipt.io.data.network.model.auth.UserProfileDto
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST

@@ -5,8 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ReceiptCategory
 import com.snapreceipt.io.domain.model.ReceiptEntity
-import com.snapreceipt.io.domain.model.ReceiptListQueryEntity
-import com.snapreceipt.io.domain.model.ReceiptUpdateEntity
+import com.snapreceipt.io.domain.model.query.ReceiptListQueryEntity
 import com.snapreceipt.io.domain.usecase.receipt.DeleteReceiptRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.ExportReceiptsRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.FetchReceiptsUseCase
@@ -61,7 +60,7 @@ class ReceiptsViewModel @Inject constructor(
         titleTypeFilter = type?.trim().takeIf { !it.isNullOrBlank() }
         val filtered = applyTitleFilter(lastFetchedReceipts)
         _uiState.update { current ->
-            val validIds = filtered.map { it.id }.toSet()
+            val validIds = filtered.mapNotNull { it.receiptId }.toSet()
             current.copy(
                 receipts = filtered,
                 selectedIds = current.selectedIds.intersect(validIds),
@@ -83,7 +82,7 @@ class ReceiptsViewModel @Inject constructor(
     }
 
     fun selectAll() {
-        val allIds = _uiState.value.receipts.map { it.id }.toSet()
+        val allIds = _uiState.value.receipts.mapNotNull { it.receiptId }.toSet()
         _uiState.update { it.copy(selectedIds = allIds) }
     }
 
@@ -137,7 +136,8 @@ class ReceiptsViewModel @Inject constructor(
 
     fun deleteReceipt(receipt: ReceiptEntity) {
         viewModelScope.launch(dispatchers.io) {
-            deleteReceiptRemoteUseCase(receipt.id)
+            val id = receipt.receiptId ?: return@launch
+            deleteReceiptRemoteUseCase(id)
                 .onSuccess { fetchReceipts() }
                 .onFailure { updateError(it) }
         }
@@ -145,7 +145,8 @@ class ReceiptsViewModel @Inject constructor(
 
     fun updateReceipt(receipt: ReceiptEntity) {
         viewModelScope.launch(dispatchers.io) {
-            updateReceiptRemoteUseCase(receipt.toUpdateEntity())
+            if (receipt.receiptId == null) return@launch
+            updateReceiptRemoteUseCase(receipt)
                 .onSuccess { fetchReceipts() }
                 .onFailure { updateError(it) }
         }
@@ -159,7 +160,7 @@ class ReceiptsViewModel @Inject constructor(
                     lastFetchedReceipts = receipts
                     val filtered = applyTitleFilter(lastFetchedReceipts)
                     _uiState.update { current ->
-                        val validIds = filtered.map { it.id }.toSet()
+                        val validIds = filtered.mapNotNull { it.receiptId }.toSet()
                         val nextSelected = current.selectedIds.intersect(validIds)
                         current.copy(
                             receipts = filtered,
@@ -192,24 +193,6 @@ class ReceiptsViewModel @Inject constructor(
     private fun applyTitleFilter(receipts: List<ReceiptEntity> = _uiState.value.receipts): List<ReceiptEntity> {
         val label = titleTypeFilter?.trim().orEmpty()
         if (label.isBlank()) return receipts
-        return receipts.filter { it.invoiceType.equals(label, ignoreCase = true) }
-    }
-
-    private fun ReceiptEntity.toUpdateEntity(): ReceiptUpdateEntity {
-        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
-        val timeFormat = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
-        return ReceiptUpdateEntity(
-            receiptId = id,
-            merchant = merchantName,
-            receiptDate = dateFormat.format(java.util.Date(date)),
-            receiptTime = timeFormat.format(java.util.Date(date)),
-            totalAmount = amount,
-            tipAmount = 0.0,
-            paymentCardNo = "",
-            consumer = "",
-            remark = description,
-            receiptUrl = imagePath,
-            categoryId = ReceiptCategory.idForLabel(category)
-        )
+        return receipts.filter { it.receiptType?.equals(label, ignoreCase = true) == true }
     }
 }

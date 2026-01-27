@@ -1,6 +1,6 @@
 package com.snapreceipt.io.domain.usecase.receipt
 
-import com.snapreceipt.io.domain.model.ReceiptScanResultEntity
+import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.domain.repository.ReceiptRemoteRepository
 import com.snapreceipt.io.domain.usecase.file.RequestUploadUrlUseCase
 import com.snapreceipt.io.domain.usecase.file.UploadFileUseCase
@@ -33,7 +33,7 @@ class UploadAndScanReceiptUseCase @Inject constructor(
     suspend operator fun invoke(
         filePath: String,
         onProgress: (Stage) -> Unit = {}
-    ): Result<ReceiptScanResultEntity> =
+    ): Result<ReceiptEntity> =
         runCatching {
             val file = File(filePath)
             if (!file.exists()) error("File not found: ${file.absolutePath}")
@@ -51,11 +51,8 @@ class UploadAndScanReceiptUseCase @Inject constructor(
             onProgress(Stage.SCANNING)
             val scanResult = receiptRepository.scan(uploadInfo.publicUrl)
             // 扫码结果可能缺少回填的图片地址，兜底使用上传后的公开地址
-            if (scanResult.receiptUrl.isNullOrBlank()) {
-                scanResult.copy(receiptUrl = uploadInfo.publicUrl)
-            } else {
-                scanResult
-            }
+            val resolvedUrl = scanResult.receiptUrl?.takeIf { it.isNotBlank() } ?: uploadInfo.publicUrl
+            scanResult.copy(receiptUrl = resolvedUrl)
         }
 
     private fun guessContentType(file: File): String {

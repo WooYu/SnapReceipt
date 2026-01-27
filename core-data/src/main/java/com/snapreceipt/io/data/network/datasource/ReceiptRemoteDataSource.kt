@@ -4,35 +4,35 @@ import com.snapreceipt.io.data.base.BaseRemoteDataSource
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import com.skybound.space.core.network.NetworkResult
 import com.skybound.space.core.network.BasePagedResponse
-import com.snapreceipt.io.data.network.model.ReceiptExportRequestDto
-import com.snapreceipt.io.data.network.model.ReceiptItemDto
-import com.snapreceipt.io.data.network.model.ReceiptDeleteRequestDto
-import com.snapreceipt.io.data.network.model.ScanRequestDto
-import com.snapreceipt.io.data.network.model.CategoryCreateRequestDto
-import com.snapreceipt.io.data.network.model.CategoryDeleteRequestDto
-import com.snapreceipt.io.data.network.model.CategoryItemDto
-import com.snapreceipt.io.data.network.model.CategoryListRequestDto
+import com.snapreceipt.io.data.network.model.category.CategoryCreateRequestDto
+import com.snapreceipt.io.data.network.model.category.CategoryDeleteRequestDto
+import com.snapreceipt.io.data.network.model.category.CategoryItemDto
+import com.snapreceipt.io.data.network.model.category.CategoryListRequestDto
+import com.snapreceipt.io.data.network.model.receipt.ReceiptDeleteRequestDto
+import com.snapreceipt.io.data.network.model.receipt.ReceiptExportRequestDto
+import com.snapreceipt.io.data.network.model.receipt.ReceiptItemDto
+import com.snapreceipt.io.data.network.model.receipt.ReceiptSaveRequestDto
+import com.snapreceipt.io.data.network.model.receipt.ReceiptScanResultDto
+import com.snapreceipt.io.data.network.model.receipt.ReceiptUpdateRequestDto
+import com.snapreceipt.io.data.network.model.receipt.ScanRequestDto
 import com.snapreceipt.io.data.network.service.ReceiptApi
 import com.snapreceipt.io.domain.model.ExportRecordEntity
-import com.snapreceipt.io.domain.model.ExportRecordListQueryEntity
-import com.snapreceipt.io.domain.model.ReceiptListQueryEntity
-import com.snapreceipt.io.domain.model.ReceiptSaveEntity
-import com.snapreceipt.io.domain.model.ReceiptScanResultEntity
-import com.snapreceipt.io.domain.model.ReceiptUpdateEntity
+import com.snapreceipt.io.domain.model.query.ExportRecordListQueryEntity
+import com.snapreceipt.io.domain.model.query.ReceiptListQueryEntity
 
 class ReceiptRemoteDataSource(
     private val api: ReceiptApi,
     dispatchers: CoroutineDispatchersProvider
 ) : BaseRemoteDataSource(dispatchers) {
-    suspend fun scan(imageUrl: String): NetworkResult<ReceiptScanResultEntity> {
+    suspend fun scan(imageUrl: String): NetworkResult<ReceiptScanResultDto> {
         return request { api.scan(ScanRequestDto(imageUrl)) }
     }
 
-    suspend fun save(request: ReceiptSaveEntity): NetworkResult<Unit> {
+    suspend fun save(request: ReceiptSaveRequestDto): NetworkResult<Unit> {
         return requestUnit { api.save(request) }
     }
 
-    suspend fun update(request: ReceiptUpdateEntity): NetworkResult<Unit> {
+    suspend fun update(request: ReceiptUpdateRequestDto): NetworkResult<Unit> {
         return requestUnit { api.update(request) }
     }
 

@@ -2,7 +2,7 @@ package com.snapreceipt.io.ui.me.export
 
 import androidx.lifecycle.viewModelScope
 import com.snapreceipt.io.R
-import com.snapreceipt.io.domain.model.ExportRecordListQueryEntity
+import com.snapreceipt.io.domain.model.query.ExportRecordListQueryEntity
 import com.snapreceipt.io.domain.usecase.receipt.FetchExportRecordsUseCase
 import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider

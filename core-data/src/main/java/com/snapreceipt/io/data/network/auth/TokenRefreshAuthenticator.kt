@@ -2,8 +2,8 @@ package com.snapreceipt.io.data.network.auth
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.snapreceipt.io.data.network.model.AuthTokensDto
-import com.snapreceipt.io.data.network.model.RefreshRequestDto
+import com.snapreceipt.io.data.network.model.auth.AuthTokensDto
+import com.snapreceipt.io.data.network.model.auth.RefreshRequestDto
 import com.skybound.space.core.network.BaseResponse
 import com.skybound.space.core.network.NetworkConfig
 import com.skybound.space.core.network.auth.AuthTokenStore

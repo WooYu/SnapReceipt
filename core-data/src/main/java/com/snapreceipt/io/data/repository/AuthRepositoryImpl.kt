@@ -2,8 +2,8 @@ package com.snapreceipt.io.data.repository
 
 import com.snapreceipt.io.data.mapper.AuthTokensDtoToDomainMapper
 import com.snapreceipt.io.data.network.datasource.AuthRemoteDataSource
-import com.snapreceipt.io.data.network.model.LoginRequestDto
-import com.snapreceipt.io.data.network.model.toEntity
+import com.snapreceipt.io.data.network.model.auth.LoginRequestDto
+import com.snapreceipt.io.data.network.model.auth.toEntity
 import com.snapreceipt.io.domain.model.AuthTokensEntity
 import com.snapreceipt.io.domain.model.UserEntity
 import com.snapreceipt.io.domain.repository.AuthRepository

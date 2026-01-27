@@ -5,9 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ItemReceiptBinding
+import com.snapreceipt.io.domain.model.ReceiptCategory
 import com.snapreceipt.io.domain.model.ReceiptEntity
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class HomeReceiptAdapter(
     private val onEditClick: (ReceiptEntity) -> Unit
@@ -39,15 +38,20 @@ class HomeReceiptAdapter(
         fun bind(receipt: ReceiptEntity) {
             binding.apply {
                 val context = root.context
-                merchantName.text = receipt.merchantName
-                amount.text = context.getString(R.string.amount_currency_format, receipt.amount)
+                merchantName.text = receipt.merchant.orEmpty()
+                amount.text = context.getString(
+                    R.string.amount_currency_format,
+                    receipt.totalAmount ?: 0.0
+                )
 
-                val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
+                val dateText = receipt.receiptDate?.replace('-', '/').orEmpty()
+                val categoryLabel = receipt.categoryId?.let { ReceiptCategory.labelForId(it) }.orEmpty()
+                val titleType = receipt.receiptType.orEmpty()
                 val metaText = context.getString(
                     R.string.home_receipt_meta_format,
-                    receipt.category,
-                    receipt.invoiceType,
-                    dateFormat.format(java.util.Date(receipt.date))
+                    categoryLabel,
+                    titleType,
+                    dateText
                 )
                 meta.text = metaText
 

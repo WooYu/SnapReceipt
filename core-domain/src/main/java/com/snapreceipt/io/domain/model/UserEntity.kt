@@ -11,7 +11,7 @@ package com.snapreceipt.io.domain.model
  * @property createdAt 本地创建时间戳
  */
 data class UserEntity(
-    val id: Long = 1L,
+    val id: Long? = null,
     val username: String = "",
     val email: String = "",
     val phone: String = "",

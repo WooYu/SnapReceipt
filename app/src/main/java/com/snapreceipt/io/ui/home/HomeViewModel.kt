@@ -3,14 +3,11 @@ package com.snapreceipt.io.ui.home
 import android.os.Bundle
 import androidx.lifecycle.viewModelScope
 import com.snapreceipt.io.R
-import com.snapreceipt.io.domain.model.ReceiptCategory
 import com.snapreceipt.io.domain.model.ReceiptEntity
-import com.snapreceipt.io.domain.model.ReceiptUpdateEntity
 import com.snapreceipt.io.domain.usecase.receipt.DeleteReceiptRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.FetchReceiptsUseCase
 import com.snapreceipt.io.domain.usecase.receipt.UpdateReceiptRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.UploadAndScanReceiptUseCase
-import com.snapreceipt.io.ui.invoice.InvoiceDetailsArgs
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
@@ -63,7 +60,8 @@ class HomeViewModel @Inject constructor(
 
     fun deleteReceipt(receipt: ReceiptEntity) {
         viewModelScope.launch(dispatchers.io) {
-            deleteReceiptRemoteUseCase(receipt.id)
+            val id = receipt.receiptId ?: return@launch
+            deleteReceiptRemoteUseCase(id)
                 .onSuccess { loadReceipts() }
                 .onFailure { updateError(it) }
         }
@@ -75,7 +73,8 @@ class HomeViewModel @Inject constructor(
 
     fun updateReceipt(receipt: ReceiptEntity) {
         viewModelScope.launch(dispatchers.io) {
-            updateReceiptRemoteUseCase(receipt.toUpdateEntity())
+            if (receipt.receiptId == null) return@launch
+            updateReceiptRemoteUseCase(receipt)
                 .onSuccess { loadReceipts() }
                 .onFailure { updateError(it) }
         }
@@ -115,7 +114,7 @@ class HomeViewModel @Inject constructor(
                             Bundle().apply {
                                 putParcelable(
                                     HomeEventKeys.EXTRA_ARGS,
-                                    InvoiceDetailsArgs.fromScan(imagePath, scan)
+                                    scan
                                 )
                             }
                         )
@@ -135,21 +134,4 @@ class HomeViewModel @Inject constructor(
         handleError(throwable)
     }
 
-    private fun ReceiptEntity.toUpdateEntity(): ReceiptUpdateEntity {
-        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
-        val timeFormat = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
-        return ReceiptUpdateEntity(
-            receiptId = id,
-            merchant = merchantName,
-            receiptDate = dateFormat.format(java.util.Date(date)),
-            receiptTime = timeFormat.format(java.util.Date(date)),
-            totalAmount = amount,
-            tipAmount = 0.0,
-            paymentCardNo = "",
-            consumer = "",
-            remark = description,
-            receiptUrl = imagePath,
-            categoryId = ReceiptCategory.idForLabel(category)
-        )
-    }
 }

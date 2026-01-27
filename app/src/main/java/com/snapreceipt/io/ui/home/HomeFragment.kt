@@ -20,7 +20,6 @@ import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.common.shouldShowEmpty
 import com.snapreceipt.io.ui.home.dialogs.ScanFailedDialog
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
-import com.snapreceipt.io.ui.invoice.InvoiceDetailsArgs
 import com.skybound.space.base.presentation.BaseFragment
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.platform.permission.FragmentPermissionHelper
@@ -134,8 +133,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     }
 
     private fun openReceiptForEdit(receipt: ReceiptEntity) {
-        val args = InvoiceDetailsArgs.fromReceipt(receipt)
-        startActivity(InvoiceDetailsActivity.createIntent(requireContext(), args))
+        startActivity(InvoiceDetailsActivity.createIntent(requireContext(), receipt))
     }
 
     private fun openCameraWithPermission() {
@@ -194,9 +192,9 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     override fun onCustomEvent(event: UiEvent.Custom) {
         when (event.type) {
             HomeEventKeys.PREFILL_READY -> {
-                val args = event.payload?.getParcelable(HomeEventKeys.EXTRA_ARGS) as? InvoiceDetailsArgs
-                if (args != null) {
-                    openInvoiceDetails(args)
+                val receipt = event.payload?.getParcelable(HomeEventKeys.EXTRA_ARGS) as? ReceiptEntity
+                if (receipt != null) {
+                    openInvoiceDetails(receipt)
                 }
             }
             HomeEventKeys.SCAN_FAILED -> {
@@ -205,7 +203,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         }
     }
 
-    private fun openInvoiceDetails(args: InvoiceDetailsArgs) {
-        startActivity(InvoiceDetailsActivity.createIntent(requireContext(), args))
+    private fun openInvoiceDetails(receipt: ReceiptEntity) {
+        startActivity(InvoiceDetailsActivity.createIntent(requireContext(), receipt))
     }
 }

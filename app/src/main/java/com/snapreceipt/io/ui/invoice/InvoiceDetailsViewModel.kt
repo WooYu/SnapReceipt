@@ -2,8 +2,7 @@ package com.snapreceipt.io.ui.invoice
 
 import androidx.lifecycle.viewModelScope
 import com.snapreceipt.io.R
-import com.snapreceipt.io.domain.model.ReceiptSaveEntity
-import com.snapreceipt.io.domain.model.ReceiptUpdateEntity
+import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.domain.usecase.receipt.DeleteReceiptRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.SaveReceiptRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.UpdateReceiptRemoteUseCase
@@ -29,7 +28,7 @@ class InvoiceDetailsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(InvoiceDetailsUiState())
     val uiState: StateFlow<InvoiceDetailsUiState> = _uiState.asStateFlow()
 
-    fun saveReceipt(receipt: ReceiptSaveEntity) {
+    fun saveReceipt(receipt: ReceiptEntity) {
         _uiState.update { it.copy(loading = true, error = null) }
         viewModelScope.launch(dispatchers.io) {
             saveReceiptRemoteUseCase(receipt)
@@ -42,7 +41,7 @@ class InvoiceDetailsViewModel @Inject constructor(
         }
     }
 
-    fun updateReceipt(receipt: ReceiptUpdateEntity) {
+    fun updateReceipt(receipt: ReceiptEntity) {
         _uiState.update { it.copy(loading = true, error = null) }
         viewModelScope.launch(dispatchers.io) {
             updateReceiptRemoteUseCase(receipt)

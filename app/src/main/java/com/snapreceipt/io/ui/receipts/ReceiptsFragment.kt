@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.common.shouldShowEmpty
-import com.snapreceipt.io.ui.invoice.InvoiceDetailsArgs
 import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceCategoryBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
 import com.snapreceipt.io.ui.receipts.bottomsheet.DateRangeBottomSheet
@@ -106,8 +105,11 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         adapter.updateSelection(state.selectedIds)
 
         val selectedTotal = state.receipts
-            .filter { state.selectedIds.contains(it.id) }
-            .sumOf { it.amount }
+            .filter { receipt ->
+                val id = receipt.receiptId ?: return@filter false
+                state.selectedIds.contains(id)
+            }
+            .sumOf { it.totalAmount ?: 0.0 }
         totalAmount.text = getString(R.string.amount_currency_format, selectedTotal)
 
         val allSelected = state.receipts.isNotEmpty() && state.selectedIds.size == state.receipts.size
@@ -172,9 +174,8 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     }
 
     private fun openReceiptDetails(receipt: ReceiptEntity) {
-        val args = InvoiceDetailsArgs.fromReceipt(receipt)
         startActivity(
-            com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.createIntent(requireContext(), args)
+            com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.createIntent(requireContext(), receipt)
         )
     }
 

@@ -1,4 +1,4 @@
-package com.snapreceipt.io.domain.model
+package com.snapreceipt.io.domain.model.query
 
 /**
  * 发票列表查询条件（对应 /api/receipt/list 请求体）。
@@ -8,7 +8,7 @@ package com.snapreceipt.io.domain.model
  * @property receiptDateStart 发票开始日期（yyyy-MM-dd）
  * @property receiptDateEnd 发票结束日期（yyyy-MM-dd）
  * @property createTimeStart 上传开始时间（yyyy-MM-dd）
- * @property createTimeEnd 上传结束时间（yyyy-MM-dd）
+ * @property createTimeEnd 上传结束日期（yyyy-MM-dd）
  * @property pageNum 页码
  * @property pageSize 每页数量
  */

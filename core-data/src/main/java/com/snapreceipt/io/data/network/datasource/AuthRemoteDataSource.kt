@@ -3,11 +3,11 @@ package com.snapreceipt.io.data.network.datasource
 import com.snapreceipt.io.data.base.BaseRemoteDataSource
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import com.skybound.space.core.network.NetworkResult
-import com.snapreceipt.io.data.network.model.AuthCodeRequestDto
-import com.snapreceipt.io.data.network.model.AuthTokensDto
-import com.snapreceipt.io.data.network.model.LoginRequestDto
-import com.snapreceipt.io.data.network.model.RefreshRequestDto
-import com.snapreceipt.io.data.network.model.UserProfileDto
+import com.snapreceipt.io.data.network.model.auth.AuthCodeRequestDto
+import com.snapreceipt.io.data.network.model.auth.AuthTokensDto
+import com.snapreceipt.io.data.network.model.auth.LoginRequestDto
+import com.snapreceipt.io.data.network.model.auth.RefreshRequestDto
+import com.snapreceipt.io.data.network.model.auth.UserProfileDto
 import com.snapreceipt.io.data.network.service.AuthApi
 
 class AuthRemoteDataSource(

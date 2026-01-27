@@ -97,7 +97,6 @@ dependencies {
     implementation(project(":core-foundation"))
     implementation(project(":core-data"))
     implementation(project(":core-domain"))
-    implementation(project(":feature_ocr"))
 
     // 应用依赖
     implementation(libs.appcompat)

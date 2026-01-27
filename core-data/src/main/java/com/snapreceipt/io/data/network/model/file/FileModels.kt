@@ -1,4 +1,4 @@
-package com.snapreceipt.io.data.network.model
+package com.snapreceipt.io.data.network.model.file
 
 /**
  * 获取上传地址请求（/api/file/upload）。

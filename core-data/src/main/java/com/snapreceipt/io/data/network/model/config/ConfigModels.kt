@@ -1,4 +1,4 @@
-package com.snapreceipt.io.data.network.model
+package com.snapreceipt.io.data.network.model.config
 
 import com.google.gson.annotations.SerializedName
 import com.snapreceipt.io.domain.model.PolicyEntity

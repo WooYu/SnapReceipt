@@ -1,7 +1,7 @@
 package com.snapreceipt.io.domain.usecase.receipt
 
 import com.snapreceipt.io.domain.model.ReceiptEntity
-import com.snapreceipt.io.domain.model.ReceiptListQueryEntity
+import com.snapreceipt.io.domain.model.query.ReceiptListQueryEntity
 import com.snapreceipt.io.domain.repository.ReceiptRemoteRepository
 import javax.inject.Inject
 

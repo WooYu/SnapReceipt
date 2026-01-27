@@ -5,9 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ItemReceiptSelectBinding
+import com.snapreceipt.io.domain.model.ReceiptCategory
 import com.snapreceipt.io.domain.model.ReceiptEntity
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class ReceiptsSelectableAdapter(
     private var selectedIds: Set<Long>,
@@ -35,7 +34,8 @@ class ReceiptsSelectableAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val receipt = receipts[position]
-        holder.bind(receipt, selectedIds.contains(receipt.id))
+        val id = receipt.receiptId
+        holder.bind(receipt, id != null && selectedIds.contains(id))
     }
 
     override fun getItemCount(): Int = receipts.size
@@ -50,19 +50,27 @@ class ReceiptsSelectableAdapter(
             binding.apply {
                 val context = root.context
                 selectIcon.isSelected = isSelected
-                selectIcon.setOnClickListener { onToggle(receipt.id) }
+                val receiptId = receipt.receiptId
+                selectIcon.setOnClickListener {
+                    if (receiptId != null) {
+                        onToggle(receiptId)
+                    }
+                }
 
-                merchantName.text = receipt.merchantName
-                amount.text = context.getString(R.string.amount_currency_format, receipt.amount)
+                merchantName.text = receipt.merchant.orEmpty()
+                amount.text = context.getString(
+                    R.string.amount_currency_format,
+                    receipt.totalAmount ?: 0.0
+                )
 
-                val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
-                val category = receipt.category
-                val titleType = receipt.invoiceType
+                val dateText = receipt.receiptDate?.replace('-', '/').orEmpty()
+                val categoryLabel = receipt.categoryId?.let { ReceiptCategory.labelForId(it) }.orEmpty()
+                val titleType = receipt.receiptType.orEmpty()
                 val metaText = context.getString(
                     R.string.receipt_meta_format,
-                    category,
+                    categoryLabel,
                     titleType,
-                    dateFormat.format(java.util.Date(receipt.date))
+                    dateText
                 )
                 meta.text = metaText
 

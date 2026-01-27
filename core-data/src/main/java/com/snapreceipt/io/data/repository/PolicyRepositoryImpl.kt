@@ -1,7 +1,7 @@
 package com.snapreceipt.io.data.repository
 
 import com.snapreceipt.io.data.network.datasource.ConfigRemoteDataSource
-import com.snapreceipt.io.data.network.model.toEntity
+import com.snapreceipt.io.data.network.model.config.toEntity
 import com.snapreceipt.io.domain.model.PolicyEntity
 import com.snapreceipt.io.domain.repository.PolicyRepository
 import com.skybound.space.core.network.ApiException

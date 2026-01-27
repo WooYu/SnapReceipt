@@ -5,7 +5,7 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
 import com.snapreceipt.io.data.base.BaseLocalDataSource
-import com.snapreceipt.io.data.db.UserEntity
+import com.snapreceipt.io.domain.model.UserEntity
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow

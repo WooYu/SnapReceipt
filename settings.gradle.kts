@@ -27,7 +27,6 @@ include(":core-base")
 include(":core-foundation")
 include(":core-data")
 include(":core-domain")
-include(":feature_ocr")
 
 project(":core-base").projectDir = file("core-base")
 project(":core-foundation").projectDir = file("core-foundation")
