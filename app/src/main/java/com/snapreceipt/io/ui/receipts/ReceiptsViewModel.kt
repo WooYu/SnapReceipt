@@ -182,7 +182,7 @@ class ReceiptsViewModel @Inject constructor(
         }
         val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
         val today = dateFormat.format(java.util.Date())
-        return query.copy(receiptDateStart = today)
+        return query.copy(receiptDateEnd = today)
     }
 
     private fun updateError(throwable: Throwable) {
