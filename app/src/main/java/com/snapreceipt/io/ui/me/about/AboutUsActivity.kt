@@ -5,18 +5,18 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.snapreceipt.io.BuildConfig
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.PolicyEntity
 import com.snapreceipt.io.domain.usecase.config.FetchPolicyUseCase
+import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class AboutUsActivity : AppCompatActivity() {
+class AboutUsActivity : EdgeToEdgeActivity() {
 
     @Inject
     lateinit var fetchPolicyUseCase: FetchPolicyUseCase

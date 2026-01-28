@@ -3,7 +3,6 @@ package com.snapreceipt.io.ui.me.profile
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -11,12 +10,13 @@ import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.usecase.auth.AuthFetchUserProfileUseCase
 import com.snapreceipt.io.domain.usecase.user.GetUserUseCase
 import com.snapreceipt.io.domain.usecase.user.InsertUserUseCase
+import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PersonalProfileActivity : AppCompatActivity() {
+class PersonalProfileActivity : EdgeToEdgeActivity() {
 
     @Inject
     lateinit var getUserUseCase: GetUserUseCase

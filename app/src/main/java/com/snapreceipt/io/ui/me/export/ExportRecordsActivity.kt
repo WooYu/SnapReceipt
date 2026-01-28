@@ -8,7 +8,6 @@ import android.os.Environment
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -17,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ExportRecordEntity
+import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
 import com.snapreceipt.io.ui.common.shouldShowEmpty
 import com.snapreceipt.io.ui.common.shouldShowNoMore
 import com.skybound.space.core.config.AppConfig
@@ -24,7 +24,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class ExportRecordsActivity : AppCompatActivity() {
+class ExportRecordsActivity : EdgeToEdgeActivity() {
 
     private val viewModel: ExportRecordsViewModel by viewModels()
     private lateinit var recordsList: RecyclerView

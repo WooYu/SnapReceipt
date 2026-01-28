@@ -1,10 +1,10 @@
 package com.snapreceipt.io.ui.me.feedback
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import com.snapreceipt.io.R
+import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
 
-class FeedbackActivity : AppCompatActivity() {
+class FeedbackActivity : EdgeToEdgeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

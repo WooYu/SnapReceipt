@@ -4,9 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.snapreceipt.io.R
+import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
 import com.snapreceipt.io.ui.login.LoginActivity
 import com.skybound.space.core.network.auth.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -18,7 +18,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SettingsActivity : AppCompatActivity() {
+class SettingsActivity : EdgeToEdgeActivity() {
 
     @Inject
     lateinit var sessionManager: SessionManager

@@ -4,11 +4,11 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import com.snapreceipt.io.R
+import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
 import java.io.File
 
-class ImagePreviewActivity : AppCompatActivity() {
+class ImagePreviewActivity : EdgeToEdgeActivity() {
     companion object {
         const val EXTRA_IMAGE_PATH = "extra_image_path"
         const val EXTRA_IMAGE_URL = "extra_image_url"
