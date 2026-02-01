@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#0E4BFF</color>
-    <color name="colorPrimaryVariant">#0B3FCC</color>
-    <color name="colorSecondary">#00C2FF</color>
-    <color name="colorSecondaryVariant">#00A6DB</color>
+    <color name="colorPrimary">#103CED</color>
+    <color name="colorPrimaryVariant">#02D7FD</color>
+    <color name="colorSecondary">@color/colorPrimary</color>
+    <color name="colorSecondaryVariant">@color/colorPrimaryVariant</color>
     <color name="colorError">#B00020</color>
     <color name="colorOnPrimary">#FFFFFF</color>
     <color name="colorOnSecondary">#000000</color>
@@ -14,10 +14,10 @@
     <color name="colorOnSurface">#1E2430</color>
 
     <color name="page_bg">#F4F7FC</color>
-    <color name="text_primary">#1E2430</color>
-    <color name="text_secondary">#8A93A6</color>
-    <color name="text_muted">#B3BBCB</color>
-    <color name="accent_blue">#0E4BFF</color>
+    <color name="page_bg_white">#FFFFFF</color>
+    <color name="text_primary">#323B4B</color>
+    <color name="text_secondary">#7D899C</color>
+    <color name="text_muted">#BDC4D0</color>
     <color name="chip_selected">#2F6BFF</color>
     <color name="card_shadow">#1A4BFF</color>
 </resources>

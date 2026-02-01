@@ -3,68 +3,105 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/page_bg"
+    android:background="@color/page_bg_white"
     android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="24dp">
+        android:layout_height="wrap_content">
 
+        <!--左边界-->
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/bound_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="16dp" />
+
+        <!--右边界-->
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/bound_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="16dp" />
+
+        <!--上边界-->
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/bound_top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="@dimen/status_bar_height" />
+
+        <!--顶部背景-->
         <View
             android:id="@+id/header_glow"
             android:layout_width="0dp"
-            android:layout_height="220dp"
-            android:alpha="0.18"
-            android:background="@drawable/bg_header_gradient"
+            android:layout_height="0dp"
+            android:alpha="0.1"
+            android:background="@drawable/bg_login_header_gradient"
+            app:layout_constraintBottom_toBottomOf="@id/login_subtitle"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <!--返回键点击区域-->
+        <View
+            android:id="@+id/back_btn_hot_zone"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/bound_top" />
+
+        <!--返回键-->
         <ImageView
             android:id="@+id/back_btn"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:contentDescription="@string/back"
             android:src="@drawable/ic_login_back"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toStartOf="@id/bound_left"
+            app:layout_constraintTop_toTopOf="@id/bound_top" />
 
+        <!--welcome-->
         <TextView
             android:id="@+id/login_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="33dp"
             android:text="@string/login_welcome_title"
-            android:textColor="@color/accent_blue"
-            android:textSize="24sp"
+            android:textColor="@color/colorPrimary"
+            android:textSize="20sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/bound_right"
+            app:layout_constraintStart_toStartOf="@id/bound_left"
             app:layout_constraintTop_toBottomOf="@id/back_btn" />
 
         <TextView
             android:id="@+id/login_subtitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:text="@string/login_welcome_subtitle"
             android:textColor="@color/text_secondary"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textSize="@dimen/text_size_secondary"
+            app:layout_constraintEnd_toEndOf="@id/bound_right"
+            app:layout_constraintStart_toStartOf="@id/bound_left"
             app:layout_constraintTop_toBottomOf="@id/login_title" />
 
+        <!--Email Phone Switch-->
         <LinearLayout
             android:id="@+id/login_tab_container"
             android:layout_width="0dp"
             android:layout_height="48dp"
-            android:layout_marginTop="24dp"
-            android:background="@drawable/bg_login_tab_email"
+            android:layout_marginHorizontal="23dp"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/bg_login_tab"
             android:orientation="horizontal"
             android:padding="4dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/bound_right"
+            app:layout_constraintStart_toStartOf="@id/bound_left"
             app:layout_constraintTop_toBottomOf="@id/login_subtitle">
 
             <TextView
@@ -72,10 +109,11 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:background="@drawable/bg_login_tab_checked"
                 android:gravity="center"
                 android:text="@string/login_tab_email"
                 android:textColor="@color/text_primary"
-                android:textSize="16sp"
+                android:textSize="@dimen/text_size_secondary"
                 android:textStyle="bold" />
 
             <TextView
@@ -86,40 +124,43 @@
                 android:gravity="center"
                 android:text="@string/login_tab_phone"
                 android:textColor="@color/text_secondary"
-                android:textSize="16sp"
+                android:textSize="@dimen/text_size_secondary"
                 android:textStyle="bold" />
         </LinearLayout>
 
+        <!--邮箱-->
         <TextView
             android:id="@+id/email_label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="30dp"
             android:letterSpacing="0.08"
             android:text="@string/login_email_label"
             android:textAllCaps="true"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textSize="@dimen/text_size_secondary"
+            app:layout_constraintEnd_toEndOf="@id/bound_right"
+            app:layout_constraintStart_toStartOf="@id/bound_left"
             app:layout_constraintTop_toBottomOf="@id/login_tab_container" />
 
+        <!--邮箱输入框-->
         <LinearLayout
             android:id="@+id/email_input_container"
             android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_marginTop="8dp"
+            android:layout_height="@dimen/input_box_height"
+            android:layout_marginTop="10dp"
             android:background="@drawable/bg_field"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="12dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:paddingHorizontal="16dp"
+            app:layout_constraintEnd_toEndOf="@id/bound_right"
+            app:layout_constraintStart_toStartOf="@id/bound_left"
             app:layout_constraintTop_toBottomOf="@id/email_label">
 
             <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginTop="1dp"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_login_mail" />
 
@@ -127,26 +168,28 @@
                 android:id="@+id/email_input"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
+                android:layout_marginHorizontal="10dp"
                 android:layout_weight="1"
                 android:background="@null"
                 android:hint="@string/login_email_hint"
                 android:inputType="textEmailAddress"
                 android:textColor="@color/text_primary"
                 android:textColorHint="@color/text_muted"
-                android:textSize="16sp" />
+                android:textSize="@dimen/text_size_secondary" />
 
+            <!--发送验证码-->
             <TextView
                 android:id="@+id/get_code_btn"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="8dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
                 android:text="@string/login_captcha"
-                android:textColor="@color/accent_blue"
-                android:textSize="14sp"
+                android:textColor="@color/colorPrimary"
+                android:textSize="@dimen/text_size_secondary"
                 android:textStyle="bold" />
         </LinearLayout>
 
+        <!--验证码输入-->
         <TextView
             android:id="@+id/code_label"
             android:layout_width="0dp"
@@ -156,27 +199,29 @@
             android:text="@string/login_email_code_label"
             android:textAllCaps="true"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textSize="@dimen/text_size_secondary"
+            app:layout_constraintEnd_toEndOf="@id/bound_right"
+            app:layout_constraintStart_toStartOf="@id/bound_left"
             app:layout_constraintTop_toBottomOf="@id/email_input_container" />
 
+        <!--验证码输入框-->
         <LinearLayout
             android:id="@+id/code_input_container"
             android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_marginTop="8dp"
+            android:layout_height="@dimen/input_box_height"
+            android:layout_marginTop="10dp"
             android:background="@drawable/bg_field"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="12dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:paddingHorizontal="16dp"
+            app:layout_constraintEnd_toEndOf="@id/bound_right"
+            app:layout_constraintStart_toStartOf="@id/bound_left"
             app:layout_constraintTop_toBottomOf="@id/code_label">
 
             <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginTop="1dp"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_login_lock" />
 
@@ -184,66 +229,62 @@
                 android:id="@+id/code_input"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
+                android:layout_marginHorizontal="10dp"
                 android:layout_weight="1"
                 android:background="@null"
                 android:hint="@string/login_code_hint"
-                android:inputType="numberPassword"
+                android:inputType="textVisiblePassword|textNoSuggestions"
                 android:textColor="@color/text_primary"
                 android:textColorHint="@color/text_muted"
-                android:textSize="16sp" />
+                android:textSize="@dimen/text_size_secondary" />
 
-            <ImageView
-                android:id="@+id/toggle_code_visibility"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:contentDescription="@string/toggle_visibility"
-                android:src="@drawable/ic_login_eye_off" />
         </LinearLayout>
 
+        <!--登录-->
         <Button
             android:id="@+id/login_btn"
             android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_marginTop="28dp"
+            android:layout_height="@dimen/button_height"
+            android:layout_marginTop="40dp"
             android:background="@drawable/bg_login_button_selector_image"
             android:enabled="false"
             android:text="@string/login"
             android:textAllCaps="false"
             android:textColor="@color/colorOnPrimary"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_size_primary"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/bound_right"
+            app:layout_constraintStart_toStartOf="@id/bound_left"
             app:layout_constraintTop_toBottomOf="@id/code_input_container" />
 
+        <!--协议-->
         <LinearLayout
             android:id="@+id/agreement_container"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:layout_marginBottom="24dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/bound_right"
+            app:layout_constraintStart_toStartOf="@id/bound_left"
             app:layout_constraintTop_toBottomOf="@id/login_btn">
 
             <CheckBox
                 android:id="@+id/agreement_check"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
                 android:button="@drawable/ic_login_checkbox_selector" />
 
             <TextView
                 android:id="@+id/agreement_text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
+                android:layout_marginStart="10dp"
                 android:layout_weight="1"
                 android:text="@string/login_agreement_html"
                 android:textColor="@color/text_secondary"
-                android:textSize="12sp" />
+                android:textSize="10sp" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
