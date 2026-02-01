@@ -67,11 +67,11 @@ class LoginViewModel @Inject constructor(
             emitEvent(UiEvent.Toast(message = "", resId = resId))
             return
         }
-        _uiState.update { it.copy(loading = true, error = null) }
+        _uiState.update { it.copy(loading = true, requestingCode = true, error = null) }
         viewModelScope.launch(dispatchers.io) {
             requestCodeUseCase(target)
                 .onSuccess {
-                    _uiState.update { it.copy(loading = false) }
+                    _uiState.update { it.copy(loading = false, requestingCode = false) }
                     startCodeCountdown()
                     emitEvent(
                         UiEvent.Custom(
@@ -119,7 +119,7 @@ class LoginViewModel @Inject constructor(
             emitEvent(UiEvent.Toast(message = "", resId = R.string.agreement_required))
             return
         }
-        _uiState.update { it.copy(loading = true, error = null) }
+        _uiState.update { it.copy(loading = true, requestingCode = false, error = null) }
         val timezone = TimeZone.getDefault().id
         viewModelScope.launch(dispatchers.io) {
             loginUseCase(target, code, timezone)
@@ -183,7 +183,7 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun updateError(throwable: Throwable) {
-        _uiState.update { it.copy(loading = false, error = throwable.message) }
+        _uiState.update { it.copy(loading = false, requestingCode = false, error = throwable.message) }
         handleError(throwable)
     }
 

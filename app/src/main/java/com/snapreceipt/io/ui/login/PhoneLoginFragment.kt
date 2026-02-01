@@ -1,5 +1,8 @@
 package com.snapreceipt.io.ui.login
 
+import android.app.Dialog
+import android.graphics.Rect
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
@@ -7,7 +10,9 @@ import android.text.TextPaint
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
+import android.view.TouchDelegate
 import android.view.View
+import android.view.Window
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
@@ -34,7 +39,9 @@ class PhoneLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_phone_
     private lateinit var phoneTab: TextView
     private lateinit var agreementCheck: CheckBox
     private lateinit var agreementText: TextView
+    private lateinit var agreementContainer: View
     private lateinit var backBtn: View
+    private var codeLoadingDialog: Dialog? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         phoneInput = view.findViewById(R.id.phone_input)
@@ -45,6 +52,7 @@ class PhoneLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_phone_
         phoneTab = view.findViewById(R.id.tab_phone)
         agreementCheck = view.findViewById(R.id.agreement_check)
         agreementText = view.findViewById(R.id.agreement_text)
+        agreementContainer = view.findViewById(R.id.agreement_container)
         backBtn = view.findViewById(R.id.back_btn_hot_zone)
         getCodeBtn.setOnClickListener { onGetCodeClick() }
         loginBtn.setOnClickListener { onLoginClick() }
@@ -57,6 +65,9 @@ class PhoneLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_phone_
         }
         agreementText.movementMethod = LinkMovementMethod.getInstance()
         agreementText.highlightColor = android.graphics.Color.TRANSPARENT
+        agreementContainer.setOnClickListener { toggleAgreement() }
+        agreementText.setOnClickListener { toggleAgreement() }
+        expandTouchArea(agreementCheck, 16)
 
         observeState()
         super.onViewCreated(view, savedInstanceState)
@@ -78,6 +89,7 @@ class PhoneLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_phone_
         } else {
             getString(R.string.login_captcha)
         }
+        updateCodeRequestLoading(state.requestingCode)
         loginBtn.isEnabled = !state.loading && state.agreementAccepted
         updateTabStyle(state.mode == LoginMode.PHONE)
         updateAgreementState(state.agreementAccepted)
@@ -167,6 +179,7 @@ class PhoneLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_phone_
 
                     override fun updateDrawState(ds: TextPaint) {
                         super.updateDrawState(ds)
+                        ds.color = color
                         ds.isUnderlineText = false
                     }
                 },
@@ -175,6 +188,53 @@ class PhoneLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_phone_
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
+    }
+
+    override fun onDestroyView() {
+        codeLoadingDialog?.dismiss()
+        codeLoadingDialog = null
+        super.onDestroyView()
+    }
+
+    private fun toggleAgreement() {
+        agreementCheck.isChecked = !agreementCheck.isChecked
+    }
+
+    private fun updateCodeRequestLoading(show: Boolean) {
+        if (!show) {
+            codeLoadingDialog?.dismiss()
+            return
+        }
+        if (!isAdded) return
+        val dialog = codeLoadingDialog ?: createCodeLoadingDialog().also { codeLoadingDialog = it }
+        if (!dialog.isShowing) {
+            dialog.show()
+        }
+    }
+
+    private fun createCodeLoadingDialog(): Dialog {
+        return Dialog(requireContext()).apply {
+            requestWindowFeature(Window.FEATURE_NO_TITLE)
+            setContentView(R.layout.dialog_code_request_loading)
+            setCancelable(false)
+            setCanceledOnTouchOutside(false)
+            window?.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
+        }
+    }
+
+    private fun expandTouchArea(target: View, extraPaddingDp: Int) {
+        val parent = target.parent as? View ?: return
+        parent.post {
+            val rect = Rect()
+            target.getHitRect(rect)
+            val extra = dpToPx(extraPaddingDp)
+            rect.inset(-extra, -extra)
+            parent.touchDelegate = TouchDelegate(rect, target)
+        }
+    }
+
+    private fun dpToPx(value: Int): Int {
+        return (value * resources.displayMetrics.density).toInt()
     }
 
 }

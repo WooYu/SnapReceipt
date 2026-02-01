@@ -173,6 +173,7 @@
                 android:background="@null"
                 android:hint="@string/login_phone_hint"
                 android:inputType="phone"
+                android:textCursorDrawable="@drawable/cursor_primary"
                 android:textColor="@color/text_primary"
                 android:textColorHint="@color/text_muted"
                 android:textSize="@dimen/text_size_secondary" />
@@ -234,6 +235,7 @@
                 android:background="@null"
                 android:hint="@string/login_code_hint"
                 android:inputType="textVisiblePassword|textNoSuggestions"
+                android:textCursorDrawable="@drawable/cursor_primary"
                 android:textColor="@color/text_primary"
                 android:textColorHint="@color/text_muted"
                 android:textSize="@dimen/text_size_secondary" />
@@ -266,15 +268,19 @@
             android:layout_marginBottom="24dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@id/bound_right"
             app:layout_constraintStart_toStartOf="@id/bound_left"
-            app:layout_constraintTop_toBottomOf="@id/login_btn">
+            app:layout_constraintTop_toBottomOf="@id/login_btn"
+            app:layout_constraintVertical_bias="1">
 
             <CheckBox
                 android:id="@+id/agreement_check"
                 android:layout_width="12dp"
                 android:layout_height="12dp"
-                android:button="@drawable/ic_login_checkbox_selector" />
+                android:button="@drawable/ic_login_checkbox_selector"
+                android:buttonTint="@null"
+                app:buttonTint="@null" />
 
             <TextView
                 android:id="@+id/agreement_text"
