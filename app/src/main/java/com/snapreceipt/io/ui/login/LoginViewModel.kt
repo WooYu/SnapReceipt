@@ -36,7 +36,8 @@ class LoginViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
-    private var codeCountdownJob: Job? = null
+    private var phoneCodeCountdownJob: Job? = null
+    private var emailCodeCountdownJob: Job? = null
     private var policyCache: PolicyEntity? = null
     private var policyPrefetchJob: Job? = null
 
@@ -73,7 +74,13 @@ class LoginViewModel @Inject constructor(
     }
 
     fun requestCode(target: String) {
-        if (_uiState.value.codeCountdownSeconds > 0) return
+        val mode = _uiState.value.mode
+        val countdownActive = if (mode == LoginMode.PHONE) {
+            _uiState.value.phoneCodeCountdownSeconds > 0
+        } else {
+            _uiState.value.emailCodeCountdownSeconds > 0
+        }
+        if (countdownActive) return
         if (target.isBlank()) {
             val resId = if (_uiState.value.mode == LoginMode.EMAIL) {
                 R.string.email_empty
@@ -88,7 +95,7 @@ class LoginViewModel @Inject constructor(
             requestCodeUseCase(target)
                 .onSuccess {
                     _uiState.update { it.copy(loading = false, requestingCode = false) }
-                    startCodeCountdown()
+                    startCodeCountdown(mode)
                     emitEvent(
                         UiEvent.Custom(
                             LoginEventKeys.CODE_SENT,
@@ -195,14 +202,28 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun startCodeCountdown() {
-        codeCountdownJob?.cancel()
-        codeCountdownJob = viewModelScope.launch(dispatchers.default) {
-            for (second in 60 downTo 1) {
-                _uiState.update { it.copy(codeCountdownSeconds = second) }
-                delay(1000)
+    private fun startCodeCountdown(mode: LoginMode) {
+        when (mode) {
+            LoginMode.PHONE -> {
+                phoneCodeCountdownJob?.cancel()
+                phoneCodeCountdownJob = viewModelScope.launch(dispatchers.default) {
+                    for (second in 60 downTo 1) {
+                        _uiState.update { it.copy(phoneCodeCountdownSeconds = second) }
+                        delay(1000)
+                    }
+                    _uiState.update { it.copy(phoneCodeCountdownSeconds = 0) }
+                }
             }
-            _uiState.update { it.copy(codeCountdownSeconds = 0) }
+            LoginMode.EMAIL -> {
+                emailCodeCountdownJob?.cancel()
+                emailCodeCountdownJob = viewModelScope.launch(dispatchers.default) {
+                    for (second in 60 downTo 1) {
+                        _uiState.update { it.copy(emailCodeCountdownSeconds = second) }
+                        delay(1000)
+                    }
+                    _uiState.update { it.copy(emailCodeCountdownSeconds = 0) }
+                }
+            }
         }
     }
 
