@@ -188,7 +188,10 @@ class LoginViewModel @Inject constructor(
             emitEvent(
                 UiEvent.Custom(
                     LoginEventKeys.OPEN_POLICY,
-                    Bundle().apply { putString(LoginEventKeys.EXTRA_URL, url) }
+                    Bundle().apply {
+                        putString(LoginEventKeys.EXTRA_URL, url)
+                        putString(LoginEventKeys.EXTRA_POLICY_TYPE, target.name)
+                    }
                 )
             )
         }

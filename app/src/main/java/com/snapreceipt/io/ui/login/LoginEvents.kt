@@ -6,4 +6,5 @@ object LoginEventKeys {
     const val OPEN_POLICY = "open_policy"
     const val EXTRA_TARGET = "extra_target"
     const val EXTRA_URL = "extra_url"
+    const val EXTRA_POLICY_TYPE = "extra_policy_type"
 }

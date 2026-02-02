@@ -1,7 +1,6 @@
 package com.snapreceipt.io.ui.me.about
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import android.widget.TextView
@@ -10,6 +9,7 @@ import com.snapreceipt.io.BuildConfig
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.PolicyEntity
 import com.snapreceipt.io.domain.usecase.config.FetchPolicyUseCase
+import com.snapreceipt.io.ui.common.PolicyWebViewActivity
 import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -54,17 +54,29 @@ class AboutUsActivity : EdgeToEdgeActivity() {
             } else {
                 policy.privacyPolicy
             }
-            openUrl(url)
+            val title = if (isUserAgreement) {
+                getString(R.string.user_agreement)
+            } else {
+                getString(R.string.privacy_policy_label)
+            }
+            openUrl(url, title)
         }
     }
 
-    private fun openUrl(url: String) {
+    private fun openUrl(url: String, title: String? = null) {
         val trimmed = url.trim()
         if (trimmed.isBlank()) {
             Toast.makeText(this, getString(R.string.unexpected_error), Toast.LENGTH_SHORT).show()
             return
         }
-        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(trimmed)))
+        startActivity(
+            Intent(this, PolicyWebViewActivity::class.java).apply {
+                putExtra(PolicyWebViewActivity.EXTRA_URL, trimmed)
+                if (!title.isNullOrBlank()) {
+                    putExtra(PolicyWebViewActivity.EXTRA_TITLE, title)
+                }
+            }
+        )
     }
 
     private fun prefetchPolicy() {

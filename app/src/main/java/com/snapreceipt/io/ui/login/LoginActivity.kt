@@ -1,7 +1,6 @@
 package com.snapreceipt.io.ui.login
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
@@ -17,6 +16,7 @@ import com.skybound.space.core.network.auth.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.snapreceipt.io.ui.common.PolicyWebViewActivity
 
 @AndroidEntryPoint
 class LoginActivity : BaseActivity<LoginViewModel>() {
@@ -73,7 +73,13 @@ class LoginActivity : BaseActivity<LoginViewModel>() {
             LoginEventKeys.NAVIGATE_MAIN -> navigateToMainActivity()
             LoginEventKeys.OPEN_POLICY -> {
                 val url = event.payload?.getString(LoginEventKeys.EXTRA_URL).orEmpty()
-                openUrl(url)
+                val type = event.payload?.getString(LoginEventKeys.EXTRA_POLICY_TYPE)
+                val title = when (type) {
+                    "USER_AGREEMENT" -> getString(R.string.user_agreement)
+                    "PRIVACY_POLICY" -> getString(R.string.privacy_policy_label)
+                    else -> getString(R.string.agreement_dialog_title)
+                }
+                openUrl(url, title)
             }
         }
     }
@@ -91,12 +97,19 @@ class LoginActivity : BaseActivity<LoginViewModel>() {
         finish()
     }
 
-    private fun openUrl(url: String) {
+    private fun openUrl(url: String, title: String? = null) {
         val trimmed = url.trim()
         if (trimmed.isBlank()) {
             Toast.makeText(this, getString(R.string.unexpected_error), Toast.LENGTH_SHORT).show()
             return
         }
-        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(trimmed)))
+        startActivity(
+            Intent(this, PolicyWebViewActivity::class.java).apply {
+                putExtra(PolicyWebViewActivity.EXTRA_URL, trimmed)
+                if (!title.isNullOrBlank()) {
+                    putExtra(PolicyWebViewActivity.EXTRA_TITLE, title)
+                }
+            }
+        )
     }
 }
