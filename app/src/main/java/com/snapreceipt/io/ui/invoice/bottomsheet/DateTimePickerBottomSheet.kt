@@ -9,9 +9,8 @@ import android.widget.TextView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.snapreceipt.io.R
-import java.text.SimpleDateFormat
+import com.skybound.space.core.util.DateFormatUtil
 import java.util.Calendar
-import java.util.Locale
 
 class DateTimePickerBottomSheet(
     initialTime: Long?,
@@ -113,11 +112,11 @@ class DateTimePickerBottomSheet(
     }
 
     private fun formatDate(timeMillis: Long): String =
-        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(timeMillis)
+        DateFormatUtil.formatApiDate(timeMillis)
 
     private fun formatTime(timeMillis: Long): String =
-        SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(timeMillis)
+        DateFormatUtil.formatTime(timeMillis)
 
     private fun formatDisplay(timeMillis: Long): String =
-        SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault()).format(timeMillis)
+        DateFormatUtil.formatDisplayDateTime(timeMillis)
 }

@@ -12,6 +12,7 @@ import com.snapreceipt.io.domain.usecase.receipt.FetchReceiptsUseCase
 import com.snapreceipt.io.domain.usecase.receipt.UpdateReceiptRemoteUseCase
 import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
+import com.skybound.space.core.util.DateFormatUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,10 +44,9 @@ class ReceiptsViewModel @Inject constructor(
     }
 
     fun filterByDateRange(startDate: Long, endDate: Long) {
-        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
         val query = ReceiptListQueryEntity(
-            receiptDateStart = dateFormat.format(java.util.Date(startDate)),
-            receiptDateEnd = dateFormat.format(java.util.Date(endDate))
+            receiptDateStart = DateFormatUtil.formatApiDate(startDate),
+            receiptDateEnd = DateFormatUtil.formatApiDate(endDate)
         )
         fetchReceipts(query)
     }
@@ -126,12 +126,19 @@ class ReceiptsViewModel @Inject constructor(
         val ids = _uiState.value.selectedIds.toList()
         if (ids.isEmpty()) return
         viewModelScope.launch(dispatchers.io) {
+            var allSucceeded = true
             ids.forEach { id ->
-                deleteReceiptRemoteUseCase(id).onFailure { updateError(it) }
+                deleteReceiptRemoteUseCase(id)
+                    .onFailure {
+                        allSucceeded = false
+                        updateError(it)
+                    }
             }
-            fetchReceipts()
+            if (allSucceeded) {
+                _uiState.update { it.copy(selectedIds = emptySet()) }
+                fetchReceipts()
+            }
         }
-        _uiState.update { it.copy(selectedIds = emptySet()) }
     }
 
     fun deleteReceipt(receipt: ReceiptEntity) {
@@ -180,9 +187,7 @@ class ReceiptsViewModel @Inject constructor(
         if (!query.receiptDateStart.isNullOrBlank() || !query.receiptDateEnd.isNullOrBlank()) {
             return query
         }
-        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
-        val today = dateFormat.format(java.util.Date())
-        return query.copy(receiptDateEnd = today)
+        return query.copy(receiptDateEnd = DateFormatUtil.todayApiDate())
     }
 
     private fun updateError(throwable: Throwable) {

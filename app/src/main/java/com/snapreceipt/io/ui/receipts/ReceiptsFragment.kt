@@ -5,17 +5,13 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
+import com.snapreceipt.io.databinding.FragmentReceiptsBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.common.shouldShowEmpty
 import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceCategoryBottomSheet
@@ -23,6 +19,7 @@ import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
 import com.snapreceipt.io.ui.receipts.bottomsheet.DateRangeBottomSheet
 import com.snapreceipt.io.ui.receipts.dialogs.ExportSuccessDialog
 import com.skybound.space.core.config.AppConfig
+import com.skybound.space.core.util.DateFormatUtil
 import com.skybound.space.base.presentation.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -31,18 +28,9 @@ import kotlinx.coroutines.launch
 class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_receipts) {
     override val viewModel: ReceiptsViewModel by viewModels()
 
-    private lateinit var receiptList: RecyclerView
-    private lateinit var emptyState: View
-    private lateinit var actionBar: LinearLayout
-    private lateinit var toolbarTitle: TextView
-    private lateinit var filterDateBtn: TextView
-    private lateinit var filterTitleBtn: TextView
-    private lateinit var filterTypeBtn: TextView
-    private lateinit var exportActionBtn: Button
-    private lateinit var selectAllBtn: View
-    private lateinit var selectAllIcon: ImageView
-    private lateinit var totalAmount: TextView
-    private lateinit var exportLoadingOverlay: View
+    private var _binding: FragmentReceiptsBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var adapter: ReceiptsSelectableAdapter
     private var filterStartMillis: Long? = null
     private var filterEndMillis: Long? = null
@@ -51,23 +39,16 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     private var currentState: ReceiptsUiState = ReceiptsUiState()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        receiptList = view.findViewById(R.id.receipt_list)
-        emptyState = view.findViewById(R.id.empty_state)
-        actionBar = view.findViewById(R.id.action_bar)
-        toolbarTitle = view.findViewById(R.id.toolbar_title)
-        filterDateBtn = view.findViewById(R.id.filter_date_btn)
-        filterTitleBtn = view.findViewById(R.id.filter_title_btn)
-        filterTypeBtn = view.findViewById(R.id.filter_type_btn)
-        exportActionBtn = view.findViewById(R.id.export_action_btn)
-        selectAllBtn = view.findViewById(R.id.select_all_btn)
-        selectAllIcon = view.findViewById(R.id.select_all_icon)
-        totalAmount = view.findViewById(R.id.total_amount)
-        exportLoadingOverlay = view.findViewById(R.id.export_loading_overlay)
-
+        _binding = FragmentReceiptsBinding.bind(view)
         setupAdapter()
         setupListeners()
         observeState()
         super.onViewCreated(view, savedInstanceState)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onResume() {
@@ -87,21 +68,21 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         currentState = state
         val showEmpty = shouldShowEmpty(state.hasLoaded, state.empty)
         if (showEmpty) {
-            emptyState.visibility = View.VISIBLE
-            receiptList.visibility = View.GONE
+            binding.emptyState.visibility = View.VISIBLE
+            binding.receiptList.visibility = View.GONE
             adapter.setReceipts(emptyList())
         } else {
-            emptyState.visibility = View.GONE
-            receiptList.visibility = View.VISIBLE
+            binding.emptyState.visibility = View.GONE
+            binding.receiptList.visibility = View.VISIBLE
             adapter.setReceipts(state.receipts)
         }
         val selectedCount = state.selectedIds.size
-        toolbarTitle.text = if (selectedCount > 0) {
+        binding.toolbarTitle.text = if (selectedCount > 0) {
             getString(R.string.selected_count, selectedCount)
         } else {
             getString(R.string.receipts_title)
         }
-        actionBar.visibility = if (selectedCount > 0) View.VISIBLE else View.GONE
+        binding.actionBar.visibility = if (selectedCount > 0) View.VISIBLE else View.GONE
         adapter.updateSelection(state.selectedIds)
 
         val selectedTotal = state.receipts
@@ -110,15 +91,15 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                 state.selectedIds.contains(id)
             }
             .sumOf { it.totalAmount ?: 0.0 }
-        totalAmount.text = getString(R.string.amount_currency_format, selectedTotal)
+        binding.totalAmount.text = getString(R.string.amount_currency_format, selectedTotal)
 
         val allSelected = state.receipts.isNotEmpty() && state.selectedIds.size == state.receipts.size
-        selectAllIcon.isSelected = allSelected
+        binding.selectAllIcon.isSelected = allSelected
 
-        exportLoadingOverlay.visibility = if (state.exporting) View.VISIBLE else View.GONE
-        exportActionBtn.isEnabled = !state.exporting
-        exportActionBtn.alpha = if (state.exporting) 0.6f else 1f
-        selectAllBtn.isEnabled = !state.exporting
+        binding.exportLoadingOverlay.visibility = if (state.exporting) View.VISIBLE else View.GONE
+        binding.exportActionBtn.isEnabled = !state.exporting
+        binding.exportActionBtn.alpha = if (state.exporting) 0.6f else 1f
+        binding.selectAllBtn.isEnabled = !state.exporting
     }
 
     private fun setupAdapter() {
@@ -131,38 +112,38 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                 openReceiptDetails(receipt)
             }
         )
-        receiptList.adapter = adapter
+        binding.receiptList.adapter = adapter
     }
 
     private fun setupListeners() {
-        filterDateBtn.setOnClickListener {
+        binding.filterDateBtn.setOnClickListener {
             DateRangeBottomSheet(filterStartMillis, filterEndMillis) { start, end ->
                 filterStartMillis = start
                 filterEndMillis = end
-                filterDateBtn.text = formatDateRange(start, end)
+                binding.filterDateBtn.text = formatDateRange(start, end)
                 viewModel.filterByDateRange(start, end)
             }.show(parentFragmentManager, "date_range_picker")
         }
-        filterTypeBtn.setOnClickListener {
-            val initial = filterTypeLabel ?: filterTypeBtn.text.toString()
+        binding.filterTypeBtn.setOnClickListener {
+            val initial = filterTypeLabel ?: binding.filterTypeBtn.text.toString()
             InvoiceCategoryBottomSheet.newInstance(initial) { selected ->
                 filterTypeLabel = selected
-                filterTypeBtn.text = selected
+                binding.filterTypeBtn.text = selected
                 viewModel.filterByType(selected)
             }.show(parentFragmentManager, "type_filter_picker")
         }
-        filterTitleBtn.setOnClickListener {
-            val initial = filterTitleLabel ?: filterTitleBtn.text.toString()
+        binding.filterTitleBtn.setOnClickListener {
+            val initial = filterTitleLabel ?: binding.filterTitleBtn.text.toString()
             TitleTypeBottomSheet(initial) { selected ->
                 filterTitleLabel = selected
-                filterTitleBtn.text = selected
+                binding.filterTitleBtn.text = selected
                 viewModel.filterByTitleType(selected)
             }.show(parentFragmentManager, "title_filter_picker")
         }
-        exportActionBtn.setOnClickListener {
+        binding.exportActionBtn.setOnClickListener {
             viewModel.exportSelected()
         }
-        selectAllBtn.setOnClickListener {
+        binding.selectAllBtn.setOnClickListener {
             val isAllSelected = currentState.receipts.isNotEmpty() &&
                 currentState.selectedIds.size == currentState.receipts.size
             if (isAllSelected) {
@@ -180,11 +161,10 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     }
 
     private fun formatDateRange(start: Long, end: Long): String {
-        val format = java.text.SimpleDateFormat("yyyy/MM/dd", java.util.Locale.getDefault())
         return getString(
             R.string.date_range_format,
-            format.format(java.util.Date(start)),
-            format.format(java.util.Date(end))
+            DateFormatUtil.formatDisplayDate(start),
+            DateFormatUtil.formatDisplayDate(end)
         )
     }
 

@@ -40,22 +40,24 @@ class HomeViewModel @Inject constructor(
 
     fun loadReceipts() {
         receiptsJob?.cancel()
-        _uiState.update { it.copy(loading = true, error = null) }
-        receiptsJob = viewModelScope.launch(dispatchers.io) {
-            fetchReceiptsUseCase()
-                .onSuccess { receipts ->
-                    _uiState.update { current ->
-                        current.copy(
-                            receipts = receipts,
-                            loading = false,
-                            error = null,
-                            empty = receipts.isEmpty(),
-                            hasLoaded = true
-                        )
-                    }
+        receiptsJob = launchWithLoading(
+            updateLoading = { loading ->
+                _uiState.update { it.copy(loading = loading, error = if (loading) null else it.error) }
+            },
+            block = { fetchReceiptsUseCase() },
+            onSuccess = { receipts ->
+                _uiState.update { current ->
+                    current.copy(
+                        receipts = receipts,
+                        loading = false,
+                        error = null,
+                        empty = receipts.isEmpty(),
+                        hasLoaded = true
+                    )
                 }
-                .onFailure { updateError(it) }
-        }
+            },
+            onFailure = { updateError(it) }
+        )
     }
 
     fun deleteReceipt(receipt: ReceiptEntity) {

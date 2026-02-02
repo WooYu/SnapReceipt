@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,42 +28,42 @@ class InvoiceDetailsViewModel @Inject constructor(
     val uiState: StateFlow<InvoiceDetailsUiState> = _uiState.asStateFlow()
 
     fun saveReceipt(receipt: ReceiptEntity) {
-        _uiState.update { it.copy(loading = true, error = null) }
-        viewModelScope.launch(dispatchers.io) {
-            saveReceiptRemoteUseCase(receipt)
-                .onSuccess {
-                    _uiState.update { it.copy(loading = false) }
-                    emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.SHOW_SUCCESS))
-                    emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.NAVIGATE_TO_MAIN))
-                }
-                .onFailure { updateError(it) }
-        }
+        launchWithLoading(
+            updateLoading = { loading -> _uiState.update { it.copy(loading = loading, error = if (loading) null else it.error) } },
+            block = { saveReceiptRemoteUseCase(receipt) },
+            onSuccess = {
+                _uiState.update { it.copy(loading = false) }
+                emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.SHOW_SUCCESS))
+                emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.NAVIGATE_TO_MAIN))
+            },
+            onFailure = { updateError(it) }
+        )
     }
 
     fun updateReceipt(receipt: ReceiptEntity) {
-        _uiState.update { it.copy(loading = true, error = null) }
-        viewModelScope.launch(dispatchers.io) {
-            updateReceiptRemoteUseCase(receipt)
-                .onSuccess {
-                    _uiState.update { it.copy(loading = false) }
-                    emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.SHOW_SUCCESS))
-                    emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.NAVIGATE_TO_MAIN))
-                }
-                .onFailure { updateError(it) }
-        }
+        launchWithLoading(
+            updateLoading = { loading -> _uiState.update { it.copy(loading = loading, error = if (loading) null else it.error) } },
+            block = { updateReceiptRemoteUseCase(receipt) },
+            onSuccess = {
+                _uiState.update { it.copy(loading = false) }
+                emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.SHOW_SUCCESS))
+                emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.NAVIGATE_TO_MAIN))
+            },
+            onFailure = { updateError(it) }
+        )
     }
 
     fun deleteReceipt(receiptId: Long) {
-        _uiState.update { it.copy(loading = true, error = null) }
-        viewModelScope.launch(dispatchers.io) {
-            deleteReceiptRemoteUseCase(receiptId)
-                .onSuccess {
-                    _uiState.update { it.copy(loading = false) }
-                    emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.SHOW_SUCCESS))
-                    emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.NAVIGATE_TO_MAIN))
-                }
-                .onFailure { updateError(it) }
-        }
+        launchWithLoading(
+            updateLoading = { loading -> _uiState.update { it.copy(loading = loading, error = if (loading) null else it.error) } },
+            block = { deleteReceiptRemoteUseCase(receiptId) },
+            onSuccess = {
+                _uiState.update { it.copy(loading = false) }
+                emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.SHOW_SUCCESS))
+                emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.NAVIGATE_TO_MAIN))
+            },
+            onFailure = { updateError(it) }
+        )
     }
 
     private fun updateError(throwable: Throwable) {

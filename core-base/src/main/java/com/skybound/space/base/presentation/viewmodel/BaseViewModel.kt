@@ -90,6 +90,32 @@ abstract class BaseViewModel(
     }
 
     /**
+     * 统一“显示 loading → 执行 IO → 成功/失败更新状态”的流程，供使用 Result 与自定义 UiState 的页面复用。
+     * 先调用 updateLoading(true)，执行 block 后根据 Result 调用 onSuccess/onFailure，再调用 updateLoading(false)。
+     */
+    protected fun <T> launchWithLoading(
+        updateLoading: (Boolean) -> Unit,
+        block: suspend () -> Result<T>,
+        onSuccess: (T) -> Unit,
+        onFailure: (Throwable) -> Unit = { handleError(it) }
+    ): Job = viewModelScope.launch(dispatchers.io + exceptionHandler) {
+        withContext(dispatchers.main) { updateLoading(true) }
+        block()
+            .onSuccess { value ->
+                withContext(dispatchers.main) {
+                    updateLoading(false)
+                    onSuccess(value)
+                }
+            }
+            .onFailure { t ->
+                withContext(dispatchers.main) {
+                    updateLoading(false)
+                    onFailure(t)
+                }
+            }
+    }
+
+    /**
      * 子类可根据业务重写错误处理逻辑。
      */
     open fun handleError(throwable: Throwable) {

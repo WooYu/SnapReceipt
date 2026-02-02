@@ -6,8 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
@@ -15,9 +13,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.card.MaterialCardView
 import com.snapreceipt.io.R
+import com.snapreceipt.io.databinding.FragmentHomeBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.common.shouldShowEmpty
 import com.snapreceipt.io.ui.home.dialogs.ScanFailedDialog
@@ -37,13 +34,9 @@ import java.io.File
 class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     override val viewModel: HomeViewModel by viewModels()
 
-    private lateinit var receiptList: RecyclerView
-    private lateinit var scanCard: MaterialCardView
-    private lateinit var uploadCard: MaterialCardView
-    private lateinit var previewCard: MaterialCardView
-    private lateinit var previewImage: ImageView
-    private lateinit var emptyState: View
-    private lateinit var loadingIndicator: ProgressBar
+    private var _binding: FragmentHomeBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var adapter: HomeReceiptAdapter
     private var pendingCameraUri: Uri? = null
 
@@ -92,18 +85,16 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        receiptList = view.findViewById(R.id.receipt_list)
-        scanCard = view.findViewById(R.id.card_scan)
-        uploadCard = view.findViewById(R.id.card_upload)
-        previewCard = view.findViewById(R.id.preview_card)
-        previewImage = view.findViewById(R.id.preview_image)
-        emptyState = view.findViewById(R.id.empty_state)
-        loadingIndicator = view.findViewById(R.id.loading_indicator)
-
+        _binding = FragmentHomeBinding.bind(view)
         setupAdapter()
         setupListeners()
         observeState()
         super.onViewCreated(view, savedInstanceState)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onResume() {
@@ -122,23 +113,23 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     private fun renderState(state: HomeUiState) {
         adapter.setReceipts(state.receipts)
         val showEmpty = shouldShowEmpty(state.hasLoaded, state.empty)
-        emptyState.visibility = if (showEmpty) View.VISIBLE else View.GONE
-        receiptList.visibility = if (showEmpty) View.GONE else View.VISIBLE
-        loadingIndicator.visibility = if (state.loading) View.VISIBLE else View.GONE
-        scanCard.isEnabled = !state.loading
-        uploadCard.isEnabled = !state.loading
+        binding.emptyState.visibility = if (showEmpty) View.VISIBLE else View.GONE
+        binding.receiptList.visibility = if (showEmpty) View.GONE else View.VISIBLE
+        binding.loadingIndicator.visibility = if (state.loading) View.VISIBLE else View.GONE
+        binding.cardScan.isEnabled = !state.loading
+        binding.cardUpload.isEnabled = !state.loading
     }
 
     private fun setupAdapter() {
         adapter = HomeReceiptAdapter { receipt ->
             openReceiptForEdit(receipt)
         }
-        receiptList.adapter = adapter
+        binding.receiptList.adapter = adapter
     }
 
     private fun setupListeners() {
-        scanCard.setOnClickListener { openCameraWithPermission() }
-        uploadCard.setOnClickListener { pickImageFromGallery() }
+        binding.cardScan.setOnClickListener { openCameraWithPermission() }
+        binding.cardUpload.setOnClickListener { pickImageFromGallery() }
     }
 
     private fun openReceiptForEdit(receipt: ReceiptEntity) {

@@ -44,7 +44,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
         debug {
@@ -53,6 +53,7 @@ android {
     }
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = javaVersionValue
         targetCompatibility = javaVersionValue
     }
@@ -82,16 +83,12 @@ kotlin {
     compilerOptions {
         val jvmTargetValue = project.property("kotlin.jvmTarget") as String
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(jvmTargetValue))
-        freeCompilerArgs.addAll(
-            listOf(
-                "-P",
-                "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=true"
-            )
-        )
     }
 }
 
 dependencies {
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+
     // Core 依赖
     implementation(project(":core-base"))
     implementation(project(":core-foundation"))

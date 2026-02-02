@@ -24,6 +24,26 @@ sealed class NetworkResult<out T> {
 }
 
 /**
+ * Success 时返回 [data]，Failure 时抛出 [ApiException]。供 Repository 层统一“取数据或抛异常”的写法。
+ */
+fun <T> NetworkResult<T>.getOrThrow(): T {
+    return when (this) {
+        is NetworkResult.Success -> data
+        is NetworkResult.Failure -> throw error.toApiException()
+    }
+}
+
+/**
+ * 将 [NetworkError] 转为 [ApiException]，供 Repository/UseCase 层统一错误类型。
+ */
+fun NetworkError.toApiException(): ApiException = when (this) {
+    is NetworkError.Http -> ApiException(code, message, throwable)
+    is NetworkError.Network -> ApiException(-1, message, throwable)
+    is NetworkError.Serialization -> ApiException(-2, message, throwable)
+    is NetworkError.Unexpected -> ApiException(-3, message, throwable)
+}
+
+/**
  * 统一错误描述，便于上层根据类型做兜底处理。
  */
 sealed class NetworkError(open val throwable: Throwable? = null) {

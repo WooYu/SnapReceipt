@@ -2,15 +2,13 @@ package com.snapreceipt.io.ui.login
 
 import android.os.Bundle
 import android.view.View
-import android.widget.EditText
-import android.widget.TextView
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.skybound.space.core.util.LogHelper
 import com.snapreceipt.io.R
-import com.snapreceipt.io.ui.widget.PrimaryActionButton
+import com.snapreceipt.io.databinding.FragmentEmailLoginBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -18,43 +16,36 @@ import kotlinx.coroutines.launch
 class EmailLoginFragment : BaseLoginFragment(R.layout.fragment_email_login) {
     override val viewModel: LoginViewModel by activityViewModels()
 
-    private lateinit var emailInput: EditText
-    private lateinit var codeInput: EditText
-    private lateinit var getCodeBtn: TextView
-    private lateinit var loginBtn: PrimaryActionButton
-    private lateinit var emailTab: TextView
-    private lateinit var phoneTab: TextView
-    private lateinit var backBtn: View
+    private var _binding: FragmentEmailLoginBinding? = null
+    private val binding get() = _binding!!
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        emailInput = view.findViewById(R.id.email_input)
-        codeInput = view.findViewById(R.id.code_input)
-        getCodeBtn = view.findViewById(R.id.get_code_btn)
-        loginBtn = view.findViewById(R.id.login_btn)
-        emailTab = view.findViewById(R.id.tab_email)
-        phoneTab = view.findViewById(R.id.tab_phone)
-        backBtn = view.findViewById(R.id.back_btn_hot_zone)
+        _binding = FragmentEmailLoginBinding.bind(view)
+        binding.getCodeBtn.setOnClickListener { onGetCodeClick() }
+        binding.loginBtn.setOnClickListener { onLoginClick() }
+        binding.tabPhone.setOnClickListener { onSwitchLogin() }
+        binding.tabEmail.setOnClickListener { viewModel.switchToEmail() }
+        binding.backBtnHotZone.setOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
 
-        getCodeBtn.setOnClickListener { onGetCodeClick() }
-        loginBtn.setOnClickListener { onLoginClick() }
-        phoneTab.setOnClickListener { onSwitchLogin() }
-        emailTab.setOnClickListener { viewModel.switchToEmail() }
-        backBtn.setOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
-
-        bindAgreementViews(view)
+        bindAgreementViews(binding.root)
 
         val state = viewModel.uiState.value
-        if (emailInput.text.toString() != state.email) {
-            emailInput.setText(state.email)
+        if (binding.emailInput.text.toString() != state.email) {
+            binding.emailInput.setText(state.email)
         }
-        if (codeInput.text.toString() != state.emailCode) {
-            codeInput.setText(state.emailCode)
+        if (binding.codeInput.text.toString() != state.emailCode) {
+            binding.codeInput.setText(state.emailCode)
         }
-        emailInput.addTextChangedListener(SimpleTextWatcher { viewModel.updateEmail(it) })
-        codeInput.addTextChangedListener(SimpleTextWatcher { viewModel.updateEmailCode(it) })
+        binding.emailInput.addTextChangedListener(SimpleTextWatcher { viewModel.updateEmail(it) })
+        binding.codeInput.addTextChangedListener(SimpleTextWatcher { viewModel.updateEmailCode(it) })
 
         observeState()
         super.onViewCreated(view, savedInstanceState)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun observeState() {
@@ -110,11 +101,11 @@ class EmailLoginFragment : BaseLoginFragment(R.layout.fragment_email_login) {
 
     private fun updateTabStyle(isPhoneSelected: Boolean) {
         if (isPhoneSelected) {
-            phoneTab.setTextColor(requireContext().getColor(R.color.text_primary))
-            emailTab.setTextColor(requireContext().getColor(R.color.text_secondary))
+            binding.tabPhone.setTextColor(requireContext().getColor(R.color.text_primary))
+            binding.tabEmail.setTextColor(requireContext().getColor(R.color.text_secondary))
         } else {
-            emailTab.setTextColor(requireContext().getColor(R.color.text_primary))
-            phoneTab.setTextColor(requireContext().getColor(R.color.text_secondary))
+            binding.tabEmail.setTextColor(requireContext().getColor(R.color.text_primary))
+            binding.tabPhone.setTextColor(requireContext().getColor(R.color.text_secondary))
         }
     }
 }

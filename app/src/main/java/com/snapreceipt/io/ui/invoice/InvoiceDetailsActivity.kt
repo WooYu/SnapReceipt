@@ -19,6 +19,7 @@ import com.skybound.space.base.presentation.BaseActivity
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.core.network.auth.SessionEvent
 import com.skybound.space.core.network.auth.SessionManager
+import com.skybound.space.core.util.DateFormatUtil
 import com.snapreceipt.io.MainActivity
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ReceiptCategory
@@ -326,21 +327,11 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         return if (displayTime.isNotEmpty()) "$displayDate $displayTime" else displayDate
     }
 
-    private fun currentDate(): String {
-        return java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
-            .format(System.currentTimeMillis())
-    }
+    private fun currentDate(): String =
+        DateFormatUtil.todayApiDate()
 
-    private fun parseDateTime(date: String, time: String): Long? {
-        if (date.isBlank()) return null
-        val safeTime = if (time.isBlank()) "00:00:00" else time
-        val value = "$date $safeTime"
-        return runCatching {
-            java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
-                .parse(value)
-                ?.time
-        }.getOrNull()
-    }
+    private fun parseDateTime(date: String, time: String): Long? =
+        DateFormatUtil.parseApiDateTime(date, time)
 
     override fun onSessionExpired(event: SessionEvent) {
         startActivity(

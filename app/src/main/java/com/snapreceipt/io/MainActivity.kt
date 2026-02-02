@@ -6,7 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.snapreceipt.io.databinding.ActivityMainBinding
 import com.snapreceipt.io.ui.home.HomeFragment
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
 import com.snapreceipt.io.ui.main.MainTab
@@ -30,16 +30,16 @@ class MainActivity : BaseActivity<MainViewModel>() {
     override val sessionManager: SessionManager
         get() = injectedSessionManager
 
-    private lateinit var bottomNav: BottomNavigationView
+    private lateinit var binding: ActivityMainBinding
     private var suppressSelection = false
     private var currentTab: MainTab? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        bottomNav = findViewById(R.id.bottom_nav)
-        bottomNav.setOnItemSelectedListener { item ->
+        binding.bottomNav.setOnItemSelectedListener { item ->
             if (suppressSelection) return@setOnItemSelectedListener true
             val tab = when (item.itemId) {
                 R.id.nav_home -> MainTab.HOME
@@ -77,7 +77,7 @@ class MainActivity : BaseActivity<MainViewModel>() {
         currentTab = state.selectedTab
 
         suppressSelection = true
-        bottomNav.selectedItemId = when (state.selectedTab) {
+        binding.bottomNav.selectedItemId = when (state.selectedTab) {
             MainTab.HOME -> R.id.nav_home
             MainTab.RECEIPTS -> R.id.nav_receipts
             MainTab.ME -> R.id.nav_me

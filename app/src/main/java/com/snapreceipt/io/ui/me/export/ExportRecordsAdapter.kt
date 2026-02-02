@@ -6,8 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ItemExportRecordBinding
 import com.snapreceipt.io.domain.model.ExportRecordEntity
-import java.text.SimpleDateFormat
-import java.util.Locale
+import com.skybound.space.core.util.DateFormatUtil
 
 class ExportRecordsAdapter(
     private val onRecordClick: (ExportRecordEntity) -> Unit
@@ -60,13 +59,7 @@ class ExportRecordsAdapter(
             }
         }
 
-        private fun formatDate(value: String): String {
-            if (value.isBlank()) return ""
-            return runCatching {
-                val parser = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                val formatter = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
-                formatter.format(parser.parse(value) ?: return value)
-            }.getOrDefault(value)
-        }
+        private fun formatDate(value: String): String =
+            DateFormatUtil.apiDateToDisplay(value)
     }
 }

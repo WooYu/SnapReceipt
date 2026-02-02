@@ -6,6 +6,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
+/**
+ * 数据层 Repository 基类，提供统一的 IO 调度、Flow 映射和缓存优先能力。
+ *
+ * **继承约定：**
+ * - **本地或混合仓库**（如 [UserRepositoryImpl]）：继承本类，复用 [withIo]、[mapFlow]、[cacheFirst]。
+ * - **纯远程仓库**（如 [ReceiptRemoteRepositoryImpl]）：数据源已在 DataSource 内使用 withContext(io)，
+ *   可不继承本类，避免重复调度；若需统一调度或缓存可评估后继承。
+ */
 abstract class BaseRepository(
     private val dispatchers: CoroutineDispatchersProvider,
     private val cacheManager: CacheManager? = null

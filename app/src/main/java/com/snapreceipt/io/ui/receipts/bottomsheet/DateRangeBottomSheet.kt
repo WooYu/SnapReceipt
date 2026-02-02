@@ -10,9 +10,8 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.snapreceipt.io.R
-import java.text.SimpleDateFormat
+import com.skybound.space.core.util.DateFormatUtil
 import java.util.Calendar
-import java.util.Locale
 
 class DateRangeBottomSheet(
     initialStart: Long?,
@@ -123,9 +122,8 @@ class DateRangeBottomSheet(
     }
 
     private fun updateDateViews() {
-        val format = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
-        startDateView.text = format.format(startCalendar.timeInMillis)
-        endDateView.text = format.format(endCalendar.timeInMillis)
+        startDateView.text = DateFormatUtil.formatDisplayDate(startCalendar.timeInMillis)
+        endDateView.text = DateFormatUtil.formatDisplayDate(endCalendar.timeInMillis)
     }
 
     private fun updateSelection() {
