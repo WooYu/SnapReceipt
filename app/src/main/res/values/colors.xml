@@ -1,15 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- 主色调：保持您的皇家蓝 -->
     <color name="colorPrimary">#103CED</color>
-    <color name="colorPrimaryVariant">#02D7FD</color>
-    <color name="colorSecondary">@color/colorPrimary</color>
-    <color name="colorSecondaryVariant">@color/colorPrimaryVariant</color>
+
+    <!-- 主色调变体：通常用于状态栏 (Status Bar)。
+         建议：使用比主色深一点的蓝色，或者如果追求扁平化设计，可以设为与 colorPrimary 相同。
+         原先的 Cyan (#02D7FD) 在状态栏上可能太亮且抢眼。 -->
+    <color name="colorPrimaryVariant">#0824B0</color>
+
+    <!-- 次要颜色/强调色：强烈建议将您的 Cyan 放在这里 -->
+    <!-- 用于：FloatingActionButton, CheckBox, Switch, Link Text -->
+    <color name="colorSecondary">#02D7FD</color>
+
+    <!-- 次要颜色变体：Cyan 的深色版本 -->
+    <color name="colorSecondaryVariant">#00A7C4</color>
+
+    <!-- 错误色：标准的 Material Red，保持即可 -->
     <color name="colorError">#B00020</color>
+
+    <!-- 文本/内容颜色 -->
+    <!-- 在主色(蓝)上的文字：白色 -->
     <color name="colorOnPrimary">#FFFFFF</color>
-    <color name="colorOnSecondary">#000000</color>
+
+    <!-- 在次要色(青)上的文字：
+         由于 #02D7FD 比较亮，白色文字可能会看不清。
+         建议使用深色文字 (#1E2430 或 #000000) 以保证可读性。 -->
+    <color name="colorOnSecondary">#1E2430</color>
+
     <color name="colorOnError">#FFFFFF</color>
+
+    <!-- 背景色 -->
+    <!-- 页面大背景：您选的浅灰蓝非常棒，护眼且有质感 -->
     <color name="colorBackground">#F4F7FC</color>
+
+    <!-- 卡片/表面背景：纯白 -->
     <color name="colorSurface">#FFFFFF</color>
+
+    <!-- 背景上的文字：使用深蓝灰，比纯黑更柔和 -->
     <color name="colorOnBackground">#1E2430</color>
     <color name="colorOnSurface">#1E2430</color>
 
