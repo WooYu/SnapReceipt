@@ -9,8 +9,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="match_parent"
-        android:paddingBottom="24dp">
+        android:paddingBottom="33dp">
 
         <!--左边界-->
         <androidx.constraintlayout.widget.Guideline
