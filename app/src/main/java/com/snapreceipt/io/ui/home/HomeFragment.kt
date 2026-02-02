@@ -104,7 +104,15 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         val showEmpty = shouldShowEmpty(state.hasLoaded, state.empty)
         binding.emptyState.visibility = if (showEmpty) View.VISIBLE else View.GONE
         binding.receiptList.visibility = if (showEmpty) View.GONE else View.VISIBLE
-        binding.loadingIndicator.visibility = if (state.loading) View.VISIBLE else View.GONE
+
+        val showRecognitionOverlay = state.recognitionStatusResId != null
+        binding.recognitionOverlay.visibility = if (showRecognitionOverlay) View.VISIBLE else View.GONE
+        if (showRecognitionOverlay && state.recognitionStatusResId != null) {
+            binding.recognitionStatusText.setText(state.recognitionStatusResId)
+        }
+        binding.loadingIndicator.visibility =
+            if (state.loading && !showRecognitionOverlay) View.VISIBLE else View.GONE
+
         binding.cardScan.isEnabled = !state.loading
         binding.cardUpload.isEnabled = !state.loading
     }

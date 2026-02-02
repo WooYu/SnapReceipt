@@ -7,5 +7,7 @@ data class HomeUiState(
     val loading: Boolean = false,
     val error: String? = null,
     val empty: Boolean = true,
-    val hasLoaded: Boolean = false
+    val hasLoaded: Boolean = false,
+    /** ResId for OCR recognition progress (uploading/scanning). Non-null only during processCroppedImage. */
+    val recognitionStatusResId: Int? = null
 )

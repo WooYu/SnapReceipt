@@ -84,32 +84,28 @@ class HomeViewModel @Inject constructor(
 
     fun processCroppedImage(imagePath: String) {
         viewModelScope.launch(dispatchers.io) {
-            _uiState.update { it.copy(loading = true, error = null) }
+            _uiState.update {
+                it.copy(
+                    loading = true,
+                    error = null,
+                    recognitionStatusResId = R.string.uploading_receipt
+                )
+            }
             uploadAndScanReceiptUseCase(
                 imagePath,
                 onProgress = { stage ->
-                    when (stage) {
+                    val resId = when (stage) {
                         UploadAndScanReceiptUseCase.Stage.REQUESTING_UPLOAD_URL,
-                        UploadAndScanReceiptUseCase.Stage.UPLOADING -> emitEvent(
-                            UiEvent.Toast(
-                                message = "",
-                                resId = R.string.uploading_receipt,
-                                long = true
-                            )
-                        )
-
-                        UploadAndScanReceiptUseCase.Stage.SCANNING -> emitEvent(
-                            UiEvent.Toast(
-                                message = "",
-                                resId = R.string.scanning_receipt,
-                                long = true
-                            )
-                        )
+                        UploadAndScanReceiptUseCase.Stage.UPLOADING -> R.string.uploading_receipt
+                        UploadAndScanReceiptUseCase.Stage.SCANNING -> R.string.scanning_receipt
                     }
+                    _uiState.update { it.copy(recognitionStatusResId = resId) }
                 }
             )
                 .onSuccess { scan ->
-                    _uiState.update { it.copy(loading = false) }
+                    _uiState.update {
+                        it.copy(loading = false, recognitionStatusResId = null)
+                    }
                     emitEvent(
                         UiEvent.Custom(
                             HomeEventKeys.PREFILL_READY,
@@ -123,8 +119,12 @@ class HomeViewModel @Inject constructor(
                     )
                 }
                 .onFailure { throwable ->
-                    _uiState.update { state ->
-                        state.copy(loading = false, error = throwable.message)
+                    _uiState.update {
+                        it.copy(
+                            loading = false,
+                            error = throwable.message,
+                            recognitionStatusResId = null
+                        )
                     }
                     emitEvent(UiEvent.Custom(HomeEventKeys.SCAN_FAILED))
                 }
