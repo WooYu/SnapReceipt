@@ -91,6 +91,10 @@ abstract class BaseLoginFragment(@LayoutRes layoutId: Int) : BaseFragment<LoginV
         }
 
         dialog.show()
+        dialog.window?.setLayout(
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+        )
     }
 
     override fun onDestroyView() {
