@@ -5,16 +5,13 @@ import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import android.widget.Toast
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.snapreceipt.io.MainActivity
 import com.snapreceipt.io.R
 import com.skybound.space.base.presentation.BaseActivity
 import com.skybound.space.base.presentation.UiEvent
+import com.skybound.space.base.presentation.observeState
 import com.skybound.space.core.network.auth.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.snapreceipt.io.ui.common.PolicyWebViewActivity
 
@@ -39,15 +36,7 @@ class LoginActivity : BaseActivity<LoginViewModel>() {
         if (savedInstanceState == null) {
             viewModel.switchToPhone()
         }
-        observeState()
-    }
-
-    private fun observeState() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { renderState(it) }
-            }
-        }
+        observeState(viewModel.uiState) { renderState(it) }
     }
 
     private fun renderState(state: LoginUiState) {

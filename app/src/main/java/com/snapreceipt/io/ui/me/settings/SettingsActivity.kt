@@ -2,10 +2,10 @@ package com.snapreceipt.io.ui.me.settings
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.snapreceipt.io.R
+import com.snapreceipt.io.databinding.ActivitySettingsBinding
 import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
 import com.snapreceipt.io.ui.login.LoginActivity
 import com.skybound.space.core.network.auth.SessionManager
@@ -22,25 +22,26 @@ class SettingsActivity : EdgeToEdgeActivity() {
 
     @Inject
     lateinit var sessionManager: SessionManager
-    private lateinit var cacheSizeView: TextView
+    private var _binding: ActivitySettingsBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
+        _binding = ActivitySettingsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        cacheSizeView = findViewById(R.id.cache_size)
-        findViewById<android.view.View>(R.id.btn_back).setOnClickListener { finish() }
-        findViewById<android.view.View>(R.id.menu_switch_account).setOnClickListener {
+        binding.btnBack.setOnClickListener { finish() }
+        binding.menuSwitchAccount.setOnClickListener {
             Toast.makeText(this, getString(R.string.switch_account), Toast.LENGTH_SHORT).show()
         }
-        findViewById<android.view.View>(R.id.menu_clear_cache).setOnClickListener {
+        binding.menuClearCache.setOnClickListener {
             lifecycleScope.launch {
                 withContext(Dispatchers.IO) { clearAppCache() }
                 Toast.makeText(this@SettingsActivity, getString(R.string.clear_cache), Toast.LENGTH_SHORT).show()
                 updateCacheSize()
             }
         }
-        findViewById<android.view.View>(R.id.logout_btn).setOnClickListener {
+        binding.logoutBtn.setOnClickListener {
             sessionManager.logout()
             startActivity(Intent(this, LoginActivity::class.java))
             finishAffinity()
@@ -49,12 +50,17 @@ class SettingsActivity : EdgeToEdgeActivity() {
         updateCacheSize()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+    }
+
     private fun updateCacheSize() {
         lifecycleScope.launch {
             val sizeBytes = withContext(Dispatchers.IO) {
                 directorySize(cacheDir) + (externalCacheDir?.let { directorySize(it) } ?: 0L)
             }
-            cacheSizeView.text = formatSize(sizeBytes)
+            binding.cacheSize.text = formatSize(sizeBytes)
         }
     }
 

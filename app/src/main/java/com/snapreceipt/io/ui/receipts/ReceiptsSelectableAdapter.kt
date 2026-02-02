@@ -2,6 +2,8 @@ package com.snapreceipt.io.ui.receipts
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ItemReceiptSelectBinding
@@ -12,18 +14,24 @@ class ReceiptsSelectableAdapter(
     private var selectedIds: Set<Long>,
     private val onToggle: (Long) -> Unit,
     private val onEditClick: (ReceiptEntity) -> Unit
-) : RecyclerView.Adapter<ReceiptsSelectableAdapter.ViewHolder>() {
+) : ListAdapter<ReceiptEntity, ReceiptsSelectableAdapter.ViewHolder>(RECEIPT_DIFF) {
 
-    private var receipts: List<ReceiptEntity> = emptyList()
+    companion object {
+        private val RECEIPT_DIFF = object : DiffUtil.ItemCallback<ReceiptEntity>() {
+            override fun areItemsTheSame(a: ReceiptEntity, b: ReceiptEntity): Boolean =
+                a.receiptId == b.receiptId
+
+            override fun areContentsTheSame(a: ReceiptEntity, b: ReceiptEntity): Boolean = a == b
+        }
+    }
 
     fun setReceipts(newReceipts: List<ReceiptEntity>) {
-        receipts = newReceipts
-        notifyDataSetChanged()
+        submitList(newReceipts)
     }
 
     fun updateSelection(selected: Set<Long>) {
         selectedIds = selected
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, currentList.size)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -33,12 +41,10 @@ class ReceiptsSelectableAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val receipt = receipts[position]
+        val receipt = getItem(position)
         val id = receipt.receiptId
         holder.bind(receipt, id != null && selectedIds.contains(id))
     }
-
-    override fun getItemCount(): Int = receipts.size
 
     class ViewHolder(
         private val binding: ItemReceiptSelectBinding,

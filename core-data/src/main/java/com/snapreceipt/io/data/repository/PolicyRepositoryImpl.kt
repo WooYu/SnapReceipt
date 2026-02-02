@@ -5,8 +5,8 @@ import com.snapreceipt.io.data.network.datasource.ConfigRemoteDataSource
 import com.snapreceipt.io.data.network.model.config.toEntity
 import com.snapreceipt.io.domain.model.PolicyEntity
 import com.snapreceipt.io.domain.repository.PolicyRepository
-import com.skybound.space.core.network.ApiException
 import com.skybound.space.core.network.NetworkResult
+import com.skybound.space.core.network.toApiException
 import javax.inject.Inject
 
 class PolicyRepositoryImpl @Inject constructor(
@@ -21,20 +21,7 @@ class PolicyRepositoryImpl @Inject constructor(
                 localDataSource.updatePolicy(entity)
                 entity
             }
-            is NetworkResult.Failure -> cached ?: throw result.toApiException()
-        }
-    }
-
-    private fun NetworkResult.Failure.toApiException(): ApiException {
-        return when (val failure = error) {
-            is com.skybound.space.core.network.NetworkError.Http ->
-                ApiException(failure.code, failure.message, failure.throwable)
-            is com.skybound.space.core.network.NetworkError.Network ->
-                ApiException(-1, failure.message, failure.throwable)
-            is com.skybound.space.core.network.NetworkError.Serialization ->
-                ApiException(-2, failure.message, failure.throwable)
-            is com.skybound.space.core.network.NetworkError.Unexpected ->
-                ApiException(-3, failure.message, failure.throwable)
+            is NetworkResult.Failure -> cached ?: throw result.error.toApiException()
         }
     }
 }

@@ -2,24 +2,16 @@ package com.snapreceipt.io
 
 import android.os.Bundle
 import androidx.activity.viewModels
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
 import com.snapreceipt.io.databinding.ActivityMainBinding
-import com.snapreceipt.io.ui.home.HomeFragment
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
-import com.snapreceipt.io.ui.main.MainTab
-import com.snapreceipt.io.ui.main.MainUiState
 import com.snapreceipt.io.ui.main.MainViewModel
-import com.snapreceipt.io.ui.me.MeFragment
-import com.snapreceipt.io.ui.receipts.ReceiptsFragment
 import com.snapreceipt.io.ui.login.LoginActivity
 import com.skybound.space.base.presentation.BaseActivity
 import com.skybound.space.core.network.auth.SessionEvent
 import com.skybound.space.core.network.auth.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -31,72 +23,29 @@ class MainActivity : BaseActivity<MainViewModel>() {
         get() = injectedSessionManager
 
     private lateinit var binding: ActivityMainBinding
-    private var suppressSelection = false
-    private var currentTab: MainTab? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.bottomNav.setOnItemSelectedListener { item ->
-            if (suppressSelection) return@setOnItemSelectedListener true
-            val tab = when (item.itemId) {
-                R.id.nav_home -> MainTab.HOME
-                R.id.nav_receipts -> MainTab.RECEIPTS
-                R.id.nav_me -> MainTab.ME
-                else -> MainTab.HOME
-            }
-            viewModel.selectTab(tab)
-            true
-        }
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.fragment_container) as NavHostFragment
+        val navController = navHostFragment.navController
+        binding.bottomNav.setupWithNavController(navController)
 
         if (savedInstanceState == null) {
             val startTab = intent.getStringExtra(InvoiceDetailsActivity.EXTRA_START_TAB)
-            val initialTab = if (startTab == InvoiceDetailsActivity.TAB_RECEIPTS) {
-                MainTab.RECEIPTS
-            } else {
-                MainTab.HOME
-            }
-            viewModel.selectTab(initialTab)
-        }
-
-        observeState()
-    }
-
-    private fun observeState() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { renderState(it) }
+            if (startTab == InvoiceDetailsActivity.TAB_RECEIPTS) {
+                navController.navigate(
+                    R.id.nav_receipts,
+                    null,
+                    androidx.navigation.NavOptions.Builder()
+                        .setPopUpTo(R.id.nav_home, true, true)
+                        .build()
+                )
             }
         }
-    }
-
-    private fun renderState(state: MainUiState) {
-        if (currentTab == state.selectedTab) return
-        currentTab = state.selectedTab
-
-        suppressSelection = true
-        binding.bottomNav.selectedItemId = when (state.selectedTab) {
-            MainTab.HOME -> R.id.nav_home
-            MainTab.RECEIPTS -> R.id.nav_receipts
-            MainTab.ME -> R.id.nav_me
-        }
-        suppressSelection = false
-
-        loadFragment(
-            when (state.selectedTab) {
-                MainTab.HOME -> HomeFragment()
-                MainTab.RECEIPTS -> ReceiptsFragment()
-                MainTab.ME -> MeFragment()
-            }
-        )
-    }
-
-    private fun loadFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
-            .commit()
     }
 
     override fun onSessionExpired(event: SessionEvent) {

@@ -16,9 +16,11 @@ import android.view.View
 import android.view.Window
 import android.widget.ImageView
 import android.widget.TextView
+import android.view.LayoutInflater
 import androidx.annotation.LayoutRes
 import com.skybound.space.base.presentation.BaseFragment
 import com.snapreceipt.io.R
+import com.snapreceipt.io.databinding.DialogAgreementConfirmBinding
 import com.snapreceipt.io.ui.widget.PrimaryActionButton
 
 abstract class BaseLoginFragment(@LayoutRes layoutId: Int) : BaseFragment<LoginViewModel>(layoutId) {
@@ -66,35 +68,33 @@ abstract class BaseLoginFragment(@LayoutRes layoutId: Int) : BaseFragment<LoginV
     protected fun showAgreementDialog(onResult: (Boolean) -> Unit) {
         val dialog = Dialog(requireContext())
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        dialog.setContentView(R.layout.dialog_agreement_confirm)
+        val binding = DialogAgreementConfirmBinding.inflate(LayoutInflater.from(requireContext()))
+        dialog.setContentView(binding.root)
         dialog.setCancelable(false)
         dialog.setCanceledOnTouchOutside(false)
-        dialog.window?.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
+        dialog.window?.apply {
+            setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
+            setLayout(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        }
 
-        val titleView = dialog.findViewById<TextView>(R.id.agreement_dialog_title)
-        val messageView = dialog.findViewById<TextView>(R.id.agreement_dialog_message)
-        val agreeButton = dialog.findViewById<PrimaryActionButton>(R.id.agreement_dialog_agree)
-        val disagreeButton = dialog.findViewById<TextView>(R.id.agreement_dialog_disagree)
+        binding.agreementDialogTitle.text = getString(R.string.agreement_dialog_title)
+        binding.agreementDialogMessage.text = buildAgreementText()
+        binding.agreementDialogMessage.movementMethod = LinkMovementMethod.getInstance()
+        binding.agreementDialogMessage.highlightColor = android.graphics.Color.TRANSPARENT
 
-        titleView.text = getString(R.string.agreement_dialog_title)
-        messageView.text = buildAgreementText()
-        messageView.movementMethod = LinkMovementMethod.getInstance()
-        messageView.highlightColor = android.graphics.Color.TRANSPARENT
-
-        agreeButton.setOnClickListener {
+        binding.agreementDialogAgree.setOnClickListener {
             dialog.dismiss()
             onResult(true)
         }
-        disagreeButton.setOnClickListener {
+        binding.agreementDialogDisagree.setOnClickListener {
             dialog.dismiss()
             onResult(false)
         }
 
         dialog.show()
-        dialog.window?.setLayout(
-            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-            android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-        )
     }
 
     override fun onDestroyView() {

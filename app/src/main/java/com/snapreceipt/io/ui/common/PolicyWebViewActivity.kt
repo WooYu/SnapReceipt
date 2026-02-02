@@ -35,6 +35,7 @@ class PolicyWebViewActivity : EdgeToEdgeActivity() {
 
     companion object {
         const val EXTRA_URL = "extra_url"
+        /** 保留供调用方传入，Custom Tabs 不展示该标题。 */
         const val EXTRA_TITLE = "extra_title"
     }
 }

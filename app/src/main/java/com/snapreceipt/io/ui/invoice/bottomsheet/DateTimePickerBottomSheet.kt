@@ -3,12 +3,10 @@ package com.snapreceipt.io.ui.invoice.bottomsheet
 import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
-import android.widget.NumberPicker
-import android.widget.TextView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.snapreceipt.io.R
+import com.snapreceipt.io.databinding.BottomSheetDatetimeBinding
 import com.skybound.space.core.util.DateFormatUtil
 import java.util.Calendar
 
@@ -21,30 +19,19 @@ class DateTimePickerBottomSheet(
         if (initialTime != null) timeInMillis = initialTime
     }
 
-    private lateinit var yearPicker: NumberPicker
-    private lateinit var monthPicker: NumberPicker
-    private lateinit var dayPicker: NumberPicker
-    private lateinit var hourPicker: NumberPicker
-    private lateinit var minutePicker: NumberPicker
-    private lateinit var selectedText: TextView
+    private var _binding: BottomSheetDatetimeBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = BottomSheetDialog(requireContext())
-        val view = LayoutInflater.from(context).inflate(R.layout.bottom_sheet_datetime, null)
-        dialog.setContentView(view)
-
-        yearPicker = view.findViewById(R.id.picker_year)
-        monthPicker = view.findViewById(R.id.picker_month)
-        dayPicker = view.findViewById(R.id.picker_day)
-        hourPicker = view.findViewById(R.id.picker_hour)
-        minutePicker = view.findViewById(R.id.picker_minute)
-        selectedText = view.findViewById(R.id.selected_date)
+        _binding = BottomSheetDatetimeBinding.inflate(LayoutInflater.from(context))
+        dialog.setContentView(binding.root)
 
         setupPickers()
         updateSelectedText()
 
-        view.findViewById<View>(R.id.cancel_btn).setOnClickListener { dismiss() }
-        view.findViewById<View>(R.id.confirm_btn).setOnClickListener {
+        binding.cancelBtn.setOnClickListener { dismiss() }
+        binding.confirmBtn.setOnClickListener {
             val date = formatDate(calendar.timeInMillis)
             val time = formatTime(calendar.timeInMillis)
             val display = formatDisplay(calendar.timeInMillis)
@@ -55,60 +42,65 @@ class DateTimePickerBottomSheet(
         return dialog
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     private fun setupPickers() {
         val currentYear = calendar.get(Calendar.YEAR)
-        yearPicker.minValue = currentYear - 2
-        yearPicker.maxValue = currentYear + 2
-        yearPicker.value = currentYear
+        binding.pickerYear.minValue = currentYear - 2
+        binding.pickerYear.maxValue = currentYear + 2
+        binding.pickerYear.value = currentYear
 
-        monthPicker.minValue = 1
-        monthPicker.maxValue = 12
-        monthPicker.value = calendar.get(Calendar.MONTH) + 1
+        binding.pickerMonth.minValue = 1
+        binding.pickerMonth.maxValue = 12
+        binding.pickerMonth.value = calendar.get(Calendar.MONTH) + 1
 
-        hourPicker.minValue = 0
-        hourPicker.maxValue = 23
-        hourPicker.value = calendar.get(Calendar.HOUR_OF_DAY)
+        binding.pickerHour.minValue = 0
+        binding.pickerHour.maxValue = 23
+        binding.pickerHour.value = calendar.get(Calendar.HOUR_OF_DAY)
 
-        minutePicker.minValue = 0
-        minutePicker.maxValue = 59
-        minutePicker.value = calendar.get(Calendar.MINUTE)
+        binding.pickerMinute.minValue = 0
+        binding.pickerMinute.maxValue = 59
+        binding.pickerMinute.value = calendar.get(Calendar.MINUTE)
 
-        monthPicker.setFormatter { value -> value.toString().padStart(2, '0') }
-        dayPicker.setFormatter { value -> value.toString().padStart(2, '0') }
-        hourPicker.setFormatter { value -> value.toString().padStart(2, '0') }
-        minutePicker.setFormatter { value -> value.toString().padStart(2, '0') }
+        binding.pickerMonth.setFormatter { value -> value.toString().padStart(2, '0') }
+        binding.pickerDay.setFormatter { value -> value.toString().padStart(2, '0') }
+        binding.pickerHour.setFormatter { value -> value.toString().padStart(2, '0') }
+        binding.pickerMinute.setFormatter { value -> value.toString().padStart(2, '0') }
 
         updateDayPicker()
 
-        val listener = NumberPicker.OnValueChangeListener { _, _, _ ->
-            calendar.set(Calendar.YEAR, yearPicker.value)
-            calendar.set(Calendar.MONTH, monthPicker.value - 1)
-            calendar.set(Calendar.DAY_OF_MONTH, dayPicker.value)
-            calendar.set(Calendar.HOUR_OF_DAY, hourPicker.value)
-            calendar.set(Calendar.MINUTE, minutePicker.value)
+        val listener = android.widget.NumberPicker.OnValueChangeListener { _, _, _ ->
+            calendar.set(Calendar.YEAR, binding.pickerYear.value)
+            calendar.set(Calendar.MONTH, binding.pickerMonth.value - 1)
+            calendar.set(Calendar.DAY_OF_MONTH, binding.pickerDay.value)
+            calendar.set(Calendar.HOUR_OF_DAY, binding.pickerHour.value)
+            calendar.set(Calendar.MINUTE, binding.pickerMinute.value)
             updateDayPicker()
-            calendar.set(Calendar.DAY_OF_MONTH, dayPicker.value)
+            calendar.set(Calendar.DAY_OF_MONTH, binding.pickerDay.value)
             updateSelectedText()
         }
 
-        yearPicker.setOnValueChangedListener(listener)
-        monthPicker.setOnValueChangedListener(listener)
-        dayPicker.setOnValueChangedListener(listener)
-        hourPicker.setOnValueChangedListener(listener)
-        minutePicker.setOnValueChangedListener(listener)
+        binding.pickerYear.setOnValueChangedListener(listener)
+        binding.pickerMonth.setOnValueChangedListener(listener)
+        binding.pickerDay.setOnValueChangedListener(listener)
+        binding.pickerHour.setOnValueChangedListener(listener)
+        binding.pickerMinute.setOnValueChangedListener(listener)
     }
 
     private fun updateDayPicker() {
         val maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
         val currentDay = calendar.get(Calendar.DAY_OF_MONTH).coerceAtMost(maxDay)
-        dayPicker.minValue = 1
-        dayPicker.maxValue = maxDay
-        dayPicker.value = currentDay
+        binding.pickerDay.minValue = 1
+        binding.pickerDay.maxValue = maxDay
+        binding.pickerDay.value = currentDay
     }
 
     private fun updateSelectedText() {
         val display = formatDisplay(calendar.timeInMillis)
-        selectedText.text = getString(R.string.date_prefix, display)
+        binding.selectedDate.text = getString(R.string.date_prefix, display)
     }
 
     private fun formatDate(timeMillis: Long): String =

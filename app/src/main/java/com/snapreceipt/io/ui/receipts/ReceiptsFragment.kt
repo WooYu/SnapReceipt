@@ -7,9 +7,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentReceiptsBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
@@ -21,8 +18,8 @@ import com.snapreceipt.io.ui.receipts.dialogs.ExportSuccessDialog
 import com.skybound.space.core.config.AppConfig
 import com.skybound.space.core.util.DateFormatUtil
 import com.skybound.space.base.presentation.BaseFragment
+import com.skybound.space.base.presentation.observeState
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_receipts) {
@@ -42,7 +39,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         _binding = FragmentReceiptsBinding.bind(view)
         setupAdapter()
         setupListeners()
-        observeState()
+        observeState(viewModel.uiState) { renderState(it) }
         super.onViewCreated(view, savedInstanceState)
     }
 
@@ -54,14 +51,6 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     override fun onResume() {
         super.onResume()
         viewModel.loadReceipts()
-    }
-
-    private fun observeState() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { renderState(it) }
-            }
-        }
     }
 
     private fun renderState(state: ReceiptsUiState) {

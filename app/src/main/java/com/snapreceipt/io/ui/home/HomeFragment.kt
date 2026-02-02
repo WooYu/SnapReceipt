@@ -10,9 +10,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentHomeBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
@@ -21,13 +18,13 @@ import com.snapreceipt.io.ui.home.dialogs.ScanFailedDialog
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
 import com.skybound.space.base.presentation.BaseFragment
 import com.skybound.space.base.presentation.UiEvent
+import com.skybound.space.base.presentation.observeState
 import com.skybound.space.base.platform.permission.FragmentPermissionHelper
 import com.skybound.space.base.platform.permission.PermissionManager
 import com.skybound.space.base.platform.permission.Permissions
 import com.skybound.space.core.util.LogHelper
 import com.yalantis.ucrop.UCrop
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import java.io.File
 
 @AndroidEntryPoint
@@ -88,7 +85,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         _binding = FragmentHomeBinding.bind(view)
         setupAdapter()
         setupListeners()
-        observeState()
+        observeState(viewModel.uiState) { renderState(it) }
         super.onViewCreated(view, savedInstanceState)
     }
 

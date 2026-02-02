@@ -3,10 +3,10 @@ package com.snapreceipt.io.ui.me.about
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
-import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import com.snapreceipt.io.BuildConfig
 import com.snapreceipt.io.R
+import com.snapreceipt.io.databinding.ActivityAboutUsBinding
 import com.snapreceipt.io.domain.model.PolicyEntity
 import com.snapreceipt.io.domain.usecase.config.FetchPolicyUseCase
 import com.snapreceipt.io.ui.common.PolicyWebViewActivity
@@ -20,22 +20,30 @@ class AboutUsActivity : EdgeToEdgeActivity() {
 
     @Inject
     lateinit var fetchPolicyUseCase: FetchPolicyUseCase
+    private var _binding: ActivityAboutUsBinding? = null
+    private val binding get() = _binding!!
     private var policyCache: PolicyEntity? = null
     private var policyPrefetchJob: kotlinx.coroutines.Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_about_us)
+        _binding = ActivityAboutUsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        findViewById<TextView>(R.id.app_version).text = "V${BuildConfig.VERSION_NAME}"
+        binding.appVersion.text = "V${BuildConfig.VERSION_NAME}"
         prefetchPolicy()
-        findViewById<android.view.View>(R.id.btn_back).setOnClickListener { finish() }
-        findViewById<android.view.View>(R.id.menu_user_agreement).setOnClickListener {
+        binding.btnBack.setOnClickListener { finish() }
+        binding.menuUserAgreement.setOnClickListener {
             openPolicyUrl(isUserAgreement = true)
         }
-        findViewById<android.view.View>(R.id.menu_privacy_policy).setOnClickListener {
+        binding.menuPrivacyPolicy.setOnClickListener {
             openPolicyUrl(isUserAgreement = false)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 
     private fun openPolicyUrl(isUserAgreement: Boolean) {

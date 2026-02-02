@@ -3,8 +3,6 @@ package com.snapreceipt.io.ui.invoice.bottomsheet
 import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
@@ -14,13 +12,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.snapreceipt.io.R
+import com.snapreceipt.io.databinding.BottomSheetInvoiceCategoryBinding
 import com.snapreceipt.io.domain.model.ReceiptCategory
 import com.snapreceipt.io.domain.usecase.category.AddCategoryUseCase
 import com.snapreceipt.io.domain.usecase.category.DeleteCategoryUseCase
 import com.snapreceipt.io.domain.usecase.category.FetchCategoriesUseCase
 import com.snapreceipt.io.ui.invoice.dialogs.CustomTypeDialog
+import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -48,18 +47,20 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
     @Inject
     lateinit var deleteCategoryUseCase: DeleteCategoryUseCase
 
+    @Inject
+    lateinit var dispatchers: CoroutineDispatchersProvider
+
     private var onSelected: ((String) -> Unit)? = null
     private lateinit var adapter: CategoryChipAdapter
     private var selectedLabel: String = ""
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = BottomSheetDialog(requireContext())
-        val view = LayoutInflater.from(context).inflate(R.layout.bottom_sheet_invoice_category, null)
-        dialog.setContentView(view)
+        val binding = BottomSheetInvoiceCategoryBinding.inflate(LayoutInflater.from(requireContext()))
+        dialog.setContentView(binding.root)
 
         selectedLabel = arguments?.getString(ARG_INITIAL).orEmpty()
 
-        val recycler = view.findViewById<RecyclerView>(R.id.category_list)
         adapter = CategoryChipAdapter(
             onSelect = { option ->
                 selectedLabel = option.label
@@ -71,16 +72,16 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
                 }
             }
         )
-        recycler.layoutManager = GridLayoutManager(requireContext(), 3)
-        recycler.adapter = adapter
+        binding.categoryList.layoutManager = GridLayoutManager(requireContext(), 3)
+        binding.categoryList.adapter = adapter
 
-        view.findViewById<TextView>(R.id.type_add).setOnClickListener {
+        binding.typeAdd.setOnClickListener {
             CustomTypeDialog { customType -> addCustomType(customType) }
                 .show(parentFragmentManager, "custom_type_dialog")
         }
 
-        view.findViewById<View>(R.id.cancel_btn).setOnClickListener { dismiss() }
-        view.findViewById<View>(R.id.confirm_btn).setOnClickListener {
+        binding.cancelBtn.setOnClickListener { dismiss() }
+        binding.confirmBtn.setOnClickListener {
             onSelected?.invoke(selectedLabel)
             dismiss()
         }
@@ -91,7 +92,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
 
     private fun loadCategories() {
         lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) { fetchCategoriesUseCase() }
+            val result = withContext(dispatchers.io) { fetchCategoriesUseCase() }
             val list = result.getOrElse { ReceiptCategory.all() }
             ReceiptCategory.update(list)
             val options = buildOptions(list)
@@ -101,7 +102,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
 
     private fun addCustomType(label: String) {
         lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) { addCategoryUseCase(label) }
+            val result = withContext(dispatchers.io) { addCategoryUseCase(label) }
             result.onSuccess {
                 selectedLabel = label
                 loadCategories()
@@ -121,7 +122,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
 
     private fun deleteCategory(option: CategoryOption) {
         lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) { deleteCategoryUseCase(listOf(option.id)) }
+            val result = withContext(dispatchers.io) { deleteCategoryUseCase(listOf(option.id)) }
             result.onSuccess {
                 if (selectedLabel.equals(option.label, ignoreCase = true)) {
                     selectedLabel = ""
@@ -175,9 +176,12 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         }
 
         override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_category_chip, parent, false)
-            return ViewHolder(view)
+            val binding = ItemCategoryChipBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+            return ViewHolder(binding)
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -186,8 +190,9 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
 
         override fun getItemCount(): Int = items.size
 
-        class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            private val text: TextView = itemView.findViewById(R.id.chip_text)
+        class ViewHolder(
+            private val binding: ItemCategoryChipBinding
+        ) : RecyclerView.ViewHolder(binding.root) {
 
             fun bind(
                 option: CategoryOption,
@@ -195,10 +200,10 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
                 onSelect: (CategoryOption) -> Unit,
                 onLongPress: (CategoryOption) -> Unit
             ) {
-                text.text = option.label
-                text.isSelected = option.label.equals(selectedLabel, ignoreCase = true)
-                text.setOnClickListener { onSelect(option) }
-                text.setOnLongClickListener {
+                binding.chipText.text = option.label
+                binding.chipText.isSelected = option.label.equals(selectedLabel, ignoreCase = true)
+                binding.chipText.setOnClickListener { onSelect(option) }
+                binding.chipText.setOnLongClickListener {
                     if (option.isCustom && !option.isAll) {
                         onLongPress(option)
                         true

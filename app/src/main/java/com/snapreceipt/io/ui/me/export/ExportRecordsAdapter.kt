@@ -2,6 +2,8 @@ package com.snapreceipt.io.ui.me.export
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ItemExportRecordBinding
@@ -10,13 +12,16 @@ import com.skybound.space.core.util.DateFormatUtil
 
 class ExportRecordsAdapter(
     private val onRecordClick: (ExportRecordEntity) -> Unit
-) : RecyclerView.Adapter<ExportRecordsAdapter.ViewHolder>() {
+) : ListAdapter<ExportRecordEntity, ExportRecordsAdapter.ViewHolder>(EXPORT_RECORD_DIFF) {
 
-    private var records: List<ExportRecordEntity> = emptyList()
+    companion object {
+        private val EXPORT_RECORD_DIFF = object : DiffUtil.ItemCallback<ExportRecordEntity>() {
+            override fun areItemsTheSame(a: ExportRecordEntity, b: ExportRecordEntity): Boolean =
+                a.exportId == b.exportId
 
-    fun submitList(newRecords: List<ExportRecordEntity>) {
-        records = newRecords
-        notifyDataSetChanged()
+            override fun areContentsTheSame(a: ExportRecordEntity, b: ExportRecordEntity): Boolean =
+                a == b
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -25,10 +30,8 @@ class ExportRecordsAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(records[position], onRecordClick)
+        holder.bind(getItem(position), onRecordClick)
     }
-
-    override fun getItemCount(): Int = records.size
 
     class ViewHolder(
         private val binding: ItemExportRecordBinding

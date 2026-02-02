@@ -1,12 +1,10 @@
 package com.snapreceipt.io.ui.me.profile
 
 import android.os.Bundle
-import android.widget.TextView
 import android.widget.Toast
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import com.skybound.space.base.presentation.observeState
 import com.snapreceipt.io.R
+import com.snapreceipt.io.databinding.ActivityPersonalProfileBinding
 import com.snapreceipt.io.domain.usecase.auth.AuthFetchUserProfileUseCase
 import com.snapreceipt.io.domain.usecase.user.GetUserUseCase
 import com.snapreceipt.io.domain.usecase.user.InsertUserUseCase
@@ -27,35 +25,28 @@ class PersonalProfileActivity : EdgeToEdgeActivity() {
     @Inject
     lateinit var insertUserUseCase: InsertUserUseCase
 
-    private lateinit var nameValue: TextView
-    private lateinit var emailValue: TextView
-    private lateinit var phoneValue: TextView
+    private var _binding: ActivityPersonalProfileBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_personal_profile)
+        _binding = ActivityPersonalProfileBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        nameValue = findViewById(R.id.profile_name)
-        emailValue = findViewById(R.id.profile_email)
-        phoneValue = findViewById(R.id.profile_phone)
+        binding.btnBack.setOnClickListener { finish() }
 
-        findViewById<android.view.View>(R.id.btn_back).setOnClickListener { finish() }
-
-        observeUser()
+        observeState(getUserUseCase()) { result ->
+            val user = result.getOrNull()
+            binding.profileName.text = user?.username?.ifBlank { placeholder() } ?: placeholder()
+            binding.profileEmail.text = user?.email?.ifBlank { placeholder() } ?: placeholder()
+            binding.profilePhone.text = user?.phone?.ifBlank { placeholder() } ?: placeholder()
+        }
         refreshUserProfile()
     }
 
-    private fun observeUser() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                getUserUseCase().collect { result ->
-                    val user = result.getOrNull()
-                    nameValue.text = user?.username?.ifBlank { placeholder() } ?: placeholder()
-                    emailValue.text = user?.email?.ifBlank { placeholder() } ?: placeholder()
-                    phoneValue.text = user?.phone?.ifBlank { placeholder() } ?: placeholder()
-                }
-            }
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 
     private fun refreshUserProfile() {

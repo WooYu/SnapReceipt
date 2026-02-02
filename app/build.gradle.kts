@@ -104,6 +104,8 @@ dependencies {
     implementation(libs.fragment.ktx)
     implementation(libs.activity.ktx)
     implementation(libs.androidx.browser)
+    implementation(libs.navigation.fragment.ktx)
+    implementation(libs.navigation.ui.ktx)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.lifecycle.livedata.ktx)

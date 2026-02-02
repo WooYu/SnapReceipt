@@ -2,6 +2,8 @@ package com.snapreceipt.io.ui.home
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ItemReceiptBinding
@@ -10,13 +12,19 @@ import com.snapreceipt.io.domain.model.ReceiptEntity
 
 class HomeReceiptAdapter(
     private val onEditClick: (ReceiptEntity) -> Unit
-) : RecyclerView.Adapter<HomeReceiptAdapter.ReceiptViewHolder>() {
+) : ListAdapter<ReceiptEntity, HomeReceiptAdapter.ReceiptViewHolder>(RECEIPT_DIFF) {
 
-    private var receipts: List<ReceiptEntity> = emptyList()
+    companion object {
+        private val RECEIPT_DIFF = object : DiffUtil.ItemCallback<ReceiptEntity>() {
+            override fun areItemsTheSame(a: ReceiptEntity, b: ReceiptEntity): Boolean =
+                a.receiptId == b.receiptId
+
+            override fun areContentsTheSame(a: ReceiptEntity, b: ReceiptEntity): Boolean = a == b
+        }
+    }
 
     fun setReceipts(newReceipts: List<ReceiptEntity>) {
-        receipts = newReceipts
-        notifyDataSetChanged()
+        submitList(newReceipts)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReceiptViewHolder {
@@ -25,10 +33,8 @@ class HomeReceiptAdapter(
     }
 
     override fun onBindViewHolder(holder: ReceiptViewHolder, position: Int) {
-        holder.bind(receipts[position])
+        holder.bind(getItem(position))
     }
-
-    override fun getItemCount(): Int = receipts.size
 
     class ReceiptViewHolder(
         private val binding: ItemReceiptBinding,

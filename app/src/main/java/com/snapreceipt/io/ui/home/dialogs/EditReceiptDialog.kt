@@ -1,13 +1,10 @@
 package com.snapreceipt.io.ui.home.dialogs
 
-import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.widget.Button
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
-import com.google.android.material.textfield.TextInputEditText
-import com.snapreceipt.io.R
+import com.snapreceipt.io.databinding.DialogEditReceiptBinding
 import com.snapreceipt.io.domain.model.ReceiptCategory
 import com.snapreceipt.io.domain.model.ReceiptEntity
 
@@ -16,44 +13,38 @@ class EditReceiptDialog(
     private val onSave: (ReceiptEntity) -> Unit
 ) : DialogFragment() {
 
-    private lateinit var merchantNameInput: TextInputEditText
-    private lateinit var amountInput: TextInputEditText
-    private lateinit var categoryInput: TextInputEditText
-    private lateinit var descriptionInput: TextInputEditText
+    private var _binding: DialogEditReceiptBinding? = null
+    private val binding get() = _binding!!
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    override fun onCreateDialog(savedInstanceState: Bundle?): android.app.Dialog {
         return activity?.let {
-            val view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_edit_receipt, null)
-            
-            merchantNameInput = view.findViewById(R.id.merchant_name_input)
-            amountInput = view.findViewById(R.id.amount_input)
-            categoryInput = view.findViewById(R.id.category_input)
-            descriptionInput = view.findViewById(R.id.description_input)
+            _binding = DialogEditReceiptBinding.inflate(LayoutInflater.from(requireContext()))
 
-            // Set current values
-            merchantNameInput.setText(receipt.merchant.orEmpty())
-            amountInput.setText(receipt.totalAmount?.toString().orEmpty())
+            binding.merchantNameInput.setText(receipt.merchant.orEmpty())
+            binding.amountInput.setText(receipt.totalAmount?.toString().orEmpty())
             val categoryLabel = receipt.categoryId?.let { ReceiptCategory.labelForId(it) }.orEmpty()
-            categoryInput.setText(categoryLabel)
-            descriptionInput.setText(receipt.remark.orEmpty())
+            binding.categoryInput.setText(categoryLabel)
+            binding.descriptionInput.setText(receipt.remark.orEmpty())
 
-            val cancelBtn = view.findViewById<Button>(R.id.cancel_btn)
-            val saveBtn = view.findViewById<Button>(R.id.save_btn)
-
-            cancelBtn.setOnClickListener { dismiss() }
-            saveBtn.setOnClickListener { onSaveClick() }
+            binding.cancelBtn.setOnClickListener { dismiss() }
+            binding.saveBtn.setOnClickListener { onSaveClick() }
 
             AlertDialog.Builder(requireContext())
-                .setView(view)
+                .setView(binding.root)
                 .create()
         } ?: super.onCreateDialog(savedInstanceState)
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     private fun onSaveClick() {
-        val merchantName = merchantNameInput.text.toString().trim()
-        val amount = amountInput.text.toString().trim().toDoubleOrNull() ?: receipt.totalAmount
-        val category = categoryInput.text.toString().trim()
-        val description = descriptionInput.text.toString().trim()
+        val merchantName = binding.merchantNameInput.text.toString().trim()
+        val amount = binding.amountInput.text.toString().trim().toDoubleOrNull() ?: receipt.totalAmount
+        val category = binding.categoryInput.text.toString().trim()
+        val description = binding.descriptionInput.text.toString().trim()
 
         val updated = receipt.copy(
             merchant = merchantName.ifEmpty { receipt.merchant.orEmpty() },

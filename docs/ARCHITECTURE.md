@@ -9,7 +9,7 @@
 
 ## 导航
 
-主界面采用 **手动 Tab + FragmentManager.replace**（未使用 Jetpack Navigation 的 NavController），结构简单、无深层链接需求；若后续需要 Deep Link、统一返回栈或 Safe Args，可再迁移到 Navigation Component。
+主界面已迁移至 **Jetpack Navigation Component**：`activity_main` 使用 `NavHostFragment` + `main_nav` 导航图，底部栏通过 `setupWithNavController(binding.bottomNav, navController)` 与 NavController 联动；支持从外部（如发票详情保存后）通过 `EXTRA_START_TAB` 指定初始 Tab（如收据列表）。
 
 ## 数据层
 

@@ -3,14 +3,11 @@ package com.snapreceipt.io.ui.login
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import com.skybound.space.base.presentation.observeState
 import com.skybound.space.core.util.LogHelper
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentEmailLoginBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class EmailLoginFragment : BaseLoginFragment(R.layout.fragment_email_login) {
@@ -46,14 +43,6 @@ class EmailLoginFragment : BaseLoginFragment(R.layout.fragment_email_login) {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun observeState() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { renderState(it) }
-            }
-        }
     }
 
     private fun renderState(state: LoginUiState) {

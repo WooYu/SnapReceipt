@@ -4,9 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentMeBinding
 import com.snapreceipt.io.ui.login.LoginActivity
@@ -17,8 +14,8 @@ import com.snapreceipt.io.ui.me.profile.PersonalProfileActivity
 import com.snapreceipt.io.ui.me.settings.SettingsActivity
 import com.skybound.space.base.presentation.BaseFragment
 import com.skybound.space.base.presentation.UiEvent
+import com.skybound.space.base.presentation.observeState
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MeFragment : BaseFragment<MeViewModel>(R.layout.fragment_me) {
@@ -37,14 +34,6 @@ class MeFragment : BaseFragment<MeViewModel>(R.layout.fragment_me) {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun observeState() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { renderState(it) }
-            }
-        }
     }
 
     private fun renderState(state: MeUiState) {

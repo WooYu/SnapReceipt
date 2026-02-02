@@ -3,19 +3,14 @@ package com.snapreceipt.io.ui.invoice
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Bundle
 import android.os.Build
+import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import com.snapreceipt.io.databinding.ActivityInvoiceDetailsBinding
 import com.skybound.space.base.presentation.BaseActivity
+import com.skybound.space.base.presentation.observeState
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.core.network.auth.SessionEvent
 import com.skybound.space.core.network.auth.SessionManager
@@ -29,7 +24,6 @@ import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceCategoryBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
 import com.snapreceipt.io.ui.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -54,18 +48,9 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     override val sessionManager: SessionManager
         get() = injectedSessionManager
 
-    private lateinit var imageView: ImageView
-    private lateinit var inputAmount: EditText
-    private lateinit var inputMerchant: EditText
-    private lateinit var inputAddress: EditText
-    private lateinit var inputDate: EditText
-    private lateinit var inputCard: EditText
-    private lateinit var inputInvoiceCategory: EditText
-    private lateinit var inputTitleType: EditText
-    private lateinit var inputNote: EditText
-    private lateinit var cardHelper: TextView
-    private lateinit var saveButton: Button
-    private lateinit var deleteButton: ImageView
+    private var _binding: ActivityInvoiceDetailsBinding? = null
+    private val binding get() = _binding!!
+
     private var receiptImagePath: String = ""
     private var receiptImageUrl: String = ""
     private var receiptDate: String = ""
@@ -132,7 +117,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         setupPickers()
         setupCardValidation()
         saveButton.setOnClickListener { saveReceipt(receiptImagePath) }
-        observeState()
+        observeState(viewModel.uiState) { renderState(it) }
     }
 
     private fun readReceipt(intent: Intent): ReceiptEntity {
@@ -145,18 +130,8 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         return receipt ?: ReceiptEntity()
     }
 
-    private fun observeState() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { renderState(it) }
-            }
-        }
-    }
-
     private fun renderState(state: InvoiceDetailsUiState) {
-        if (::saveButton.isInitialized) {
-            saveButton.isEnabled = !state.loading
-        }
+        binding.saveBtn.isEnabled = !state.loading
     }
 
     override fun onCustomEvent(event: UiEvent.Custom) {
@@ -170,30 +145,29 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun saveReceipt(imagePath: String) {
-        val amountText = inputAmount.text.toString().trim()
+        val amountText = binding.inputAmount.text.toString().trim()
         val amountValue = amountText.toDoubleOrNull()
-        val merchantValue = inputMerchant.text.toString().trim()
+        val merchantValue = binding.inputMerchant.text.toString().trim()
             .ifEmpty { getString(R.string.receipt_default_name) }
-        val invoiceCategoryInput = inputInvoiceCategory.text.toString().trim()
+        val invoiceCategoryInput = binding.inputInvoiceCategory.text.toString().trim()
         if (invoiceCategoryInput.isBlank()) {
             Toast.makeText(this, getString(R.string.select_invoice_category), Toast.LENGTH_SHORT)
                 .show()
             return
         }
-        val titleTypeValue =
-            inputTitleType.text.toString().trim()
+        val titleTypeValue = binding.inputTitleType.text.toString().trim()
         if (titleTypeValue.isBlank()) {
             Toast.makeText(this, getString(R.string.select_invoice_type), Toast.LENGTH_SHORT).show()
             return
         }
-        val cardValue = inputCard.text.toString().trim()
+        val cardValue = binding.inputCard.text.toString().trim()
         val cardError = cardValidationErrorResId(cardValue)
         if (cardError != null) {
             updateCardHelper(cardValue)
             Toast.makeText(this, getString(cardError), Toast.LENGTH_SHORT).show()
             return
         }
-        val noteValue = inputNote.text.toString().trim()
+        val noteValue = binding.inputNote.text.toString().trim()
         val categoryId = ReceiptCategory.idForLabel(invoiceCategoryInput)
         if (categoryId <= 0L) {
             Toast.makeText(this, getString(R.string.select_invoice_category), Toast.LENGTH_SHORT).show()
@@ -216,7 +190,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             receiptUrl = receiptUrl,
             categoryId = categoryId,
             receiptType = titleTypeValue,
-            address = inputAddress.text.toString().trim()
+            address = binding.inputAddress.text.toString().trim()
         )
         if (isEditMode) {
             viewModel.updateReceipt(receipt)
@@ -234,17 +208,17 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun setupPickers() {
-        inputInvoiceCategory.apply {
+        binding.inputInvoiceCategory.apply {
             isFocusable = false
             isClickable = true
             setOnClickListener { openInvoiceTypePicker() }
         }
-        inputTitleType.apply {
+        binding.inputTitleType.apply {
             isFocusable = false
             isClickable = true
             setOnClickListener { openTitleTypePicker() }
         }
-        inputDate.apply {
+        binding.inputDate.apply {
             isFocusable = false
             isClickable = true
             setOnClickListener { openDateTimePicker() }
@@ -253,17 +227,17 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
 
     private fun setupCardValidation() {
         // TODO: temporarily disable validation to show backend values as-is.
-        cardHelper.visibility = View.GONE
+        binding.cardHelper.visibility = View.GONE
     }
 
     private fun updateCardHelper(raw: String) {
         val errorRes = cardValidationErrorResId(raw)
         if (errorRes == null) {
-            cardHelper.visibility = View.GONE
+            binding.cardHelper.visibility = View.GONE
             return
         }
-        cardHelper.text = getString(errorRes)
-        cardHelper.visibility = View.VISIBLE
+        binding.cardHelper.text = getString(errorRes)
+        binding.cardHelper.visibility = View.VISIBLE
     }
 
     private fun cardValidationErrorResId(raw: String): Int? {
@@ -288,14 +262,14 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun openInvoiceTypePicker() {
-        InvoiceCategoryBottomSheet.newInstance(inputInvoiceCategory.text.toString()) { selected ->
-            inputInvoiceCategory.setText(selected)
+        InvoiceCategoryBottomSheet.newInstance(binding.inputInvoiceCategory.text.toString()) { selected ->
+            binding.inputInvoiceCategory.setText(selected)
         }.show(supportFragmentManager, "invoice_type_picker")
     }
 
     private fun openTitleTypePicker() {
-        TitleTypeBottomSheet(inputTitleType.text.toString()) { selected ->
-            inputTitleType.setText(selected)
+        TitleTypeBottomSheet(binding.inputTitleType.text.toString()) { selected ->
+            binding.inputTitleType.setText(selected)
         }.show(supportFragmentManager, "title_type_picker")
     }
 
@@ -304,7 +278,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         DateTimePickerBottomSheet(initial) { date, time, display ->
             receiptDate = date
             receiptTime = time
-            inputDate.setText(display)
+            binding.inputDate.setText(display)
         }.show(supportFragmentManager, "date_time_picker")
     }
 

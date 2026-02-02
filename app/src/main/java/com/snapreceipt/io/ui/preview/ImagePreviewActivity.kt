@@ -2,9 +2,9 @@ package com.snapreceipt.io.ui.preview
 
 import android.net.Uri
 import android.os.Bundle
-import android.widget.ImageView
 import android.widget.Toast
 import com.snapreceipt.io.R
+import com.snapreceipt.io.databinding.ActivityImagePreviewBinding
 import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
 import java.io.File
 
@@ -14,26 +14,33 @@ class ImagePreviewActivity : EdgeToEdgeActivity() {
         const val EXTRA_IMAGE_URL = "extra_image_url"
     }
 
+    private var _binding: ActivityImagePreviewBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_image_preview)
+        _binding = ActivityImagePreviewBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val imageView = findViewById<ImageView>(R.id.preview_image)
-        val closeBtn = findViewById<ImageView>(R.id.btn_close)
-        closeBtn.setOnClickListener { finish() }
-        imageView.setOnClickListener { finish() }
+        binding.btnClose.setOnClickListener { finish() }
+        binding.previewImage.setOnClickListener { finish() }
 
         val imagePath = intent.getStringExtra(EXTRA_IMAGE_PATH).orEmpty()
         val imageUrl = intent.getStringExtra(EXTRA_IMAGE_URL).orEmpty()
         when {
             imagePath.isNotBlank() && File(imagePath).exists() ->
-                imageView.setImageURI(Uri.fromFile(File(imagePath)))
+                binding.previewImage.setImageURI(Uri.fromFile(File(imagePath)))
             imageUrl.isNotBlank() ->
-                imageView.setImageURI(Uri.parse(imageUrl))
+                binding.previewImage.setImageURI(Uri.parse(imageUrl))
             else -> {
                 Toast.makeText(this, getString(R.string.image_missing), Toast.LENGTH_SHORT).show()
                 finish()
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 }

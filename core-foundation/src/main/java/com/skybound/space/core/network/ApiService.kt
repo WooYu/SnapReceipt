@@ -2,32 +2,20 @@ package com.skybound.space.core.network
 
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 
+/**
+ * 封装“直接返回 data 或抛 ApiException”的请求方式。
+ * 当前 data 层主要使用 BaseRemoteDataSource + getOrThrow；本类供需要“同步风格”调用的场景使用。
+ */
 class ApiService(
     private val dispatchers: CoroutineDispatchersProvider
 ) {
-    suspend fun <T> request(call: suspend () -> BaseResponse<T>): T {
-        return when (val result = safeApiCall(dispatchers, call)) {
-            is NetworkResult.Success -> result.data
-            is NetworkResult.Failure -> throw result.toApiException()
-        }
-    }
+    suspend fun <T> request(call: suspend () -> BaseResponse<T>): T =
+        safeApiCall(dispatchers, call).getOrThrow()
 
     suspend fun requestUnit(call: suspend () -> BaseEmptyResponse) {
-        when (val result = safeApiCallBasic(dispatchers, call)) {
-            is NetworkResult.Success -> Unit
-            is NetworkResult.Failure -> throw result.toApiException()
-        }
+        safeApiCallBasic(dispatchers, call).getOrThrow()
     }
 
     suspend fun <T> requestResult(call: suspend () -> BaseResponse<T>): NetworkResult<T> =
         safeApiCall(dispatchers, call)
-
-    private fun NetworkResult.Failure.toApiException(): ApiException {
-        return when (val error = error) {
-            is NetworkError.Http -> ApiException(error.code, error.message, error.throwable)
-            is NetworkError.Network -> ApiException(-1, error.message, error.throwable)
-            is NetworkError.Serialization -> ApiException(-2, error.message, error.throwable)
-            is NetworkError.Unexpected -> ApiException(-3, error.message, error.throwable)
-        }
-    }
 }

@@ -29,9 +29,9 @@ class TokenRefreshAuthenticator(
     private val refreshLock = Any()
     private val refreshClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
-            .connectTimeout(config.connectTimeoutSec, TimeUnit.SECONDS)
-            .readTimeout(config.readTimeoutSec, TimeUnit.SECONDS)
-            .writeTimeout(config.writeTimeoutSec, TimeUnit.SECONDS)
+            .connectTimeout(5, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(10, TimeUnit.SECONDS)
             .apply {
                 if (config.enableLogging) {
                     addInterceptor(LoggingInterceptor(HttpLoggingInterceptor.Level.HEADERS))
