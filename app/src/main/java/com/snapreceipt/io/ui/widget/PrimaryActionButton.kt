@@ -25,6 +25,11 @@ class PrimaryActionButton @JvmOverloads constructor(
     private var cornerRadiusPx = dpToPx(DEFAULT_CORNER_RADIUS_DP)
     private var textSizePx = resources.getDimension(R.dimen.text_size_primary)
     private var textColor = ContextCompat.getColor(context, R.color.colorOnPrimary)
+    private var rippleColor = adjustAlpha(
+        ContextCompat.getColor(context, R.color.colorPrimary),
+        DEFAULT_RIPPLE_ALPHA
+    )
+    private var pressedDarkenFactor = DEFAULT_PRESSED_DARKEN_FACTOR
 
     init {
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.PrimaryActionButton, defStyleAttr, 0)
@@ -37,6 +42,15 @@ class PrimaryActionButton @JvmOverloads constructor(
         }
         if (typedArray.hasValue(R.styleable.PrimaryActionButton_pabTextColor)) {
             textColor = typedArray.getColor(R.styleable.PrimaryActionButton_pabTextColor, textColor)
+        }
+        if (typedArray.hasValue(R.styleable.PrimaryActionButton_pabRippleColor)) {
+            rippleColor = typedArray.getColor(R.styleable.PrimaryActionButton_pabRippleColor, rippleColor)
+        }
+        if (typedArray.hasValue(R.styleable.PrimaryActionButton_pabPressedDarkenFactor)) {
+            pressedDarkenFactor = typedArray.getFloat(
+                R.styleable.PrimaryActionButton_pabPressedDarkenFactor,
+                pressedDarkenFactor
+            ).coerceIn(MIN_PRESSED_FACTOR, MAX_PRESSED_FACTOR)
         }
         typedArray.recycle()
 
@@ -79,8 +93,8 @@ class PrimaryActionButton @JvmOverloads constructor(
         val endColor = ContextCompat.getColor(context, R.color.colorSecondary)
         val normal = createGradientDrawable(startColor, endColor)
         val pressed = createGradientDrawable(
-            darkenColor(startColor, PRESSED_DARKEN_FACTOR),
-            darkenColor(endColor, PRESSED_DARKEN_FACTOR)
+            darkenColor(startColor, pressedDarkenFactor),
+            darkenColor(endColor, pressedDarkenFactor)
         )
         val disabled = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
@@ -95,13 +109,13 @@ class PrimaryActionButton @JvmOverloads constructor(
         }
 
         background = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            val rippleColor = ColorStateList.valueOf(adjustAlpha(Color.BLACK, RIPPLE_ALPHA))
+            val ripple = ColorStateList.valueOf(rippleColor)
             val mask = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
                 setColor(Color.WHITE)
                 cornerRadius = cornerRadiusPx
             }
-            RippleDrawable(rippleColor, states, mask)
+            RippleDrawable(ripple, states, mask)
         } else {
             states
         }
@@ -135,8 +149,10 @@ class PrimaryActionButton @JvmOverloads constructor(
 
     companion object {
         private const val DEFAULT_CORNER_RADIUS_DP = 80f
-        private const val PRESSED_DARKEN_FACTOR = 0.85f
-        private const val RIPPLE_ALPHA = 0.22f
+        private const val DEFAULT_PRESSED_DARKEN_FACTOR = 0.78f
+        private const val DEFAULT_RIPPLE_ALPHA = 0.32f
+        private const val MIN_PRESSED_FACTOR = 0.5f
+        private const val MAX_PRESSED_FACTOR = 0.95f
         private const val DISABLED_COLOR = 0xFFB2B9C5.toInt()
     }
 }

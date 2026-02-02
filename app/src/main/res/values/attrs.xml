@@ -5,5 +5,7 @@
         <attr name="pabCornerRadius" format="dimension" />
         <attr name="pabTextSize" format="dimension" />
         <attr name="pabTextColor" format="color" />
+        <attr name="pabRippleColor" format="color" />
+        <attr name="pabPressedDarkenFactor" format="float" />
     </declare-styleable>
 </resources>
