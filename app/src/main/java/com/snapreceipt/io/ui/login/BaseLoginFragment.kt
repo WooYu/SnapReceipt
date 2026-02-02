@@ -18,6 +18,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.view.LayoutInflater
 import androidx.annotation.LayoutRes
+import androidx.core.content.ContextCompat
 import com.skybound.space.base.presentation.BaseFragment
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.DialogAgreementConfirmBinding
@@ -111,7 +112,7 @@ abstract class BaseLoginFragment(@LayoutRes layoutId: Int) : BaseFragment<LoginV
     private fun buildAgreementText(): CharSequence {
         val text = getString(R.string.login_agreement_html)
         val spannable = SpannableString(text)
-        val highlightColor = requireContext().getColor(R.color.colorPrimary)
+        val highlightColor = ContextCompat.getColor(requireContext(), R.color.colorPrimary)
         highlightPhrase(
             spannable,
             text,

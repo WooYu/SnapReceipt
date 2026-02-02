@@ -2,6 +2,7 @@ package com.snapreceipt.io.ui.login
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import com.skybound.space.base.presentation.observeState
 import com.skybound.space.core.util.LogHelper
@@ -36,7 +37,7 @@ class EmailLoginFragment : BaseLoginFragment(R.layout.fragment_email_login) {
         binding.emailInput.addTextChangedListener(SimpleTextWatcher { viewModel.updateEmail(it) })
         binding.codeInput.addTextChangedListener(SimpleTextWatcher { viewModel.updateEmailCode(it) })
 
-        observeState()
+        observeState(viewModel.uiState) { renderState(it) }
         super.onViewCreated(view, savedInstanceState)
     }
 
@@ -48,26 +49,26 @@ class EmailLoginFragment : BaseLoginFragment(R.layout.fragment_email_login) {
     private fun renderState(state: LoginUiState) {
         val countdownSeconds = state.emailCodeCountdownSeconds
         val canRequestCode = !state.loading && countdownSeconds == 0
-        getCodeBtn.isEnabled = canRequestCode
-        getCodeBtn.text = if (countdownSeconds > 0) {
+        binding.getCodeBtn.isEnabled = canRequestCode
+        binding.getCodeBtn.text = if (countdownSeconds > 0) {
             getString(R.string.login_countdown, countdownSeconds)
         } else {
             getString(R.string.login_captcha)
         }
         updateCodeRequestLoading(state.requestingCode)
-        loginBtn.isEnabled = !state.loading && state.email.isNotBlank() && state.emailCode.isNotBlank()
+        binding.loginBtn.isEnabled = !state.loading && state.email.isNotBlank() && state.emailCode.isNotBlank()
         updateTabStyle(state.mode == LoginMode.PHONE)
         updateAgreementState(state.agreementAccepted)
     }
 
     private fun onGetCodeClick() {
-        val email = emailInput.text.toString().trim()
+        val email = binding.emailInput.text.toString().trim()
         viewModel.requestCode(email)
     }
 
     private fun onLoginClick() {
-        val email = emailInput.text.toString().trim()
-        val code = codeInput.text.toString().trim()
+        val email = binding.emailInput.text.toString().trim()
+        val code = binding.codeInput.text.toString().trim()
         LogHelper.d(
             "Login",
             "Email login click emailLength=${email.length} codeLength=${code.length}"
@@ -90,11 +91,11 @@ class EmailLoginFragment : BaseLoginFragment(R.layout.fragment_email_login) {
 
     private fun updateTabStyle(isPhoneSelected: Boolean) {
         if (isPhoneSelected) {
-            binding.tabPhone.setTextColor(requireContext().getColor(R.color.text_primary))
-            binding.tabEmail.setTextColor(requireContext().getColor(R.color.text_secondary))
+            binding.tabPhone.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_primary))
+            binding.tabEmail.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_secondary))
         } else {
-            binding.tabEmail.setTextColor(requireContext().getColor(R.color.text_primary))
-            binding.tabPhone.setTextColor(requireContext().getColor(R.color.text_secondary))
+            binding.tabEmail.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_primary))
+            binding.tabPhone.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_secondary))
         }
     }
 }

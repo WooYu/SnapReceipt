@@ -13,6 +13,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.BottomSheetInvoiceCategoryBinding
+import com.snapreceipt.io.databinding.ItemCategoryChipBinding
 import com.snapreceipt.io.domain.model.ReceiptCategory
 import com.snapreceipt.io.domain.usecase.category.AddCategoryUseCase
 import com.snapreceipt.io.domain.usecase.category.DeleteCategoryUseCase

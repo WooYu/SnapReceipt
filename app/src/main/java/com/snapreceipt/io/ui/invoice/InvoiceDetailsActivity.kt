@@ -62,20 +62,8 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_invoice_details)
-
-        imageView = findViewById(R.id.invoice_image)
-        inputAmount = findViewById(R.id.input_amount)
-        inputMerchant = findViewById(R.id.input_merchant)
-        inputAddress = findViewById(R.id.input_address)
-        inputDate = findViewById(R.id.input_date)
-        inputCard = findViewById(R.id.input_card)
-        inputInvoiceCategory = findViewById(R.id.input_invoice_category)
-        inputTitleType = findViewById(R.id.input_title_type)
-        inputNote = findViewById(R.id.input_note)
-        cardHelper = findViewById(R.id.card_helper)
-        saveButton = findViewById(R.id.save_btn)
-        deleteButton = findViewById(R.id.btn_delete)
+        _binding = ActivityInvoiceDetailsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         val receipt = readReceipt(intent)
         val rawImage = receipt.receiptUrl.orEmpty()
@@ -88,36 +76,41 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         }
         receiptId = receipt.receiptId
         isEditMode = (receiptId ?: 0L) > 0L
-        deleteButton.visibility =
-            if (isEditMode) android.view.View.VISIBLE else android.view.View.GONE
+        binding.btnDelete.visibility =
+            if (isEditMode) View.VISIBLE else View.GONE
         if (receiptImagePath.isNotEmpty()) {
-            imageView.setImageURI(Uri.fromFile(java.io.File(receiptImagePath)))
+            binding.invoiceImage.setImageURI(Uri.fromFile(java.io.File(receiptImagePath)))
         } else if (receiptImageUrl.isNotEmpty()) {
-            imageView.setImageURI(Uri.parse(receiptImageUrl))
+            binding.invoiceImage.setImageURI(Uri.parse(receiptImageUrl))
         }
 
-        inputAmount.setText(receipt.totalAmount?.toString().orEmpty())
-        inputMerchant.setText(receipt.merchant.orEmpty())
-        inputAddress.setText(receipt.address.orEmpty())
+        binding.inputAmount.setText(receipt.totalAmount?.toString().orEmpty())
+        binding.inputMerchant.setText(receipt.merchant.orEmpty())
+        binding.inputAddress.setText(receipt.address.orEmpty())
         receiptDate = receipt.receiptDate.orEmpty()
         receiptTime = receipt.receiptTime.orEmpty()
-        inputDate.setText(buildDisplayDate(receiptDate, receiptTime))
-        inputCard.setText(receipt.paymentCardNo.orEmpty())
+        binding.inputDate.setText(buildDisplayDate(receiptDate, receiptTime))
+        binding.inputCard.setText(receipt.paymentCardNo.orEmpty())
         scanConsumer = receipt.consumer.orEmpty()
         scanTipAmount = receipt.tipAmount
         val categoryLabel = receipt.categoryId?.let { ReceiptCategory.labelForId(it) }.orEmpty()
-        inputInvoiceCategory.setText(categoryLabel)
-        inputTitleType.setText(receipt.receiptType.orEmpty())
-        inputNote.setText(receipt.remark.orEmpty())
+        binding.inputInvoiceCategory.setText(categoryLabel)
+        binding.inputTitleType.setText(receipt.receiptType.orEmpty())
+        binding.inputNote.setText(receipt.remark.orEmpty())
 
-        findViewById<ImageView>(R.id.btn_back).setOnClickListener { finish() }
-        deleteButton.setOnClickListener { deleteReceiptIfNeeded() }
-        imageView.setOnClickListener { openImagePreview() }
+        binding.btnBack.setOnClickListener { finish() }
+        binding.btnDelete.setOnClickListener { deleteReceiptIfNeeded() }
+        binding.invoiceImage.setOnClickListener { openImagePreview() }
 
         setupPickers()
         setupCardValidation()
-        saveButton.setOnClickListener { saveReceipt(receiptImagePath) }
+        binding.saveBtn.setOnClickListener { saveReceipt(receiptImagePath) }
         observeState(viewModel.uiState) { renderState(it) }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 
     private fun readReceipt(intent: Intent): ReceiptEntity {

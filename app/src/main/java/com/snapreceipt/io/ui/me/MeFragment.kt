@@ -27,7 +27,7 @@ class MeFragment : BaseFragment<MeViewModel>(R.layout.fragment_me) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentMeBinding.bind(view)
         setupListeners()
-        observeState()
+        observeState(viewModel.uiState) { renderState(it) }
         super.onViewCreated(view, savedInstanceState)
     }
 

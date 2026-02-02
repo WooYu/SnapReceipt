@@ -2,6 +2,7 @@ package com.snapreceipt.io.ui.me.profile
 
 import android.os.Bundle
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import com.skybound.space.base.presentation.observeState
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityPersonalProfileBinding
