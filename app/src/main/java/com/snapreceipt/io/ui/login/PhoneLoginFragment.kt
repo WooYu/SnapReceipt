@@ -13,7 +13,6 @@ import android.text.style.ForegroundColorSpan
 import android.view.TouchDelegate
 import android.view.View
 import android.view.Window
-import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
@@ -24,6 +23,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.skybound.space.base.presentation.BaseFragment
 import com.skybound.space.core.util.LogHelper
 import com.snapreceipt.io.R
+import com.snapreceipt.io.ui.widget.PrimaryActionButton
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -34,7 +34,7 @@ class PhoneLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_phone_
     private lateinit var phoneInput: EditText
     private lateinit var codeInput: EditText
     private lateinit var getCodeBtn: TextView
-    private lateinit var loginBtn: Button
+    private lateinit var loginBtn: PrimaryActionButton
     private lateinit var emailTab: TextView
     private lateinit var phoneTab: TextView
     private lateinit var agreementCheck: ImageView

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="PrimaryActionButton">
+        <attr name="android:text" />
+        <attr name="pabCornerRadius" format="dimension" />
+        <attr name="pabTextSize" format="dimension" />
+        <attr name="pabTextColor" format="color" />
+    </declare-styleable>
+</resources>
