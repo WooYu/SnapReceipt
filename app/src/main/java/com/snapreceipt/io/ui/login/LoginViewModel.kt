@@ -56,6 +56,22 @@ class LoginViewModel @Inject constructor(
         _uiState.update { it.copy(agreementAccepted = accepted) }
     }
 
+    fun updatePhone(value: String) {
+        _uiState.update { it.copy(phone = value) }
+    }
+
+    fun updatePhoneCode(value: String) {
+        _uiState.update { it.copy(phoneCode = value) }
+    }
+
+    fun updateEmail(value: String) {
+        _uiState.update { it.copy(email = value) }
+    }
+
+    fun updateEmailCode(value: String) {
+        _uiState.update { it.copy(emailCode = value) }
+    }
+
     fun requestCode(target: String) {
         if (_uiState.value.codeCountdownSeconds > 0) return
         if (target.isBlank()) {

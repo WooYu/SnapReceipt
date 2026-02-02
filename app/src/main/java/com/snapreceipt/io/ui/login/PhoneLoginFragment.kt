@@ -4,18 +4,21 @@ import android.app.Dialog
 import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextPaint
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
+import android.view.MotionEvent
 import android.view.TouchDelegate
 import android.view.View
 import android.view.Window
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -64,8 +67,18 @@ class PhoneLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_phone_
         agreementText.movementMethod = LinkMovementMethod.getInstance()
         agreementText.highlightColor = android.graphics.Color.TRANSPARENT
         agreementContainer.setOnClickListener { toggleAgreement() }
-        agreementText.setOnClickListener { toggleAgreement() }
+        agreementText.setOnTouchListener { _, event -> handleAgreementTextTouch(event) }
         expandTouchArea(agreementCheck, 16)
+
+        val state = viewModel.uiState.value
+        if (phoneInput.text.toString() != state.phone) {
+            phoneInput.setText(state.phone)
+        }
+        if (codeInput.text.toString() != state.phoneCode) {
+            codeInput.setText(state.phoneCode)
+        }
+        phoneInput.addTextChangedListener(SimpleTextWatcher { viewModel.updatePhone(it) })
+        codeInput.addTextChangedListener(SimpleTextWatcher { viewModel.updatePhoneCode(it) })
 
         observeState()
         super.onViewCreated(view, savedInstanceState)
@@ -88,7 +101,7 @@ class PhoneLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_phone_
             getString(R.string.login_captcha)
         }
         updateCodeRequestLoading(state.requestingCode)
-        loginBtn.isEnabled = !state.loading && state.agreementAccepted
+        loginBtn.isEnabled = !state.loading && state.phone.isNotBlank() && state.phoneCode.isNotBlank()
         updateTabStyle(state.mode == LoginMode.PHONE)
         updateAgreementState(state.agreementAccepted)
     }
@@ -105,6 +118,15 @@ class PhoneLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_phone_
             "Login",
             "Phone login click phoneLength=${phone.length} codeLength=${code.length}"
         )
+        if (!viewModel.uiState.value.agreementAccepted) {
+            showAgreementDialog { confirmed ->
+                if (confirmed) {
+                    viewModel.setAgreementAccepted(true)
+                    viewModel.submitPhoneLogin(phone, code)
+                }
+            }
+            return
+        }
         viewModel.submitPhoneLogin(phone, code)
     }
 
@@ -196,6 +218,52 @@ class PhoneLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_phone_
     private fun toggleAgreement() {
         val newChecked = !viewModel.uiState.value.agreementAccepted
         viewModel.setAgreementAccepted(newChecked)
+    }
+
+    private fun handleAgreementTextTouch(event: MotionEvent): Boolean {
+        val text = agreementText.text
+        if (text is Spannable) {
+            val x = (event.x - agreementText.totalPaddingLeft + agreementText.scrollX).toInt()
+            val y = (event.y - agreementText.totalPaddingTop + agreementText.scrollY).toInt()
+            val layout = agreementText.layout
+            if (layout != null) {
+                val line = layout.getLineForVertical(y)
+                val off = layout.getOffsetForHorizontal(line, x.toFloat())
+                val links = text.getSpans(off, off, ClickableSpan::class.java)
+                if (links.isNotEmpty()) {
+                    return agreementText.movementMethod?.onTouchEvent(agreementText, text, event) ?: false
+                }
+            }
+        }
+        if (event.action == MotionEvent.ACTION_UP) {
+            toggleAgreement()
+        }
+        return true
+    }
+
+    private fun showAgreementDialog(onResult: (Boolean) -> Unit) {
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.agreement_dialog_title)
+            .setMessage(R.string.agreement_dialog_message)
+            .setPositiveButton(R.string.agreement_dialog_confirm) { dialog, _ ->
+                dialog.dismiss()
+                onResult(true)
+            }
+            .setNegativeButton(R.string.agreement_dialog_cancel) { dialog, _ ->
+                dialog.dismiss()
+                onResult(false)
+            }
+            .show()
+    }
+
+    private class SimpleTextWatcher(
+        private val onChanged: (String) -> Unit
+    ) : android.text.TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        override fun afterTextChanged(s: android.text.Editable?) {
+            onChanged(s?.toString()?.trim().orEmpty())
+        }
     }
 
     private fun updateCodeRequestLoading(show: Boolean) {

@@ -12,5 +12,9 @@ data class LoginUiState(
     val error: String? = null,
     val empty: Boolean = false,
     val codeCountdownSeconds: Int = 0,
-    val agreementAccepted: Boolean = false
+    val agreementAccepted: Boolean = false,
+    val phone: String = "",
+    val phoneCode: String = "",
+    val email: String = "",
+    val emailCode: String = ""
 )

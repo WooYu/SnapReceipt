@@ -25,6 +25,10 @@
     <string name="code_sent">Verification code sent to %s</string>
     <string name="input_required">Please complete all required fields</string>
     <string name="agreement_required">Please accept the User Agreement and Privacy Policy</string>
+    <string name="agreement_dialog_title">Agreement Required</string>
+    <string name="agreement_dialog_message">To continue, please review and agree to the User Agreement and Privacy Policy.</string>
+    <string name="agreement_dialog_confirm">Agree and Continue</string>
+    <string name="agreement_dialog_cancel">Cancel</string>
     <string name="agree_terms">Agree to terms</string>
     <string name="toggle_visibility">Toggle visibility</string>
 
