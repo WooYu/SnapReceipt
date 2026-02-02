@@ -3,25 +3,21 @@ package com.snapreceipt.io.ui.widget
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.StateListDrawable
 import android.util.AttributeSet
 import android.util.TypedValue
-import android.view.Gravity
-import android.widget.FrameLayout
-import android.widget.TextView
 import androidx.core.content.ContextCompat
+import com.google.android.material.button.MaterialButton
 import com.snapreceipt.io.R
 
 class PrimaryActionButton @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr) {
+) : MaterialButton(context, attrs, defStyleAttr) {
 
-    private val textView = TextView(context)
     private var cornerRadiusPx = dpToPx(DEFAULT_CORNER_RADIUS_DP)
     private var textSizePx = resources.getDimension(R.dimen.text_size_primary)
     private var textColor = ContextCompat.getColor(context, R.color.colorOnPrimary)
@@ -33,7 +29,6 @@ class PrimaryActionButton @JvmOverloads constructor(
 
     init {
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.PrimaryActionButton, defStyleAttr, 0)
-        val text = typedArray.getString(R.styleable.PrimaryActionButton_android_text)
         if (typedArray.hasValue(R.styleable.PrimaryActionButton_pabCornerRadius)) {
             cornerRadiusPx = typedArray.getDimension(R.styleable.PrimaryActionButton_pabCornerRadius, cornerRadiusPx)
         }
@@ -54,37 +49,31 @@ class PrimaryActionButton @JvmOverloads constructor(
         }
         typedArray.recycle()
 
-        isClickable = true
-        isFocusable = true
+        val elevationAttrs = context.obtainStyledAttributes(attrs, intArrayOf(android.R.attr.elevation))
+        val hasElevation = elevationAttrs.hasValue(0)
+        elevationAttrs.recycle()
+        if (!hasElevation) {
+            elevation = dpToPx(DEFAULT_ELEVATION_DP)
+        }
 
-        textView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-        textView.gravity = Gravity.CENTER
-        textView.typeface = Typeface.DEFAULT_BOLD
-        textView.setTextColor(textColor)
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSizePx)
-        textView.isClickable = false
-        textView.isFocusable = false
-        textView.text = text
-        addView(textView)
-
+        cornerRadius = cornerRadiusPx.toInt()
+        insetTop = 0
+        insetBottom = 0
+        setTextColor(textColor)
+        setTextSize(TypedValue.COMPLEX_UNIT_PX, textSizePx)
+        backgroundTintList = null
         updateBackground()
-    }
-
-    fun setText(text: CharSequence?) {
-        textView.text = text
-    }
-
-    fun getText(): CharSequence? {
-        return textView.text
     }
 
     fun setCornerRadiusDp(radiusDp: Float) {
         cornerRadiusPx = dpToPx(radiusDp)
+        cornerRadius = cornerRadiusPx.toInt()
         updateBackground()
     }
 
     fun setCornerRadiusPx(radiusPx: Float) {
         cornerRadiusPx = radiusPx
+        cornerRadius = cornerRadiusPx.toInt()
         updateBackground()
     }
 
@@ -154,5 +143,6 @@ class PrimaryActionButton @JvmOverloads constructor(
         private const val MIN_PRESSED_FACTOR = 0.5f
         private const val MAX_PRESSED_FACTOR = 0.95f
         private const val DISABLED_COLOR = 0xFFB2B9C5.toInt()
+        private const val DEFAULT_ELEVATION_DP = 4f
     }
 }
