@@ -44,7 +44,7 @@
         android:background="@drawable/bg_chip_dashed"
         android:gravity="center"
         android:text="@string/type_add"
-        android:textColor="@color/chip_selected" />
+        android:textColor="@color/colorSecondary" />
 
     <LinearLayout
         android:layout_width="match_parent"

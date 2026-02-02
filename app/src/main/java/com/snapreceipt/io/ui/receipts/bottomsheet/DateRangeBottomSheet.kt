@@ -129,7 +129,7 @@ class DateRangeBottomSheet(
     }
 
     private fun updateSelection() {
-        val selectedColor = ContextCompat.getColor(requireContext(), R.color.chip_selected)
+        val selectedColor = ContextCompat.getColor(requireContext(), R.color.colorSecondary)
         val defaultColor = ContextCompat.getColor(requireContext(), R.color.text_secondary)
         if (editingStart) {
             startDateView.setBackgroundResource(R.drawable.bg_date_chip_selected)

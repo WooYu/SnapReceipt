@@ -43,7 +43,7 @@
             android:layout_weight="1"
             android:background="@drawable/bg_date_chip_selected"
             android:gravity="center"
-            android:textColor="@color/chip_selected"
+            android:textColor="@color/colorSecondary"
             android:textSize="14sp" />
 
         <TextView
