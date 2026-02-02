@@ -7,5 +7,7 @@
         <attr name="pabTextColor" format="color" />
         <attr name="pabRippleColor" format="color" />
         <attr name="pabPressedDarkenFactor" format="float" />
+        <attr name="pabGradientStartColor" format="color" />
+        <attr name="pabGradientEndColor" format="color" />
     </declare-styleable>
 </resources>

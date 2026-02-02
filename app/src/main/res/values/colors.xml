@@ -12,6 +12,9 @@
     <!-- 次要颜色变体：与次要色一致 -->
     <color name="colorSecondaryVariant">@color/colorSecondary</color>
 
+    <!-- 主按钮渐变结束色 -->
+    <color name="colorPrimaryGradientEnd">#02D7FD</color>
+
     <!-- 错误色：标准的 Material Red，保持即可 -->
     <color name="colorError">#B00020</color>
 

@@ -3,11 +3,13 @@ package com.snapreceipt.io.ui.widget
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.StateListDrawable
 import android.util.AttributeSet
 import android.util.TypedValue
+import android.view.Gravity
 import androidx.core.content.ContextCompat
 import com.google.android.material.button.MaterialButton
 import com.snapreceipt.io.R
@@ -26,6 +28,8 @@ class PrimaryActionButton @JvmOverloads constructor(
         DEFAULT_RIPPLE_ALPHA
     )
     private var pressedDarkenFactor = DEFAULT_PRESSED_DARKEN_FACTOR
+    private var gradientStartColor = ContextCompat.getColor(context, R.color.colorPrimary)
+    private var gradientEndColor = ContextCompat.getColor(context, R.color.colorPrimaryGradientEnd)
 
     init {
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.PrimaryActionButton, defStyleAttr, 0)
@@ -47,6 +51,18 @@ class PrimaryActionButton @JvmOverloads constructor(
                 pressedDarkenFactor
             ).coerceIn(MIN_PRESSED_FACTOR, MAX_PRESSED_FACTOR)
         }
+        if (typedArray.hasValue(R.styleable.PrimaryActionButton_pabGradientStartColor)) {
+            gradientStartColor = typedArray.getColor(
+                R.styleable.PrimaryActionButton_pabGradientStartColor,
+                gradientStartColor
+            )
+        }
+        if (typedArray.hasValue(R.styleable.PrimaryActionButton_pabGradientEndColor)) {
+            gradientEndColor = typedArray.getColor(
+                R.styleable.PrimaryActionButton_pabGradientEndColor,
+                gradientEndColor
+            )
+        }
         typedArray.recycle()
 
         val elevationAttrs = context.obtainStyledAttributes(attrs, intArrayOf(android.R.attr.elevation))
@@ -59,6 +75,10 @@ class PrimaryActionButton @JvmOverloads constructor(
         cornerRadius = cornerRadiusPx.toInt()
         insetTop = 0
         insetBottom = 0
+        gravity = Gravity.CENTER
+        isAllCaps = false
+        typeface = Typeface.DEFAULT_BOLD
+        textAlignment = TEXT_ALIGNMENT_CENTER
         setTextColor(textColor)
         setTextSize(TypedValue.COMPLEX_UNIT_PX, textSizePx)
         backgroundTintList = null
@@ -78,12 +98,10 @@ class PrimaryActionButton @JvmOverloads constructor(
     }
 
     private fun updateBackground() {
-        val startColor = ContextCompat.getColor(context, R.color.colorPrimary)
-        val endColor = ContextCompat.getColor(context, R.color.colorSecondary)
-        val normal = createGradientDrawable(startColor, endColor)
+        val normal = createGradientDrawable(gradientStartColor, gradientEndColor)
         val pressed = createGradientDrawable(
-            darkenColor(startColor, pressedDarkenFactor),
-            darkenColor(endColor, pressedDarkenFactor)
+            darkenColor(gradientStartColor, pressedDarkenFactor),
+            darkenColor(gradientEndColor, pressedDarkenFactor)
         )
         val disabled = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
@@ -112,7 +130,7 @@ class PrimaryActionButton @JvmOverloads constructor(
 
     private fun createGradientDrawable(startColor: Int, endColor: Int): GradientDrawable {
         return GradientDrawable(
-            GradientDrawable.Orientation.BOTTOM_TOP,
+            GradientDrawable.Orientation.TOP_BOTTOM,
             intArrayOf(startColor, endColor)
         ).apply {
             cornerRadius = cornerRadiusPx
