@@ -174,7 +174,8 @@ abstract class BaseLoginFragment(@LayoutRes layoutId: Int) : BaseFragment<LoginV
                 val off = layout.getOffsetForHorizontal(line, x.toFloat())
                 val links = text.getSpans(off, off, ClickableSpan::class.java)
                 if (links.isNotEmpty()) {
-                    return agreementText.movementMethod?.onTouchEvent(agreementText, text, event) ?: false
+                    agreementText.movementMethod?.onTouchEvent(agreementText, text, event)
+                    return true
                 }
             }
         }

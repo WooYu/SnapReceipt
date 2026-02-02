@@ -272,9 +272,11 @@
 
             <ImageView
                 android:id="@+id/agreement_check"
-                android:layout_width="14dp"
-                android:layout_height="14dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:adjustViewBounds="true"
                 android:contentDescription="@string/agree_terms"
+                android:scaleType="centerInside"
                 android:src="@drawable/ic_login_checkbox_unchecked" />
 
             <TextView
