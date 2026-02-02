@@ -99,14 +99,6 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         viewModel.loadReceipts()
     }
 
-    private fun observeState() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { renderState(it) }
-            }
-        }
-    }
-
     private fun renderState(state: HomeUiState) {
         adapter.setReceipts(state.receipts)
         val showEmpty = shouldShowEmpty(state.hasLoaded, state.empty)

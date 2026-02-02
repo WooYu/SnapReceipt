@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Main Navigation -->
+    <string name="nav_home">首页</string>
+    <string name="nav_receipts">收据</string>
+    <string name="nav_me">我的</string>
+
+    <!-- Home Fragment -->
+    <string name="scan_receipt">扫描收据</string>
+    <string name="upload_receipt">上传收据</string>
+    <string name="take_photo">拍照</string>
+    <string name="choose_from_album">从相册选择</string>
+    <string name="no_receipts">还没有收据</string>
+    <string name="tap_to_scan">点击扫描第一份收据</string>
+    <string name="empty_state_hint_home">扫描或上传您的第一张收据</string>
+    <string name="edit_receipt">编辑收据</string>
+    <string name="receipt_details">收据详情</string>
+    <string name="merchant_name">商户名称</string>
+    <string name="amount">金额</string>
+    <string name="date">日期</string>
+    <string name="category">分类</string>
+    <string name="description">备注</string>
+    <string name="save">保存</string>
+    <string name="cancel">取消</string>
+    <string name="delete">删除</string>
+
+    <!-- Receipts Fragment -->
+    <string name="all_receipts">所有收据</string>
+    <string name="select_date">选择日期</string>
+    <string name="select_type">选择类型</string>
+    <string name="export">导出</string>
+    <string name="select_all">全选</string>
+    <string name="delete_selected">删除选中</string>
+    <string name="export_pdf">导出为 PDF</string>
+    <string name="export_excel">导出为 Excel</string>
+    <string name="export_csv">导出为 CSV</string>
+    <string name="no_content">暂无内容</string>
+
+    <!-- Me Fragment -->
+    <string name="profile">个人资料</string>
+    <string name="settings">设置</string>
+    <string name="feedback">反馈</string>
+    <string name="about">关于我们</string>
+    <string name="logout">退出登录</string>
+    <string name="edit_profile">编辑资料</string>
+    <string name="username">用户名</string>
+    <string name="email">邮箱</string>
+    <string name="phone">手机</string>
+    <string name="avatar">头像</string>
+    <string name="change_avatar">更换头像</string>
+
+    <!-- Settings -->
+    <string name="notification">通知</string>
+    <string name="dark_mode">深色模式</string>
+    <string name="language">语言</string>
+    <string name="storage">存储</string>
+    <string name="clear_cache">清空缓存</string>
+
+    <!-- Feedback -->
+    <string name="feedback_type">反馈类型</string>
+    <string name="feedback_content">请输入反馈内容</string>
+    <string name="feedback_image">上传截图（可选）</string>
+    <string name="submit">提交</string>
+
+    <!-- About -->
+    <string name="version">版本</string>
+    <string name="company">公司</string>
+    <string name="website">官网</string>
+    <string name="privacy_policy">隐私政策</string>
+    <string name="terms_of_service">服务条款</string>
+
+    <!-- Messages -->
+    <string name="success">操作成功</string>
+    <string name="error">出错了</string>
+    <string name="loading">加载中…</string>
+    <string name="retry">重试</string>
+    <string name="confirm">确认</string>
+    <string name="recognition_failed">识别失败，请重试</string>
+    <string name="uploading_receipt">正在上传收据，请稍候…</string>
+    <string name="scanning_receipt">正在识别收据，请稍候…</string>
+</resources>
