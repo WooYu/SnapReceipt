@@ -10,7 +10,9 @@
     <ProgressBar
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="48dp"
-        android:layout_height="48dp" />
+        android:layout_height="48dp"
+        android:indeterminateTint="@color/colorPrimary"
+        android:indeterminateTintMode="src_in" />
 
     <TextView
         android:layout_width="wrap_content"
