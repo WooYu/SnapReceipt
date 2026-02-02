@@ -8,7 +8,9 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:minHeight="match_parent"
+        android:paddingBottom="24dp">
 
         <!--左边界-->
         <androidx.constraintlayout.widget.Guideline
@@ -273,13 +275,12 @@
             app:layout_constraintTop_toBottomOf="@id/login_btn"
             app:layout_constraintVertical_bias="1">
 
-            <CheckBox
+            <ImageView
                 android:id="@+id/agreement_check"
-                android:layout_width="13dp"
-                android:layout_height="13dp"
-                android:button="@drawable/ic_login_checkbox_selector"
-                android:buttonTint="@null"
-                app:buttonTint="@null" />
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:contentDescription="@string/agree_terms"
+                android:src="@drawable/ic_login_checkbox_unchecked" />
 
             <TextView
                 android:id="@+id/agreement_text"

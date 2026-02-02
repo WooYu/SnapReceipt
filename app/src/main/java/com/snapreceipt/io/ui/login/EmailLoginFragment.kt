@@ -14,8 +14,8 @@ import android.view.TouchDelegate
 import android.view.View
 import android.view.Window
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -37,7 +37,7 @@ class EmailLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_email_
     private lateinit var loginBtn: Button
     private lateinit var emailTab: TextView
     private lateinit var phoneTab: TextView
-    private lateinit var agreementCheck: CheckBox
+    private lateinit var agreementCheck: ImageView
     private lateinit var agreementText: TextView
     private lateinit var agreementContainer: View
     private lateinit var backBtn: View
@@ -61,9 +61,7 @@ class EmailLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_email_
         emailTab.setOnClickListener { viewModel.switchToEmail() }
         backBtn.setOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
 
-        agreementCheck.setOnCheckedChangeListener { _, checked ->
-            viewModel.setAgreementAccepted(checked)
-        }
+        agreementCheck.setOnClickListener { toggleAgreement() }
         agreementText.movementMethod = LinkMovementMethod.getInstance()
         agreementText.highlightColor = android.graphics.Color.TRANSPARENT
         agreementContainer.setOnClickListener { toggleAgreement() }
@@ -126,13 +124,12 @@ class EmailLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_email_
     }
 
     private fun updateAgreementState(accepted: Boolean) {
-        if (agreementCheck.isChecked != accepted) {
-            agreementCheck.setOnCheckedChangeListener(null)
-            agreementCheck.isChecked = accepted
-            agreementCheck.setOnCheckedChangeListener { _, checked ->
-                viewModel.setAgreementAccepted(checked)
-            }
+        val drawable = if (accepted) {
+            R.drawable.ic_login_checkbox_checked
+        } else {
+            R.drawable.ic_login_checkbox_unchecked
         }
+        agreementCheck.setImageResource(drawable)
         agreementText.text = buildAgreementText()
     }
 
@@ -198,7 +195,8 @@ class EmailLoginFragment : BaseFragment<LoginViewModel>(R.layout.fragment_email_
     }
 
     private fun toggleAgreement() {
-        agreementCheck.isChecked = !agreementCheck.isChecked
+        val newChecked = !viewModel.uiState.value.agreementAccepted
+        viewModel.setAgreementAccepted(newChecked)
     }
 
     private fun updateCodeRequestLoading(show: Boolean) {

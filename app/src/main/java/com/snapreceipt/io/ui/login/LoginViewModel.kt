@@ -87,16 +87,24 @@ class LoginViewModel @Inject constructor(
     }
 
     fun submitPhoneLogin(phone: String, code: String) {
-        if (phone.isBlank() || code.isBlank()) {
-            emitEvent(UiEvent.Toast(message = "", resId = R.string.input_required))
+        if (phone.isBlank()) {
+            emitEvent(UiEvent.Toast(message = "", resId = R.string.phone_empty))
+            return
+        }
+        if (code.isBlank()) {
+            emitEvent(UiEvent.Toast(message = "", resId = R.string.code_empty))
             return
         }
         login(phone, code)
     }
 
     fun submitEmailLogin(email: String, code: String) {
-        if (email.isBlank() || code.isBlank()) {
-            emitEvent(UiEvent.Toast(message = "", resId = R.string.input_required))
+        if (email.isBlank()) {
+            emitEvent(UiEvent.Toast(message = "", resId = R.string.email_empty))
+            return
+        }
+        if (code.isBlank()) {
+            emitEvent(UiEvent.Toast(message = "", resId = R.string.code_empty))
             return
         }
         login(email, code)

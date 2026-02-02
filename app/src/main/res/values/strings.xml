@@ -21,9 +21,11 @@
     <string name="login">Log In</string>
     <string name="phone_empty">Please enter phone number</string>
     <string name="email_empty">Please enter email address</string>
+    <string name="code_empty">Please enter verification code</string>
     <string name="code_sent">Verification code sent to %s</string>
     <string name="input_required">Please complete all required fields</string>
     <string name="agreement_required">Please accept the User Agreement and Privacy Policy</string>
+    <string name="agree_terms">Agree to terms</string>
     <string name="toggle_visibility">Toggle visibility</string>
 
     <!-- Main Navigation -->
