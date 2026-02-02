@@ -12,7 +12,7 @@
     <string name="login_code_label">Verification Code</string>
     <string name="login_email_code_label">Email Verification Code</string>
     <string name="login_phone_hint">Mobile Phone Number</string>
-    <string name="login_email_hint">name@gmail.com</string>
+    <string name="login_email_hint">Enter email</string>
     <string name="login_code_hint">Enter code</string>
     <string name="login_captcha">CAPTCHA</string>
     <string name="login_countdown">%dS</string>

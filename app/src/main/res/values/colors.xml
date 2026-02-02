@@ -10,10 +10,10 @@
 
     <!-- 次要颜色/强调色：强烈建议将您的 Cyan 放在这里 -->
     <!-- 用于：FloatingActionButton, CheckBox, Switch, Link Text -->
-    <color name="colorSecondary">#02D7FD</color>
+    <color name="colorSecondary">@color/colorPrimary</color>
 
     <!-- 次要颜色变体：Cyan 的深色版本 -->
-    <color name="colorSecondaryVariant">#00A7C4</color>
+    <color name="colorSecondaryVariant">@color/colorPrimaryVariant</color>
 
     <!-- 错误色：标准的 Material Red，保持即可 -->
     <color name="colorError">#B00020</color>
