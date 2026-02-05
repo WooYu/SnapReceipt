@@ -63,9 +63,6 @@ class MeFragment : BaseFragment<MeViewModel>(R.layout.fragment_me) {
         binding.menuAbout.setOnClickListener {
             startActivity(Intent(requireContext(), AboutUsActivity::class.java))
         }
-        binding.logoutBtn.setOnClickListener {
-            viewModel.logout()
-        }
     }
 
     private fun navigateToLogin() {
