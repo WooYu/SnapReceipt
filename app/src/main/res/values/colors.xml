@@ -28,8 +28,8 @@
     <color name="colorOnError">#FFFFFF</color>
 
     <!-- 背景色 -->
-    <!-- 页面大背景：您选的浅灰蓝非常棒，护眼且有质感 -->
-    <color name="colorBackground">#F4F7FC</color>
+    <!-- 页面大背景 -->
+    <color name="colorBackground">#F3F6FD</color>
 
     <!-- 卡片/表面背景：纯白 -->
     <color name="colorSurface">#FFFFFF</color>
@@ -38,6 +38,7 @@
     <color name="colorOnBackground">#1E2430</color>
     <color name="colorOnSurface">#1E2430</color>
 
+    <color name="text_title">#22263F</color>
     <color name="text_primary">#323B4B</color>
     <color name="text_secondary">#7D899C</color>
     <color name="text_muted">#BDC4D0</color>

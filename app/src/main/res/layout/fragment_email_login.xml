@@ -17,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_begin="16dp" />
+            app:layout_constraintGuide_begin="@dimen/page_start_margin" />
 
         <!--右边界-->
         <androidx.constraintlayout.widget.Guideline
@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_end="16dp" />
+            app:layout_constraintGuide_end="@dimen/page_end_margin" />
 
         <!--上边界-->
         <androidx.constraintlayout.widget.Guideline
@@ -250,10 +250,10 @@
             android:layout_marginTop="40dp"
             android:enabled="false"
             android:text="@string/login"
-            app:pabCornerRadius="80dp"
             app:layout_constraintEnd_toEndOf="@id/bound_right"
             app:layout_constraintStart_toStartOf="@id/bound_left"
-            app:layout_constraintTop_toBottomOf="@id/code_input_container" />
+            app:layout_constraintTop_toBottomOf="@id/code_input_container"
+            app:pabCornerRadius="80dp" />
 
         <!--协议-->
         <LinearLayout
