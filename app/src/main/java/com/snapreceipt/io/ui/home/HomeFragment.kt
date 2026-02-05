@@ -10,12 +10,14 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.fragment.app.viewModels
+import androidx.core.content.ContextCompat
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentHomeBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.common.shouldShowEmpty
 import com.snapreceipt.io.ui.home.dialogs.ScanFailedDialog
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
+import com.snapreceipt.io.ui.widget.CurvedGradientDrawable
 import com.skybound.space.base.presentation.BaseFragment
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.presentation.observeState
@@ -83,10 +85,18 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentHomeBinding.bind(view)
+        setupHeaderBackground()
         setupAdapter()
         setupListeners()
         observeState(viewModel.uiState) { renderState(it) }
         super.onViewCreated(view, savedInstanceState)
+    }
+
+    private fun setupHeaderBackground() {
+        val startColor = ContextCompat.getColor(requireContext(), R.color.colorPrimary)
+        val endColor = ContextCompat.getColor(requireContext(), R.color.colorPrimaryGradientEnd)
+        val curveHeight = resources.displayMetrics.density * 60f // 60dp 转换为像素
+        binding.headerBg.background = CurvedGradientDrawable(startColor, endColor, curveHeight)
     }
 
     override fun onDestroyView() {
