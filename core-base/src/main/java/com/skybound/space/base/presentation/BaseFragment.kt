@@ -1,5 +1,8 @@
 package com.skybound.space.base.presentation
 
+import android.app.Dialog
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
 import androidx.annotation.LayoutRes
@@ -7,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.skybound.space.base.R
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 
@@ -19,9 +23,28 @@ abstract class BaseFragment<VM : com.skybound.space.base.presentation.viewmodel.
 
     protected abstract val viewModel: VM
 
+    private var loadingDialog: Dialog? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeEvents()
+    }
+
+    override fun onDestroyView() {
+        dismissLoading()
+        super.onDestroyView()
+    }
+
+    protected fun showLoading(show: Boolean) {
+        if (!show) {
+            dismissLoading()
+            return
+        }
+        if (!isAdded) return
+        val dialog = loadingDialog ?: createLoadingDialog().also { loadingDialog = it }
+        if (!dialog.isShowing) {
+            dialog.show()
+        }
     }
 
     private fun observeEvents() {
@@ -69,5 +92,19 @@ abstract class BaseFragment<VM : com.skybound.space.base.presentation.viewmodel.
 
     open fun onCustomEvent(event: UiEvent.Custom) {
         // 默认空实现
+    }
+
+    private fun dismissLoading() {
+        loadingDialog?.dismiss()
+        loadingDialog = null
+    }
+
+    private fun createLoadingDialog(): Dialog {
+        return Dialog(requireContext()).apply {
+            setContentView(R.layout.dialog_fragment_loading)
+            setCancelable(false)
+            setCanceledOnTouchOutside(false)
+            window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        }
     }
 }

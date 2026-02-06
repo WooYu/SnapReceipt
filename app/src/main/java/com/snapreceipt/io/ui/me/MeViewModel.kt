@@ -50,7 +50,8 @@ class MeViewModel @Inject constructor(
                 _uiState.update { current ->
                     current.copy(
                         username = user?.username.orEmpty(),
-                        email = user?.email.orEmpty()
+                        email = user?.email.orEmpty(),
+                        avatar = user?.avatar.orEmpty()
                     )
                 }
             }
