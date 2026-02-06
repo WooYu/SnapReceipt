@@ -79,8 +79,8 @@
             android:layout_marginEnd="15dp"
             android:layout_weight="1"
             app:cardCornerRadius="20dp"
-            app:cardElevation="4dp"
-            app:cardUseCompatPadding="false">
+            app:cardElevation="@dimen/card_elevation_default"
+            app:cardUseCompatPadding="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -122,8 +122,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             app:cardCornerRadius="22dp"
-            app:cardElevation="4dp"
-            app:cardUseCompatPadding="false">
+            app:cardElevation="@dimen/card_elevation_default"
+            app:cardUseCompatPadding="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -226,18 +226,6 @@
         </LinearLayout>
     </FrameLayout>
 
-    <!--加载框-->
-    <ProgressBar
-        android:id="@+id/loading_indicator"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <!-- OCR recognition progress overlay (uploading / scanning) -->
     <FrameLayout
         android:id="@+id/recognition_overlay"
@@ -257,7 +245,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             app:cardCornerRadius="16dp"
-            app:cardElevation="8dp"
+            app:cardElevation="@dimen/card_elevation_default"
             app:cardUseCompatPadding="true">
 
             <LinearLayout

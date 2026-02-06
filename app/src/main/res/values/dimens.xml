@@ -8,6 +8,8 @@
     <!--圆角大小-->
     <dimen name="corner_radius_large">10dp</dimen>
     <dimen name="corner_radius_small">6dp</dimen>
+    <!--统一卡片阴影-->
+    <dimen name="card_elevation_default">4dp</dimen>
     <!--输入框高度-->
     <dimen name="input_box_height">48dp</dimen>
     <!--按钮高度-->

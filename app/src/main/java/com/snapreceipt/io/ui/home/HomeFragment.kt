@@ -104,11 +104,6 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         _binding = null
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.loadReceipts()
-    }
-
     private fun renderState(state: HomeUiState) {
         adapter.setReceipts(state.receipts)
         val showEmpty = shouldShowEmpty(state.hasLoaded, state.empty)
@@ -117,11 +112,8 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
 
         val showRecognitionOverlay = state.recognitionStatusResId != null
         binding.recognitionOverlay.visibility = if (showRecognitionOverlay) View.VISIBLE else View.GONE
-        if (showRecognitionOverlay && state.recognitionStatusResId != null) {
-            binding.recognitionStatusText.setText(state.recognitionStatusResId)
-        }
-        binding.loadingIndicator.visibility =
-            if (state.loading && !showRecognitionOverlay) View.VISIBLE else View.GONE
+        state.recognitionStatusResId?.let { binding.recognitionStatusText.setText(it) }
+        showLoading(state.loading && !showRecognitionOverlay)
 
         binding.cardScan.isEnabled = !state.loading
         binding.cardUpload.isEnabled = !state.loading

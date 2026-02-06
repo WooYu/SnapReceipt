@@ -15,5 +15,16 @@
         <item name="colorOnSurface">@color/colorOnSurface</item>
         <item name="android:windowBackground">@color/colorBackground</item>
         <item name="android:textCursorDrawable">@drawable/cursor_primary</item>
+        <item name="materialCardViewStyle">@style/Widget.SnapReceipt.MaterialCardView</item>
+    </style>
+
+    <style name="Widget.SnapReceipt.MaterialCardView" parent="Widget.MaterialComponents.CardView">
+        <item name="cardUseCompatPadding">true</item>
+        <item name="cardElevation">@dimen/card_elevation_default</item>
+    </style>
+
+    <style name="SnapReceiptCircleAvatarShape">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
     </style>
 </resources>
