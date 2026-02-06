@@ -10,8 +10,8 @@ import android.graphics.drawable.Drawable
 /**
  * 自定义 Drawable，用于创建带有弧形底边的渐变背景
  * 
- * @param startColor 渐变起始颜色（左上角）
- * @param endColor 渐变结束颜色（右下角）
+ * @param startColor 渐变起始颜色（顶部）
+ * @param endColor 渐变结束颜色（底部）
  * @param curveHeight 弧形的高度（向下弯曲的深度）
  */
 class CurvedGradientDrawable(
@@ -28,10 +28,10 @@ class CurvedGradientDrawable(
         val width = bounds.width().toFloat()
         val height = bounds.height().toFloat()
 
-        // 创建从左上到右下的线性渐变
+        // 创建从上到下的线性渐变
         val gradient = LinearGradient(
-            0f, 0f,  // 起始点（左上角）
-            width, height,  // 结束点（右下角）
+            0f, 0f,  // 起始点（顶部）
+            0f, height,  // 结束点（底部）
             startColor,
             endColor,
             Shader.TileMode.CLAMP
