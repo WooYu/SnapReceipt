@@ -2,6 +2,7 @@
 <resources>
 
     <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="bottomNavigationStyle">@style/Widget.SnapReceipt.BottomNavigationView</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
         <item name="colorSecondary">@color/colorSecondary</item>
@@ -16,6 +17,14 @@
         <item name="android:windowBackground">@color/colorBackground</item>
         <item name="android:textCursorDrawable">@drawable/cursor_primary</item>
         <item name="materialCardViewStyle">@style/Widget.SnapReceipt.MaterialCardView</item>
+    </style>
+
+    <!-- 底部导航栏样式：禁用图标 tint，使 selector 图标按选中/未选中显示不同图片 -->
+    <style name="Widget.SnapReceipt.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemIconTint">@null</item>
+        <item name="itemTextColor">@color/nav_text_selector</item>
+        <item name="itemTextAppearanceActive">@style/TextAppearance.BottomNav.Active</item>
+        <item name="itemTextAppearanceInactive">@style/TextAppearance.BottomNav.Inactive</item>
     </style>
 
     <style name="Widget.SnapReceipt.MaterialCardView" parent="Widget.MaterialComponents.CardView">

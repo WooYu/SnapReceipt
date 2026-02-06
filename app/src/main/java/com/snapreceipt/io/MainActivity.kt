@@ -34,6 +34,9 @@ class MainActivity : BaseActivity<MainViewModel>() {
         val navController = navHostFragment.navController
         binding.bottomNav.setupWithNavController(navController)
 
+        // 强制清除图标 tint，使自定义 selector 图标显示原始颜色（主题可能覆盖 XML 的 itemIconTint="@null"）
+        binding.bottomNav.itemIconTintList = null
+
         if (savedInstanceState == null) {
             val startTab = intent.getStringExtra(InvoiceDetailsActivity.EXTRA_START_TAB)
             if (startTab == InvoiceDetailsActivity.TAB_RECEIPTS) {

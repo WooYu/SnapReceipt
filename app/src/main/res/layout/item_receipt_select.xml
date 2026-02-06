@@ -5,25 +5,24 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingTop="6dp"
-    android:paddingBottom="6dp">
+    android:paddingTop="10dp"
+    android:paddingBottom="2dp">
 
     <ImageView
         android:id="@+id/select_icon"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_marginEnd="12dp"
         android:contentDescription="@string/select_all"
-        android:src="@drawable/ic_select_toggle" />
+        android:src="@drawable/ic_select_toggle"
+        app:tint="@color/select_icon_selector" />
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/receipt_card"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        app:cardCornerRadius="16dp"
+        app:cardCornerRadius="@dimen/corner_radius_large"
         app:cardElevation="@dimen/card_elevation_default"
         app:cardUseCompatPadding="true">
 
@@ -36,8 +35,8 @@
                 android:id="@+id/merchant_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textColor="@color/text_primary"
-                android:textSize="15sp"
+                android:textColor="@color/text_title"
+                android:textSize="@dimen/text_size_primary"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/amount"
@@ -47,8 +46,8 @@
                 android:id="@+id/amount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/text_primary"
-                android:textSize="16sp"
+                android:textColor="@color/text_title"
+                android:textSize="@dimen/text_size_primary"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -61,7 +60,7 @@
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/amount"
                 app:layout_constraintTop_toBottomOf="@id/merchant_name" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
