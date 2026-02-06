@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     android:background="@color/colorBackground">
     <!--左边界-->
     <androidx.constraintlayout.widget.Guideline
@@ -62,6 +64,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="41dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="@id/bound_right"
         app:layout_constraintStart_toStartOf="@id/bound_left"
@@ -73,7 +77,9 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="15dp"
             android:layout_weight="1"
-            app:cardCornerRadius="20dp">
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            app:cardUseCompatPadding="false">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -114,7 +120,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            app:cardCornerRadius="22dp">
+            app:cardCornerRadius="22dp"
+            app:cardElevation="4dp"
+            app:cardUseCompatPadding="false">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -211,6 +219,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
+        android:clipChildren="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/bound_right"
         app:layout_constraintStart_toStartOf="@id/bound_left"
@@ -220,6 +229,7 @@
             android:id="@+id/receipt_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:clipChildren="false"
             android:clipToPadding="false"
             android:paddingBottom="24dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
