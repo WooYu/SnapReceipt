@@ -5,6 +5,9 @@
     <!--左右间距-->
     <dimen name="page_start_margin">16dp</dimen>
     <dimen name="page_end_margin">16dp</dimen>
+    <!--圆角大小-->
+    <dimen name="corner_radius_large">10dp</dimen>
+    <dimen name="corner_radius_small">6dp</dimen>
     <!--输入框高度-->
     <dimen name="input_box_height">48dp</dimen>
     <!--按钮高度-->
