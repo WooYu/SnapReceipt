@@ -27,4 +27,14 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
     </style>
+
+    <!-- 底部导航栏文字样式：修改 nav_text_size 或此处 textSize 可调整字号 -->
+    <style name="TextAppearance.BottomNav.Active" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">@dimen/nav_text_size</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+    <style name="TextAppearance.BottomNav.Inactive" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">@dimen/nav_text_size</item>
+        <item name="android:textStyle">normal</item>
+    </style>
 </resources>

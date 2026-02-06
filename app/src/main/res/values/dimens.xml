@@ -18,5 +18,7 @@
     <dimen name="text_size_title">18sp</dimen>
     <dimen name="text_size_primary">16sp</dimen>
     <dimen name="text_size_secondary">14sp</dimen>
+    <!--底部导航栏文字大小-->
+    <dimen name="nav_text_size">12sp</dimen>
 
 </resources>

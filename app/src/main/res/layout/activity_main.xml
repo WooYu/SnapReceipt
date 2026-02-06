@@ -20,6 +20,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         app:itemIconTint="@null"
+        app:itemTextColor="@color/nav_text_selector"
+        app:itemTextAppearanceActive="@style/TextAppearance.BottomNav.Active"
+        app:itemTextAppearanceInactive="@style/TextAppearance.BottomNav.Inactive"
         app:menu="@menu/bottom_nav_menu" />
 
 </LinearLayout>
