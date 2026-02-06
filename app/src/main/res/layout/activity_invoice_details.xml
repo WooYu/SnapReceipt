@@ -107,7 +107,7 @@
                         android:layout_height="64dp"
                         android:contentDescription="@string/invoice_photo"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/ic_receipts" />
+                        android:src="@drawable/ic_nav_receipts" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
