@@ -42,4 +42,5 @@
     <color name="text_primary">#323B4B</color>
     <color name="text_secondary">#7D899C</color>
     <color name="text_muted">#BDC4D0</color>
+    <color name="text_muted_dark">#B2B9C5</color>
 </resources>

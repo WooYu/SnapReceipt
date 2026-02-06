@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorBackground"
     android:clipChildren="false"
-    android:clipToPadding="false"
-    android:background="@color/colorBackground">
+    android:clipToPadding="false">
     <!--左边界-->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/bound_left"
@@ -59,6 +59,7 @@
         app:layout_constraintStart_toStartOf="@id/bound_left"
         app:layout_constraintTop_toTopOf="@id/bound_top" />
 
+    <!--选择图片-->
     <LinearLayout
         android:id="@+id/action_cards"
         android:layout_width="0dp"
@@ -160,45 +161,6 @@
 
     </LinearLayout>
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/preview_card"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="16dp"
-        android:visibility="gone"
-        app:cardCornerRadius="18dp"
-        app:cardElevation="6dp"
-        app:cardUseCompatPadding="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/action_cards">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="12dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/preview"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <ImageView
-                android:id="@+id/preview_image"
-                android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:layout_marginTop="8dp"
-                android:contentDescription="@string/receipt_details"
-                android:scaleType="centerCrop" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
     <!--列表标题-->
     <TextView
         android:id="@+id/recent_title"
@@ -211,14 +173,14 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="@id/bound_right"
         app:layout_constraintStart_toStartOf="@id/bound_left"
-        app:layout_constraintTop_toBottomOf="@id/preview_card" />
+        app:layout_constraintTop_toBottomOf="@id/action_cards" />
 
     <!--列表-->
     <FrameLayout
         android:id="@+id/list_container"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="6dp"
         android:clipChildren="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/bound_right"
@@ -229,27 +191,25 @@
             android:id="@+id/receipt_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:paddingBottom="24dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:itemCount="5"
             tools:listitem="@layout/item_receipt"
             tools:orientation="vertical"
             tools:showLayoutMargins="true" />
 
+        <!--没有数据-->
         <LinearLayout
             android:id="@+id/empty_state"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
             android:orientation="vertical"
-            android:padding="24dp"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <ImageView
-                android:layout_width="180dp"
-                android:layout_height="180dp"
+                android:layout_width="240dp"
+                android:layout_height="140dp"
                 android:adjustViewBounds="true"
                 android:contentDescription="@string/no_content"
                 android:src="@drawable/img_receipts_empty" />
@@ -258,23 +218,15 @@
                 android:id="@+id/empty_state_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="10dp"
                 android:text="@string/no_content"
-                android:textColor="@color/text_muted"
-                android:textSize="16sp" />
+                android:textColor="@color/text_muted_dark"
+                android:textSize="@dimen/text_size_secondary" />
 
-            <TextView
-                android:id="@+id/empty_state_hint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center"
-                android:text="@string/empty_state_hint_home"
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp" />
         </LinearLayout>
     </FrameLayout>
 
+    <!--加载框-->
     <ProgressBar
         android:id="@+id/loading_indicator"
         style="?android:attr/progressBarStyleLarge"

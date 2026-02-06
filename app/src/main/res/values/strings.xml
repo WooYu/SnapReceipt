@@ -50,7 +50,6 @@
     <string name="choose_from_album">Choose from Album</string>
     <string name="no_receipts">No receipts yet</string>
     <string name="tap_to_scan">Tap to scan your first receipt</string>
-    <string name="empty_state_hint_home">Start by scanning or uploading your first receipt</string>
     <string name="edit_receipt">Edit Receipt</string>
     <string name="receipt_details">Receipt Details</string>
     <string name="merchant_name">Merchant Name</string>

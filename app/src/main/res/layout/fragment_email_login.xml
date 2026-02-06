@@ -177,7 +177,8 @@
                 android:textColor="@color/text_primary"
                 android:textColorHint="@color/text_muted"
                 android:textCursorDrawable="@drawable/cursor_primary"
-                android:textSize="@dimen/text_size_secondary" />
+                android:textSize="@dimen/text_size_secondary"
+                android:textStyle="bold" />
 
             <!--发送验证码-->
             <TextView
@@ -187,7 +188,8 @@
                 android:gravity="center"
                 android:text="@string/login_captcha"
                 android:textColor="@color/colorPrimary"
-                android:textSize="@dimen/text_size_secondary" />
+                android:textSize="@dimen/text_size_secondary"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <!--验证码输入-->

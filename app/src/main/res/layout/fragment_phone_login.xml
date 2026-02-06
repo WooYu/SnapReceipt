@@ -112,7 +112,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="@string/login_tab_email"
-                android:textColor="@color/text_primary"
+                android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_secondary"
                 android:textStyle="bold" />
 
@@ -177,7 +177,8 @@
                 android:textColor="@color/text_primary"
                 android:textColorHint="@color/text_muted"
                 android:textCursorDrawable="@drawable/cursor_primary"
-                android:textSize="@dimen/text_size_secondary" />
+                android:textSize="@dimen/text_size_secondary"
+                android:textStyle="bold" />
 
             <!--发送验证码-->
             <TextView
@@ -238,7 +239,8 @@
                 android:textColor="@color/text_primary"
                 android:textColorHint="@color/text_muted"
                 android:textCursorDrawable="@drawable/cursor_primary"
-                android:textSize="@dimen/text_size_secondary" />
+                android:textSize="@dimen/text_size_secondary"
+                android:textStyle="bold" />
 
         </LinearLayout>
 

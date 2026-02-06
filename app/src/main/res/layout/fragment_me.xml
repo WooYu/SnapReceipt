@@ -34,7 +34,7 @@
     <View
         android:id="@+id/header_glow"
         android:layout_width="0dp"
-        android:layout_height="164dp"
+        android:layout_height="200dp"
         android:background="@drawable/bg_me_header_gradient"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -43,12 +43,12 @@
     <!--个人信息-->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/edit_profile_btn"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="54dp"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="8dp"
-        app:cardUseCompatPadding="true"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="false"
         app:layout_constraintEnd_toEndOf="@id/bound_right"
         app:layout_constraintStart_toStartOf="@id/bound_left"
         app:layout_constraintTop_toTopOf="@id/bound_top">
@@ -86,6 +86,7 @@
                 app:layout_constraintEnd_toStartOf="@id/iv_avatar_arrow"
                 app:layout_constraintStart_toEndOf="@id/iv_avatar"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
                 tools:text="@string/placeholder_dash" />
 
             <!--邮箱 or 手机号-->
@@ -120,12 +121,12 @@
     <!--导出记录-->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/export_record_btn"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        app:cardCornerRadius="16dp"
+        app:cardCornerRadius="6dp"
         app:cardElevation="4dp"
-        app:cardUseCompatPadding="true"
+        app:cardUseCompatPadding="false"
         app:layout_constraintEnd_toEndOf="@id/bound_right"
         app:layout_constraintStart_toStartOf="@id/bound_left"
         app:layout_constraintTop_toBottomOf="@id/edit_profile_btn">
@@ -146,7 +147,6 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-
                 android:layout_marginStart="15dp"
                 android:layout_weight="1"
                 android:text="@string/export_records"
@@ -159,18 +159,18 @@
                 android:layout_height="12dp"
                 android:contentDescription="@string/export_records"
                 android:scaleType="fitXY"
-                android:src="@drawable/ic_me_chevron" />
+                android:src="@drawable/ic_chevron_right" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
     <!--其他-->
     <com.google.android.material.card.MaterialCardView
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        app:cardCornerRadius="16dp"
+        app:cardCornerRadius="10dp"
         app:cardElevation="4dp"
-        app:cardUseCompatPadding="true"
+        app:cardUseCompatPadding="false"
         app:layout_constraintEnd_toEndOf="@id/bound_right"
         app:layout_constraintStart_toStartOf="@id/bound_left"
         app:layout_constraintTop_toBottomOf="@id/export_record_btn">
@@ -180,6 +180,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!--关于-->
             <LinearLayout
                 android:id="@+id/menu_about"
                 android:layout_width="match_parent"
@@ -208,14 +209,17 @@
                     android:layout_height="12dp"
                     android:contentDescription="@string/about_us"
                     android:scaleType="fitXY"
-                    android:src="@drawable/ic_me_chevron" />
+                    android:src="@drawable/ic_chevron_right" />
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#EEF1F6" />
+                android:layout_marginStart="46dp"
+                android:layout_marginEnd="16dp"
+                android:background="#F7F7F7" />
 
+            <!--意见反馈-->
             <LinearLayout
                 android:id="@+id/menu_feedback"
                 android:layout_width="match_parent"
@@ -244,14 +248,17 @@
                     android:layout_height="12dp"
                     android:contentDescription="@string/feedback"
                     android:scaleType="fitXY"
-                    android:src="@drawable/ic_me_chevron" />
+                    android:src="@drawable/ic_chevron_right" />
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#EEF1F6" />
+                android:layout_marginStart="46dp"
+                android:layout_marginEnd="16dp"
+                android:background="#F7F7F7" />
 
+            <!--设置-->
             <LinearLayout
                 android:id="@+id/menu_settings"
                 android:layout_width="match_parent"
@@ -280,7 +287,7 @@
                     android:layout_height="12dp"
                     android:contentDescription="@string/settings"
                     android:scaleType="fitXY"
-                    android:src="@drawable/ic_me_chevron" />
+                    android:src="@drawable/ic_chevron_right" />
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
