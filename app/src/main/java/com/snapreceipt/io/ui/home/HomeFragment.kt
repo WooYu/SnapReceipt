@@ -95,7 +95,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     private fun setupHeaderBackground() {
         val startColor = ContextCompat.getColor(requireContext(), R.color.colorPrimary)
         val endColor = ContextCompat.getColor(requireContext(), R.color.colorPrimaryGradientEnd)
-        val curveHeight = resources.displayMetrics.density * 60f // 60dp 转换为像素
+        val curveHeight = resources.displayMetrics.density * 45f // 45dp 转换为像素
         binding.headerBg.background = CurvedGradientDrawable(startColor, endColor, curveHeight)
     }
 
