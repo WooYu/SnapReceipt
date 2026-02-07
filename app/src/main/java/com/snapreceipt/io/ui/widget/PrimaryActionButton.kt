@@ -30,6 +30,7 @@ class PrimaryActionButton @JvmOverloads constructor(
     private var pressedDarkenFactor = DEFAULT_PRESSED_DARKEN_FACTOR
     private var gradientStartColor = ContextCompat.getColor(context, R.color.colorPrimary)
     private var gradientEndColor = ContextCompat.getColor(context, R.color.colorPrimaryGradientEnd)
+    private var enableShadow = true
 
     init {
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.PrimaryActionButton, defStyleAttr, 0)
@@ -63,13 +64,25 @@ class PrimaryActionButton @JvmOverloads constructor(
                 gradientEndColor
             )
         }
+        if (typedArray.hasValue(R.styleable.PrimaryActionButton_pabEnableShadow)) {
+            enableShadow = typedArray.getBoolean(
+                R.styleable.PrimaryActionButton_pabEnableShadow,
+                enableShadow
+            )
+        }
         typedArray.recycle()
 
-        val elevationAttrs = context.obtainStyledAttributes(attrs, intArrayOf(android.R.attr.elevation))
-        val hasElevation = elevationAttrs.hasValue(0)
-        elevationAttrs.recycle()
-        if (!hasElevation) {
-            elevation = dpToPx(DEFAULT_ELEVATION_DP)
+        if (enableShadow) {
+            val elevationAttrs = context.obtainStyledAttributes(attrs, intArrayOf(android.R.attr.elevation))
+            val hasElevation = elevationAttrs.hasValue(0)
+            elevationAttrs.recycle()
+            if (!hasElevation) {
+                elevation = dpToPx(DEFAULT_ELEVATION_DP)
+            }
+        } else {
+            stateListAnimator = null
+            elevation = 0f
+            translationZ = 0f
         }
 
         cornerRadius = cornerRadiusPx.toInt()

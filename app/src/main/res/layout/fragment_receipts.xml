@@ -240,11 +240,11 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <Button
+        <com.snapreceipt.io.ui.widget.PrimaryActionButton
             android:id="@+id/export_action_btn"
             android:layout_width="118dp"
             android:layout_height="44dp"
-            android:background="@drawable/bg_button_gradient"
+            app:pabEnableShadow="false"
             android:text="@string/export"
             android:textAllCaps="false"
             android:textColor="@android:color/white"

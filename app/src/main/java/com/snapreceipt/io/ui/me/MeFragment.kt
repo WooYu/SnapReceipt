@@ -3,11 +3,6 @@ package com.snapreceipt.io.ui.me
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.annotation.DrawableRes
-import androidx.annotation.IdRes
-import androidx.annotation.StringRes
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
 import com.snapreceipt.io.R
@@ -32,7 +27,6 @@ class MeFragment : BaseFragment<MeViewModel>(R.layout.fragment_me) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentMeBinding.bind(view)
-        bindMenuItems()
         setupListeners()
         observeState(viewModel.uiState) { renderState(it) }
         super.onViewCreated(view, savedInstanceState)
@@ -56,43 +50,23 @@ class MeFragment : BaseFragment<MeViewModel>(R.layout.fragment_me) {
         }
     }
 
-    private fun bindMenuItems() {
-        bindMenuItem(R.id.menu_export, R.drawable.ic_me_export, R.string.export_records)
-        bindMenuItem(R.id.menu_about, R.drawable.ic_me_about, R.string.about_us)
-        bindMenuItem(R.id.menu_feedback, R.drawable.ic_me_feedback, R.string.feedback)
-        bindMenuItem(R.id.menu_settings, R.drawable.ic_me_settings, R.string.settings)
-    }
-
-    private fun bindMenuItem(
-        @IdRes menuId: Int,
-        @DrawableRes iconRes: Int,
-        @StringRes titleRes: Int
-    ) {
-        val row = menuView(menuId)
-        row.findViewById<ImageView>(R.id.menu_icon).setImageResource(iconRes)
-        row.findViewById<TextView>(R.id.menu_title).setText(titleRes)
-        row.contentDescription = getString(titleRes)
-    }
-
     private fun setupListeners() {
         binding.editProfileBtn.setOnClickListener {
             startActivity(Intent(requireContext(), PersonalProfileActivity::class.java))
         }
-        menuView(R.id.menu_export).setOnClickListener {
+        binding.menuExport.setOnClickListener {
             startActivity(Intent(requireContext(), ExportRecordsActivity::class.java))
         }
-        menuView(R.id.menu_settings).setOnClickListener {
+        binding.menuSettings.setOnClickListener {
             startActivity(Intent(requireContext(), SettingsActivity::class.java))
         }
-        menuView(R.id.menu_feedback).setOnClickListener {
+        binding.menuFeedback.setOnClickListener {
             startActivity(Intent(requireContext(), FeedbackActivity::class.java))
         }
-        menuView(R.id.menu_about).setOnClickListener {
+        binding.menuAbout.setOnClickListener {
             startActivity(Intent(requireContext(), AboutUsActivity::class.java))
         }
     }
-
-    private fun menuView(@IdRes id: Int): View = binding.root.findViewById(id)
 
     private fun navigateToLogin() {
         startActivity(Intent(requireContext(), LoginActivity::class.java))

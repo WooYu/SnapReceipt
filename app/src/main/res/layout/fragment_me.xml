@@ -38,13 +38,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.material.card.MaterialCardView
+    <com.snapreceipt.io.ui.widget.SnapCardView
         android:id="@+id/edit_profile_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="54dp"
         app:cardCornerRadius="@dimen/corner_radius_large"
-        app:cardElevation="@dimen/card_elevation_default"
         app:cardUseCompatPadding="false"
         app:layout_constraintEnd_toEndOf="@id/bound_right"
         app:layout_constraintStart_toStartOf="@id/bound_left"
@@ -63,16 +62,18 @@
                 android:contentDescription="@string/avatar"
                 android:scaleType="centerCrop"
                 android:src="@drawable/img_app_icon"
-                app:shapeAppearanceOverlay="@style/SnapReceiptCircleAvatarShape"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/SnapReceiptCircleAvatarShape" />
 
             <TextView
                 android:id="@+id/username"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="12dp"
+                android:breakStrategy="simple"
+                android:hyphenationFrequency="none"
                 android:textColor="@color/text_primary"
                 android:textSize="@dimen/text_size_title"
                 android:textStyle="bold"
@@ -89,6 +90,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="12dp"
                 android:layout_marginTop="12dp"
+                android:breakStrategy="simple"
+                android:hyphenationFrequency="none"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_secondary"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -108,67 +111,104 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.card.MaterialCardView>
+    </com.snapreceipt.io.ui.widget.SnapCardView>
 
-    <com.google.android.material.card.MaterialCardView
+    <LinearLayout
         android:id="@+id/export_record_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        app:cardCornerRadius="@dimen/corner_radius_small"
-        app:cardElevation="@dimen/card_elevation_default"
-        app:cardUseCompatPadding="false"
+        android:background="@drawable/bg_surface_card_small"
+        android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="@id/bound_right"
         app:layout_constraintStart_toStartOf="@id/bound_left"
         app:layout_constraintTop_toBottomOf="@id/edit_profile_btn">
 
-        <include
+        <LinearLayout
             android:id="@+id/menu_export"
-            layout="@layout/view_me_menu_item" />
-    </com.google.android.material.card.MaterialCardView>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/export_records"
+            android:gravity="center_vertical"
+            android:minHeight="58dp"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingTop="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="16dp">
 
-    <com.google.android.material.card.MaterialCardView
+            <ImageView
+                android:id="@+id/menu_export_icon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_me_export" />
+
+            <TextView
+                android:id="@+id/menu_export_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_weight="1"
+                android:text="@string/export_records"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/text_size_secondary"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/menu_export_arrow"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:contentDescription="@null"
+                android:scaleType="fitXY"
+                android:src="@drawable/ic_chevron_right_small" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        app:cardCornerRadius="@dimen/corner_radius_large"
-        app:cardElevation="@dimen/card_elevation_default"
-        app:cardUseCompatPadding="false"
+        android:background="@drawable/bg_surface_card_large"
+        android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="@id/bound_right"
         app:layout_constraintStart_toStartOf="@id/bound_left"
         app:layout_constraintTop_toBottomOf="@id/export_record_btn">
 
-        <LinearLayout
+        <com.snapreceipt.io.ui.widget.MeMenuItemView
+            android:id="@+id/menu_about"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            app:mmivIcon="@drawable/ic_me_about"
+            app:mmivTitle="@string/about_us" />
 
-            <include
-                android:id="@+id/menu_about"
-                layout="@layout/view_me_menu_item" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="46dp"
+            android:layout_marginEnd="16dp"
+            android:background="#F7F7F7" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="46dp"
-                android:layout_marginEnd="16dp"
-                android:background="#F7F7F7" />
+        <com.snapreceipt.io.ui.widget.MeMenuItemView
+            android:id="@+id/menu_feedback"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:mmivIcon="@drawable/ic_me_feedback"
+            app:mmivTitle="@string/feedback" />
 
-            <include
-                android:id="@+id/menu_feedback"
-                layout="@layout/view_me_menu_item" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="46dp"
+            android:layout_marginEnd="16dp"
+            android:background="#F7F7F7" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="46dp"
-                android:layout_marginEnd="16dp"
-                android:background="#F7F7F7" />
-
-            <include
-                android:id="@+id/menu_settings"
-                layout="@layout/view_me_menu_item" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+        <com.snapreceipt.io.ui.widget.MeMenuItemView
+            android:id="@+id/menu_settings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:mmivIcon="@drawable/ic_me_settings"
+            app:mmivTitle="@string/settings" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
