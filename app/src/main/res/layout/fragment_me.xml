@@ -38,6 +38,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!--用户信息-->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/edit_profile_btn"
         android:layout_width="0dp"
@@ -63,10 +64,10 @@
                 android:contentDescription="@string/avatar"
                 android:scaleType="centerCrop"
                 android:src="@drawable/img_app_icon"
-                app:shapeAppearanceOverlay="@style/SnapReceiptCircleAvatarShape"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/SnapReceiptCircleAvatarShape" />
 
             <TextView
                 android:id="@+id/username"
@@ -99,8 +100,8 @@
 
             <ImageView
                 android:id="@+id/iv_avatar_arrow"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
                 android:contentDescription="@string/edit_profile"
                 android:src="@drawable/ic_chevron_right_large"
@@ -110,13 +111,15 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
 
+    <!--导出记录-->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/export_record_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        app:cardBackgroundColor="@android:color/white"
         app:cardCornerRadius="@dimen/corner_radius_small"
-        app:cardElevation="@dimen/card_elevation_default"
+        app:cardElevation="0dp"
         app:cardUseCompatPadding="false"
         app:layout_constraintEnd_toEndOf="@id/bound_right"
         app:layout_constraintStart_toStartOf="@id/bound_left"
@@ -131,8 +134,9 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
+        app:cardBackgroundColor="@android:color/white"
         app:cardCornerRadius="@dimen/corner_radius_large"
-        app:cardElevation="@dimen/card_elevation_default"
+        app:cardElevation="0dp"
         app:cardUseCompatPadding="false"
         app:layout_constraintEnd_toEndOf="@id/bound_right"
         app:layout_constraintStart_toStartOf="@id/bound_left"

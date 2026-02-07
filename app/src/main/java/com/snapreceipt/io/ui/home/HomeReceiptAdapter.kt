@@ -53,7 +53,7 @@ class HomeReceiptAdapter(
                 val categoryLabel = receipt.categoryName.orEmpty()
                 val titleType = receipt.receiptType.orEmpty()
                 val metaText = context.getString(
-                    R.string.home_receipt_meta_format,
+                    R.string.receipt_meta_format,
                     categoryLabel,
                     titleType,
                     dateText

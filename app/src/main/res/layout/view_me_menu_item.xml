@@ -28,8 +28,8 @@
 
     <ImageView
         android:id="@+id/menu_arrow"
-        android:layout_width="12dp"
-        android:layout_height="12dp"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
         android:contentDescription="@null"
         android:scaleType="fitXY"
         android:src="@drawable/ic_chevron_right_small" />

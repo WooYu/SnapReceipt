@@ -92,15 +92,14 @@
     <string name="export_excel">导出为 Excel</string>
     <string name="export_csv">导出为 CSV</string>
     <string name="filter_date">日期</string>
-    <string name="filter_title">抬头</string>
+    <string name="filter_title">分类</string>
     <string name="filter_type">类型</string>
     <string name="no_content">暂无内容</string>
     <string name="selected_count">已选择：%d</string>
     <string name="total_label">合计</string>
-    <string name="amount_currency_format">¥%1$.2f</string>
+    <string name="amount_currency_format">$%1$.2f</string>
     <string name="amount_number_format">%1$.2f</string>
     <string name="receipt_meta_format">%1$s · %2$s · %3$s</string>
-    <string name="home_receipt_meta_format">%1$s | %2$s | %3$s</string>
     <string name="date_range_format">%1$s - %2$s</string>
     <string name="select_invoice_type">选择发票类型</string>
     <string name="select_invoice_category">选择发票分类</string>
@@ -158,7 +157,7 @@
     <string name="export_success_message">您可以在个人中心查看导出记录</string>
     <string name="view_export_records">查看导出记录</string>
     <string name="exporting_receipts">正在导出收据…</string>
-    <string name="no_more_records">没有更多记录了</string>
+    <string name="no_more_records">没有更多啦~</string>
     <string name="opening_export_file">正在打开导出文件…</string>
     <string name="export_file_unavailable">导出文件尚未准备好</string>
     <string name="no_app_to_open">没有可用的应用打开此文件</string>
