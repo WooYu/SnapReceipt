@@ -74,85 +74,108 @@
             android:textSize="@dimen/text_size_secondary" />
     </LinearLayout>
 
-    <FrameLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipChildren="false"
-        android:clipToPadding="false">
-
-        <!-- 空状态：与首页一致 -->
-        <LinearLayout
-            android:id="@+id/empty_state"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:padding="24dp"
-            android:visibility="gone">
-
-            <ImageView
-                android:layout_width="240dp"
-                android:layout_height="140dp"
-                android:adjustViewBounds="true"
-                android:contentDescription="@string/no_content"
-                android:src="@drawable/img_receipts_empty" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@string/no_content"
-                android:textSize="@dimen/text_size_secondary"
-                android:textColor="@color/text_muted_dark" />
-        </LinearLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/receipt_list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingStart="@dimen/page_start_margin"
-            android:paddingEnd="@dimen/page_end_margin"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        android:layout_weight="1">
 
         <FrameLayout
-            android:id="@+id/export_loading_overlay"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#66000000"
-            android:clickable="true"
-            android:focusable="true"
-            android:visibility="gone">
+            android:layout_height="match_parent">
 
+            <!-- 空状态：与首页一致 -->
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="@drawable/bg_loading_card"
-                android:gravity="center"
+                android:id="@+id/empty_state"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:gravity="center"
+                android:padding="24dp"
+                android:visibility="gone">
 
-                <ProgressBar
-                    style="?android:attr/progressBarStyleLarge"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp" />
+                <ImageView
+                    android:layout_width="240dp"
+                    android:layout_height="140dp"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@string/no_content"
+                    android:src="@drawable/img_receipts_empty" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="@string/exporting_receipts"
-                    android:textColor="@color/text_primary"
-                    android:textSize="14sp" />
+                    android:layout_marginTop="10dp"
+                    android:text="@string/no_content"
+                    android:textSize="@dimen/text_size_secondary"
+                    android:textColor="@color/text_muted_dark" />
             </LinearLayout>
-        </FrameLayout>
 
-    </FrameLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/receipt_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingStart="@dimen/page_start_margin"
+                android:paddingEnd="@dimen/page_end_margin"
+                android:paddingTop="8dp"
+                android:paddingBottom="36dp"
+                android:clipToPadding="false"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+            <ProgressBar
+                android:id="@+id/load_more_indicator"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/no_more_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="12dp"
+                android:text="@string/no_more_records"
+                android:textColor="@color/text_muted"
+                android:textSize="13sp"
+                android:visibility="gone" />
+
+            <FrameLayout
+                android:id="@+id/export_loading_overlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#66000000"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_loading_card"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <ProgressBar
+                        style="?android:attr/progressBarStyleLarge"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/exporting_receipts"
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </FrameLayout>
+
+        </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <!-- 选择模式底部操作栏：白色悬浮效果，与图片一致 -->
     <LinearLayout

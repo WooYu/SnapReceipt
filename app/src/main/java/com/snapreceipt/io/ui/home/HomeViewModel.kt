@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.lifecycle.viewModelScope
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ReceiptEntity
+import com.snapreceipt.io.domain.model.query.ReceiptListQueryEntity
 import com.snapreceipt.io.domain.usecase.receipt.DeleteReceiptRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.FetchReceiptsUseCase
 import com.snapreceipt.io.domain.usecase.receipt.UpdateReceiptRemoteUseCase
@@ -33,31 +34,64 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     private var receiptsJob: Job? = null
+    private var nextPage = 1
+    private val pageSize = 20
+    private var hasMore = true
 
     init {
         loadReceipts()
     }
 
     fun loadReceipts() {
+        fetchPage(page = 1, reset = true, showLoading = true)
+    }
+
+    fun refresh() {
+        fetchPage(page = 1, reset = true, refreshing = true)
+    }
+
+    fun loadMore() {
+        if (!hasMore || _uiState.value.loadingMore || _uiState.value.loading || _uiState.value.refreshing) return
+        fetchPage(page = nextPage, reset = false, loadingMore = true)
+    }
+
+    private fun fetchPage(
+        page: Int,
+        reset: Boolean,
+        showLoading: Boolean = false,
+        refreshing: Boolean = false,
+        loadingMore: Boolean = false
+    ) {
         receiptsJob?.cancel()
-        receiptsJob = launchWithLoading(
-            updateLoading = { loading ->
-                _uiState.update { it.copy(loading = loading, error = if (loading) null else it.error) }
-            },
-            block = { fetchReceiptsUseCase() },
-            onSuccess = { receipts ->
-                _uiState.update { current ->
-                    current.copy(
-                        receipts = receipts,
-                        loading = false,
-                        error = null,
-                        empty = receipts.isEmpty(),
-                        hasLoaded = true
-                    )
+        _uiState.update {
+            it.copy(
+                loading = if (showLoading) true else it.loading,
+                refreshing = if (refreshing) true else it.refreshing,
+                loadingMore = if (loadingMore) true else it.loadingMore,
+                error = null
+            )
+        }
+        receiptsJob = viewModelScope.launch(dispatchers.io) {
+            fetchReceiptsUseCase(ReceiptListQueryEntity(pageNum = page, pageSize = pageSize))
+                .onSuccess { receipts ->
+                    val merged = if (reset) receipts else _uiState.value.receipts + receipts
+                    hasMore = receipts.size >= pageSize
+                    nextPage = if (hasMore) page + 1 else page
+                    _uiState.update { current ->
+                        current.copy(
+                            receipts = merged,
+                            loading = false,
+                            refreshing = false,
+                            loadingMore = false,
+                            error = null,
+                            empty = merged.isEmpty(),
+                            hasLoaded = true,
+                            hasMore = hasMore
+                        )
+                    }
                 }
-            },
-            onFailure = { updateError(it) }
-        )
+                .onFailure { updateError(it) }
+        }
     }
 
     fun deleteReceipt(receipt: ReceiptEntity) {
@@ -132,7 +166,16 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun updateError(throwable: Throwable) {
-        _uiState.update { it.copy(loading = false, error = throwable.message) }
+        _uiState.update {
+            it.copy(
+                loading = false,
+                refreshing = false,
+                loadingMore = false,
+                error = throwable.message,
+                hasLoaded = true,
+                hasMore = hasMore
+            )
+        }
         handleError(throwable)
     }
 

@@ -34,26 +34,41 @@ class ReceiptsViewModel @Inject constructor(
     val uiState: StateFlow<ReceiptsUiState> = _uiState.asStateFlow()
     private var titleTypeFilter: String? = null
     private var lastFetchedReceipts: List<ReceiptEntity> = emptyList()
+    private var nextPage = 1
+    private val pageSize = 20
+    private var hasMore = true
+    private var currentQuery = ReceiptListQueryEntity()
 
     init {
         loadReceipts()
     }
 
     fun loadReceipts() {
-        fetchReceipts()
+        currentQuery = ReceiptListQueryEntity()
+        fetchPage(page = 1, reset = true, showLoading = true)
+    }
+
+    fun refresh() {
+        fetchPage(page = 1, reset = true, refreshing = true)
+    }
+
+    fun loadMore() {
+        if (!hasMore || _uiState.value.loadingMore || _uiState.value.loading || _uiState.value.refreshing) return
+        fetchPage(page = nextPage, reset = false, loadingMore = true)
     }
 
     fun filterByDateRange(startDate: Long, endDate: Long) {
-        val query = ReceiptListQueryEntity(
+        currentQuery = ReceiptListQueryEntity(
             receiptDateStart = DateFormatUtil.formatApiDate(startDate),
             receiptDateEnd = DateFormatUtil.formatApiDate(endDate)
         )
-        fetchReceipts(query)
+        fetchPage(page = 1, reset = true, showLoading = true)
     }
 
     fun filterByType(type: String) {
         val categoryId = ReceiptCategory.idForLabel(type).takeIf { it > 0L }
-        fetchReceipts(ReceiptListQueryEntity(categoryId = categoryId))
+        currentQuery = ReceiptListQueryEntity(categoryId = categoryId)
+        fetchPage(page = 1, reset = true, showLoading = true)
     }
 
     fun filterByTitleType(type: String?) {
@@ -136,7 +151,7 @@ class ReceiptsViewModel @Inject constructor(
             }
             if (allSucceeded) {
                 _uiState.update { it.copy(selectedIds = emptySet()) }
-                fetchReceipts()
+                fetchPage(page = 1, reset = true, showLoading = true)
             }
         }
     }
@@ -145,7 +160,7 @@ class ReceiptsViewModel @Inject constructor(
         viewModelScope.launch(dispatchers.io) {
             val id = receipt.receiptId ?: return@launch
             deleteReceiptRemoteUseCase(id)
-                .onSuccess { fetchReceipts() }
+                .onSuccess { fetchPage(page = 1, reset = true, showLoading = true) }
                 .onFailure { updateError(it) }
         }
     }
@@ -154,18 +169,35 @@ class ReceiptsViewModel @Inject constructor(
         viewModelScope.launch(dispatchers.io) {
             if (receipt.receiptId == null) return@launch
             updateReceiptRemoteUseCase(receipt)
-                .onSuccess { fetchReceipts() }
+                .onSuccess { fetchPage(page = 1, reset = true, showLoading = true) }
                 .onFailure { updateError(it) }
         }
     }
 
-    private fun fetchReceipts(query: ReceiptListQueryEntity = ReceiptListQueryEntity()) {
-        _uiState.update { it.copy(loading = true, error = null) }
+    private fun fetchPage(
+        page: Int,
+        reset: Boolean,
+        showLoading: Boolean = false,
+        refreshing: Boolean = false,
+        loadingMore: Boolean = false
+    ) {
+        _uiState.update {
+            it.copy(
+                loading = if (showLoading) true else it.loading,
+                refreshing = if (refreshing) true else it.refreshing,
+                loadingMore = if (loadingMore) true else it.loadingMore,
+                error = null
+            )
+        }
+        val query = applyDefaultDateFilter(currentQuery.copy(pageNum = page, pageSize = pageSize))
         viewModelScope.launch(dispatchers.io) {
-            fetchReceiptsUseCase(applyDefaultDateFilter(query))
+            fetchReceiptsUseCase(query)
                 .onSuccess { receipts ->
-                    lastFetchedReceipts = receipts
-                    val filtered = applyTitleFilter(lastFetchedReceipts)
+                    val rawMerged = if (reset) receipts else lastFetchedReceipts + receipts
+                    lastFetchedReceipts = rawMerged
+                    hasMore = receipts.size >= pageSize
+                    nextPage = if (hasMore) page + 1 else page
+                    val filtered = applyTitleFilter(rawMerged)
                     _uiState.update { current ->
                         val validIds = filtered.mapNotNull { it.receiptId }.toSet()
                         val nextSelected = current.selectedIds.intersect(validIds)
@@ -173,9 +205,12 @@ class ReceiptsViewModel @Inject constructor(
                             receipts = filtered,
                             selectedIds = nextSelected,
                             loading = false,
+                            refreshing = false,
+                            loadingMore = false,
                             error = null,
                             empty = filtered.isEmpty(),
-                            hasLoaded = true
+                            hasLoaded = true,
+                            hasMore = hasMore
                         )
                     }
                 }
@@ -191,7 +226,16 @@ class ReceiptsViewModel @Inject constructor(
     }
 
     private fun updateError(throwable: Throwable) {
-        _uiState.update { it.copy(loading = false, error = throwable.message) }
+        _uiState.update {
+            it.copy(
+                loading = false,
+                refreshing = false,
+                loadingMore = false,
+                error = throwable.message,
+                hasLoaded = true,
+                hasMore = hasMore
+            )
+        }
         handleError(throwable)
     }
 

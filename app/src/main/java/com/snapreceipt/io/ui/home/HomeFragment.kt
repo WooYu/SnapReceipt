@@ -11,10 +11,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.fragment.app.viewModels
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentHomeBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.common.shouldShowEmpty
+import com.snapreceipt.io.ui.common.shouldShowNoMore
 import com.snapreceipt.io.ui.home.dialogs.ScanFailedDialog
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
 import com.snapreceipt.io.ui.widget.CurvedGradientDrawable
@@ -110,6 +113,12 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         binding.emptyState.visibility = if (showEmpty) View.VISIBLE else View.GONE
         binding.receiptList.visibility = if (showEmpty) View.GONE else View.VISIBLE
 
+        binding.swipeRefresh.isRefreshing = state.refreshing
+        binding.loadMoreIndicator.visibility = if (state.loadingMore) View.VISIBLE else View.GONE
+        binding.noMoreHint.visibility = if (
+            shouldShowNoMore(state.hasLoaded, state.hasMore, state.receipts.size, state.loadingMore)
+        ) View.VISIBLE else View.GONE
+
         val showRecognitionOverlay = state.recognitionStatusResId != null
         binding.recognitionOverlay.visibility = if (showRecognitionOverlay) View.VISIBLE else View.GONE
         state.recognitionStatusResId?.let { binding.recognitionStatusText.setText(it) }
@@ -123,12 +132,24 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         adapter = HomeReceiptAdapter { receipt ->
             openReceiptForEdit(receipt)
         }
+        val layoutManager = binding.receiptList.layoutManager as LinearLayoutManager
         binding.receiptList.adapter = adapter
+        binding.receiptList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (dy <= 0) return
+                val total = layoutManager.itemCount
+                val lastVisible = layoutManager.findLastVisibleItemPosition()
+                if (total > 0 && lastVisible >= total - 3) {
+                    viewModel.loadMore()
+                }
+            }
+        })
     }
 
     private fun setupListeners() {
         binding.cardScan.setOnClickListener { openCameraWithPermission() }
         binding.cardUpload.setOnClickListener { pickImageFromGallery() }
+        binding.swipeRefresh.setOnRefreshListener { viewModel.refresh() }
     }
 
     private fun openReceiptForEdit(receipt: ReceiptEntity) {

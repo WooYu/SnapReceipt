@@ -176,58 +176,82 @@
         app:layout_constraintTop_toBottomOf="@id/action_cards" />
 
     <!--列表-->
-    <FrameLayout
-        android:id="@+id/list_container"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="6dp"
-        android:clipChildren="false"
-        android:clipToPadding="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/bound_right"
         app:layout_constraintStart_toStartOf="@id/bound_left"
         app:layout_constraintTop_toBottomOf="@id/recent_title">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/receipt_list"
+        <FrameLayout
+            android:id="@+id/list_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:itemCount="5"
-            tools:listitem="@layout/item_receipt"
-            tools:orientation="vertical"
-            tools:showLayoutMargins="true" />
+            android:layout_height="match_parent">
 
-        <!--没有数据-->
-        <LinearLayout
-            android:id="@+id/empty_state"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:visibility="gone"
-            tools:visibility="visible">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/receipt_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="36dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="5"
+                tools:listitem="@layout/item_receipt"
+                tools:orientation="vertical"
+                tools:showLayoutMargins="true" />
 
-            <ImageView
-                android:layout_width="240dp"
-                android:layout_height="140dp"
-                android:adjustViewBounds="true"
-                android:contentDescription="@string/no_content"
-                android:src="@drawable/img_receipts_empty" />
+            <!--没有数据-->
+            <LinearLayout
+                android:id="@+id/empty_state"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <ImageView
+                    android:layout_width="240dp"
+                    android:layout_height="140dp"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@string/no_content"
+                    android:src="@drawable/img_receipts_empty" />
+
+                <TextView
+                    android:id="@+id/empty_state_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/no_content"
+                    android:textColor="@color/text_muted_dark"
+                    android:textSize="@dimen/text_size_secondary" />
+
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/load_more_indicator"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone" />
 
             <TextView
-                android:id="@+id/empty_state_title"
+                android:id="@+id/no_more_hint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@string/no_content"
-                android:textColor="@color/text_muted_dark"
-                android:textSize="@dimen/text_size_secondary" />
-
-        </LinearLayout>
-    </FrameLayout>
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="12dp"
+                android:text="@string/no_more_records"
+                android:textColor="@color/text_muted"
+                android:textSize="13sp"
+                android:visibility="gone" />
+        </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <!-- OCR recognition progress overlay (uploading / scanning) -->
     <FrameLayout
