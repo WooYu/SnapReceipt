@@ -18,6 +18,7 @@ fun ReceiptItemDto.toEntity(): ReceiptEntity = ReceiptEntity(
     remark = remark,
     receiptUrl = receiptUrl,
     categoryId = categoryId,
+    categoryName = categoryName,
     receiptType = receiptType
 )
 

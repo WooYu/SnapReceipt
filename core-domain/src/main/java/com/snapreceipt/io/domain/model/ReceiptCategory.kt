@@ -34,10 +34,6 @@ object ReceiptCategory {
         lastUpdatedAt = System.currentTimeMillis()
     }
 
-    fun labelForId(id: Long): String {
-        return categories.firstOrNull { it.id == id }?.label.orEmpty()
-    }
-
     fun idForLabel(label: String): Long {
         val fromList = categories.firstOrNull { it.label.equals(label, ignoreCase = true) }?.id
         if (fromList != null) return fromList

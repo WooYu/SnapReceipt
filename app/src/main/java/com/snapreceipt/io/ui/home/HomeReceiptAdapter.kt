@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ItemReceiptBinding
-import com.snapreceipt.io.domain.model.ReceiptCategory
 import com.snapreceipt.io.domain.model.ReceiptEntity
 
 class HomeReceiptAdapter(
@@ -51,7 +50,7 @@ class HomeReceiptAdapter(
                 )
 
                 val dateText = receipt.receiptDate?.replace('-', '/').orEmpty()
-                val categoryLabel = receipt.categoryId?.let { ReceiptCategory.labelForId(it) }.orEmpty()
+                val categoryLabel = receipt.categoryName.orEmpty()
                 val titleType = receipt.receiptType.orEmpty()
                 val metaText = context.getString(
                     R.string.home_receipt_meta_format,

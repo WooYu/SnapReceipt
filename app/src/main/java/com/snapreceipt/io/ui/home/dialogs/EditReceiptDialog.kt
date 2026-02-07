@@ -22,8 +22,7 @@ class EditReceiptDialog(
 
             binding.merchantNameInput.setText(receipt.merchant.orEmpty())
             binding.amountInput.setText(receipt.totalAmount?.toString().orEmpty())
-            val categoryLabel = receipt.categoryId?.let { ReceiptCategory.labelForId(it) }.orEmpty()
-            binding.categoryInput.setText(categoryLabel)
+            binding.categoryInput.setText(receipt.categoryName.orEmpty())
             binding.descriptionInput.setText(receipt.remark.orEmpty())
 
             binding.cancelBtn.setOnClickListener { dismiss() }
@@ -46,10 +45,12 @@ class EditReceiptDialog(
         val category = binding.categoryInput.text.toString().trim()
         val description = binding.descriptionInput.text.toString().trim()
 
+        val newCategoryId = ReceiptCategory.idForLabel(category).takeIf { it > 0L } ?: receipt.categoryId
         val updated = receipt.copy(
             merchant = merchantName.ifEmpty { receipt.merchant.orEmpty() },
             totalAmount = amount,
-            categoryId = ReceiptCategory.idForLabel(category).takeIf { it > 0L } ?: receipt.categoryId,
+            categoryId = newCategoryId,
+            categoryName = category.ifEmpty { receipt.categoryName },
             remark = description
         )
 

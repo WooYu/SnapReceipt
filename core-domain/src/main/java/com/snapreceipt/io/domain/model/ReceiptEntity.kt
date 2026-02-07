@@ -16,6 +16,7 @@ import kotlinx.parcelize.Parcelize
  * @property remark 备注
  * @property receiptUrl 发票图片地址
  * @property categoryId 分类ID
+ * @property categoryName 分类名称（接口直接返回，无需通过 categoryId 转换）
  * @property receiptType 发票类型（Business/Individual）
  */
 @Parcelize
@@ -32,5 +33,6 @@ data class ReceiptEntity(
     val remark: String? = null,
     val receiptUrl: String? = null,
     val categoryId: Long? = null,
+    val categoryName: String? = null,
     val receiptType: String? = null
 ) : Parcelable

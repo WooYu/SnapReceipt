@@ -93,7 +93,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         binding.inputCard.setText(receipt.paymentCardNo.orEmpty())
         scanConsumer = receipt.consumer.orEmpty()
         scanTipAmount = receipt.tipAmount
-        val categoryLabel = receipt.categoryId?.let { ReceiptCategory.labelForId(it) }.orEmpty()
+        val categoryLabel = receipt.categoryName.orEmpty()
         binding.inputInvoiceCategory.setText(categoryLabel)
         binding.inputTitleType.setText(receipt.receiptType.orEmpty())
         binding.inputNote.setText(receipt.remark.orEmpty())
@@ -182,6 +182,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             remark = noteValue,
             receiptUrl = receiptUrl,
             categoryId = categoryId,
+            categoryName = invoiceCategoryInput,
             receiptType = titleTypeValue,
             address = binding.inputAddress.text.toString().trim()
         )
