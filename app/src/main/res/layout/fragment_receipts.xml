@@ -4,7 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/colorBackground">
+    android:background="@color/colorBackground"
+    android:clipChildren="false"
+    android:clipToPadding="false">
 
     <!-- 顶部蓝色渐变 Header，与首页一致 -->
     <FrameLayout
@@ -75,7 +77,9 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:clipChildren="false"
+        android:clipToPadding="false">
 
         <!-- 空状态：与首页一致 -->
         <LinearLayout
@@ -111,6 +115,7 @@
             android:paddingEnd="@dimen/page_end_margin"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
+            android:clipChildren="false"
             android:clipToPadding="false"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 

@@ -28,7 +28,7 @@
     </style>
 
     <style name="Widget.SnapReceipt.MaterialCardView" parent="Widget.MaterialComponents.CardView">
-        <item name="cardUseCompatPadding">true</item>
+        <item name="cardUseCompatPadding">false</item>
         <item name="cardElevation">@dimen/card_elevation_default</item>
     </style>
 
