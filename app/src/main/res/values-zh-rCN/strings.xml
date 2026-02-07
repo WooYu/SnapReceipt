@@ -63,7 +63,6 @@
     <string name="cancel">取消</string>
     <string name="delete">删除</string>
     <string name="crop_image">裁剪图片</string>
-    <string name="image_crop_success">裁剪成功</string>
     <string name="image_crop_failed">裁剪失败</string>
     <string name="camera_permission_denied">相机权限被拒绝</string>
     <string name="preview">预览</string>

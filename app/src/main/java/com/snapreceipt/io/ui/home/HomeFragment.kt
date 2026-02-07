@@ -67,7 +67,6 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         if (result.resultCode == Activity.RESULT_OK) {
             val output = UCrop.getOutput(result.data ?: return@registerForActivityResult)
             if (output != null) {
-                Toast.makeText(requireContext(), getString(R.string.image_crop_success), Toast.LENGTH_SHORT).show()
                 handleCroppedImage(output)
             }
         } else if (result.resultCode == UCrop.RESULT_ERROR) {

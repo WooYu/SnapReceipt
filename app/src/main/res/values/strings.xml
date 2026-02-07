@@ -63,7 +63,6 @@
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
     <string name="crop_image">Crop image</string>
-    <string name="image_crop_success">Image cropped</string>
     <string name="image_crop_failed">Crop failed</string>
     <string name="camera_permission_denied">Camera permission denied</string>
     <string name="preview">Preview</string>
