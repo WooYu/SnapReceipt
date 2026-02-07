@@ -14,8 +14,7 @@
         android:layout_height="24dp"
         android:layout_marginEnd="12dp"
         android:contentDescription="@string/select_all"
-        android:src="@drawable/ic_select_toggle"
-        app:tint="@color/select_icon_selector" />
+        android:src="@drawable/ic_select_toggle" />
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/receipt_card"
