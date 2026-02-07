@@ -7,52 +7,54 @@
     android:clipChildren="false"
     android:clipToPadding="false">
 
-    <View
-        android:id="@+id/feedback_header"
-        android:layout_width="0dp"
-        android:layout_height="140dp"
-        android:background="@drawable/bg_header_gradient"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <ImageView
-        android:id="@+id/btn_back"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:contentDescription="@string/back"
-        android:src="@drawable/ic_back_white"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/title"
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/bound_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/feedback"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/btn_back"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="@dimen/page_start_margin" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/bound_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="@dimen/page_end_margin" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/bound_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="@dimen/status_bar_height" />
+
+    <include
+        android:id="@+id/page_header"
+        layout="@layout/view_page_top_header"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/feedback_header"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/page_header">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp"
+            android:paddingStart="16dp"
+            android:paddingTop="20dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="24dp"
             android:clipChildren="false"
             android:clipToPadding="false">
 
@@ -66,16 +68,20 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="16dp"
+                    android:lineSpacingExtra="6dp"
+                    android:paddingStart="18dp"
+                    android:paddingTop="20dp"
+                    android:paddingEnd="18dp"
+                    android:paddingBottom="20dp"
                     android:text="@string/feedback_message"
                     android:textColor="@color/text_secondary"
-                    android:textSize="14sp" />
+                    android:textSize="16sp" />
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="14dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="@dimen/card_elevation_default"
                 app:cardUseCompatPadding="false">
@@ -84,8 +90,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
+                    android:minHeight="72dp"
+                    android:paddingStart="18dp"
+                    android:paddingTop="14dp"
+                    android:paddingEnd="18dp"
+                    android:paddingBottom="14dp">
 
                     <TextView
                         android:layout_width="0dp"
@@ -93,7 +102,7 @@
                         android:layout_weight="1"
                         android:text="@string/email_label"
                         android:textColor="@color/text_secondary"
-                        android:textSize="15sp" />
+                        android:textSize="16sp" />
 
                     <TextView
                         android:id="@+id/feedback_email"
@@ -101,11 +110,11 @@
                         android:layout_height="wrap_content"
                         android:text="@string/feedback_email"
                         android:textColor="@color/text_primary"
-                        android:textSize="15sp" />
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

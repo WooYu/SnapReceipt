@@ -30,13 +30,16 @@ class AboutUsActivity : EdgeToEdgeActivity() {
         _binding = ActivityAboutUsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.pageHeader.title.setText(R.string.about_us)
         binding.appVersion.text = "V${BuildConfig.VERSION_NAME}"
+        binding.menuUserAgreement.menuTitle.setText(R.string.user_agreement)
+        binding.menuPrivacyPolicy.menuTitle.setText(R.string.privacy_policy_label)
         prefetchPolicy()
-        binding.btnBack.setOnClickListener { finish() }
-        binding.menuUserAgreement.setOnClickListener {
+        binding.pageHeader.btnBack.setOnClickListener { finish() }
+        binding.menuUserAgreement.root.setOnClickListener {
             openPolicyUrl(isUserAgreement = true)
         }
-        binding.menuPrivacyPolicy.setOnClickListener {
+        binding.menuPrivacyPolicy.root.setOnClickListener {
             openPolicyUrl(isUserAgreement = false)
         }
     }

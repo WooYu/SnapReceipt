@@ -1,6 +1,7 @@
 package com.snapreceipt.io.ui.me.feedback
 
 import android.os.Bundle
+import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityFeedbackBinding
 import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
 
@@ -14,7 +15,8 @@ class FeedbackActivity : EdgeToEdgeActivity() {
         _binding = ActivityFeedbackBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.btnBack.setOnClickListener { finish() }
+        binding.pageHeader.title.setText(R.string.feedback)
+        binding.pageHeader.btnBack.setOnClickListener { finish() }
     }
 
     override fun onDestroy() {

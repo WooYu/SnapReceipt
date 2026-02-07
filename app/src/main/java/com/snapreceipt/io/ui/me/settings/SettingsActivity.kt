@@ -2,6 +2,7 @@ package com.snapreceipt.io.ui.me.settings
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.snapreceipt.io.R
@@ -30,11 +31,15 @@ class SettingsActivity : EdgeToEdgeActivity() {
         _binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.btnBack.setOnClickListener { finish() }
-        binding.menuSwitchAccount.setOnClickListener {
+        binding.pageHeader.title.setText(R.string.settings)
+        binding.menuSwitchAccount.menuTitle.setText(R.string.switch_account)
+        binding.menuClearCache.menuTitle.setText(R.string.clear_cache)
+        binding.menuClearCache.menuValue.visibility = View.VISIBLE
+        binding.pageHeader.btnBack.setOnClickListener { finish() }
+        binding.menuSwitchAccount.root.setOnClickListener {
             Toast.makeText(this, getString(R.string.switch_account), Toast.LENGTH_SHORT).show()
         }
-        binding.menuClearCache.setOnClickListener {
+        binding.menuClearCache.root.setOnClickListener {
             lifecycleScope.launch {
                 withContext(Dispatchers.IO) { clearAppCache() }
                 Toast.makeText(this@SettingsActivity, getString(R.string.clear_cache), Toast.LENGTH_SHORT).show()
@@ -60,7 +65,7 @@ class SettingsActivity : EdgeToEdgeActivity() {
             val sizeBytes = withContext(Dispatchers.IO) {
                 directorySize(cacheDir) + (externalCacheDir?.let { directorySize(it) } ?: 0L)
             }
-            binding.cacheSize.text = formatSize(sizeBytes)
+            binding.menuClearCache.menuValue.text = formatSize(sizeBytes)
         }
     }
 

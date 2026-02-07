@@ -34,6 +34,7 @@ class ExportRecordsActivity : EdgeToEdgeActivity() {
         _binding = ActivityExportRecordsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.pageHeader.title.setText(R.string.export_records)
         adapter = ExportRecordsAdapter { record -> openExportFile(record) }
         val layoutManager = LinearLayoutManager(this)
         binding.recordsList.layoutManager = layoutManager
@@ -49,7 +50,7 @@ class ExportRecordsActivity : EdgeToEdgeActivity() {
             }
         })
 
-        binding.btnBack.setOnClickListener { finish() }
+        binding.pageHeader.btnBack.setOnClickListener { finish() }
         binding.swipeRefresh.setOnRefreshListener { viewModel.refresh() }
 
         observeState(viewModel.uiState) { renderState(it) }
