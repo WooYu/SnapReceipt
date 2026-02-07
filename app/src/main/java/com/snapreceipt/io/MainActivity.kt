@@ -1,6 +1,7 @@
 package com.snapreceipt.io
 
 import android.os.Bundle
+import android.view.View
 import androidx.activity.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -49,6 +50,10 @@ class MainActivity : BaseActivity<MainViewModel>() {
                 )
             }
         }
+    }
+
+    fun setBottomNavVisible(visible: Boolean) {
+        binding.bottomNav.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     override fun onSessionExpired(event: SessionEvent) {

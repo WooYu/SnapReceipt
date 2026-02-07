@@ -122,6 +122,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         val showRecognitionOverlay = state.recognitionStatusResId != null
         binding.recognitionOverlay.visibility = if (showRecognitionOverlay) View.VISIBLE else View.GONE
         state.recognitionStatusResId?.let { binding.recognitionStatusText.setText(it) }
+        (activity as? com.snapreceipt.io.MainActivity)?.setBottomNavVisible(!showRecognitionOverlay)
         showLoading(state.loading && !showRecognitionOverlay)
 
         binding.cardScan.isEnabled = !state.loading
