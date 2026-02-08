@@ -16,91 +16,15 @@
         app:layout_constraintTop_toTopOf="parent"
         app:ptbTitleText="@string/export_records" />
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_refresh"
+    <com.snapreceipt.io.ui.widget.StatefulListLayout
+        android:id="@+id/stateful_list"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/page_header">
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <!--导出记录列表-->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/records_list"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:paddingHorizontal="@dimen/page_start_margin"
-                android:paddingBottom="36dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:itemCount="5"
-                tools:listitem="@layout/item_export_record"
-                tools:orientation="vertical"
-                tools:showLayoutMargins="true" />
-
-            <!--空数据-->
-            <LinearLayout
-                android:id="@+id/empty_state"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:visibility="gone"
-                tools:visibility="visible">
-
-                <ImageView
-                    android:layout_width="240dp"
-                    android:layout_height="140dp"
-                    android:adjustViewBounds="true"
-                    android:contentDescription="@string/no_content"
-                    android:src="@drawable/img_receipts_empty" />
-
-                <TextView
-                    android:id="@+id/empty_state_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/no_content"
-                    android:textColor="@color/text_muted_dark"
-                    android:textSize="@dimen/text_size_secondary" />
-            </LinearLayout>
-
-            <!--加载更多进度-->
-            <ProgressBar
-                android:id="@+id/load_more_indicator"
-                style="?android:attr/progressBarStyleSmall"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_gravity="bottom|center_horizontal"
-                android:layout_marginBottom="12dp"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/no_more_hint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|center_horizontal"
-                android:layout_marginBottom="12dp"
-                android:text="@string/no_more_records"
-                android:textColor="@color/text_muted"
-                android:textSize="13sp"
-                android:visibility="gone" />
-        </FrameLayout>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-    <ProgressBar
-        android:id="@+id/loading_indicator"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/page_header"
+        app:sllEmptyImage="@drawable/img_receipts_empty"
+        app:sllEmptyText="@string/no_content" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

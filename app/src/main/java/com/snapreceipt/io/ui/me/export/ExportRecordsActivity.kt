@@ -5,19 +5,14 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.content.FileProvider
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityExportRecordsBinding
 import com.snapreceipt.io.domain.model.ExportRecordEntity
 import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
 import com.skybound.space.base.presentation.observeState
-import com.snapreceipt.io.ui.common.shouldShowEmpty
-import com.snapreceipt.io.ui.common.shouldShowNoMore
 import com.skybound.space.core.config.AppConfig
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -35,22 +30,17 @@ class ExportRecordsActivity : EdgeToEdgeActivity() {
         setContentView(binding.root)
 
         adapter = ExportRecordsAdapter { record -> openExportFile(record) }
-        val layoutManager = LinearLayoutManager(this)
-        binding.recordsList.layoutManager = layoutManager
-        binding.recordsList.adapter = adapter
-        binding.recordsList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (dy <= 0) return
-                val total = layoutManager.itemCount
-                val lastVisible = layoutManager.findLastVisibleItemPosition()
-                if (total > 0 && lastVisible >= total - 3) {
-                    viewModel.loadMore()
-                }
-            }
-        })
+        binding.statefulList.setAdapter(adapter)
+        binding.statefulList.setOnLoadMoreListener { viewModel.loadMore() }
+        binding.statefulList.setOnRefreshListener { viewModel.refresh() }
+        // RecyclerView in this page needs horizontal padding
+        val horizontalPadding = resources.getDimensionPixelSize(R.dimen.page_start_margin)
+        binding.statefulList.recyclerView.setPadding(
+            horizontalPadding, 0, horizontalPadding,
+            binding.statefulList.recyclerView.paddingBottom
+        )
 
         binding.pageHeader.setOnLeftIconClickListener { finish() }
-        binding.swipeRefresh.setOnRefreshListener { viewModel.refresh() }
 
         observeState(viewModel.uiState) { renderState(it) }
     }
@@ -61,15 +51,15 @@ class ExportRecordsActivity : EdgeToEdgeActivity() {
     }
 
     private fun renderState(state: ExportRecordsUiState) {
-        binding.loadingIndicator.visibility = if (state.loading && !state.hasLoaded) View.VISIBLE else View.GONE
-        binding.swipeRefresh.isRefreshing = state.refreshing
-        binding.loadMoreIndicator.visibility = if (state.loadingMore) View.VISIBLE else View.GONE
-        binding.noMoreHint.visibility = if (
-            shouldShowNoMore(state.hasLoaded, state.hasMore, state.records.size, state.loadingMore)
-        ) View.VISIBLE else View.GONE
-        val showEmpty = shouldShowEmpty(state.hasLoaded, state.empty)
-        binding.emptyState.visibility = if (showEmpty) View.VISIBLE else View.GONE
-        binding.recordsList.visibility = if (showEmpty) View.GONE else View.VISIBLE
+        binding.statefulList.applyState(
+            hasLoaded = state.hasLoaded,
+            isEmpty = state.empty,
+            hasMore = state.hasMore,
+            itemCount = state.records.size,
+            refreshing = state.refreshing,
+            loadingMore = state.loadingMore,
+            centerLoading = state.loading && !state.hasLoaded
+        )
         adapter.submitList(state.records)
     }
 

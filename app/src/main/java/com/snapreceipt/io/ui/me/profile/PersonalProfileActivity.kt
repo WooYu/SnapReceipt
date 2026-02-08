@@ -38,9 +38,9 @@ class PersonalProfileActivity : EdgeToEdgeActivity() {
 
         observeState(getUserUseCase()) { result ->
             val user = result.getOrNull()
-            binding.profileName.text = user?.username?.ifBlank { placeholder() } ?: placeholder()
-            binding.profileEmail.text = user?.email?.ifBlank { placeholder() } ?: placeholder()
-            binding.profilePhone.text = user?.phone?.ifBlank { placeholder() } ?: placeholder()
+            binding.profileName.setValueText(user?.username?.ifBlank { placeholder() } ?: placeholder())
+            binding.profileEmail.setValueText(user?.email?.ifBlank { placeholder() } ?: placeholder())
+            binding.profilePhone.setValueText(user?.phone?.ifBlank { placeholder() } ?: placeholder())
         }
         refreshUserProfile()
     }

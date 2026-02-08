@@ -7,13 +7,9 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentReceiptsBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
-import com.snapreceipt.io.ui.common.shouldShowEmpty
-import com.snapreceipt.io.ui.common.shouldShowNoMore
 import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceCategoryBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
 import com.snapreceipt.io.ui.receipts.bottomsheet.DateRangeBottomSheet
@@ -58,21 +54,21 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
 
     private fun renderState(state: ReceiptsUiState) {
         currentState = state
-        val showEmpty = shouldShowEmpty(state.hasLoaded, state.empty)
+        val showEmpty = state.hasLoaded && state.empty
         if (showEmpty) {
-            binding.emptyState.visibility = View.VISIBLE
-            binding.receiptList.visibility = View.GONE
             adapter.setReceipts(emptyList())
         } else {
-            binding.emptyState.visibility = View.GONE
-            binding.receiptList.visibility = View.VISIBLE
             adapter.setReceipts(state.receipts)
         }
-        binding.swipeRefresh.isRefreshing = state.refreshing
-        binding.loadMoreIndicator.visibility = if (state.loadingMore) View.VISIBLE else View.GONE
-        binding.noMoreHint.visibility = if (
-            shouldShowNoMore(state.hasLoaded, state.hasMore, state.receipts.size, state.loadingMore)
-        ) View.VISIBLE else View.GONE
+        binding.statefulList.applyState(
+            hasLoaded = state.hasLoaded,
+            isEmpty = state.empty,
+            hasMore = state.hasMore,
+            itemCount = state.receipts.size,
+            refreshing = state.refreshing,
+            loadingMore = state.loadingMore
+        )
+
         val selectedCount = state.selectedIds.size
         binding.toolbarTitle.text = if (selectedCount > 0) {
             getString(R.string.selected_count, selectedCount)
@@ -93,7 +89,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         val allSelected = state.receipts.isNotEmpty() && state.selectedIds.size == state.receipts.size
         binding.selectAllIcon.isSelected = allSelected
 
-        binding.exportLoadingOverlay.visibility = if (state.exporting) View.VISIBLE else View.GONE
+        if (state.exporting) binding.exportLoadingOverlay.show() else binding.exportLoadingOverlay.hide()
         binding.exportActionBtn.isEnabled = !state.exporting
         binding.exportActionBtn.alpha = if (state.exporting) 0.6f else 1f
         binding.selectAllBtn.isEnabled = !state.exporting
@@ -109,22 +105,12 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                 openReceiptDetails(receipt)
             }
         )
-        val layoutManager = binding.receiptList.layoutManager as LinearLayoutManager
-        binding.receiptList.adapter = adapter
-        binding.receiptList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (dy <= 0) return
-                val total = layoutManager.itemCount
-                val lastVisible = layoutManager.findLastVisibleItemPosition()
-                if (total > 0 && lastVisible >= total - 3) {
-                    viewModel.loadMore()
-                }
-            }
-        })
+        binding.statefulList.setAdapter(adapter)
+        binding.statefulList.setOnLoadMoreListener { viewModel.loadMore() }
     }
 
     private fun setupListeners() {
-        binding.swipeRefresh.setOnRefreshListener { viewModel.refresh() }
+        binding.statefulList.setOnRefreshListener { viewModel.refresh() }
         binding.filterDateBtn.setOnClickListener {
             DateRangeBottomSheet(filterStartMillis, filterEndMillis) { start, end ->
                 filterStartMillis = start

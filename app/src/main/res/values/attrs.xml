@@ -25,6 +25,17 @@
         <attr name="mmivSwapTitleValueStyle" format="boolean" />
     </declare-styleable>
 
+    <declare-styleable name="StatefulListLayout">
+        <attr name="sllEmptyImage" format="reference" />
+        <attr name="sllEmptyText" format="reference|string" />
+        <attr name="sllNoMoreText" format="reference|string" />
+    </declare-styleable>
+
+    <declare-styleable name="LoadingOverlayView">
+        <attr name="lovText" format="reference|string" />
+        <attr name="lovOverlayColor" format="color" />
+    </declare-styleable>
+
     <declare-styleable name="PageTitleBar">
         <attr name="ptbTitleText" format="reference|string" />
         <attr name="ptbTitleTextColor" format="color" />
