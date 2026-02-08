@@ -52,27 +52,24 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:orientation="horizontal">
-
-        <Button
+        <!--取消-->
+        <com.snapreceipt.io.ui.widget.PrimaryActionButton
             android:id="@+id/cancel_btn"
             android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="12dp"
+            android:layout_height="@dimen/button_height_small"
+            android:layout_marginEnd="27dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_chip_default"
             android:text="@string/cancel"
-            android:textAllCaps="false"
-            android:textColor="@color/text_primary" />
+            app:pabEnableShadow="false" />
 
+        <!--确认-->
         <com.snapreceipt.io.ui.widget.PrimaryActionButton
             android:id="@+id/confirm_btn"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="@dimen/button_height_small"
             android:layout_weight="1"
-            app:pabEnableShadow="false"
             android:text="@string/confirm"
-            android:textAllCaps="false"
-            android:textColor="@android:color/white" />
+            app:pabEnableShadow="false" />
     </LinearLayout>
 
 </LinearLayout>

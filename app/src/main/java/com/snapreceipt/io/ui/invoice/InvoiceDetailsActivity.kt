@@ -115,7 +115,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         binding.valueNote.text = noteText
 
         binding.pageTitle.setOnLeftIconClickListener { finish() }
-        binding.btnDelete.setOnClickListener { onTopRightActionClick() }
+        binding.pageTitle.setOnRightIconClickListener { onTopRightActionClick() }
         binding.invoiceImage.setOnClickListener { openImagePreview() }
 
         renderModeUi()
@@ -154,17 +154,13 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         binding.valueNote.visibility = if (showEdit) View.GONE else View.VISIBLE
         binding.bottomActionContainer.visibility = if (showEdit) View.VISIBLE else View.GONE
 
+        binding.pageTitle.setRightIconVisible(hasSavedReceipt)
         if (hasSavedReceipt) {
-            binding.btnDelete.visibility = View.VISIBLE
             if (showEdit) {
-                binding.btnDelete.setImageResource(R.drawable.ic_delete_outline_white)
-                binding.btnDelete.contentDescription = getString(R.string.delete)
+                binding.pageTitle.setRightIcon(R.drawable.ic_trash_white)
             } else {
-                binding.btnDelete.setImageResource(R.drawable.ic_edit_white)
-                binding.btnDelete.contentDescription = getString(R.string.edit_receipt)
+                binding.pageTitle.setRightIcon(R.drawable.ic_edit_white)
             }
-        } else {
-            binding.btnDelete.visibility = View.GONE
         }
     }
 

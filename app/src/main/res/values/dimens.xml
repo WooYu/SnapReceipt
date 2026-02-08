@@ -16,6 +16,7 @@
     <dimen name="input_box_height">48dp</dimen>
     <!--按钮高度-->
     <dimen name="button_height">50dp</dimen>
+    <dimen name="button_height_small">48dp</dimen>
     <!--文字大小-->
     <dimen name="text_size_title">18sp</dimen>
     <dimen name="text_size_primary">16sp</dimen>

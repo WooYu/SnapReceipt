@@ -32,19 +32,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:ptbBackground="@android:color/transparent"
+        app:ptbRightIcon="@drawable/ic_edit_white"
         app:ptbTitleText="@string/invoice_details" />
-
-
-    <ImageView
-        android:id="@+id/btn_delete"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginEnd="@dimen/page_end_margin"
-        android:contentDescription="@string/delete"
-        android:src="@drawable/ic_edit_white"
-        app:layout_constraintBottom_toBottomOf="@id/btn_back"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/btn_back" />
 
     <ScrollView
         android:layout_width="0dp"

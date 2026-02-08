@@ -6,9 +6,9 @@ import android.view.LayoutInflater
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.skybound.space.core.util.DateFormatUtil
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.BottomSheetDateRangeBinding
-import com.skybound.space.core.util.DateFormatUtil
 import java.util.Calendar
 
 class DateRangeBottomSheet(
@@ -124,14 +124,14 @@ class DateRangeBottomSheet(
         val selectedColor = ContextCompat.getColor(requireContext(), R.color.colorSecondary)
         val defaultColor = ContextCompat.getColor(requireContext(), R.color.text_secondary)
         if (editingStart) {
-            binding.startDate.setBackgroundResource(R.drawable.bg_date_chip_selected)
+            binding.startDate.setBackgroundResource(R.drawable.bg_chip_selected)
             binding.startDate.setTextColor(selectedColor)
-            binding.endDate.setBackgroundResource(R.drawable.bg_date_chip_default)
+            binding.endDate.setBackgroundResource(R.drawable.bg_chip_default)
             binding.endDate.setTextColor(defaultColor)
         } else {
-            binding.endDate.setBackgroundResource(R.drawable.bg_date_chip_selected)
+            binding.endDate.setBackgroundResource(R.drawable.bg_chip_selected)
             binding.endDate.setTextColor(selectedColor)
-            binding.startDate.setBackgroundResource(R.drawable.bg_date_chip_default)
+            binding.startDate.setBackgroundResource(R.drawable.bg_chip_default)
             binding.startDate.setTextColor(defaultColor)
         }
     }
