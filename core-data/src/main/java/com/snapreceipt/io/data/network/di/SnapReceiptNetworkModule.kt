@@ -176,11 +176,4 @@ object SnapReceiptNetworkModule {
         @UploadClient okHttpClient: OkHttpClient,
         dispatchers: CoroutineDispatchersProvider
     ): UploadRemoteDataSource = UploadRemoteDataSource(okHttpClient, dispatchers)
-
-    @Provides
-    @Singleton
-    fun provideFeedbackRemoteDataSource(
-        api: FeedbackApi,
-        dispatchers: CoroutineDispatchersProvider
-    ): FeedbackRemoteDataSource = FeedbackRemoteDataSource(api, dispatchers)
 }
