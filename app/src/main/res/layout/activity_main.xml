@@ -29,11 +29,4 @@
             app:menu="@menu/bottom_nav_menu" />
     </LinearLayout>
 
-    <com.snapreceipt.io.ui.widget.LoadingOverlayView
-        android:id="@+id/global_loading_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:lovOverlayColor="#66000000"
-        app:lovText="@string/exporting_receipts" />
-
 </FrameLayout>

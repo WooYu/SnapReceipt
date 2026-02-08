@@ -44,7 +44,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     }
 
     override fun onDestroyView() {
-        setGlobalExportOverlay(false)
+        setGlobalLoadingOverlay(null)
         super.onDestroyView()
         _binding = null
     }
@@ -91,7 +91,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         val allSelected = state.receipts.isNotEmpty() && state.selectedIds.size == state.receipts.size
         binding.selectAllIcon.isSelected = allSelected
 
-        setGlobalExportOverlay(state.exporting)
+        setGlobalLoadingOverlay(state)
         binding.exportActionBtn.isEnabled = !state.exporting
         binding.exportActionBtn.alpha = if (state.exporting) 0.6f else 1f
         binding.selectAllBtn.isEnabled = !state.exporting
@@ -195,12 +195,16 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         }
     }
 
-    private fun setGlobalExportOverlay(show: Boolean) {
+    private fun setGlobalLoadingOverlay(state: ReceiptsUiState?) {
         val host = activity as? MainActivity ?: return
-        if (show) {
-            host.showGlobalLoadingOverlay(R.string.exporting_receipts)
-        } else {
+        if (state == null) {
             host.hideGlobalLoadingOverlay()
+            return
+        }
+        when {
+            state.exporting -> host.showGlobalLoadingOverlay(R.string.exporting_receipts)
+            state.loading || state.refreshing -> host.showGlobalLoadingOverlay(R.string.loading)
+            else -> host.hideGlobalLoadingOverlay()
         }
     }
 }
