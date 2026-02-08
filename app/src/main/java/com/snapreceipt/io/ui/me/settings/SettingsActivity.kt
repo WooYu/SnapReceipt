@@ -4,6 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import com.skybound.space.core.network.auth.SessionManager
 import com.snapreceipt.io.R
@@ -30,6 +33,7 @@ class SettingsActivity : EdgeToEdgeActivity() {
         super.onCreate(savedInstanceState)
         _binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applySystemBarInsets()
 
         binding.menuClearCacheValue.visibility = View.VISIBLE
         binding.pageHeader.setOnLeftIconClickListener { finish() }
@@ -110,5 +114,13 @@ class SettingsActivity : EdgeToEdgeActivity() {
             String.format(Locale.US, "%.1f", value)
         }
         return formatted + units[idx]
+    }
+
+    private fun applySystemBarInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.updatePadding(bottom = systemBars.bottom)
+            insets
+        }
     }
 }
