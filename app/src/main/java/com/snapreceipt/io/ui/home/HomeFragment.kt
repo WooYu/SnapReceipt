@@ -16,6 +16,7 @@ import com.snapreceipt.io.databinding.FragmentHomeBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.home.dialogs.ScanFailedDialog
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
+import com.snapreceipt.io.ui.receipts.ReceiptsRefreshSignal
 import com.snapreceipt.io.ui.widget.CurvedGradientDrawable
 import com.skybound.space.base.presentation.BaseFragment
 import com.skybound.space.base.presentation.UiEvent
@@ -223,6 +224,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
             HomeEventKeys.PREFILL_READY -> {
                 val receipt = event.payload?.getParcelable(HomeEventKeys.EXTRA_ARGS) as? ReceiptEntity
                 if (receipt != null) {
+                    ReceiptsRefreshSignal.requestRefresh()
                     openInvoiceDetails(receipt)
                 }
             }

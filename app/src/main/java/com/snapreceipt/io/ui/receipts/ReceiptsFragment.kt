@@ -51,7 +51,13 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
 
     override fun onResume() {
         super.onResume()
-        viewModel.loadReceipts()
+        if (!ReceiptsRefreshSignal.consumeRefresh()) return
+        if (currentState.loading || currentState.refreshing) return
+        if (currentState.hasLoaded) {
+            viewModel.refresh()
+        } else {
+            viewModel.loadReceipts()
+        }
     }
 
     private fun renderState(state: ReceiptsUiState) {

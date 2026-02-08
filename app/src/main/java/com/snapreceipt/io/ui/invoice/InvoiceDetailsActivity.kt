@@ -23,6 +23,7 @@ import com.snapreceipt.io.ui.invoice.bottomsheet.DateTimePickerBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceCategoryBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
 import com.snapreceipt.io.ui.login.LoginActivity
+import com.snapreceipt.io.ui.receipts.ReceiptsRefreshSignal
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
 import javax.inject.Inject
@@ -180,7 +181,10 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
                 Toast.makeText(this, getString(R.string.success), Toast.LENGTH_SHORT).show()
             }
 
-            InvoiceDetailsEventKeys.NAVIGATE_TO_MAIN -> navigateToMain()
+            InvoiceDetailsEventKeys.NAVIGATE_TO_MAIN -> {
+                ReceiptsRefreshSignal.requestRefresh()
+                navigateToMain()
+            }
         }
     }
 
