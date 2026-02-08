@@ -58,6 +58,7 @@
     <string name="category">Category</string>
     <string name="invoice_category">Invoice Category</string>
     <string name="invoice_type">Invoice Type</string>
+    <string name="title_type">Title Type</string>
     <string name="description">Note</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>

@@ -25,6 +25,7 @@ import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
 import com.snapreceipt.io.ui.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import java.util.Locale
 
 @AndroidEntryPoint
 class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
@@ -58,7 +59,8 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private var scanConsumer: String = ""
     private var scanTipAmount: Double? = null
     private var receiptId: Long? = null
-    private var isEditMode: Boolean = false
+    private var hasSavedReceipt: Boolean = false
+    private var isEditing: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,33 +77,48 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             receiptImageUrl = ""
         }
         receiptId = receipt.receiptId
-        isEditMode = (receiptId ?: 0L) > 0L
-        binding.btnDelete.visibility =
-            if (isEditMode) View.VISIBLE else View.GONE
+        hasSavedReceipt = (receiptId ?: 0L) > 0L
+        isEditing = !hasSavedReceipt
         if (receiptImagePath.isNotEmpty()) {
             binding.invoiceImage.setImageURI(Uri.fromFile(java.io.File(receiptImagePath)))
         } else if (receiptImageUrl.isNotEmpty()) {
             binding.invoiceImage.setImageURI(Uri.parse(receiptImageUrl))
         }
 
-        binding.inputAmount.setText(receipt.totalAmount?.toString().orEmpty())
-        binding.inputMerchant.setText(receipt.merchant.orEmpty())
-        binding.inputAddress.setText(receipt.address.orEmpty())
+        val amountText = receipt.totalAmount?.let { formatAmount(it) }.orEmpty()
+        binding.inputAmount.setText(amountText)
+        binding.amountReadonlyValue.text = amountText.ifBlank { "0.00" }
+        val merchantText = receipt.merchant.orEmpty()
+        val addressText = receipt.address.orEmpty()
+        binding.inputMerchant.setText(merchantText)
+        binding.inputAddress.setText(addressText)
+        binding.valueMerchant.text = merchantText
+        binding.valueAddress.text = addressText
         receiptDate = receipt.receiptDate.orEmpty()
         receiptTime = receipt.receiptTime.orEmpty()
-        binding.inputDate.setText(buildDisplayDate(receiptDate, receiptTime))
-        binding.inputCard.setText(receipt.paymentCardNo.orEmpty())
+        val displayDate = buildDisplayDate(receiptDate, receiptTime)
+        binding.inputDate.setText(displayDate)
+        binding.valueDate.text = displayDate
+        val cardText = receipt.paymentCardNo.orEmpty()
+        binding.inputCard.setText(cardText)
+        binding.valueCard.text = cardText
         scanConsumer = receipt.consumer.orEmpty()
         scanTipAmount = receipt.tipAmount
         val categoryLabel = receipt.categoryName.orEmpty()
         binding.inputInvoiceCategory.setText(categoryLabel)
-        binding.inputTitleType.setText(receipt.receiptType.orEmpty())
-        binding.inputNote.setText(receipt.remark.orEmpty())
+        binding.valueInvoiceType.text = categoryLabel
+        val titleType = receipt.receiptType.orEmpty()
+        binding.inputTitleType.setText(titleType)
+        binding.valueTitleType.text = titleType
+        val noteText = receipt.remark.orEmpty()
+        binding.inputNote.setText(noteText)
+        binding.valueNote.text = noteText
 
         binding.btnBack.setOnClickListener { finish() }
-        binding.btnDelete.setOnClickListener { deleteReceiptIfNeeded() }
+        binding.btnDelete.setOnClickListener { onTopRightActionClick() }
         binding.invoiceImage.setOnClickListener { openImagePreview() }
 
+        renderModeUi()
         setupPickers()
         setupCardValidation()
         binding.saveBtn.setOnClickListener { saveReceipt(receiptImagePath) }
@@ -125,6 +142,40 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
 
     private fun renderState(state: InvoiceDetailsUiState) {
         binding.saveBtn.isEnabled = !state.loading
+    }
+
+    private fun renderModeUi() {
+        val showEdit = isEditing
+        binding.amountEditContainer.visibility = if (showEdit) View.VISIBLE else View.GONE
+        binding.amountReadonlyContainer.visibility = if (showEdit) View.GONE else View.VISIBLE
+        binding.sectionEditMode.visibility = if (showEdit) View.VISIBLE else View.GONE
+        binding.sectionViewMode.visibility = if (showEdit) View.GONE else View.VISIBLE
+        binding.viewNoteLabel.visibility = if (showEdit) View.GONE else View.VISIBLE
+        binding.valueNote.visibility = if (showEdit) View.GONE else View.VISIBLE
+        binding.bottomActionContainer.visibility = if (showEdit) View.VISIBLE else View.GONE
+
+        if (hasSavedReceipt) {
+            binding.btnDelete.visibility = View.VISIBLE
+            if (showEdit) {
+                binding.btnDelete.setImageResource(R.drawable.ic_delete_outline_white)
+                binding.btnDelete.contentDescription = getString(R.string.delete)
+            } else {
+                binding.btnDelete.setImageResource(R.drawable.ic_edit_white)
+                binding.btnDelete.contentDescription = getString(R.string.edit_receipt)
+            }
+        } else {
+            binding.btnDelete.visibility = View.GONE
+        }
+    }
+
+    private fun onTopRightActionClick() {
+        if (!hasSavedReceipt) return
+        if (isEditing) {
+            deleteReceiptIfNeeded()
+            return
+        }
+        isEditing = true
+        renderModeUi()
     }
 
     override fun onCustomEvent(event: UiEvent.Custom) {
@@ -186,7 +237,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             receiptType = titleTypeValue,
             address = binding.inputAddress.text.toString().trim()
         )
-        if (isEditMode) {
+        if (hasSavedReceipt) {
             viewModel.updateReceipt(receipt)
         } else {
             viewModel.saveReceipt(receipt)
@@ -258,12 +309,14 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private fun openInvoiceTypePicker() {
         InvoiceCategoryBottomSheet.newInstance(binding.inputInvoiceCategory.text.toString()) { selected ->
             binding.inputInvoiceCategory.setText(selected)
+            binding.valueInvoiceType.text = selected
         }.show(supportFragmentManager, "invoice_type_picker")
     }
 
     private fun openTitleTypePicker() {
         TitleTypeBottomSheet(binding.inputTitleType.text.toString()) { selected ->
             binding.inputTitleType.setText(selected)
+            binding.valueTitleType.text = selected
         }.show(supportFragmentManager, "title_type_picker")
     }
 
@@ -273,11 +326,12 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             receiptDate = date
             receiptTime = time
             binding.inputDate.setText(display)
+            binding.valueDate.text = display
         }.show(supportFragmentManager, "date_time_picker")
     }
 
     private fun deleteReceiptIfNeeded() {
-        if (!isEditMode) return
+        if (!hasSavedReceipt) return
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setMessage(getString(R.string.delete_receipt_confirm))
             .setPositiveButton(R.string.confirm) { _, _ ->
@@ -294,6 +348,9 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         val displayTime = time.takeIf { it.isNotBlank() }?.substring(0, 5).orEmpty()
         return if (displayTime.isNotEmpty()) "$displayDate $displayTime" else displayDate
     }
+
+    private fun formatAmount(amount: Double): String =
+        String.format(Locale.US, "%.2f", amount)
 
     private fun currentDate(): String =
         DateFormatUtil.todayApiDate()
