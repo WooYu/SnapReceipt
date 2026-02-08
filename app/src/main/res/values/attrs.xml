@@ -19,7 +19,9 @@
     <declare-styleable name="MeMenuItemView">
         <attr name="mmivIcon" format="reference" />
         <attr name="mmivTitle" format="reference|string" />
+        <attr name="mmivValueText" format="reference|string" />
         <attr name="mmivShowArrow" format="boolean" />
+        <attr name="mmivShowBackground" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="PageTitleBar">
