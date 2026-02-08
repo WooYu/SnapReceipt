@@ -2,6 +2,7 @@ package com.snapreceipt.io
 
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.StringRes
 import androidx.activity.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -9,6 +10,7 @@ import com.snapreceipt.io.databinding.ActivityMainBinding
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
 import com.snapreceipt.io.ui.main.MainViewModel
 import com.snapreceipt.io.ui.login.LoginActivity
+import com.snapreceipt.io.ui.widget.GlobalLoadingDialog
 import com.skybound.space.base.presentation.BaseActivity
 import com.skybound.space.core.network.auth.SessionEvent
 import com.skybound.space.core.network.auth.SessionManager
@@ -24,11 +26,13 @@ class MainActivity : BaseActivity<MainViewModel>() {
         get() = injectedSessionManager
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var globalLoadingDialog: GlobalLoadingDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        globalLoadingDialog = GlobalLoadingDialog(this)
 
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.fragment_container) as NavHostFragment
@@ -54,6 +58,23 @@ class MainActivity : BaseActivity<MainViewModel>() {
 
     fun setBottomNavVisible(visible: Boolean) {
         binding.bottomNav.visibility = if (visible) View.VISIBLE else View.GONE
+    }
+
+    fun showGlobalLoadingOverlay(@StringRes messageRes: Int? = null) {
+        if (messageRes != null) {
+            globalLoadingDialog.show(messageRes)
+        } else {
+            globalLoadingDialog.show()
+        }
+    }
+
+    fun hideGlobalLoadingOverlay() {
+        globalLoadingDialog.hide()
+    }
+
+    override fun onDestroy() {
+        globalLoadingDialog.release()
+        super.onDestroy()
     }
 
     override fun onSessionExpired(event: SessionEvent) {

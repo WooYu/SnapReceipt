@@ -106,9 +106,7 @@
         android:id="@+id/stateful_list"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="@dimen/page_start_margin"
         android:layout_marginTop="4dp"
-        android:layout_marginEnd="@dimen/page_end_margin"
         app:layout_constraintBottom_toTopOf="@id/action_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -124,8 +122,6 @@
         android:background="@drawable/bg_export_bottom"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingStart="@dimen/page_start_margin"
-        android:paddingEnd="@dimen/page_end_margin"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -137,20 +133,32 @@
             android:id="@+id/select_all_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:gravity="center_vertical"
+            android:minHeight="40dp"
             android:orientation="horizontal">
 
-            <ImageView
-                android:id="@+id/select_all_icon"
-                android:layout_width="@dimen/check_box_size"
-                android:layout_height="@dimen/check_box_size"
-                android:contentDescription="@string/select_all"
-                android:src="@drawable/ic_select_toggle" />
+            <!--点击区域-->
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="40dp"
+                android:paddingStart="@dimen/page_start_margin"
+                android:paddingEnd="4dp">
+
+                <ImageView
+                    android:id="@+id/select_all_icon"
+                    android:layout_width="@dimen/check_box_size"
+                    android:layout_height="@dimen/check_box_size"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/select_all"
+                    android:src="@drawable/ic_select_toggle" />
+            </FrameLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="2dp"
                 android:text="@string/select_all"
                 android:textColor="@color/text_primary"
                 android:textSize="@dimen/text_size_small"
@@ -180,10 +188,10 @@
                 android:paddingVertical="12dp"
                 android:paddingStart="8dp"
                 android:paddingEnd="12dp"
-                android:text="$0.00"
                 android:textColor="@color/text_primary"
                 android:textSize="22sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:text="$0.00" />
         </LinearLayout>
 
         <!--导出-->
@@ -192,20 +200,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginVertical="12dp"
+            android:layout_marginEnd="@dimen/page_end_margin"
             android:minWidth="120dp"
             android:padding="12dp"
             android:text="@string/export"
             android:textColor="@android:color/white"
-            android:textSize="@dimen/text_size_primary" />
+            android:textSize="@dimen/text_size_primary"
+            app:pabEnableShadow="false" />
 
     </LinearLayout>
-
-    <!--导出加载框-->
-    <com.snapreceipt.io.ui.widget.LoadingOverlayView
-        android:id="@+id/export_loading_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:lovOverlayColor="#66000000"
-        app:lovText="@string/exporting_receipts" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

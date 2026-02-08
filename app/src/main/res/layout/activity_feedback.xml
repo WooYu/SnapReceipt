@@ -31,64 +31,79 @@
         app:layout_constraintTop_toTopOf="parent"
         app:ptbTitleText="@string/feedback" />
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/content_scroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="20dp"
-        android:orientation="vertical"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:overScrollMode="ifContentScrolls"
         app:layout_constraintBottom_toTopOf="@id/submit_btn"
         app:layout_constraintEnd_toEndOf="@id/bound_right"
         app:layout_constraintStart_toStartOf="@id/bound_left"
         app:layout_constraintTop_toBottomOf="@id/page_header">
 
-        <!--反馈内容-->
-        <FrameLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_surface_card_large">
+            android:orientation="vertical">
 
-            <EditText
-                android:id="@+id/feedback_input"
+            <!--反馈内容-->
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@null"
-                android:gravity="top"
-                android:hint="@string/feedback_message"
-                android:importantForAutofill="no"
-                android:inputType="textMultiLine"
-                android:lineSpacingExtra="6dp"
-                android:maxLength="1000"
-                android:minHeight="160dp"
-                android:padding="16dp"
-                android:paddingBottom="36dp"
-                android:textColor="@color/text_primary"
-                android:textColorHint="@color/text_secondary"
-                android:textSize="@dimen/text_size_primary" />
+                android:background="@drawable/bg_surface_card_large">
 
-            <TextView
-                android:id="@+id/feedback_char_count"
-                android:layout_width="wrap_content"
+                <EditText
+                    android:id="@+id/feedback_input"
+                    android:layout_width="0dp"
+                    android:layout_height="220dp"
+                    android:background="@null"
+                    android:gravity="top|start"
+                    android:hint="@string/feedback_message"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:lineSpacingExtra="6dp"
+                    android:maxLength="1000"
+                    android:maxLines="12"
+                    android:overScrollMode="ifContentScrolls"
+                    android:padding="16dp"
+                    android:scrollbars="vertical"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_secondary"
+                    android:textSize="@dimen/text_size_primary"
+                    app:layout_constraintBottom_toTopOf="@id/feedback_char_count"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/feedback_char_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|end"
+                    android:padding="12dp"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="@dimen/text_size_small"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    tools:text="0/1000" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!--官方邮箱-->
+            <com.snapreceipt.io.ui.widget.MeMenuItemView
+                android:id="@+id/feedback_email"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom|end"
-                android:padding="12dp"
-                tools:text="0/1000"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp" />
+                android:layout_marginTop="20dp"
+                app:mmivShowArrow="false"
+                app:mmivSwapTitleValueStyle="true"
+                app:mmivTitle="@string/email_label"
+                app:mmivValueText="@string/feedback_email" />
 
-        </FrameLayout>
-
-        <!--官方邮箱-->
-        <com.snapreceipt.io.ui.widget.MeMenuItemView
-            android:id="@+id/feedback_email"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            app:mmivShowArrow="false"
-            app:mmivSwapTitleValueStyle="true"
-            app:mmivTitle="@string/email_label"
-            app:mmivValueText="@string/feedback_email" />
-
-    </LinearLayout>
+        </LinearLayout>
 
     <com.snapreceipt.io.ui.widget.PrimaryActionButton
         android:id="@+id/submit_btn"
@@ -103,4 +118,5 @@
         app:pabCornerRadius="28dp"
         app:pabEnableShadow="true" />
 
+    </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

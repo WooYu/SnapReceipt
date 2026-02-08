@@ -11,10 +11,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.skybound.space.base.presentation.BaseActivity
+import android.view.WindowManager
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityFeedbackBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlin.math.max
 
 @AndroidEntryPoint
 class FeedbackActivity : BaseActivity<FeedbackViewModel>() {
@@ -32,8 +37,10 @@ class FeedbackActivity : BaseActivity<FeedbackViewModel>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         _binding = ActivityFeedbackBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applyInsets()
 
         initView()
         observeViewModel()
@@ -50,6 +57,9 @@ class FeedbackActivity : BaseActivity<FeedbackViewModel>() {
             override fun afterTextChanged(s: Editable?) {
                 val length = s?.length ?: 0
                 binding.feedbackCharCount.text = getString(R.string.char_count_format, length, MAX_INPUT_LENGTH)
+                binding.feedbackInput.post {
+                    binding.feedbackInput.bringPointIntoView(binding.feedbackInput.selectionEnd)
+                }
                 binding.submitBtn.isEnabled = length > 0
             }
         })
@@ -102,5 +112,14 @@ class FeedbackActivity : BaseActivity<FeedbackViewModel>() {
         super.onDestroy()
         dismissLoading()
         _binding = null
+    }
+
+    private fun applyInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
+            view.updatePadding(bottom = max(systemBars.bottom, ime.bottom))
+            insets
+        }
     }
 }
