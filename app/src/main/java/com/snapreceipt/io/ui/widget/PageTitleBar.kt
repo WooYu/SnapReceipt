@@ -23,7 +23,7 @@ class PageTitleBar @JvmOverloads constructor(
     val title: TextView
 
     init {
-        minimumHeight = dpToPx(DEFAULT_HEIGHT_DP)
+        minHeight = dpToPx(DEFAULT_HEIGHT_DP)
         if (background == null) {
             setBackgroundResource(R.drawable.bg_header_gradient)
         }

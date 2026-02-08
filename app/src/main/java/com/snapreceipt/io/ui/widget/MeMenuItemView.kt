@@ -20,6 +20,7 @@ class MeMenuItemView @JvmOverloads constructor(
     val menuIcon: ImageView
     val menuTitle: TextView
     val menuArrow: ImageView
+    private val titleStartMarginWithIcon: Int
 
     init {
         orientation = HORIZONTAL
@@ -33,11 +34,14 @@ class MeMenuItemView @JvmOverloads constructor(
         menuIcon = findViewById(R.id.menu_icon)
         menuTitle = findViewById(R.id.menu_title)
         menuArrow = findViewById(R.id.menu_arrow)
+        titleStartMarginWithIcon = (menuTitle.layoutParams as LayoutParams).marginStart
 
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.MeMenuItemView, defStyleAttr, 0)
-        if (typedArray.hasValue(R.styleable.MeMenuItemView_mmivIcon)) {
-            menuIcon.setImageDrawable(typedArray.getDrawable(R.styleable.MeMenuItemView_mmivIcon))
+        val iconDrawable = typedArray.getDrawable(R.styleable.MeMenuItemView_mmivIcon)
+        if (iconDrawable != null) {
+            menuIcon.setImageDrawable(iconDrawable)
         }
+        setIconVisible(iconDrawable != null)
         if (typedArray.hasValue(R.styleable.MeMenuItemView_mmivTitle)) {
             val title = typedArray.getText(R.styleable.MeMenuItemView_mmivTitle)
             setTitle(title)
@@ -49,6 +53,7 @@ class MeMenuItemView @JvmOverloads constructor(
 
     fun setIcon(@DrawableRes iconRes: Int) {
         menuIcon.setImageResource(iconRes)
+        setIconVisible(true)
     }
 
     fun setTitle(@StringRes titleRes: Int) {
@@ -62,6 +67,20 @@ class MeMenuItemView @JvmOverloads constructor(
 
     fun setArrowVisible(visible: Boolean) {
         menuArrow.visibility = if (visible) VISIBLE else GONE
+    }
+
+    fun setIconVisible(visible: Boolean) {
+        menuIcon.visibility = if (visible) VISIBLE else GONE
+        updateTitleStartMargin(visible)
+    }
+
+    private fun updateTitleStartMargin(iconVisible: Boolean) {
+        val layoutParams = menuTitle.layoutParams as LayoutParams
+        val desiredMarginStart = if (iconVisible) titleStartMarginWithIcon else 0
+        if (layoutParams.marginStart != desiredMarginStart) {
+            layoutParams.marginStart = desiredMarginStart
+            menuTitle.layoutParams = layoutParams
+        }
     }
 
     private fun dpToPx(dp: Int): Int {
