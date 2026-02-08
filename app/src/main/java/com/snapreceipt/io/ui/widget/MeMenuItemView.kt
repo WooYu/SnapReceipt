@@ -87,7 +87,8 @@ class MeMenuItemView @JvmOverloads constructor(
         titleDefaultStyle = captureTextStyle(menuTitle)
         valueDefaultStyle = captureTextStyle(menuValue)
 
-        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.MeMenuItemView, defStyleAttr, 0)
+        val typedArray =
+            context.obtainStyledAttributes(attrs, R.styleable.MeMenuItemView, defStyleAttr, 0)
         val iconDrawable = typedArray.getDrawable(R.styleable.MeMenuItemView_mmivIcon)
         if (iconDrawable != null) {
             menuIcon.setImageDrawable(iconDrawable)
@@ -100,9 +101,11 @@ class MeMenuItemView @JvmOverloads constructor(
         setValueText(typedArray.getText(R.styleable.MeMenuItemView_mmivValueText))
         val showArrow = typedArray.getBoolean(R.styleable.MeMenuItemView_mmivShowArrow, true)
         setArrowVisible(showArrow)
-        val showBackground = typedArray.getBoolean(R.styleable.MeMenuItemView_mmivShowBackground, true)
+        val showBackground =
+            typedArray.getBoolean(R.styleable.MeMenuItemView_mmivShowBackground, true)
         setBackgroundVisible(showBackground)
-        val swapTitleValueStyle = typedArray.getBoolean(R.styleable.MeMenuItemView_mmivSwapTitleValueStyle, false)
+        val swapTitleValueStyle =
+            typedArray.getBoolean(R.styleable.MeMenuItemView_mmivSwapTitleValueStyle, false)
         setTitleValueStyleSwapped(swapTitleValueStyle)
         typedArray.recycle()
     }
@@ -199,8 +202,9 @@ class MeMenuItemView @JvmOverloads constructor(
         private const val DEFAULT_MIN_HEIGHT_DP = 52
         private const val DEFAULT_HORIZONTAL_PADDING_DP = 16
         private const val DEFAULT_VERTICAL_PADDING_DP = 14
+
         @DrawableRes
-        private val DEFAULT_BACKGROUND_RES_ID: Int = R.drawable.bg_surface_card_large
+        private val DEFAULT_BACKGROUND_RES_ID: Int = R.drawable.bg_surface_card_small
     }
 
     private data class TextStyleSnapshot(

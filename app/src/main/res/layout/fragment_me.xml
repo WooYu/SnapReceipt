@@ -126,7 +126,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:background="@drawable/bg_surface_card_small"
         app:layout_constraintEnd_toEndOf="@id/bound_right"
         app:layout_constraintStart_toStartOf="@id/bound_left"
         app:layout_constraintTop_toBottomOf="@id/edit_profile_btn"
@@ -149,6 +148,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:mmivIcon="@drawable/ic_me_about"
+            app:mmivShowBackground="false"
             app:mmivTitle="@string/about_us" />
 
         <View
@@ -164,6 +164,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:mmivIcon="@drawable/ic_me_feedback"
+            app:mmivShowBackground="false"
             app:mmivTitle="@string/feedback" />
 
         <View
@@ -179,6 +180,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:mmivIcon="@drawable/ic_me_settings"
+            app:mmivShowBackground="false"
             app:mmivTitle="@string/settings" />
     </LinearLayout>
 
