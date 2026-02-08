@@ -2,7 +2,6 @@ package com.snapreceipt.io.ui.me.settings
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -34,8 +33,6 @@ class SettingsActivity : EdgeToEdgeActivity() {
         _binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
         applySystemBarInsets()
-
-        binding.menuClearCacheValue.visibility = View.VISIBLE
         binding.pageHeader.setOnLeftIconClickListener { finish() }
 
         binding.menuClearCache.setOnClickListener {
@@ -68,7 +65,7 @@ class SettingsActivity : EdgeToEdgeActivity() {
             val sizeBytes = withContext(Dispatchers.IO) {
                 directorySize(cacheDir) + (externalCacheDir?.let { directorySize(it) } ?: 0L)
             }
-            binding.menuClearCacheValue.text = formatSize(sizeBytes)
+            binding.menuClearCache.setValueText(formatSize(sizeBytes))
         }
     }
 

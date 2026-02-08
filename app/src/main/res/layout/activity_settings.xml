@@ -1,24 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBackground">
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/bound_left"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_begin="@dimen/page_start_margin" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/bound_right"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_end="@dimen/page_end_margin" />
 
     <com.snapreceipt.io.ui.widget.PageTitleBar
         android:id="@+id/page_header"
@@ -29,56 +14,19 @@
         app:layout_constraintTop_toTopOf="parent"
         app:ptbTitleText="@string/settings" />
 
-    <LinearLayout
+    <com.snapreceipt.io.ui.widget.MeMenuItemView
+        android:id="@+id/menu_clear_cache"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_surface_card_large"
+        android:layout_marginStart="@dimen/page_start_margin"
         android:layout_marginTop="20dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@id/logout_btn"
-        app:layout_constraintEnd_toEndOf="@id/bound_right"
-        app:layout_constraintStart_toStartOf="@id/bound_left"
-        app:layout_constraintTop_toBottomOf="@id/page_header">
+        android:layout_marginEnd="@dimen/page_end_margin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/page_header"
+        app:mmivTitle="@string/clear_cache" />
 
-        <!--清除缓存-->
-        <LinearLayout
-            android:id="@+id/menu_clear_cache"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_surface_card_large"
-            android:gravity="center_vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:layout_weight="1"
-                android:text="@string/clear_cache"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/text_size_secondary"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/menu_clear_cache_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="15dp"
-                android:textColor="@color/text_secondary"
-                android:textSize="@dimen/text_size_secondary"
-                android:visibility="gone"
-                tools:text="0M"
-                tools:visibility="visible" />
-
-            <ImageView
-                android:layout_width="@dimen/arrow_size_small"
-                android:layout_height="@dimen/arrow_size_small"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_chevron_right_small" />
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <!--退出登录-->
     <com.snapreceipt.io.ui.widget.PrimaryActionButton
         android:id="@+id/logout_btn"
         android:layout_width="0dp"
