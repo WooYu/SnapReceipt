@@ -48,4 +48,10 @@ abstract class RepositoryModule {
     abstract fun bindUserRepository(
         impl: UserRepositoryImpl
     ): UserRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindFeedbackRepository(
+        impl: FeedbackRepositoryImpl
+    ): FeedbackRepository
 }
