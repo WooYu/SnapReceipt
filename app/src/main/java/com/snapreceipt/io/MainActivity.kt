@@ -2,6 +2,7 @@ package com.snapreceipt.io
 
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.StringRes
 import androidx.activity.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -54,6 +55,18 @@ class MainActivity : BaseActivity<MainViewModel>() {
 
     fun setBottomNavVisible(visible: Boolean) {
         binding.bottomNav.visibility = if (visible) View.VISIBLE else View.GONE
+    }
+
+    fun showGlobalLoadingOverlay(@StringRes messageRes: Int? = null) {
+        if (messageRes != null) {
+            binding.globalLoadingOverlay.show(messageRes)
+        } else {
+            binding.globalLoadingOverlay.show()
+        }
+    }
+
+    fun hideGlobalLoadingOverlay() {
+        binding.globalLoadingOverlay.hide()
     }
 
     override fun onSessionExpired(event: SessionEvent) {

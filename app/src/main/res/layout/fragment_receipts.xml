@@ -208,12 +208,4 @@
 
     </LinearLayout>
 
-    <!--导出加载框-->
-    <com.snapreceipt.io.ui.widget.LoadingOverlayView
-        android:id="@+id/export_loading_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:lovOverlayColor="#66000000"
-        app:lovText="@string/exporting_receipts" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>
