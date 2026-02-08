@@ -31,16 +31,10 @@ class AboutUsActivity : EdgeToEdgeActivity() {
         setContentView(binding.root)
 
         binding.appVersion.text = "V${BuildConfig.VERSION_NAME}"
-        binding.menuUserAgreement.menuTitle.setText(R.string.user_agreement)
-        binding.menuPrivacyPolicy.menuTitle.setText(R.string.privacy_policy_label)
+
         prefetchPolicy()
         binding.pageHeader.setOnLeftIconClickListener { finish() }
-        binding.menuUserAgreement.root.setOnClickListener {
-            openPolicyUrl(isUserAgreement = true)
-        }
-        binding.menuPrivacyPolicy.root.setOnClickListener {
-            openPolicyUrl(isUserAgreement = false)
-        }
+
     }
 
     override fun onDestroy() {
