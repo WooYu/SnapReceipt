@@ -56,7 +56,7 @@ class ReceiptsSelectableAdapter(
                 val context = root.context
                 selectIcon.isSelected = isSelected
                 val receiptId = receipt.receiptId
-                selectIcon.setOnClickListener {
+                selectClickArea.setOnClickListener {
                     if (receiptId != null) {
                         onToggle(receiptId)
                     }

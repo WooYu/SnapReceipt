@@ -137,20 +137,28 @@
             android:id="@+id/select_all_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:gravity="center_vertical"
+            android:minHeight="@dimen/touch_target_size"
             android:orientation="horizontal">
 
-            <ImageView
-                android:id="@+id/select_all_icon"
-                android:layout_width="@dimen/check_box_size"
-                android:layout_height="@dimen/check_box_size"
-                android:contentDescription="@string/select_all"
-                android:src="@drawable/ic_select_toggle" />
+            <FrameLayout
+                android:layout_width="@dimen/touch_target_size"
+                android:layout_height="@dimen/touch_target_size">
+
+                <ImageView
+                    android:id="@+id/select_all_icon"
+                    android:layout_width="@dimen/check_box_size"
+                    android:layout_height="@dimen/check_box_size"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/select_all"
+                    android:src="@drawable/ic_select_toggle" />
+            </FrameLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="2dp"
                 android:text="@string/select_all"
                 android:textColor="@color/text_primary"
                 android:textSize="@dimen/text_size_small"

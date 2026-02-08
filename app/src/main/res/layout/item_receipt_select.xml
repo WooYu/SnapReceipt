@@ -9,18 +9,28 @@
     android:paddingTop="10dp">
 
     <!--选中-->
-    <ImageView
-        android:id="@+id/select_icon"
-        android:layout_width="@dimen/check_box_size"
-        android:layout_height="@dimen/check_box_size"
-        android:contentDescription="@string/select_all"
-        android:src="@drawable/ic_select_toggle" />
+    <FrameLayout
+        android:id="@+id/select_click_area"
+        android:layout_width="@dimen/touch_target_size"
+        android:layout_height="@dimen/touch_target_size"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true">
+
+        <ImageView
+            android:id="@+id/select_icon"
+            android:layout_width="@dimen/check_box_size"
+            android:layout_height="@dimen/check_box_size"
+            android:layout_gravity="center"
+            android:contentDescription="@string/select_all"
+            android:src="@drawable/ic_select_toggle" />
+    </FrameLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/receipt_card"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="8dp"
         android:layout_weight="1"
         android:background="@drawable/bg_surface_card_large"
         android:paddingHorizontal="16dp"
