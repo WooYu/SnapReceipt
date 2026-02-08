@@ -1,11 +1,13 @@
 package com.snapreceipt.io.data.di
 
 import com.snapreceipt.io.data.repository.AuthRepositoryImpl
+import com.snapreceipt.io.data.repository.FeedbackRepositoryImpl
 import com.snapreceipt.io.data.repository.FileRepositoryImpl
 import com.snapreceipt.io.data.repository.PolicyRepositoryImpl
 import com.snapreceipt.io.data.repository.ReceiptRemoteRepositoryImpl
 import com.snapreceipt.io.data.repository.UserRepositoryImpl
 import com.snapreceipt.io.domain.repository.AuthRepository
+import com.snapreceipt.io.domain.repository.FeedbackRepository
 import com.snapreceipt.io.domain.repository.FileRepository
 import com.snapreceipt.io.domain.repository.PolicyRepository
 import com.snapreceipt.io.domain.repository.ReceiptRemoteRepository

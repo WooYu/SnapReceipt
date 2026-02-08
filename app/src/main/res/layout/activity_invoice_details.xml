@@ -5,38 +5,35 @@
     android:layout_height="match_parent"
     android:background="@color/colorBackground">
 
-    <View
-        android:id="@+id/invoice_header"
-        android:layout_width="0dp"
-        android:layout_height="268dp"
-        android:background="@drawable/bg_invoice_details_header"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/btn_back"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginStart="@dimen/page_start_margin"
-        android:layout_marginTop="@dimen/status_bar_height"
-        android:contentDescription="@string/back"
-        android:src="@drawable/ic_back_white"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/invoice_title"
+    <!--上边界-->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/bound_top"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/invoice_details"
-        android:textColor="@android:color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/btn_back"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="@dimen/status_bar_height" />
+
+    <!--背景-->
+    <View
+        android:id="@+id/header_glow"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:background="@drawable/bg_me_header_gradient"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/btn_back" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!--标题-->
+    <com.snapreceipt.io.ui.widget.PageTitleBar
+        android:id="@+id/page_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:ptbBackground="@android:color/transparent"
+        app:ptbTitleText="@string/invoice_details" />
+
 
     <ImageView
         android:id="@+id/btn_delete"
@@ -58,7 +55,7 @@
         app:layout_constraintBottom_toTopOf="@id/bottom_action_container"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_back">
+        app:layout_constraintTop_toBottomOf="@id/page_title">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -125,7 +122,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:paddingStart="16dp"
-                    android:paddingTop="18dp"
+                    android:paddingTop="16dp"
                     android:paddingEnd="16dp"
                     android:paddingBottom="20dp">
 
@@ -237,10 +234,12 @@
                         android:stretchColumns="1">
 
                         <TableRow android:layout_marginTop="18dp">
+
                             <TextView
                                 android:text="@string/merchant"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="15sp" />
+
                             <TextView
                                 android:id="@+id/value_merchant"
                                 android:gravity="end"
@@ -249,10 +248,12 @@
                         </TableRow>
 
                         <TableRow android:layout_marginTop="18dp">
+
                             <TextView
                                 android:text="@string/address"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="15sp" />
+
                             <TextView
                                 android:id="@+id/value_address"
                                 android:gravity="end"
@@ -261,10 +262,12 @@
                         </TableRow>
 
                         <TableRow android:layout_marginTop="18dp">
+
                             <TextView
                                 android:text="@string/date"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="15sp" />
+
                             <TextView
                                 android:id="@+id/value_date"
                                 android:gravity="end"
@@ -273,10 +276,12 @@
                         </TableRow>
 
                         <TableRow android:layout_marginTop="18dp">
+
                             <TextView
                                 android:text="@string/bank_card"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="15sp" />
+
                             <TextView
                                 android:id="@+id/value_card"
                                 android:gravity="end"
@@ -285,10 +290,12 @@
                         </TableRow>
 
                         <TableRow android:layout_marginTop="18dp">
+
                             <TextView
                                 android:text="@string/invoice_type"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="15sp" />
+
                             <TextView
                                 android:id="@+id/value_invoice_type"
                                 android:gravity="end"
@@ -297,10 +304,12 @@
                         </TableRow>
 
                         <TableRow android:layout_marginTop="18dp">
+
                             <TextView
                                 android:text="@string/title_type"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="15sp" />
+
                             <TextView
                                 android:id="@+id/value_title_type"
                                 android:gravity="end"

@@ -6,15 +6,15 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.WindowManager
 import androidx.activity.viewModels
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.skybound.space.base.presentation.BaseActivity
-import android.view.WindowManager
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityFeedbackBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -56,7 +56,8 @@ class FeedbackActivity : BaseActivity<FeedbackViewModel>() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 val length = s?.length ?: 0
-                binding.feedbackCharCount.text = getString(R.string.char_count_format, length, MAX_INPUT_LENGTH)
+                binding.feedbackCharCount.text =
+                    getString(R.string.char_count_format, length, MAX_INPUT_LENGTH)
                 binding.feedbackInput.post {
                     binding.feedbackInput.bringPointIntoView(binding.feedbackInput.selectionEnd)
                 }

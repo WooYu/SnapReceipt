@@ -8,15 +8,15 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
-import com.snapreceipt.io.databinding.ActivityInvoiceDetailsBinding
 import com.skybound.space.base.presentation.BaseActivity
-import com.skybound.space.base.presentation.observeState
 import com.skybound.space.base.presentation.UiEvent
+import com.skybound.space.base.presentation.observeState
 import com.skybound.space.core.network.auth.SessionEvent
 import com.skybound.space.core.network.auth.SessionManager
 import com.skybound.space.core.util.DateFormatUtil
 import com.snapreceipt.io.MainActivity
 import com.snapreceipt.io.R
+import com.snapreceipt.io.databinding.ActivityInvoiceDetailsBinding
 import com.snapreceipt.io.domain.model.ReceiptCategory
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.invoice.bottomsheet.DateTimePickerBottomSheet
@@ -24,8 +24,8 @@ import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceCategoryBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
 import com.snapreceipt.io.ui.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import java.util.Locale
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
@@ -114,7 +114,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         binding.inputNote.setText(noteText)
         binding.valueNote.text = noteText
 
-        binding.btnBack.setOnClickListener { finish() }
+        binding.pageTitle.setOnLeftIconClickListener { finish() }
         binding.btnDelete.setOnClickListener { onTopRightActionClick() }
         binding.invoiceImage.setOnClickListener { openImagePreview() }
 
@@ -214,7 +214,8 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         val noteValue = binding.inputNote.text.toString().trim()
         val categoryId = ReceiptCategory.idForLabel(invoiceCategoryInput)
         if (categoryId <= 0L) {
-            Toast.makeText(this, getString(R.string.select_invoice_category), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.select_invoice_category), Toast.LENGTH_SHORT)
+                .show()
             return
         }
         val receiptUrl = receiptImageUrl.ifEmpty { imagePath }.takeIf { it.isNotBlank() }
