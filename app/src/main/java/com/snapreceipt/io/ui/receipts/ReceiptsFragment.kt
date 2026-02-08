@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.viewModels
+import com.snapreceipt.io.MainActivity
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentReceiptsBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
@@ -43,6 +44,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     }
 
     override fun onDestroyView() {
+        setGlobalExportOverlay(false)
         super.onDestroyView()
         _binding = null
     }
@@ -89,7 +91,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         val allSelected = state.receipts.isNotEmpty() && state.selectedIds.size == state.receipts.size
         binding.selectAllIcon.isSelected = allSelected
 
-        if (state.exporting) binding.exportLoadingOverlay.show() else binding.exportLoadingOverlay.hide()
+        setGlobalExportOverlay(state.exporting)
         binding.exportActionBtn.isEnabled = !state.exporting
         binding.exportActionBtn.alpha = if (state.exporting) 0.6f else 1f
         binding.selectAllBtn.isEnabled = !state.exporting
@@ -190,6 +192,15 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         } catch (ex: ActivityNotFoundException) {
             Toast.makeText(requireContext(), getString(R.string.no_app_to_open), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun setGlobalExportOverlay(show: Boolean) {
+        val host = activity as? MainActivity ?: return
+        if (show) {
+            host.showGlobalLoadingOverlay(R.string.exporting_receipts)
+        } else {
+            host.hideGlobalLoadingOverlay()
         }
     }
 }
