@@ -9,7 +9,7 @@
     <dimen name="corner_radius_large">10dp</dimen>
     <dimen name="corner_radius_small">6dp</dimen>
     <!--CheckBox大小-->
-    <dimen name="check_box_size">22dp</dimen>
+    <dimen name="check_box_size">20dp</dimen>
     <!--通用最小点击热区-->
     <dimen name="touch_target_size">44dp</dimen>
     <!--我的界面图标大小-->
