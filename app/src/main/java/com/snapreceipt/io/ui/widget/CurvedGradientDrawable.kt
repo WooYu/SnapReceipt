@@ -8,11 +8,22 @@ import android.graphics.Shader
 import android.graphics.drawable.Drawable
 
 /**
- * 自定义 Drawable，用于创建带有弧形底边的渐变背景
- * 
- * @param startColor 渐变起始颜色（顶部）
- * @param endColor 渐变结束颜色（底部）
- * @param curveHeight 弧形的高度（向下弯曲的深度）
+ * Drawable that paints a top-to-bottom gradient with a curved bottom edge.
+ *
+ * Constructor params:
+ * - `startColor`: gradient start color at top.
+ * - `endColor`: gradient end color at bottom.
+ * - `curveHeight`: depth of curved bottom edge.
+ *
+ * Kotlin usage example:
+ * ```kotlin
+ * val drawable = CurvedGradientDrawable(
+ *     startColor = ContextCompat.getColor(this, R.color.colorPrimary),
+ *     endColor = ContextCompat.getColor(this, R.color.colorPrimaryGradientEnd),
+ *     curveHeight = 60f
+ * )
+ * headerView.background = drawable
+ * ```
  */
 class CurvedGradientDrawable(
     private val startColor: Int,
@@ -28,10 +39,10 @@ class CurvedGradientDrawable(
         val width = bounds.width().toFloat()
         val height = bounds.height().toFloat()
 
-        // 创建从上到下的线性渐变
+        // Build vertical gradient.
         val gradient = LinearGradient(
-            0f, 0f,  // 起始点（顶部）
-            0f, height,  // 结束点（底部）
+            0f, 0f,
+            0f, height,
             startColor,
             endColor,
             Shader.TileMode.CLAMP
@@ -39,19 +50,18 @@ class CurvedGradientDrawable(
 
         paint.shader = gradient
 
-        // 创建弧形路径
+        // Build the curved shape path.
         path.reset()
-        path.moveTo(0f, 0f)  // 左上角
-        path.lineTo(width, 0f)  // 右上角
-        path.lineTo(width, height - curveHeight)  // 右下角上方
+        path.moveTo(0f, 0f)
+        path.lineTo(width, 0f)
+        path.lineTo(width, height - curveHeight)
         
-        // 创建底部弧形：使用二次贝塞尔曲线
-        // 控制点位于底部中间，向下弯曲，形成平滑的弧形
+        // Use a quadratic Bezier to create a smooth bottom arc.
         val controlX = width / 2f
-        val controlY = height + curveHeight * 0.8f  // 控制点稍微低一些，使弧形更明显
-        path.quadTo(controlX, controlY, 0f, height - curveHeight)  // 弧形到底部左侧
+        val controlY = height + curveHeight * 0.8f
+        path.quadTo(controlX, controlY, 0f, height - curveHeight)
         
-        path.close()  // 自动回到起点
+        path.close()
 
         canvas.drawPath(path, paint)
     }

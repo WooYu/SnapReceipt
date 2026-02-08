@@ -2,6 +2,7 @@ package com.snapreceipt.io.ui.widget
 
 import android.content.Context
 import android.graphics.Typeface
+import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
@@ -14,13 +15,15 @@ import androidx.annotation.StringRes
 import com.snapreceipt.io.R
 
 /**
- * Reusable menu row used in the "Me" page.
+ * A reusable menu row used in the "Me" page.
  *
- * Features:
- * - Left icon is optional. If `mmivIcon` is not set, icon is hidden.
- * - Title plus optional value text before the arrow.
- * - Optional arrow and optional background.
- * - Can swap title/value text styles.
+ * Supported attrs:
+ * - `mmivIcon`: optional left icon; if not set, icon is hidden.
+ * - `mmivTitle`: primary text.
+ * - `mmivValueText`: optional right text shown before the arrow.
+ * - `mmivShowArrow`: whether to show right arrow.
+ * - `mmivShowBackground`: whether to keep row background.
+ * - `mmivSwapTitleValueStyle`: swap title/value text style.
  *
  * XML example:
  * ```xml
@@ -39,9 +42,11 @@ import com.snapreceipt.io.R
  * Kotlin example:
  * ```kotlin
  * val item = findViewById<MeMenuItemView>(R.id.menu_clear_cache)
+ * item.setTitle(R.string.clear_cache)
  * item.setValueText("0 MB")
- * item.setTitleValueStyleSwapped(true)
  * item.setArrowVisible(true)
+ * item.setBackgroundVisible(true)
+ * item.setTitleValueStyleSwapped(false)
  * ```
  */
 class MeMenuItemView @JvmOverloads constructor(
@@ -58,14 +63,17 @@ class MeMenuItemView @JvmOverloads constructor(
     private val titleDefaultStyle: TextStyleSnapshot
     private val valueDefaultStyle: TextStyleSnapshot
     private var isTitleValueStyleSwapped: Boolean = false
+    private var defaultBackgroundDrawable: Drawable? = null
 
     init {
         orientation = HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
         minimumHeight = dpToPx(DEFAULT_MIN_HEIGHT_DP)
         if (background == null) {
-            setBackgroundResource(DEFAULT_BACKGROUND_RES)
+            setBackgroundResource(DEFAULT_BACKGROUND_RES_ID)
         }
+        // Keep a copy so background can be restored after setBackgroundVisible(false).
+        defaultBackgroundDrawable = background?.constantState?.newDrawable()?.mutate()
         val horizontalPadding = dpToPx(DEFAULT_HORIZONTAL_PADDING_DP)
         val verticalPadding = dpToPx(DEFAULT_VERTICAL_PADDING_DP)
         setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
@@ -137,7 +145,7 @@ class MeMenuItemView @JvmOverloads constructor(
     fun setBackgroundVisible(visible: Boolean) {
         if (visible) {
             if (background == null) {
-                setBackgroundResource(DEFAULT_BACKGROUND_RES)
+                background = defaultBackgroundDrawable?.constantState?.newDrawable()?.mutate()
             }
         } else {
             background = null
@@ -191,7 +199,8 @@ class MeMenuItemView @JvmOverloads constructor(
         private const val DEFAULT_MIN_HEIGHT_DP = 52
         private const val DEFAULT_HORIZONTAL_PADDING_DP = 16
         private const val DEFAULT_VERTICAL_PADDING_DP = 14
-        private const val DEFAULT_BACKGROUND_RES = R.drawable.bg_surface_card_large
+        @DrawableRes
+        private val DEFAULT_BACKGROUND_RES_ID: Int = R.drawable.bg_surface_card_large
     }
 
     private data class TextStyleSnapshot(

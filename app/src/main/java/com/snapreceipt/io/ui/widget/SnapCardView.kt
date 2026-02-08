@@ -5,6 +5,28 @@ import android.util.AttributeSet
 import com.google.android.material.card.MaterialCardView
 import com.snapreceipt.io.R
 
+/**
+ * MaterialCardView wrapper with a simple switch to enable/disable shadow.
+ *
+ * Supported attrs:
+ * - `scvShowShadow`: whether card elevation/shadow is visible.
+ *
+ * XML example:
+ * ```xml
+ * <com.snapreceipt.io.ui.widget.SnapCardView
+ *     android:id="@+id/profile_card"
+ *     android:layout_width="match_parent"
+ *     android:layout_height="wrap_content"
+ *     app:cardCornerRadius="16dp"
+ *     app:scvShowShadow="true" />
+ * ```
+ *
+ * Kotlin example:
+ * ```kotlin
+ * val card = findViewById<SnapCardView>(R.id.profile_card)
+ * card.setShadowEnabled(false)
+ * ```
+ */
 class SnapCardView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -34,6 +56,7 @@ class SnapCardView @JvmOverloads constructor(
             maxCardElevation = defaultMaxCardElevation
             return
         }
+        // Disable all elevation-related effects for a fully flat card.
         cardElevation = 0f
         maxCardElevation = 0f
         stateListAnimator = null

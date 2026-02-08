@@ -12,6 +12,40 @@ import androidx.annotation.StringRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.snapreceipt.io.R
 
+/**
+ * Page header bar with left/right actions and centered title.
+ *
+ * Supported attrs:
+ * - `ptbTitleText`: title text.
+ * - `ptbTitleTextColor`: title color.
+ * - `ptbLeftIcon`: left icon drawable.
+ * - `ptbRightIcon`: right icon drawable.
+ * - `ptbShowLeftIcon`: whether to show left icon.
+ * - `ptbShowRightIcon`: whether to show right icon.
+ * - `ptbBackground`: background drawable or color.
+ *
+ * XML example:
+ * ```xml
+ * <com.snapreceipt.io.ui.widget.PageTitleBar
+ *     android:id="@+id/page_header"
+ *     android:layout_width="0dp"
+ *     android:layout_height="wrap_content"
+ *     app:layout_constraintStart_toStartOf="parent"
+ *     app:layout_constraintEnd_toEndOf="parent"
+ *     app:layout_constraintTop_toTopOf="parent"
+ *     app:ptbTitleText="@string/settings"
+ *     app:ptbShowLeftIcon="true"
+ *     app:ptbShowRightIcon="false" />
+ * ```
+ *
+ * Kotlin example:
+ * ```kotlin
+ * val titleBar = findViewById<PageTitleBar>(R.id.page_header)
+ * titleBar.setTitle(R.string.settings)
+ * titleBar.setOnLeftIconClickListener { finish() }
+ * titleBar.setRightIconVisible(false)
+ * ```
+ */
 class PageTitleBar @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -23,6 +57,7 @@ class PageTitleBar @JvmOverloads constructor(
     val title: TextView
 
     init {
+        // Use minHeight instead of minimumHeight so ConstraintLayout measurement honors it.
         minHeight = dpToPx(DEFAULT_HEIGHT_DP)
         if (background == null) {
             setBackgroundResource(R.drawable.bg_header_gradient)

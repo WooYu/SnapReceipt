@@ -14,6 +14,38 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.button.MaterialButton
 import com.snapreceipt.io.R
 
+/**
+ * Primary CTA button with gradient background, ripple, and optional shadow.
+ *
+ * Supported attrs:
+ * - `android:text`: button label.
+ * - `pabCornerRadius`: corner radius.
+ * - `pabTextSize`: text size.
+ * - `pabTextColor`: text color.
+ * - `pabRippleColor`: ripple color.
+ * - `pabPressedDarkenFactor`: darken factor for pressed state.
+ * - `pabGradientStartColor`: gradient start color.
+ * - `pabGradientEndColor`: gradient end color.
+ * - `pabEnableShadow`: whether shadow/elevation is enabled.
+ *
+ * XML example:
+ * ```xml
+ * <com.snapreceipt.io.ui.widget.PrimaryActionButton
+ *     android:id="@+id/submit_btn"
+ *     android:layout_width="match_parent"
+ *     android:layout_height="56dp"
+ *     android:text="@string/continue_text"
+ *     app:pabCornerRadius="28dp"
+ *     app:pabEnableShadow="true" />
+ * ```
+ *
+ * Kotlin example:
+ * ```kotlin
+ * val submitButton = findViewById<PrimaryActionButton>(R.id.submit_btn)
+ * submitButton.setCornerRadiusDp(24f)
+ * submitButton.isEnabled = true
+ * ```
+ */
 class PrimaryActionButton @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -99,18 +131,21 @@ class PrimaryActionButton @JvmOverloads constructor(
     }
 
     fun setCornerRadiusDp(radiusDp: Float) {
+        // Rebuild all button states so pressed/disabled shapes keep same radius.
         cornerRadiusPx = dpToPx(radiusDp)
         cornerRadius = cornerRadiusPx.toInt()
         updateBackground()
     }
 
     fun setCornerRadiusPx(radiusPx: Float) {
+        // Rebuild all button states so pressed/disabled shapes keep same radius.
         cornerRadiusPx = radiusPx
         cornerRadius = cornerRadiusPx.toInt()
         updateBackground()
     }
 
     private fun updateBackground() {
+        // Build state drawables in priority order: pressed > disabled > normal.
         val normal = createGradientDrawable(gradientStartColor, gradientEndColor)
         val pressed = createGradientDrawable(
             darkenColor(gradientStartColor, pressedDarkenFactor),
@@ -129,6 +164,7 @@ class PrimaryActionButton @JvmOverloads constructor(
         }
 
         background = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            // Ripple needs a rounded mask to match button corners.
             val ripple = ColorStateList.valueOf(rippleColor)
             val mask = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
