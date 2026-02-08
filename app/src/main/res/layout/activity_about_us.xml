@@ -3,30 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground"
-    android:clipChildren="false"
-    android:clipToPadding="false">
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/bound_left"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_begin="@dimen/page_start_margin" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/bound_right"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_end="@dimen/page_end_margin" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/bound_top"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_begin="@dimen/status_bar_height" />
+    android:background="@color/colorBackground">
 
     <com.snapreceipt.io.ui.widget.PageTitleBar
         android:id="@+id/page_header"
@@ -40,6 +17,7 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/page_start_margin"
         android:layout_marginStart="@dimen/page_start_margin"
         android:layout_marginTop="60dp"
         android:layout_marginEnd="@dimen/page_end_margin"
@@ -55,7 +33,7 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:contentDescription="@string/app_name"
-            android:src="@drawable/img_app_icon" />
+            android:src="@drawable/img_app_icon_square" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -81,7 +59,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
-            app:mmivIcon="@drawable/ic_me_about"
+            android:background="@drawable/bg_surface_card_large"
             app:mmivTitle="@string/user_agreement" />
 
         <!--隐私协议-->
@@ -90,7 +68,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            app:mmivIcon="@drawable/ic_me_about"
+            android:background="@drawable/bg_surface_card_large"
             app:mmivTitle="@string/privacy_policy_label" />
 
     </LinearLayout>

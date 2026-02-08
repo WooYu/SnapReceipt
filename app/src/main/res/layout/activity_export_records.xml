@@ -6,27 +6,6 @@
     android:layout_height="match_parent"
     android:background="@color/colorBackground">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/bound_left"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_begin="@dimen/page_start_margin" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/bound_right"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_end="@dimen/page_end_margin" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/bound_top"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_begin="@dimen/status_bar_height" />
-
     <!--标题-->
     <com.snapreceipt.io.ui.widget.PageTitleBar
         android:id="@+id/page_header"

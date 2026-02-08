@@ -9,8 +9,8 @@ import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityAboutUsBinding
 import com.snapreceipt.io.domain.model.PolicyEntity
 import com.snapreceipt.io.domain.usecase.config.FetchPolicyUseCase
-import com.snapreceipt.io.ui.common.PolicyWebViewActivity
 import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
+import com.snapreceipt.io.ui.common.PolicyWebViewActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,7 +34,12 @@ class AboutUsActivity : EdgeToEdgeActivity() {
 
         prefetchPolicy()
         binding.pageHeader.setOnLeftIconClickListener { finish() }
-
+        binding.menuUserAgreement.setOnClickListener {
+            openPolicyUrl(isUserAgreement = true)
+        }
+        binding.menuPrivacyPolicy.setOnClickListener {
+            openPolicyUrl(isUserAgreement = false)
+        }
     }
 
     override fun onDestroy() {
@@ -50,7 +55,11 @@ class AboutUsActivity : EdgeToEdgeActivity() {
             }
             val policy = policyCache
             if (policy == null) {
-                Toast.makeText(this@AboutUsActivity, getString(R.string.unexpected_error), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@AboutUsActivity,
+                    getString(R.string.unexpected_error),
+                    Toast.LENGTH_SHORT
+                ).show()
                 return@launch
             }
             val url = if (isUserAgreement) {

@@ -5,17 +5,17 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import com.skybound.space.core.network.auth.SessionManager
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivitySettingsBinding
 import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
 import com.snapreceipt.io.ui.login.LoginActivity
-import com.skybound.space.core.network.auth.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.File
-import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.util.Locale
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -31,17 +31,17 @@ class SettingsActivity : EdgeToEdgeActivity() {
         _binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.menuSwitchAccount.menuTitle.setText(R.string.switch_account)
-        binding.menuClearCache.menuTitle.setText(R.string.clear_cache)
-        binding.menuClearCache.menuValue.visibility = View.VISIBLE
+        binding.menuClearCacheValue.visibility = View.VISIBLE
         binding.pageHeader.setOnLeftIconClickListener { finish() }
-        binding.menuSwitchAccount.root.setOnClickListener {
-            Toast.makeText(this, getString(R.string.switch_account), Toast.LENGTH_SHORT).show()
-        }
-        binding.menuClearCache.root.setOnClickListener {
+
+        binding.menuClearCache.setOnClickListener {
             lifecycleScope.launch {
                 withContext(Dispatchers.IO) { clearAppCache() }
-                Toast.makeText(this@SettingsActivity, getString(R.string.clear_cache), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@SettingsActivity,
+                    getString(R.string.clear_cache),
+                    Toast.LENGTH_SHORT
+                ).show()
                 updateCacheSize()
             }
         }
@@ -64,7 +64,7 @@ class SettingsActivity : EdgeToEdgeActivity() {
             val sizeBytes = withContext(Dispatchers.IO) {
                 directorySize(cacheDir) + (externalCacheDir?.let { directorySize(it) } ?: 0L)
             }
-            binding.menuClearCache.menuValue.text = formatSize(sizeBytes)
+            binding.menuClearCacheValue.text = formatSize(sizeBytes)
         }
     }
 

@@ -12,6 +12,8 @@
     <dimen name="check_box_size">22dp</dimen>
     <!--我的界面图标大小-->
     <dimen name="icon_size_small">16dp</dimen>
+    <!--我的箭头图标大小-->
+    <dimen name="arrow_size_small">14dp</dimen>
     <!--统一卡片阴影-->
     <dimen name="card_elevation_default">4dp</dimen>
     <!--输入框高度-->

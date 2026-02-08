@@ -154,10 +154,9 @@
 
         <ImageView
             android:id="@+id/menu_export_arrow"
-            android:layout_width="12dp"
-            android:layout_height="12dp"
+            android:layout_width="@dimen/arrow_size_small"
+            android:layout_height="@dimen/arrow_size_small"
             android:contentDescription="@null"
-            android:scaleType="fitXY"
             android:src="@drawable/ic_chevron_right_small" />
     </LinearLayout>
 

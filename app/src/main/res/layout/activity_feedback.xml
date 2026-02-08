@@ -21,13 +21,6 @@
         android:orientation="vertical"
         app:layout_constraintGuide_end="@dimen/page_end_margin" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/bound_top"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_begin="@dimen/status_bar_height" />
-
     <com.snapreceipt.io.ui.widget.PageTitleBar
         android:id="@+id/page_header"
         android:layout_width="0dp"
@@ -37,84 +30,54 @@
         app:layout_constraintTop_toTopOf="parent"
         app:ptbTitleText="@string/feedback" />
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:clipChildren="false"
-        android:clipToPadding="false"
+        android:layout_marginTop="20dp"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/bound_right"
+        app:layout_constraintStart_toStartOf="@id/bound_left"
         app:layout_constraintTop_toBottomOf="@id/page_header">
 
+        <!--反馈内容-->
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_surface_card_xlarge"
+            android:hint="@string/feedback_message"
+            android:lineSpacingExtra="6dp"
+            android:padding="16dp"
+            android:textColor="@color/text_secondary"
+            android:textColorHint="@color/text_secondary"
+            android:textSize="@dimen/text_size_primary" />
+
+        <!--官方邮箱-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingStart="16dp"
-            android:paddingTop="20dp"
-            android:paddingEnd="16dp"
-            android:paddingBottom="24dp"
-            android:clipChildren="false"
-            android:clipToPadding="false">
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_surface_card_large"
+            android:gravity="center_vertical"
+            android:padding="16dp">
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="@dimen/card_elevation_default"
-                app:cardUseCompatPadding="false">
+                android:layout_weight="1"
+                android:text="@string/email_label"
+                android:textColor="@color/text_secondary"
+                android:textSize="16sp" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:lineSpacingExtra="6dp"
-                    android:paddingStart="18dp"
-                    android:paddingTop="20dp"
-                    android:paddingEnd="18dp"
-                    android:paddingBottom="20dp"
-                    android:text="@string/feedback_message"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="16sp" />
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/feedback_email"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="@dimen/card_elevation_default"
-                app:cardUseCompatPadding="false">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:minHeight="72dp"
-                    android:paddingStart="18dp"
-                    android:paddingTop="14dp"
-                    android:paddingEnd="18dp"
-                    android:paddingBottom="14dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/email_label"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/feedback_email"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/feedback_email"
-                        android:textColor="@color/text_primary"
-                        android:textSize="17sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                android:text="@string/feedback_email"
+                android:textColor="@color/text_primary"
+                android:textSize="17sp"
+                android:textStyle="bold" />
         </LinearLayout>
-    </ScrollView>
 
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
