@@ -4,15 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:baselineAligned="false"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingTop="10dp">
+    android:paddingStart="0dp"
+    android:paddingTop="10dp"
+    android:paddingEnd="@dimen/page_end_margin">
 
     <!--选中-->
     <FrameLayout
         android:id="@+id/select_click_area"
-        android:layout_width="@dimen/touch_target_size"
-        android:layout_height="@dimen/touch_target_size"
+        android:layout_width="48dp"
+        android:layout_height="match_parent"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:clickable="true"
         android:focusable="true">
@@ -21,7 +24,8 @@
             android:id="@+id/select_icon"
             android:layout_width="@dimen/check_box_size"
             android:layout_height="@dimen/check_box_size"
-            android:layout_gravity="center"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/page_start_margin"
             android:contentDescription="@string/select_all"
             android:src="@drawable/ic_select_toggle" />
     </FrameLayout>
@@ -30,7 +34,6 @@
         android:id="@+id/receipt_card"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:layout_weight="1"
         android:background="@drawable/bg_surface_card_large"
         android:paddingHorizontal="16dp"
