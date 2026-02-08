@@ -47,4 +47,6 @@
     <!-- 底部导航栏文字颜色 -->
     <color name="nav_text_selected">#103CED</color>
     <color name="nav_text_unselected">#A9B6E5</color>
+    <!--分割线-->
+    <color name="line_mine">#F7F7F7</color>
 </resources>

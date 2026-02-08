@@ -16,64 +16,58 @@
         android:contentDescription="@string/select_all"
         android:src="@drawable/ic_select_toggle" />
 
-    <FrameLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/receipt_card"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:layout_weight="1"
-        android:background="@drawable/bg_surface_card_large">
+        android:background="@drawable/bg_surface_card_large"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="13dp">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
+        <!--金额-->
+        <TextView
+            android:id="@+id/amount"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="13dp">
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/text_size_title"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="$0.00" />
 
-            <!--金额-->
-            <TextView
-                android:id="@+id/amount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/text_size_title"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="$0.00" />
+        <!--发票名称-->
+        <TextView
+            android:id="@+id/merchant_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/text_size_primary"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/amount"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Apple Store" />
 
-            <!--发票名称-->
-            <TextView
-                android:id="@+id/merchant_name"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/text_size_primary"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@id/amount"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="Apple Store" />
+        <!--说明-->
+        <TextView
+            android:id="@+id/meta"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:layout_marginEnd="10dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toStartOf="@id/amount"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/merchant_name"
+            tools:text="Office·Individual·2025/12/26" />
 
-            <!--说明-->
-            <TextView
-                android:id="@+id/meta"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:layout_marginEnd="10dp"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp"
-                app:layout_constraintEnd_toStartOf="@id/amount"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/merchant_name"
-                tools:text="Office·Individual·2025/12/26" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>
 

@@ -107,6 +107,6 @@ class PageTitleBar @JvmOverloads constructor(
     }
 
     companion object {
-        private const val DEFAULT_HEIGHT_DP = 152
+        private const val DEFAULT_HEIGHT_DP = 88
     }
 }

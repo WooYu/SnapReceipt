@@ -1,89 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
+    android:layout_marginTop="16dp"
     android:layout_marginBottom="8dp"
-    android:background="@drawable/bg_surface_card_xlarge">
+    android:background="@drawable/bg_surface_card_large"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="13dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!--金额-->
+    <TextView
+        android:id="@+id/amount"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingStart="16dp"
-        android:paddingTop="14dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="14dp">
+        android:paddingStart="10dp"
+        android:textColor="@color/text_primary"
+        android:textSize="@dimen/text_size_title"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="$0.00" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
+    <!--日期范围-->
+    <LinearLayout
+        android:id="@+id/container_date_range"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toStartOf="@id/amount"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="@dimen/icon_size_small"
+            android:layout_height="@dimen/icon_size_small"
+            android:contentDescription="@string/select_date"
+            android:src="@drawable/ic_record_date" />
+
+        <TextView
+            android:id="@+id/date_range"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/text_size_secondary"
+            android:textStyle="bold"
+            tools:text="2024/12/10 - 2025/12/10" />
 
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:contentDescription="@string/select_date"
-                android:src="@drawable/ic_record_date" />
-
-            <TextView
-                android:id="@+id/date_range"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:textColor="@color/text_primary"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/amount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/text_primary"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:contentDescription="@string/receipt_count"
-                android:src="@drawable/ic_record_count" />
-
-            <TextView
-                android:id="@+id/receipt_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:textColor="@color/text_secondary"
-                android:textSize="15sp" />
-
-            <View
-                android:layout_width="18dp"
-                android:layout_height="1dp" />
-
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:contentDescription="@string/invoice_type"
-                android:src="@drawable/ic_record_type" />
-
-            <TextView
-                android:id="@+id/title_type"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:textColor="@color/text_secondary"
-                android:textSize="15sp" />
-        </LinearLayout>
     </LinearLayout>
-</FrameLayout>
+
+    <!--记录梳理-->
+    <LinearLayout
+        android:id="@+id/container_record"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toStartOf="@id/amount"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/container_date_range">
+
+        <ImageView
+            android:layout_width="@dimen/icon_size_small"
+            android:layout_height="@dimen/icon_size_small"
+            android:contentDescription="@string/receipt_count"
+            android:src="@drawable/ic_record_count" />
+
+        <TextView
+            android:id="@+id/receipt_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/text_size_secondary"
+            tools:text="0" />
+
+        <ImageView
+            android:layout_width="@dimen/icon_size_small"
+            android:layout_height="@dimen/icon_size_small"
+            android:layout_marginStart="22dp"
+            android:contentDescription="@string/invoice_type"
+            android:src="@drawable/ic_record_type" />
+
+        <TextView
+            android:id="@+id/title_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/text_size_secondary"
+            tools:text="Company" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,8 +3,8 @@
 
     <ImageView
         android:id="@+id/menu_icon"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
+        android:layout_width="@dimen/icon_size_small"
+        android:layout_height="@dimen/icon_size_small"
         android:contentDescription="@null" />
 
     <TextView
@@ -22,6 +22,5 @@
         android:layout_width="12dp"
         android:layout_height="12dp"
         android:contentDescription="@null"
-        android:scaleType="fitXY"
         android:src="@drawable/ic_chevron_right_small" />
 </merge>
