@@ -47,13 +47,12 @@
             </LinearLayout>
 
             <!--加载更多-->
-            <ProgressBar
+            <com.skybound.space.base.presentation.widget.BrandLoadingView
                 android:id="@+id/sll_load_more"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_gravity="bottom|center_horizontal"
                 android:layout_marginBottom="12dp"
-                android:indeterminateDrawable="@drawable/progress_gradient_spinner"
                 android:visibility="gone" />
 
             <!--没有更多-->
@@ -69,12 +68,11 @@
                 android:visibility="gone" />
 
             <!--居中加载（首次加载）-->
-            <ProgressBar
+            <com.skybound.space.base.presentation.widget.BrandLoadingView
                 android:id="@+id/sll_center_loading"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:layout_gravity="center"
-                android:indeterminateDrawable="@drawable/progress_gradient_spinner"
                 android:visibility="gone" />
         </FrameLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

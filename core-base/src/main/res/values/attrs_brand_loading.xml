@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="BrandLoadingView">
+        <!-- 渐变起始色（弧线尾部），默认 #103CED -->
+        <attr name="blvPrimaryColor" format="color" />
+        <!-- 渐变结束色（弧线头部），默认 #02D7FD -->
+        <attr name="blvSecondaryColor" format="color" />
+        <!-- 弧线描边宽度，默认 3.5dp -->
+        <attr name="blvStrokeWidth" format="dimension" />
+        <!-- 是否显示底部浅色轨道环，默认 true -->
+        <attr name="blvShowTrack" format="boolean" />
+    </declare-styleable>
+</resources>

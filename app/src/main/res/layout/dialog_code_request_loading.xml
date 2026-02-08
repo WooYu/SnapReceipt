@@ -7,10 +7,9 @@
     android:orientation="vertical"
     android:padding="20dp">
 
-    <ProgressBar
+    <com.skybound.space.base.presentation.widget.BrandLoadingView
         android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:indeterminateDrawable="@drawable/progress_gradient_spinner" />
+        android:layout_height="48dp" />
 
     <TextView
         android:layout_width="wrap_content"

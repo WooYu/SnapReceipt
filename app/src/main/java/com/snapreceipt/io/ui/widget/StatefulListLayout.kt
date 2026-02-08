@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -66,9 +65,9 @@ class StatefulListLayout @JvmOverloads constructor(
     private val emptyStateView: View
     private val emptyImageView: ImageView
     private val emptyTextView: TextView
-    private val loadMoreIndicator: ProgressBar
+    private val loadMoreIndicator: View
     private val noMoreHintView: TextView
-    private val centerLoadingView: ProgressBar
+    private val centerLoadingView: View
 
     private var onLoadMoreListener: (() -> Unit)? = null
 
