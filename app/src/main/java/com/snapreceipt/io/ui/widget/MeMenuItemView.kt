@@ -1,7 +1,9 @@
 package com.snapreceipt.io.ui.widget
 
 import android.content.Context
+import android.graphics.Typeface
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.widget.ImageView
@@ -22,6 +24,9 @@ class MeMenuItemView @JvmOverloads constructor(
     val menuValue: TextView
     val menuArrow: ImageView
     private val valueEndMarginWithArrow: Int
+    private val titleDefaultStyle: TextStyleSnapshot
+    private val valueDefaultStyle: TextStyleSnapshot
+    private var isTitleValueStyleSwapped: Boolean = false
 
     init {
         orientation = HORIZONTAL
@@ -40,6 +45,8 @@ class MeMenuItemView @JvmOverloads constructor(
         menuValue = findViewById(R.id.menu_value)
         menuArrow = findViewById(R.id.menu_arrow)
         valueEndMarginWithArrow = (menuValue.layoutParams as LayoutParams).marginEnd
+        titleDefaultStyle = captureTextStyle(menuTitle)
+        valueDefaultStyle = captureTextStyle(menuValue)
 
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.MeMenuItemView, defStyleAttr, 0)
         val iconDrawable = typedArray.getDrawable(R.styleable.MeMenuItemView_mmivIcon)
@@ -56,6 +63,8 @@ class MeMenuItemView @JvmOverloads constructor(
         setArrowVisible(showArrow)
         val showBackground = typedArray.getBoolean(R.styleable.MeMenuItemView_mmivShowBackground, true)
         setBackgroundVisible(showBackground)
+        val swapTitleValueStyle = typedArray.getBoolean(R.styleable.MeMenuItemView_mmivSwapTitleValueStyle, false)
+        setTitleValueStyleSwapped(swapTitleValueStyle)
         typedArray.recycle()
     }
 
@@ -102,6 +111,35 @@ class MeMenuItemView @JvmOverloads constructor(
         }
     }
 
+    fun setTitleValueStyleSwapped(swapped: Boolean) {
+        if (isTitleValueStyleSwapped == swapped) {
+            return
+        }
+        isTitleValueStyleSwapped = swapped
+        if (swapped) {
+            applyTextStyle(menuTitle, valueDefaultStyle)
+            applyTextStyle(menuValue, titleDefaultStyle)
+        } else {
+            applyTextStyle(menuTitle, titleDefaultStyle)
+            applyTextStyle(menuValue, valueDefaultStyle)
+        }
+    }
+
+    private fun captureTextStyle(view: TextView): TextStyleSnapshot {
+        return TextStyleSnapshot(
+            textColor = view.currentTextColor,
+            textSizePx = view.textSize,
+            typeface = view.typeface,
+            typefaceStyle = view.typeface?.style ?: Typeface.NORMAL
+        )
+    }
+
+    private fun applyTextStyle(view: TextView, style: TextStyleSnapshot) {
+        view.setTextColor(style.textColor)
+        view.setTextSize(TypedValue.COMPLEX_UNIT_PX, style.textSizePx)
+        view.setTypeface(style.typeface, style.typefaceStyle)
+    }
+
     private fun updateValueEndMargin(arrowVisible: Boolean) {
         val layoutParams = menuValue.layoutParams as LayoutParams
         val desiredMarginEnd = if (arrowVisible) valueEndMarginWithArrow else 0
@@ -121,4 +159,11 @@ class MeMenuItemView @JvmOverloads constructor(
         private const val DEFAULT_VERTICAL_PADDING_DP = 14
         private const val DEFAULT_BACKGROUND_RES = R.drawable.bg_surface_card_large
     }
+
+    private data class TextStyleSnapshot(
+        val textColor: Int,
+        val textSizePx: Float,
+        val typeface: Typeface?,
+        val typefaceStyle: Int
+    )
 }
