@@ -3,10 +3,15 @@ package com.snapreceipt.io.ui.me.feedback
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityFeedbackBinding
 import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
 
 class FeedbackActivity : EdgeToEdgeActivity() {
+
+    companion object {
+        private const val MAX_INPUT_LENGTH = 1000
+    }
 
     private var _binding: ActivityFeedbackBinding? = null
     private val binding get() = _binding!!
@@ -23,7 +28,7 @@ class FeedbackActivity : EdgeToEdgeActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 val length = s?.length ?: 0
-                binding.feedbackCharCount.text = "$length/1000"
+                binding.feedbackCharCount.text = getString(R.string.char_count_format, length, MAX_INPUT_LENGTH)
             }
         })
     }

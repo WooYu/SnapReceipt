@@ -171,6 +171,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
                 android:layout_weight="1"
+                android:autofillHints="emailAddress"
                 android:background="@null"
                 android:hint="@string/login_email_hint"
                 android:inputType="textEmailAddress"

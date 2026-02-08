@@ -145,6 +145,7 @@
     <string name="privacy_policy_label">Privacy Policy</string>
     <string name="feedback_message">If you have any comments or suggestions regarding the software, please contact the email address below to provide feedback.</string>
     <string name="feedback_email">receiptfold@gmail.com</string>
+    <string name="char_count_format">%1$d/%2$d</string>
     <string name="personal_profile">Personal Profile</string>
     <string name="name_label">Name</string>
     <string name="email_label">Email</string>
