@@ -12,11 +12,9 @@
         android:padding="24dp">
 
         <ProgressBar
-            style="?android:attr/progressBarStyleLarge"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:indeterminateTint="@color/colorPrimary"
-            android:indeterminateTintMode="src_in" />
+            android:indeterminateDrawable="@drawable/progress_gradient_spinner" />
 
         <TextView
             android:id="@+id/lov_text"
