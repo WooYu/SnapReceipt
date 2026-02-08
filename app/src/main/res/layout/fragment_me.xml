@@ -121,44 +121,17 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.snapreceipt.io.ui.widget.SnapCardView>
 
-    <LinearLayout
+    <com.snapreceipt.io.ui.widget.MeMenuItemView
         android:id="@+id/menu_export"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:background="@drawable/bg_surface_card_small"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="16dp"
         app:layout_constraintEnd_toEndOf="@id/bound_right"
         app:layout_constraintStart_toStartOf="@id/bound_left"
-        app:layout_constraintTop_toBottomOf="@id/edit_profile_btn">
-
-        <ImageView
-            android:id="@+id/menu_export_icon"
-            android:layout_width="@dimen/icon_size_small"
-            android:layout_height="@dimen/icon_size_small"
-            android:contentDescription="@null"
-            android:src="@drawable/ic_me_export" />
-
-        <TextView
-            android:id="@+id/menu_export_title"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="15dp"
-            android:layout_weight="1"
-            android:text="@string/export_records"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/text_size_secondary"
-            android:textStyle="bold" />
-
-        <ImageView
-            android:id="@+id/menu_export_arrow"
-            android:layout_width="@dimen/arrow_size_small"
-            android:layout_height="@dimen/arrow_size_small"
-            android:contentDescription="@null"
-            android:src="@drawable/ic_chevron_right_small" />
-    </LinearLayout>
+        app:layout_constraintTop_toBottomOf="@id/edit_profile_btn"
+        app:mmivIcon="@drawable/ic_me_export"
+        app:mmivTitle="@string/export_records" />
 
     <LinearLayout
         android:layout_width="0dp"
