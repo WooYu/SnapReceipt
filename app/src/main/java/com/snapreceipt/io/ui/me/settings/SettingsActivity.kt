@@ -31,11 +31,10 @@ class SettingsActivity : EdgeToEdgeActivity() {
         _binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.pageHeader.title.setText(R.string.settings)
         binding.menuSwitchAccount.menuTitle.setText(R.string.switch_account)
         binding.menuClearCache.menuTitle.setText(R.string.clear_cache)
         binding.menuClearCache.menuValue.visibility = View.VISIBLE
-        binding.pageHeader.btnBack.setOnClickListener { finish() }
+        binding.pageHeader.setOnLeftIconClickListener { finish() }
         binding.menuSwitchAccount.root.setOnClickListener {
             Toast.makeText(this, getString(R.string.switch_account), Toast.LENGTH_SHORT).show()
         }

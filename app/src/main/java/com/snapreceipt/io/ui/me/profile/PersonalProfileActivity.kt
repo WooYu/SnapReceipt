@@ -34,8 +34,7 @@ class PersonalProfileActivity : EdgeToEdgeActivity() {
         _binding = ActivityPersonalProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.pageHeader.title.setText(R.string.personal_profile)
-        binding.pageHeader.btnBack.setOnClickListener { finish() }
+        binding.pageHeader.setOnLeftIconClickListener { finish() }
 
         observeState(getUserUseCase()) { result ->
             val user = result.getOrNull()

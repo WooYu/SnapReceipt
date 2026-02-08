@@ -28,14 +28,14 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_begin="@dimen/status_bar_height" />
 
-    <include
+    <com.snapreceipt.io.ui.widget.PageTitleBar
         android:id="@+id/page_header"
-        layout="@layout/view_page_top_header"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:ptbTitleText="@string/personal_profile" />
 
     <ScrollView
         android:layout_width="0dp"

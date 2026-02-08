@@ -71,12 +71,10 @@
             android:paddingBottom="16dp">
 
             <!-- ====== 发票照片卡片 ====== -->
-            <com.google.android.material.card.MaterialCardView
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@android:color/white"
-                app:cardCornerRadius="@dimen/corner_radius_large"
-                app:cardElevation="0dp">
+                android:background="@drawable/bg_surface_card_large">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -108,12 +106,10 @@
                             android:textSize="12sp" />
                     </LinearLayout>
 
-                    <com.google.android.material.card.MaterialCardView
+                    <FrameLayout
                         android:layout_width="60dp"
                         android:layout_height="60dp"
-                        app:cardBackgroundColor="@color/colorBackground"
-                        app:cardCornerRadius="8dp"
-                        app:cardElevation="0dp">
+                        android:background="@drawable/bg_surface_card_background_small">
 
                         <ImageView
                             android:id="@+id/invoice_image"
@@ -121,18 +117,16 @@
                             android:layout_height="match_parent"
                             android:contentDescription="@string/invoice_photo"
                             android:scaleType="centerCrop" />
-                    </com.google.android.material.card.MaterialCardView>
+                    </FrameLayout>
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            </FrameLayout>
 
             <!-- ====== 金额卡片 ====== -->
-            <com.google.android.material.card.MaterialCardView
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                app:cardBackgroundColor="@android:color/white"
-                app:cardCornerRadius="@dimen/corner_radius_large"
-                app:cardElevation="0dp">
+                android:background="@drawable/bg_surface_card_large">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -190,16 +184,14 @@
                         android:background="@drawable/bg_dashed_divider"
                         android:layerType="software" />
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            </FrameLayout>
 
             <!-- ====== 表单区域 ====== -->
-            <com.google.android.material.card.MaterialCardView
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                app:cardBackgroundColor="@android:color/white"
-                app:cardCornerRadius="@dimen/corner_radius_large"
-                app:cardElevation="0dp">
+                android:background="@drawable/bg_surface_card_large">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -392,20 +384,20 @@
                         android:textSize="15sp" />
 
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            </FrameLayout>
 
         </LinearLayout>
     </ScrollView>
 
     <!-- 底部保存按钮 -->
-    <Button
+    <com.snapreceipt.io.ui.widget.PrimaryActionButton
         android:id="@+id/save_btn"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_marginStart="@dimen/page_start_margin"
         android:layout_marginEnd="@dimen/page_end_margin"
         android:layout_marginBottom="24dp"
-        android:background="@drawable/bg_button_gradient"
+        app:pabEnableShadow="false"
         android:text="@string/save_upload"
         android:textAllCaps="false"
         android:textColor="@android:color/white"

@@ -9,5 +9,26 @@
         <attr name="pabPressedDarkenFactor" format="float" />
         <attr name="pabGradientStartColor" format="color" />
         <attr name="pabGradientEndColor" format="color" />
+        <attr name="pabEnableShadow" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="SnapCardView">
+        <attr name="scvShowShadow" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="MeMenuItemView">
+        <attr name="mmivIcon" format="reference" />
+        <attr name="mmivTitle" format="reference|string" />
+        <attr name="mmivShowArrow" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="PageTitleBar">
+        <attr name="ptbTitleText" format="reference|string" />
+        <attr name="ptbTitleTextColor" format="color" />
+        <attr name="ptbLeftIcon" format="reference" />
+        <attr name="ptbRightIcon" format="reference" />
+        <attr name="ptbShowLeftIcon" format="boolean" />
+        <attr name="ptbShowRightIcon" format="boolean" />
+        <attr name="ptbBackground" format="color|reference" />
     </declare-styleable>
 </resources>
