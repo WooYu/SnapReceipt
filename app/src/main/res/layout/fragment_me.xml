@@ -121,6 +121,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.snapreceipt.io.ui.widget.SnapCardView>
 
+    <!--导出记录-->
     <com.snapreceipt.io.ui.widget.MeMenuItemView
         android:id="@+id/menu_export"
         android:layout_width="0dp"

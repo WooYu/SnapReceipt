@@ -21,13 +21,6 @@
         android:orientation="vertical"
         app:layout_constraintGuide_end="@dimen/page_end_margin" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/bound_top"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_begin="@dimen/status_bar_height" />
-
     <com.snapreceipt.io.ui.widget.PageTitleBar
         android:id="@+id/page_header"
         android:layout_width="0dp"
@@ -41,7 +34,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
-        android:paddingTop="18dp"
+        android:paddingTop="20dp"
         android:paddingBottom="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/bound_right"
@@ -49,8 +42,8 @@
         app:layout_constraintTop_toBottomOf="@id/page_header">
 
         <com.google.android.material.imageview.ShapeableImageView
-            android:layout_width="110dp"
-            android:layout_height="110dp"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
             android:layout_gravity="center_horizontal"
             android:contentDescription="@string/avatar"
             android:scaleType="centerCrop"
@@ -62,7 +55,7 @@
             android:id="@+id/profile_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
+            android:layout_marginTop="20dp"
             app:mmivSwapTitleValueStyle="true"
             app:mmivTitle="@string/name_label"
             app:mmivValueText="@string/placeholder_dash" />
