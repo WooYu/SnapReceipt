@@ -13,6 +13,37 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.snapreceipt.io.R
 
+/**
+ * Reusable menu row used in the "Me" page.
+ *
+ * Features:
+ * - Left icon is optional. If `mmivIcon` is not set, icon is hidden.
+ * - Title plus optional value text before the arrow.
+ * - Optional arrow and optional background.
+ * - Can swap title/value text styles.
+ *
+ * XML example:
+ * ```xml
+ * <com.snapreceipt.io.ui.widget.MeMenuItemView
+ *     android:id="@+id/menu_clear_cache"
+ *     android:layout_width="match_parent"
+ *     android:layout_height="wrap_content"
+ *     app:mmivIcon="@drawable/ic_me_settings"
+ *     app:mmivTitle="@string/clear_cache"
+ *     app:mmivValueText="128 MB"
+ *     app:mmivShowArrow="true"
+ *     app:mmivShowBackground="true"
+ *     app:mmivSwapTitleValueStyle="false" />
+ * ```
+ *
+ * Kotlin example:
+ * ```kotlin
+ * val item = findViewById<MeMenuItemView>(R.id.menu_clear_cache)
+ * item.setValueText("0 MB")
+ * item.setTitleValueStyleSwapped(true)
+ * item.setArrowVisible(true)
+ * ```
+ */
 class MeMenuItemView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -87,12 +118,14 @@ class MeMenuItemView @JvmOverloads constructor(
     }
 
     fun setValueText(value: CharSequence?) {
+        // Keep row compact: empty value does not reserve view space.
         val shouldShow = !value.isNullOrBlank()
         menuValue.text = value
         menuValue.visibility = if (shouldShow) VISIBLE else GONE
     }
 
     fun setArrowVisible(visible: Boolean) {
+        // Remove value-end gap when arrow is hidden.
         menuArrow.visibility = if (visible) VISIBLE else GONE
         updateValueEndMargin(visible)
     }
@@ -115,6 +148,7 @@ class MeMenuItemView @JvmOverloads constructor(
         if (isTitleValueStyleSwapped == swapped) {
             return
         }
+        // Swap full style snapshot (color, text size, typeface/style).
         isTitleValueStyleSwapped = swapped
         if (swapped) {
             applyTextStyle(menuTitle, valueDefaultStyle)
