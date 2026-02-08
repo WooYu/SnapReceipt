@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.viewModels
-import com.snapreceipt.io.MainActivity
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentReceiptsBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
@@ -44,7 +43,6 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     }
 
     override fun onDestroyView() {
-        setGlobalLoadingOverlay(null)
         super.onDestroyView()
         _binding = null
     }
@@ -97,7 +95,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         val allSelected = state.receipts.isNotEmpty() && state.selectedIds.size == state.receipts.size
         binding.selectAllIcon.isSelected = allSelected
 
-        setGlobalLoadingOverlay(state)
+        updateLoadingDialog(state)
         binding.exportActionBtn.isEnabled = !state.exporting
         binding.exportActionBtn.alpha = if (state.exporting) 0.6f else 1f
         binding.selectAllBtn.isEnabled = !state.exporting
@@ -201,16 +199,11 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         }
     }
 
-    private fun setGlobalLoadingOverlay(state: ReceiptsUiState?) {
-        val host = activity as? MainActivity ?: return
-        if (state == null) {
-            host.hideGlobalLoadingOverlay()
-            return
-        }
+    private fun updateLoadingDialog(state: ReceiptsUiState) {
         when {
-            state.exporting -> host.showGlobalLoadingOverlay(R.string.exporting_receipts)
-            state.loading || state.refreshing -> host.showGlobalLoadingOverlay(R.string.loading)
-            else -> host.hideGlobalLoadingOverlay()
+            state.exporting -> showLoading(true, getString(R.string.exporting_receipts))
+            state.loading || state.refreshing -> showLoading(true, getString(R.string.loading))
+            else -> showLoading(false)
         }
     }
 }

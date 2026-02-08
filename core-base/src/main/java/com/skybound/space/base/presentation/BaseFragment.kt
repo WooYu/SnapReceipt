@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
+import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -36,12 +37,17 @@ abstract class BaseFragment<VM : com.skybound.space.base.presentation.viewmodel.
     }
 
     protected fun showLoading(show: Boolean) {
+        showLoading(show, null)
+    }
+
+    protected fun showLoading(show: Boolean, message: CharSequence?) {
         if (!show) {
             dismissLoading()
             return
         }
         if (!isAdded) return
         val dialog = loadingDialog ?: createLoadingDialog().also { loadingDialog = it }
+        updateLoadingMessage(dialog, message)
         if (!dialog.isShowing) {
             dialog.show()
         }
@@ -97,6 +103,17 @@ abstract class BaseFragment<VM : com.skybound.space.base.presentation.viewmodel.
     private fun dismissLoading() {
         loadingDialog?.dismiss()
         loadingDialog = null
+    }
+
+    private fun updateLoadingMessage(dialog: Dialog, message: CharSequence?) {
+        val messageView = dialog.findViewById<TextView>(R.id.loading_message) ?: return
+        if (message.isNullOrBlank()) {
+            messageView.text = ""
+            messageView.visibility = View.GONE
+            return
+        }
+        messageView.text = message
+        messageView.visibility = View.VISIBLE
     }
 
     private fun createLoadingDialog(): Dialog {
