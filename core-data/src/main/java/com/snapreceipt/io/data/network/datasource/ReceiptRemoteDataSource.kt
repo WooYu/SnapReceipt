@@ -10,7 +10,6 @@ import com.snapreceipt.io.data.network.model.category.CategoryItemDto
 import com.snapreceipt.io.data.network.model.category.CategoryListRequestDto
 import com.snapreceipt.io.data.network.model.receipt.ReceiptDeleteRequestDto
 import com.snapreceipt.io.data.network.model.receipt.ReceiptExportRequestDto
-import com.snapreceipt.io.data.network.model.receipt.ReceiptScanResultDto
 import com.snapreceipt.io.data.network.model.receipt.ScanRequestDto
 import com.snapreceipt.io.data.network.service.ReceiptApi
 import com.snapreceipt.io.domain.model.ExportRecordEntity
@@ -22,7 +21,7 @@ class ReceiptRemoteDataSource(
     private val api: ReceiptApi,
     dispatchers: CoroutineDispatchersProvider
 ) : BaseRemoteDataSource(dispatchers) {
-    suspend fun scan(imageUrl: String): NetworkResult<ReceiptScanResultDto> {
+    suspend fun scan(imageUrl: String): NetworkResult<ReceiptEntity> {
         return request { api.scan(ScanRequestDto(imageUrl)) }
     }
 

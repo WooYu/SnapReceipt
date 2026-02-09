@@ -2,9 +2,7 @@ package com.snapreceipt.io.data.repository
 
 import com.snapreceipt.io.data.network.datasource.ReceiptRemoteDataSource
 import com.snapreceipt.io.data.network.model.category.toItem
-import com.snapreceipt.io.data.network.model.receipt.toEntity
-import com.snapreceipt.io.data.network.model.receipt.toSaveRequestPayload
-import com.snapreceipt.io.data.network.model.receipt.toUpdateRequestPayload
+import com.snapreceipt.io.data.network.model.receipt.toRequestPayload
 import com.snapreceipt.io.domain.model.ExportRecordEntity
 import com.snapreceipt.io.domain.model.query.ExportRecordListQueryEntity
 import com.snapreceipt.io.domain.model.ReceiptCategory
@@ -19,14 +17,14 @@ class ReceiptRemoteRepositoryImpl @Inject constructor(
 ) : ReceiptRemoteRepository {
 
     override suspend fun scan(imageUrl: String): ReceiptEntity =
-        remoteDataSource.scan(imageUrl).getOrThrow().toEntity()
+        remoteDataSource.scan(imageUrl).getOrThrow()
 
     override suspend fun save(request: ReceiptEntity) {
-        remoteDataSource.save(request.toSaveRequestPayload()).getOrThrow()
+        remoteDataSource.save(request.toRequestPayload()).getOrThrow()
     }
 
     override suspend fun update(request: ReceiptEntity) {
-        remoteDataSource.update(request.toUpdateRequestPayload()).getOrThrow()
+        remoteDataSource.update(request.toRequestPayload(includeReceiptId = true)).getOrThrow()
     }
 
     override suspend fun delete(receiptId: Long) {

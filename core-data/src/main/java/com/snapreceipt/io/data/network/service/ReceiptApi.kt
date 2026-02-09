@@ -9,7 +9,6 @@ import com.snapreceipt.io.data.network.model.category.CategoryItemDto
 import com.snapreceipt.io.data.network.model.category.CategoryListRequestDto
 import com.snapreceipt.io.data.network.model.receipt.ReceiptDeleteRequestDto
 import com.snapreceipt.io.data.network.model.receipt.ReceiptExportRequestDto
-import com.snapreceipt.io.data.network.model.receipt.ReceiptScanResultDto
 import com.snapreceipt.io.data.network.model.receipt.ScanRequestDto
 import com.snapreceipt.io.domain.model.ExportRecordEntity
 import com.snapreceipt.io.domain.model.ReceiptEntity
@@ -21,7 +20,7 @@ import retrofit2.http.POST
 
 interface ReceiptApi {
     @POST("api/receipt/scan")
-    suspend fun scan(@Body request: ScanRequestDto): BaseResponse<ReceiptScanResultDto>
+    suspend fun scan(@Body request: ScanRequestDto): BaseResponse<ReceiptEntity>
 
     @POST("api/receipt/save")
     suspend fun save(@Body request: Map<String, @JvmSuppressWildcards Any>): BaseEmptyResponse
