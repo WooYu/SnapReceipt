@@ -42,7 +42,6 @@ class ImagePreviewActivity : EdgeToEdgeActivity() {
     }
 
     override fun onDestroy() {
-        Glide.with(this).clear(binding.previewImage)
         super.onDestroy()
         _binding = null
     }
