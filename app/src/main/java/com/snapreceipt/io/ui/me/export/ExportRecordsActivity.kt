@@ -32,7 +32,6 @@ class ExportRecordsActivity : BaseActivity<ExportRecordsViewModel>() {
         adapter = ExportRecordsAdapter { record -> openExportFile(record) }
         binding.statefulList.setAdapter(adapter)
         binding.statefulList.setOnLoadMoreListener { viewModel.loadMore() }
-        binding.statefulList.setOnRefreshListener { viewModel.refresh() }
         // RecyclerView in this page needs horizontal padding
         val horizontalPadding = resources.getDimensionPixelSize(R.dimen.page_start_margin)
         binding.statefulList.recyclerView.setPadding(

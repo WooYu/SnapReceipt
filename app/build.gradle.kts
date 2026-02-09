@@ -113,7 +113,6 @@ dependencies {
     implementation(libs.coroutines.android)
     implementation(libs.coroutines.core)
     implementation(libs.hilt.android)
-    implementation(libs.swiperefreshlayout)
     implementation(libs.timber)
     implementation(libs.glide)
     implementation(libs.ucrop)
