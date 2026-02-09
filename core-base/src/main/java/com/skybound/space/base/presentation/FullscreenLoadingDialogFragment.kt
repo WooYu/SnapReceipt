@@ -3,6 +3,7 @@ package com.skybound.space.base.presentation
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -82,8 +83,13 @@ internal class FullscreenLoadingDialogFragment : DialogFragment() {
         )
         window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-        // Keep host system bar color/icon appearance unchanged while showing loading.
-        WindowCompat.setDecorFitsSystemWindows(window, true)
+        // Cover system bars as well so the loading scrim is truly fullscreen.
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = Color.TRANSPARENT
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
     }
 
     companion object {

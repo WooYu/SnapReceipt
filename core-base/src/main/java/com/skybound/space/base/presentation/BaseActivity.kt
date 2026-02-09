@@ -1,8 +1,15 @@
 package com.skybound.space.base.presentation
 
+import android.graphics.Color
 import android.os.Bundle
+import android.os.Build
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
+import com.google.android.material.color.MaterialColors
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -29,10 +36,24 @@ abstract class BaseActivity<VM : com.skybound.space.base.presentation.viewmodel.
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Keep Activity window behavior stable and avoid forcing edge-to-edge globally.
-        WindowCompat.setDecorFitsSystemWindows(window, true)
+        // Draw into status bar area, but keep navigation bar area reserved by default insets handling.
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = MaterialColors.getColor(
+            this,
+            com.google.android.material.R.attr.colorSurface,
+            Color.WHITE
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
         observeEvents()
         observeSessionEvents()
+    }
+
+    override fun onContentChanged() {
+        super.onContentChanged()
+        applyDefaultNavigationBarInsets()
     }
 
     private fun observeEvents() {
@@ -127,5 +148,25 @@ abstract class BaseActivity<VM : com.skybound.space.base.presentation.viewmodel.
         return loadingDialogController ?: LoadingDialogController(supportFragmentManager).also {
             loadingDialogController = it
         }
+    }
+
+    private fun applyDefaultNavigationBarInsets() {
+        val contentParent = findViewById<ViewGroup>(android.R.id.content) ?: return
+        val contentRoot = contentParent.getChildAt(0) ?: return
+        val initialLeft = contentRoot.paddingLeft
+        val initialTop = contentRoot.paddingTop
+        val initialRight = contentRoot.paddingRight
+        val initialBottom = contentRoot.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(contentRoot) { view, insets ->
+            val navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            view.updatePadding(
+                left = initialLeft + navInsets.left,
+                top = initialTop,
+                right = initialRight + navInsets.right,
+                bottom = initialBottom + navInsets.bottom
+            )
+            insets
+        }
+        ViewCompat.requestApplyInsets(contentRoot)
     }
 }
