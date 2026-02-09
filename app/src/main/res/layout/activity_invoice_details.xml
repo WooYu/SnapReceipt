@@ -143,11 +143,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="12dp"
+                        android:layout_marginBottom="10dp"
                         android:text="@string/currency_symbol_usd"
                         android:textColor="@color/text_primary"
                         android:textSize="@dimen/text_size_title"
                         android:textStyle="bold"
-                        app:layout_constraintBaseline_toBaselineOf="@id/amount_readonly_value"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/amount_readonly_value"
                         app:layout_constraintHorizontal_chainStyle="packed"
                         app:layout_constraintStart_toStartOf="parent" />
@@ -173,7 +174,7 @@
                     android:layout_marginTop="12dp"
                     android:background="@drawable/bg_invoice_field_block"
                     android:paddingHorizontal="16dp"
-                    android:paddingVertical="3dp"
+                    android:paddingVertical="5dp"
                     android:visibility="gone"
                     tools:visibility="visible">
 
@@ -182,11 +183,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="12dp"
+                        android:layout_marginBottom="10dp"
                         android:text="@string/currency_symbol_usd"
                         android:textColor="@color/text_primary"
                         android:textSize="@dimen/text_size_title"
                         android:textStyle="bold"
-                        app:layout_constraintBaseline_toBaselineOf="@id/input_amount"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/input_amount"
                         app:layout_constraintHorizontal_chainStyle="packed"
                         app:layout_constraintStart_toStartOf="parent" />
