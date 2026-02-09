@@ -187,7 +187,7 @@
     <string name="terms_of_service">Terms of Service</string>
 
     <!-- Messages -->
-    <string name="success">Success</string>
+    <string name="receipt_save_success">Saved successfully!</string>
     <string name="error">Error</string>
     <string name="unexpected_error">Unexpected error</string>
     <string name="loading">Loading…</string>

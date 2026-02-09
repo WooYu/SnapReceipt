@@ -178,7 +178,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     override fun onCustomEvent(event: UiEvent.Custom) {
         when (event.type) {
             InvoiceDetailsEventKeys.SHOW_SUCCESS -> {
-                Toast.makeText(this, getString(R.string.success), Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.receipt_save_success), Toast.LENGTH_SHORT).show()
             }
 
             InvoiceDetailsEventKeys.NAVIGATE_TO_MAIN -> {

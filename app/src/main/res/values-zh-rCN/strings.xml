@@ -186,7 +186,7 @@
     <string name="terms_of_service">服务条款</string>
 
     <!-- Messages -->
-    <string name="success">操作成功</string>
+    <string name="receipt_save_success">保存成功</string>
     <string name="error">出错了</string>
     <string name="unexpected_error">发生未知错误</string>
     <string name="loading">加载中…</string>
