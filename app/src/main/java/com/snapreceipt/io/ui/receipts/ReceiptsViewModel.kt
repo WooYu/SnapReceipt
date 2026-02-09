@@ -13,6 +13,7 @@ import com.snapreceipt.io.domain.usecase.receipt.UpdateReceiptRemoteUseCase
 import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import com.skybound.space.core.util.DateFormatUtil
+import com.skybound.space.core.util.LogHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +30,10 @@ class ReceiptsViewModel @Inject constructor(
     private val exportReceiptsRemoteUseCase: ExportReceiptsRemoteUseCase,
     private val dispatchers: CoroutineDispatchersProvider
 ) : BaseViewModel(dispatchers, R.string.unexpected_error) {
+
+    companion object {
+        private const val LOG_TAG = "ReceiptsFilterVM"
+    }
 
     private val _uiState = MutableStateFlow(ReceiptsUiState())
     val uiState: StateFlow<ReceiptsUiState> = _uiState.asStateFlow()
@@ -58,21 +63,27 @@ class ReceiptsViewModel @Inject constructor(
     }
 
     fun filterByDateRange(startDate: Long, endDate: Long) {
+        val start = DateFormatUtil.formatApiDate(startDate)
+        val end = DateFormatUtil.formatApiDate(endDate)
+        LogHelper.d(LOG_TAG, "filterByDateRange start=$start end=$end")
         currentQuery = ReceiptListQueryEntity(
-            receiptDateStart = DateFormatUtil.formatApiDate(startDate),
-            receiptDateEnd = DateFormatUtil.formatApiDate(endDate)
+            receiptDateStart = start,
+            receiptDateEnd = end
         )
         fetchPage(page = 1, reset = true, showLoading = true)
     }
 
     fun filterByType(type: String) {
-        val categoryId = ReceiptCategory.idForLabel(type).takeIf { it > 0L }
+        val normalizedType = type.trim()
+        val categoryId = ReceiptCategory.idForLabel(normalizedType).takeIf { it > 0L }
+        LogHelper.d(LOG_TAG, "filterByType label='$normalizedType' categoryId=$categoryId")
         currentQuery = ReceiptListQueryEntity(categoryId = categoryId)
         fetchPage(page = 1, reset = true, showLoading = true)
     }
 
     fun filterByTitleType(type: String?) {
         titleTypeFilter = type?.trim().takeIf { !it.isNullOrBlank() }
+        LogHelper.d(LOG_TAG, "filterByTitleType titleTypeFilter='${titleTypeFilter.orEmpty()}'")
         val filtered = applyTitleFilter(lastFetchedReceipts)
         _uiState.update { current ->
             val validIds = filtered.mapNotNull { it.receiptId }.toSet()
@@ -190,6 +201,10 @@ class ReceiptsViewModel @Inject constructor(
             )
         }
         val query = applyDefaultDateFilter(currentQuery.copy(pageNum = page, pageSize = pageSize))
+        LogHelper.d(
+            LOG_TAG,
+            "fetchPage page=$page reset=$reset showLoading=$showLoading refreshing=$refreshing loadingMore=$loadingMore query=$query titleTypeFilter='${titleTypeFilter.orEmpty()}'"
+        )
         viewModelScope.launch(dispatchers.io) {
             fetchReceiptsUseCase(query)
                 .onSuccess { receipts ->
@@ -198,6 +213,10 @@ class ReceiptsViewModel @Inject constructor(
                     hasMore = receipts.size >= pageSize
                     nextPage = if (hasMore) page + 1 else page
                     val filtered = applyTitleFilter(rawMerged)
+                    LogHelper.d(
+                        LOG_TAG,
+                        "fetchPage success page=$page received=${receipts.size} merged=${rawMerged.size} filtered=${filtered.size} hasMore=$hasMore nextPage=$nextPage"
+                    )
                     _uiState.update { current ->
                         val validIds = filtered.mapNotNull { it.receiptId }.toSet()
                         val nextSelected = current.selectedIds.intersect(validIds)
@@ -214,7 +233,10 @@ class ReceiptsViewModel @Inject constructor(
                         )
                     }
                 }
-                .onFailure { updateError(it) }
+                .onFailure {
+                    LogHelper.e(LOG_TAG, "fetchPage failed", it)
+                    updateError(it)
+                }
         }
     }
 

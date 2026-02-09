@@ -11,6 +11,7 @@ import com.skybound.space.base.presentation.BaseFragment
 import com.skybound.space.base.presentation.observeState
 import com.skybound.space.core.config.AppConfig
 import com.skybound.space.core.util.DateFormatUtil
+import com.skybound.space.core.util.LogHelper
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentReceiptsBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
@@ -22,6 +23,10 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_receipts) {
+    companion object {
+        private const val LOG_TAG = "ReceiptsFilter"
+    }
+
     override val viewModel: ReceiptsViewModel by viewModels()
 
     private var _binding: FragmentReceiptsBinding? = null
@@ -123,23 +128,23 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                 filterStartMillis = start
                 filterEndMillis = end
                 binding.filterDateBtn.text = formatDateRange(start, end)
+                LogHelper.d(
+                    LOG_TAG,
+                    "Date filter selected start=${DateFormatUtil.formatApiDate(start)} end=${DateFormatUtil.formatApiDate(end)}"
+                )
                 viewModel.filterByDateRange(start, end)
             }.show(parentFragmentManager, "date_range_picker")
         }
         binding.filterTypeBtn.setOnClickListener {
-            val initial = filterTypeLabel ?: binding.filterTypeBtn.text.toString()
+            val initial = filterTypeLabel.orEmpty()
             InvoiceCategoryBottomSheet.newInstance(initial) { selected ->
-                filterTypeLabel = selected
-                binding.filterTypeBtn.text = selected
-                viewModel.filterByType(selected)
+                applyTypeFilterSelection(selected)
             }.show(parentFragmentManager, "type_filter_picker")
         }
         binding.filterTitleBtn.setOnClickListener {
-            val initial = filterTitleLabel ?: binding.filterTitleBtn.text.toString()
+            val initial = filterTitleLabel.orEmpty()
             TitleTypeBottomSheet(initial) { selected ->
-                filterTitleLabel = selected
-                binding.filterTitleBtn.text = selected
-                viewModel.filterByTitleType(selected)
+                applyTitleFilterSelection(selected)
             }.show(parentFragmentManager, "title_filter_picker")
         }
         binding.exportActionBtn.setOnClickListener {
@@ -154,6 +159,28 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                 viewModel.selectAll()
             }
         }
+    }
+
+    private fun applyTypeFilterSelection(rawSelected: String) {
+        val normalized = rawSelected.trim()
+        filterTypeLabel = normalized.ifBlank { null }
+        binding.filterTypeBtn.text = filterTypeLabel ?: getString(R.string.filter_type)
+        LogHelper.d(
+            LOG_TAG,
+            "Type filter selected='$normalized', applied='${filterTypeLabel ?: getString(R.string.filter_type)}'"
+        )
+        viewModel.filterByType(filterTypeLabel.orEmpty())
+    }
+
+    private fun applyTitleFilterSelection(rawSelected: String) {
+        val normalized = rawSelected.trim()
+        filterTitleLabel = normalized.ifBlank { null }
+        binding.filterTitleBtn.text = filterTitleLabel ?: getString(R.string.filter_title)
+        LogHelper.d(
+            LOG_TAG,
+            "Title filter selected='$normalized', applied='${filterTitleLabel ?: getString(R.string.filter_title)}'"
+        )
+        viewModel.filterByTitleType(filterTitleLabel)
     }
 
     private fun openReceiptDetails(receipt: ReceiptEntity) {
