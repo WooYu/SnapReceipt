@@ -9,6 +9,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.skybound.space.core.util.DateFormatUtil
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.BottomSheetDateRangeBinding
+import com.snapreceipt.io.ui.widget.applyPickerStyle
 import java.util.Calendar
 
 class DateRangeBottomSheet(
@@ -73,6 +74,9 @@ class DateRangeBottomSheet(
     }
 
     private fun setupPickers() {
+        val selectedColor = ContextCompat.getColor(requireContext(), R.color.colorPrimary)
+        val unselectedColor = ContextCompat.getColor(requireContext(), R.color.text_primary)
+
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
         binding.pickerYear.minValue = currentYear - 2
         binding.pickerYear.maxValue = currentYear + 2
@@ -83,6 +87,10 @@ class DateRangeBottomSheet(
         binding.pickerYear.setFormatter { value -> value.toString() }
         binding.pickerMonth.setFormatter { value -> value.toString().padStart(2, '0') }
         binding.pickerDay.setFormatter { value -> value.toString().padStart(2, '0') }
+
+        binding.pickerYear.applyPickerStyle(selectedColor, unselectedColor)
+        binding.pickerMonth.applyPickerStyle(selectedColor, unselectedColor)
+        binding.pickerDay.applyPickerStyle(selectedColor, unselectedColor)
 
         syncPickersWithCalendar(startCalendar)
 
