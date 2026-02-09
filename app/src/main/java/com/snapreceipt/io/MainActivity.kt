@@ -19,6 +19,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : BaseActivity<MainViewModel>() {
     override val viewModel: MainViewModel by viewModels()
+    override val useDefaultNavigationBarInsets: Boolean = false
     @Inject
     lateinit var injectedSessionManager: SessionManager
     override val sessionManager: SessionManager

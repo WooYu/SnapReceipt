@@ -33,6 +33,7 @@ abstract class BaseActivity<VM : com.skybound.space.base.presentation.viewmodel.
     protected open val sessionManager: SessionManager? = null
     private var sessionEventHandled = false
     private var loadingDialogController: LoadingDialogController? = null
+    protected open val useDefaultNavigationBarInsets: Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +54,9 @@ abstract class BaseActivity<VM : com.skybound.space.base.presentation.viewmodel.
 
     override fun onContentChanged() {
         super.onContentChanged()
-        applyDefaultNavigationBarInsets()
+        if (useDefaultNavigationBarInsets) {
+            applyDefaultNavigationBarInsets()
+        }
     }
 
     private fun observeEvents() {
