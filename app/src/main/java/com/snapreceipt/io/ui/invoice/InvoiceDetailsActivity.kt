@@ -21,6 +21,7 @@ import com.snapreceipt.io.MainActivity
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityInvoiceDetailsBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
+import com.snapreceipt.io.ui.common.ReceiptTypeMapper
 import com.snapreceipt.io.ui.invoice.bottomsheet.DateTimePickerBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceCategoryBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
@@ -37,8 +38,6 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     companion object {
         const val EXTRA_START_TAB = "extra_start_tab"
         const val TAB_RECEIPTS = "receipts"
-        private const val RECEIPT_TYPE_BUSINESS = "Business"
-        private const val RECEIPT_TYPE_INDIVIDUAL = "Individual"
 
         fun createIntent(context: Context, receipt: ReceiptEntity): Intent {
             return Intent(context, InvoiceDetailsActivity::class.java).apply {
@@ -211,7 +210,11 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             return
         }
         val titleTypeDisplayValue = binding.inputTitleType.text.toString().trim()
-        val titleTypeValue = toReceiptTypePayloadValue(titleTypeDisplayValue)
+        val titleTypeValue = ReceiptTypeMapper.toPayloadValue(
+            raw = titleTypeDisplayValue,
+            companyLabel = getString(R.string.type_company),
+            individualLabel = getString(R.string.type_individual)
+        )
         if (titleTypeValue.isBlank()) {
             Toast.makeText(this, getString(R.string.select_invoice_type), Toast.LENGTH_SHORT).show()
             return
@@ -349,41 +352,13 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun setTitleTypeSelection(value: String) {
-        val displayLabel = toReceiptTypeDisplayLabel(value)
+        val displayLabel = ReceiptTypeMapper.toDisplayLabel(
+            raw = value,
+            companyLabel = getString(R.string.type_company),
+            individualLabel = getString(R.string.type_individual)
+        )
         binding.inputTitleType.setText(displayLabel)
         binding.valueTitleType.text = readonlyText(displayLabel)
-    }
-
-    private fun toReceiptTypeDisplayLabel(raw: String): String {
-        val normalized = raw.trim()
-        if (normalized.isBlank()) return ""
-        val companyLabel = getString(R.string.type_company)
-        val individualLabel = getString(R.string.type_individual)
-        return when {
-            normalized.equals(RECEIPT_TYPE_BUSINESS, ignoreCase = true) ||
-                normalized.equals(companyLabel, ignoreCase = true) -> companyLabel
-
-            normalized.equals(RECEIPT_TYPE_INDIVIDUAL, ignoreCase = true) ||
-                normalized.equals(individualLabel, ignoreCase = true) -> individualLabel
-
-            else -> normalized
-        }
-    }
-
-    private fun toReceiptTypePayloadValue(raw: String): String {
-        val normalized = raw.trim()
-        if (normalized.isBlank()) return ""
-        val companyLabel = getString(R.string.type_company)
-        val individualLabel = getString(R.string.type_individual)
-        return when {
-            normalized.equals(companyLabel, ignoreCase = true) ||
-                normalized.equals(RECEIPT_TYPE_BUSINESS, ignoreCase = true) -> RECEIPT_TYPE_BUSINESS
-
-            normalized.equals(individualLabel, ignoreCase = true) ||
-                normalized.equals(RECEIPT_TYPE_INDIVIDUAL, ignoreCase = true) -> RECEIPT_TYPE_INDIVIDUAL
-
-            else -> normalized
-        }
     }
 
     private fun openDateTimePicker() {

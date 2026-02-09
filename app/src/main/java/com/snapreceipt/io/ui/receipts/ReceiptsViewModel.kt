@@ -1,5 +1,6 @@
 package com.snapreceipt.io.ui.receipts
 
+import android.content.Context
 import android.os.Bundle
 import androidx.lifecycle.viewModelScope
 import com.snapreceipt.io.R
@@ -10,11 +11,13 @@ import com.snapreceipt.io.domain.usecase.receipt.DeleteReceiptRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.ExportReceiptsRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.FetchReceiptsUseCase
 import com.snapreceipt.io.domain.usecase.receipt.UpdateReceiptRemoteUseCase
+import com.snapreceipt.io.ui.common.ReceiptTypeMapper
 import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import com.skybound.space.core.util.DateFormatUtil
 import com.skybound.space.core.util.LogHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +27,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReceiptsViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val fetchReceiptsUseCase: FetchReceiptsUseCase,
     private val deleteReceiptRemoteUseCase: DeleteReceiptRemoteUseCase,
     private val updateReceiptRemoteUseCase: UpdateReceiptRemoteUseCase,
@@ -43,6 +47,8 @@ class ReceiptsViewModel @Inject constructor(
     private val pageSize = 20
     private var hasMore = true
     private var currentQuery = ReceiptListQueryEntity()
+    private val companyLabel by lazy { appContext.getString(R.string.type_company) }
+    private val individualLabel by lazy { appContext.getString(R.string.type_individual) }
 
     init {
         loadReceipts()
@@ -82,8 +88,17 @@ class ReceiptsViewModel @Inject constructor(
     }
 
     fun filterByTitleType(type: String?) {
-        titleTypeFilter = type?.trim().takeIf { !it.isNullOrBlank() }
-        LogHelper.d(LOG_TAG, "filterByTitleType titleTypeFilter='${titleTypeFilter.orEmpty()}'")
+        val normalized = type?.trim().orEmpty()
+        val payloadType = ReceiptTypeMapper.toPayloadValue(
+            raw = normalized,
+            companyLabel = companyLabel,
+            individualLabel = individualLabel
+        )
+        titleTypeFilter = payloadType.takeIf { it.isNotBlank() }
+        LogHelper.d(
+            LOG_TAG,
+            "filterByTitleType input='${normalized}' payload='${titleTypeFilter.orEmpty()}'"
+        )
         val filtered = applyTitleFilter(lastFetchedReceipts)
         _uiState.update { current ->
             val validIds = filtered.mapNotNull { it.receiptId }.toSet()
@@ -262,8 +277,15 @@ class ReceiptsViewModel @Inject constructor(
     }
 
     private fun applyTitleFilter(receipts: List<ReceiptEntity> = _uiState.value.receipts): List<ReceiptEntity> {
-        val label = titleTypeFilter?.trim().orEmpty()
-        if (label.isBlank()) return receipts
-        return receipts.filter { it.receiptType?.equals(label, ignoreCase = true) == true }
+        val payloadType = titleTypeFilter?.trim().orEmpty()
+        if (payloadType.isBlank()) return receipts
+        return receipts.filter { receipt ->
+            val receiptPayload = ReceiptTypeMapper.toPayloadValue(
+                raw = receipt.receiptType.orEmpty(),
+                companyLabel = companyLabel,
+                individualLabel = individualLabel
+            )
+            receiptPayload.equals(payloadType, ignoreCase = true)
+        }
     }
 }
