@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SnapReceipt</string>
-
     <!-- Login -->
     <string name="login_welcome_title">Welcome to Invoice Assistant</string>
     <string name="login_welcome_subtitle">Track your daily expenses effortlessly</string>
@@ -15,7 +13,6 @@
     <string name="login_email_hint">Enter email</string>
     <string name="login_code_hint">Enter code</string>
     <string name="login_captcha">CAPTCHA</string>
-    <string name="login_countdown">%dS</string>
     <string name="login_requesting_code">Requesting code...</string>
     <string name="login_agreement_html">I have read and agree to the User Agreement and Privacy Policy</string>
     <string name="login">Log In</string>
@@ -98,11 +95,7 @@
     <string name="no_content">No content</string>
     <string name="selected_count">Selected: %d</string>
     <string name="total_label">Total</string>
-    <string name="currency_symbol_usd">$</string>
-    <string name="amount_currency_format">$%1$.2f</string>
-    <string name="amount_number_format">%1$.2f</string>
     <string name="receipt_meta_format">%1$s • %2$s • %3$s</string>
-    <string name="date_range_format">%1$s - %2$s</string>
     <string name="select_invoice_type">Select Invoice Type</string>
     <string name="select_invoice_category">Select Invoice Category</string>
     <string name="select_date_time">Select date and time</string>
@@ -113,7 +106,6 @@
     <string name="hour_label">Hour</string>
     <string name="min_label">Min</string>
     <string name="date_prefix">Date: %s</string>
-    <string name="date_range_separator">-</string>
     <string name="type_other">Other</string>
     <string name="type_add">+ Type</string>
     <string name="type_individual">Individual</string>
@@ -147,7 +139,6 @@
     <string name="user_agreement">User Agreement</string>
     <string name="privacy_policy_label">Privacy Policy</string>
     <string name="feedback_message">If you have any comments or suggestions regarding the software, please contact the email address below to provide feedback.</string>
-    <string name="feedback_email">receiptfold@gmail.com</string>
 
     <string name="personal_profile">Personal Profile</string>
     <string name="name_label">Name</string>
@@ -165,7 +156,6 @@
     <string name="opening_export_file">Opening export file…</string>
     <string name="export_file_unavailable">Export file not ready</string>
     <string name="no_app_to_open">No app available to open this file</string>
-    <string name="placeholder_dash">-</string>
 
     <!-- Settings -->
     <string name="notification">Notifications</string>

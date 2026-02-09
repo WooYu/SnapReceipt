@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--不翻译-->
+    <!-- Non-translatable -->
+    <string name="app_name" translatable="false">SnapReceipt</string>
+    <string name="feedback_email" translatable="false">receiptfold@gmail.com</string>
+    <string name="currency_symbol_usd" translatable="false">$</string>
+    <string name="amount_currency_format" translatable="false">$%1$.2f</string>
+    <string name="amount_number_format" translatable="false">%1$.2f</string>
+    <string name="date_range_format" translatable="false">%1$s - %2$s</string>
+    <string name="date_range_separator" translatable="false">-</string>
+    <string name="placeholder_dash" translatable="false">-</string>
+    <string name="login_countdown" translatable="false">%dS</string>
     <string name="char_count_format" translatable="false">%1$d/%2$d</string>
 </resources>

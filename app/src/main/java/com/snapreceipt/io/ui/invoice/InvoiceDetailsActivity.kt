@@ -29,19 +29,78 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.util.Locale
 import javax.inject.Inject
+import org.json.JSONObject
 
 @AndroidEntryPoint
 class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     companion object {
         const val EXTRA_ARGS = "extra_invoice_args"
+        private const val EXTRA_RECEIPT_JSON = "extra_receipt_json"
 
         const val EXTRA_START_TAB = "extra_start_tab"
         const val TAB_RECEIPTS = "receipts"
 
         fun createIntent(context: Context, receipt: ReceiptEntity): Intent {
             return Intent(context, InvoiceDetailsActivity::class.java).apply {
-                putExtra(EXTRA_ARGS, receipt)
+                putExtra(EXTRA_RECEIPT_JSON, receipt.toIntentJson())
             }
+        }
+
+        private fun ReceiptEntity.toIntentJson(): String =
+            JSONObject().apply {
+                putIfNotNull("receiptId", receiptId)
+                putIfNotNull("merchant", merchant)
+                putIfNotNull("address", address)
+                putIfNotNull("receiptDate", receiptDate)
+                putIfNotNull("receiptTime", receiptTime)
+                putIfNotNull("totalAmount", totalAmount)
+                putIfNotNull("tipAmount", tipAmount)
+                putIfNotNull("paymentCardNo", paymentCardNo)
+                putIfNotNull("consumer", consumer)
+                putIfNotNull("remark", remark)
+                putIfNotNull("receiptUrl", receiptUrl)
+                putIfNotNull("categoryId", categoryId)
+                putIfNotNull("categoryName", categoryName)
+                putIfNotNull("receiptType", receiptType)
+            }.toString()
+
+        private fun JSONObject.putIfNotNull(key: String, value: Any?) {
+            if (value != null) put(key, value)
+        }
+
+        private fun receiptFromIntentJson(raw: String): ReceiptEntity? = runCatching {
+            val json = JSONObject(raw)
+            ReceiptEntity(
+                receiptId = json.optLongOrNull("receiptId"),
+                merchant = json.optStringOrNull("merchant"),
+                address = json.optStringOrNull("address"),
+                receiptDate = json.optStringOrNull("receiptDate"),
+                receiptTime = json.optStringOrNull("receiptTime"),
+                totalAmount = json.optDoubleOrNull("totalAmount"),
+                tipAmount = json.optDoubleOrNull("tipAmount"),
+                paymentCardNo = json.optStringOrNull("paymentCardNo"),
+                consumer = json.optStringOrNull("consumer"),
+                remark = json.optStringOrNull("remark"),
+                receiptUrl = json.optStringOrNull("receiptUrl"),
+                categoryId = json.optLongOrNull("categoryId"),
+                categoryName = json.optStringOrNull("categoryName"),
+                receiptType = json.optStringOrNull("receiptType")
+            )
+        }.getOrNull()
+
+        private fun JSONObject.optStringOrNull(key: String): String? {
+            if (!has(key) || isNull(key)) return null
+            return getString(key)
+        }
+
+        private fun JSONObject.optLongOrNull(key: String): Long? {
+            if (!has(key) || isNull(key)) return null
+            return getLong(key)
+        }
+
+        private fun JSONObject.optDoubleOrNull(key: String): Double? {
+            if (!has(key) || isNull(key)) return null
+            return getDouble(key)
         }
     }
 
@@ -124,13 +183,18 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun readReceipt(intent: Intent): ReceiptEntity {
-        val receipt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val safeJson = intent.getStringExtra(EXTRA_RECEIPT_JSON).orEmpty()
+        if (safeJson.isNotBlank()) {
+            receiptFromIntentJson(safeJson)?.let { return it }
+        }
+
+        val legacyParcelable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra(EXTRA_ARGS, ReceiptEntity::class.java)
         } else {
             @Suppress("DEPRECATION")
             intent.getParcelableExtra(EXTRA_ARGS) as? ReceiptEntity
         }
-        return receipt ?: ReceiptEntity()
+        return legacyParcelable ?: ReceiptEntity()
     }
 
     private fun renderState(state: InvoiceDetailsUiState) {
