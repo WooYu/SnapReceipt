@@ -2,7 +2,6 @@ package com.skybound.space.base.presentation
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,12 +9,11 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.TextView
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.DialogFragment
 import com.skybound.space.base.R
 
 /**
- * Fullscreen loading dialog that renders a scrim across content and system bars.
+ * Fullscreen loading dialog that renders a scrim above app content.
  * It is intentionally non-cancelable so network-critical flows stay deterministic.
  */
 internal class FullscreenLoadingDialogFragment : DialogFragment() {
@@ -84,23 +82,12 @@ internal class FullscreenLoadingDialogFragment : DialogFragment() {
         )
         window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.statusBarColor = SYSTEM_BAR_SCRIM
-        window.navigationBarColor = SYSTEM_BAR_SCRIM
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            window.isStatusBarContrastEnforced = false
-            window.isNavigationBarContrastEnforced = false
-        }
-        WindowInsetsControllerCompat(window, window.decorView).apply {
-            isAppearanceLightStatusBars = false
-            isAppearanceLightNavigationBars = false
-        }
+        // Keep host system bar color/icon appearance unchanged while showing loading.
+        WindowCompat.setDecorFitsSystemWindows(window, true)
     }
 
     companion object {
         private const val ARG_MESSAGE = "arg_message"
-        private const val SYSTEM_BAR_SCRIM = 0x80000000.toInt()
 
         fun newInstance(message: CharSequence?): FullscreenLoadingDialogFragment {
             return FullscreenLoadingDialogFragment().apply {
