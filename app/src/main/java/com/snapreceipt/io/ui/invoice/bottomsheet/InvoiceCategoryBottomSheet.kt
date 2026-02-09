@@ -157,7 +157,8 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
             layoutManager = GridLayoutManager(requireContext(), GRID_SPAN_COUNT)
             adapter = this@InvoiceCategoryBottomSheet.adapter
             setHasFixedSize(true)
-            isNestedScrollingEnabled = true
+            // Keep scroll fully inside RecyclerView to avoid parent nested-scroll arbitration jank.
+            isNestedScrollingEnabled = false
             overScrollMode = View.OVER_SCROLL_NEVER
             // Avoid default change animations causing spacing/jump artifacts after insert refresh.
             itemAnimator = null
@@ -169,11 +170,6 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
                         verticalSpacing = dpToPx(CATEGORY_ITEM_SPACING_VERTICAL_DP)
                     )
                 )
-            }
-            // Let RecyclerView consume touch events so parent sheet does not steal scrolling.
-            setOnTouchListener { touchedView, _ ->
-                touchedView.parent?.requestDisallowInterceptTouchEvent(true)
-                false
             }
         }
     }

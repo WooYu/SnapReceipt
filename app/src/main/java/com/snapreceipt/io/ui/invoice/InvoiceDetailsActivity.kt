@@ -20,7 +20,6 @@ import com.skybound.space.core.util.DateFormatUtil
 import com.snapreceipt.io.MainActivity
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityInvoiceDetailsBinding
-import com.snapreceipt.io.domain.model.ReceiptCategory
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.invoice.bottomsheet.DateTimePickerBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceCategoryBottomSheet
@@ -67,6 +66,8 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private var receiptId: Long? = null
     private var hasSavedReceipt: Boolean = false
     private var isEditing: Boolean = false
+    private var initialCategoryId: Long? = null
+    private var initialCategoryLabel: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,6 +81,8 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         receiptId = receipt.receiptId
         hasSavedReceipt = (receiptId ?: 0L) > 0L
         isEditing = !hasSavedReceipt
+        initialCategoryId = receipt.categoryId?.takeIf { it > 0L }
+        initialCategoryLabel = receipt.categoryName.orEmpty().trim()
         loadInvoiceImage()
 
         val amountText = receipt.totalAmount?.let { formatAmount(it) }.orEmpty()
@@ -221,15 +224,13 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             return
         }
         val noteValue = binding.inputNote.text.toString().trim()
-        val categoryId = ReceiptCategory.idForLabel(invoiceCategoryInput)
-        if (categoryId <= 0L) {
-            Toast.makeText(this, getString(R.string.select_invoice_category), Toast.LENGTH_SHORT)
-                .show()
-            return
-        }
         val receiptUrl = receiptImageUrl.ifEmpty { imagePath }.takeIf { it.isNotBlank() }
         val safeDate = receiptDate.ifEmpty { currentDate() }
         val safeTime = receiptTime.ifEmpty { "00:00:00" }
+        val addressValue = binding.inputAddress.text.toString().trim()
+        val fallbackCategoryId = initialCategoryId?.takeIf {
+            invoiceCategoryInput.equals(initialCategoryLabel, ignoreCase = true)
+        }
 
         val receipt = ReceiptEntity(
             receiptId = receiptId,
@@ -242,10 +243,10 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             consumer = scanConsumer.ifEmpty { titleTypeValue },
             remark = noteValue,
             receiptUrl = receiptUrl,
-            categoryId = categoryId,
+            categoryId = fallbackCategoryId,
             categoryName = invoiceCategoryInput,
             receiptType = titleTypeValue,
-            address = binding.inputAddress.text.toString().trim()
+            address = addressValue
         )
         if (hasSavedReceipt) {
             viewModel.updateReceipt(receipt)

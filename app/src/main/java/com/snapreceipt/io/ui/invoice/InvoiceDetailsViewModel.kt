@@ -1,8 +1,8 @@
 package com.snapreceipt.io.ui.invoice
 
-import androidx.lifecycle.viewModelScope
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ReceiptEntity
+import com.snapreceipt.io.domain.usecase.category.ResolveCategoryIdUseCase
 import com.snapreceipt.io.domain.usecase.receipt.DeleteReceiptRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.SaveReceiptRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.UpdateReceiptRemoteUseCase
@@ -21,6 +21,7 @@ class InvoiceDetailsViewModel @Inject constructor(
     private val saveReceiptRemoteUseCase: SaveReceiptRemoteUseCase,
     private val updateReceiptRemoteUseCase: UpdateReceiptRemoteUseCase,
     private val deleteReceiptRemoteUseCase: DeleteReceiptRemoteUseCase,
+    private val resolveCategoryIdUseCase: ResolveCategoryIdUseCase,
     private val dispatchers: CoroutineDispatchersProvider
 ) : BaseViewModel(dispatchers, R.string.unexpected_error) {
 
@@ -30,26 +31,26 @@ class InvoiceDetailsViewModel @Inject constructor(
     fun saveReceipt(receipt: ReceiptEntity) {
         launchWithLoading(
             updateLoading = { loading -> _uiState.update { it.copy(loading = loading, error = if (loading) null else it.error) } },
-            block = { saveReceiptRemoteUseCase(receipt) },
+            block = { submitReceipt(receipt, saveReceiptRemoteUseCase::invoke) },
             onSuccess = {
                 _uiState.update { it.copy(loading = false) }
                 emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.SHOW_SUCCESS))
                 emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.NAVIGATE_TO_MAIN))
             },
-            onFailure = { updateError(it) }
+            onFailure = ::handleSubmitFailure
         )
     }
 
     fun updateReceipt(receipt: ReceiptEntity) {
         launchWithLoading(
             updateLoading = { loading -> _uiState.update { it.copy(loading = loading, error = if (loading) null else it.error) } },
-            block = { updateReceiptRemoteUseCase(receipt) },
+            block = { submitReceipt(receipt, updateReceiptRemoteUseCase::invoke) },
             onSuccess = {
                 _uiState.update { it.copy(loading = false) }
                 emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.SHOW_SUCCESS))
                 emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.NAVIGATE_TO_MAIN))
             },
-            onFailure = { updateError(it) }
+            onFailure = ::handleSubmitFailure
         )
     }
 
@@ -70,4 +71,35 @@ class InvoiceDetailsViewModel @Inject constructor(
         _uiState.update { it.copy(loading = false, error = throwable.message) }
         handleError(throwable)
     }
+
+    private suspend fun submitReceipt(
+        receipt: ReceiptEntity,
+        remoteSubmit: suspend (ReceiptEntity) -> Result<Unit>
+    ): Result<Unit> {
+        val normalizedLabel = receipt.categoryName.orEmpty().trim()
+        if (normalizedLabel.isBlank()) {
+            return Result.failure(CategoryRequiredException())
+        }
+
+        val categoryId = receipt.categoryId?.takeIf { it > 0L }
+            ?: resolveCategoryIdUseCase(normalizedLabel).takeIf { it > 0L }
+            ?: return Result.failure(CategoryRequiredException())
+
+        val request = receipt.copy(
+            categoryId = categoryId,
+            categoryName = normalizedLabel
+        )
+        return remoteSubmit(request)
+    }
+
+    private fun handleSubmitFailure(throwable: Throwable) {
+        if (throwable is CategoryRequiredException) {
+            _uiState.update { it.copy(loading = false, error = null) }
+            emitEvent(UiEvent.Toast(message = "", resId = R.string.select_invoice_category))
+            return
+        }
+        updateError(throwable)
+    }
+
+    private class CategoryRequiredException : IllegalStateException("category_required")
 }
