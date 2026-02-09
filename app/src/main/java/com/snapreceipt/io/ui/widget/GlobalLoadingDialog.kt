@@ -1,88 +1,70 @@
 package com.snapreceipt.io.ui.widget
 
 import android.app.Activity
-import android.app.Dialog
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
+import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import androidx.annotation.StringRes
-import androidx.core.view.WindowCompat
 import com.snapreceipt.io.R
 
 /**
- * Activity-level fullscreen loading dialog that guarantees overlay coverage,
- * including areas outside FragmentContainerView (e.g. bottom navigation).
+ * Activity-level fullscreen loading overlay that guarantees coverage across
+ * content, status bar and navigation bar areas.
  */
 class GlobalLoadingDialog(
     private val activity: Activity
 ) {
 
-    private var dialog: Dialog? = null
     private var overlayView: LoadingOverlayView? = null
 
     fun show(message: CharSequence?) {
         if (activity.isFinishing || activity.isDestroyed) return
-        ensureDialog()
+        val overlay = ensureOverlay()
         if (message.isNullOrBlank()) {
-            overlayView?.setText("")
-            overlayView?.show()
+            overlay.setText("")
+            overlay.show()
         } else {
-            overlayView?.show(message)
+            overlay.show(message)
         }
-        dialog?.takeIf { !it.isShowing }?.show()
+        overlay.bringToFront()
     }
 
     fun show(@StringRes messageRes: Int = R.string.loading) {
         if (activity.isFinishing || activity.isDestroyed) return
-        ensureDialog()
-        overlayView?.show(messageRes)
-        dialog?.takeIf { !it.isShowing }?.show()
+        val overlay = ensureOverlay()
+        overlay.show(messageRes)
+        overlay.bringToFront()
     }
 
     fun hide() {
         overlayView?.hide()
-        dialog?.dismiss()
     }
 
     fun release() {
         hide()
-        dialog = null
+        removeOverlayFromParent()
         overlayView = null
     }
 
-    private fun ensureDialog() {
-        if (dialog != null && overlayView != null) return
-
+    private fun ensureOverlay(): LoadingOverlayView {
+        overlayView?.let { return it }
+        val root = activity.window.decorView as? ViewGroup
+            ?: activity.findViewById(android.R.id.content)
         val overlay = LoadingOverlayView(activity).apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
+            visibility = View.GONE
             show(R.string.loading)
+            hide()
         }
-
-        val loadingDialog = Dialog(
-            activity,
-            android.R.style.Theme_Translucent_NoTitleBar_Fullscreen
-        ).apply {
-            setContentView(overlay)
-            setCancelable(false)
-            setCanceledOnTouchOutside(false)
-            window?.let { window ->
-                WindowCompat.setDecorFitsSystemWindows(window, false)
-                window.setLayout(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-                window.statusBarColor = Color.TRANSPARENT
-                window.navigationBarColor = Color.TRANSPARENT
-                window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-            }
-        }
-
+        root.addView(overlay)
         overlayView = overlay
-        dialog = loadingDialog
+        return overlay
+    }
+
+    private fun removeOverlayFromParent() {
+        val overlay = overlayView ?: return
+        (overlay.parent as? ViewGroup)?.removeView(overlay)
     }
 }
