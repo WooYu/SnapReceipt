@@ -304,12 +304,12 @@
                     <TableRow android:layout_marginTop="34dp">
 
                         <TextView
-                            android:text="@string/invoice_type"
+                            android:text="@string/invoice_category"
                             android:textColor="@color/text_secondary"
                             android:textSize="@dimen/text_size_secondary" />
 
                         <TextView
-                            android:id="@+id/value_invoice_type"
+                            android:id="@+id/value_invoice_category"
                             android:gravity="end"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
@@ -319,17 +319,18 @@
                     <TableRow android:layout_marginTop="34dp">
 
                         <TextView
-                            android:text="@string/title_type"
+                            android:text="@string/invoice_type"
                             android:textColor="@color/text_secondary"
                             android:textSize="@dimen/text_size_secondary" />
 
                         <TextView
-                            android:id="@+id/value_title_type"
+                            android:id="@+id/value_invoice_type"
                             android:gravity="end"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
                             tools:text="Individual" />
                     </TableRow>
+
                 </TableLayout>
 
                 <!--预览模式：备注-->
@@ -337,7 +338,7 @@
                     android:id="@+id/view_note_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="22dp"
+                    android:layout_marginTop="34dp"
                     android:text="@string/note"
                     android:textColor="@color/text_secondary"
                     android:textSize="@dimen/text_size_secondary" />
@@ -493,7 +494,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="@string/invoice_type"
+                        android:text="@string/invoice_category"
                         android:textColor="@color/text_secondary"
                         android:textSize="@dimen/text_size_secondary" />
 
@@ -527,7 +528,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="16dp"
-                            android:contentDescription="@string/invoice_type"
+                            android:contentDescription="@string/invoice_category"
                             android:src="@drawable/ic_chevron_down" />
                     </LinearLayout>
 
@@ -535,12 +536,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="@string/title_type"
+                        android:text="@string/invoice_type"
                         android:textColor="@color/text_secondary"
                         android:textSize="@dimen/text_size_secondary" />
 
                     <LinearLayout
-                        android:id="@+id/container_input_title_type"
+                        android:id="@+id/container_input_invoice_type"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
@@ -549,7 +550,7 @@
                         android:minHeight="@dimen/input_box_height">
 
                         <EditText
-                            android:id="@+id/input_title_type"
+                            android:id="@+id/input_invoice_type"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -569,7 +570,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="16dp"
-                            android:contentDescription="@string/title_type"
+                            android:contentDescription="@string/invoice_type"
                             android:src="@drawable/ic_chevron_down" />
                     </LinearLayout>
 

@@ -188,7 +188,8 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     override fun onCustomEvent(event: UiEvent.Custom) {
         when (event.type) {
             InvoiceDetailsEventKeys.SHOW_SUCCESS -> {
-                Toast.makeText(this, getString(R.string.receipt_save_success), Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.receipt_save_success), Toast.LENGTH_SHORT)
+                    .show()
             }
 
             InvoiceDetailsEventKeys.NAVIGATE_TO_MAIN -> {
@@ -209,7 +210,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
                 .show()
             return
         }
-        val titleTypeDisplayValue = binding.inputTitleType.text.toString().trim()
+        val titleTypeDisplayValue = binding.inputInvoiceType.text.toString().trim()
         val titleTypeValue = ReceiptTypeMapper.toPayloadValue(
             raw = titleTypeDisplayValue,
             companyLabel = getString(R.string.type_company),
@@ -273,8 +274,8 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             onClick = ::openInvoiceCategoryPicker
         )
         bindPickerRow(
-            container = binding.containerInputTitleType,
-            input = binding.inputTitleType,
+            container = binding.containerInputInvoiceType,
+            input = binding.inputInvoiceType,
             onClick = ::openTitleTypePicker
         )
         bindPickerRow(
@@ -340,7 +341,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun openTitleTypePicker() {
-        TitleTypeBottomSheet(binding.inputTitleType.text.toString()) { selected ->
+        TitleTypeBottomSheet(binding.inputInvoiceType.text.toString()) { selected ->
             setTitleTypeSelection(selected)
         }.show(supportFragmentManager, "title_type_picker")
     }
@@ -348,7 +349,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private fun setInvoiceCategorySelection(value: String) {
         val normalized = value.trim()
         binding.inputInvoiceCategory.setText(normalized)
-        binding.valueInvoiceType.text = readonlyText(normalized)
+        binding.valueInvoiceCategory.text = readonlyText(normalized)
     }
 
     private fun setTitleTypeSelection(value: String) {
@@ -357,8 +358,8 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             companyLabel = getString(R.string.type_company),
             individualLabel = getString(R.string.type_individual)
         )
-        binding.inputTitleType.setText(displayLabel)
-        binding.valueTitleType.text = readonlyText(displayLabel)
+        binding.inputInvoiceType.setText(displayLabel)
+        binding.valueInvoiceType.text = readonlyText(displayLabel)
     }
 
     private fun openDateTimePicker() {

@@ -55,7 +55,6 @@
     <string name="category">分类</string>
     <string name="invoice_category">发票分类</string>
     <string name="invoice_type">发票类型</string>
-    <string name="title_type">抬头类型</string>
     <string name="description">备注</string>
     <string name="save">保存</string>
     <string name="cancel">取消</string>
