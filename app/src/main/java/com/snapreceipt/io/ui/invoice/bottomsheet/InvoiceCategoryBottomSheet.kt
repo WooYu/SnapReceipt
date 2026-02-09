@@ -13,7 +13,6 @@ import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -281,40 +280,8 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
             options.any { option -> option.matches(selected) }
         }.orEmpty()
 
-        adapter.submitCategories(options, selectedLabel) {
-            updateCategoryListHeight()
-        }
+        adapter.submitCategories(options, selectedLabel)
         binding.deleteHint.isVisible = options.any { it.isCustom }
-    }
-
-    private fun updateCategoryListHeight() {
-        val maxHeight = (resources.displayMetrics.heightPixels * CATEGORY_MAX_HEIGHT_RATIO).toInt()
-        binding.categoryList.post {
-            val categoryList = _binding?.categoryList ?: return@post
-            // `computeVerticalScrollRange` may be 0 on first layout pass, so we keep a deterministic
-            // fallback height estimate to avoid sudden jump after data is shown.
-            val measuredContentHeight =
-                categoryList.computeVerticalScrollRange() +
-                    categoryList.paddingTop +
-                    categoryList.paddingBottom
-            val fallbackHeight = estimateCategoryListHeight(adapter.itemCount)
-            val desiredHeight = measuredContentHeight.takeIf { it > 0 } ?: fallbackHeight
-            val finalHeight = desiredHeight.coerceAtMost(maxHeight)
-
-            categoryList.updateLayoutParams<ViewGroup.LayoutParams> {
-                if (height != finalHeight) {
-                    height = finalHeight
-                }
-            }
-        }
-    }
-
-    private fun estimateCategoryListHeight(itemCount: Int): Int {
-        val rows = maxOf(1, (itemCount + GRID_SPAN_COUNT - 1) / GRID_SPAN_COUNT)
-        val rowHeight = dpToPx(CATEGORY_FALLBACK_ROW_HEIGHT_DP)
-        val verticalGapCount = (rows - 1).coerceAtLeast(0)
-        val verticalGaps = verticalGapCount * dpToPx(CATEGORY_ITEM_SPACING_VERTICAL_DP)
-        return rows * rowHeight + verticalGaps
     }
 
     private fun showToast(@StringRes messageRes: Int) {
