@@ -2,8 +2,10 @@ package com.snapreceipt.io.ui.widget
 
 import android.app.Activity
 import android.graphics.Color
+import android.os.Build
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.annotation.StringRes
 import androidx.core.view.WindowCompat
 import com.snapreceipt.io.R
@@ -23,6 +25,8 @@ class GlobalLoadingDialog(
     private var previousNavigationBarColor: Int = Color.TRANSPARENT
     private var previousLightStatusBars: Boolean = false
     private var previousLightNavigationBars: Boolean = false
+    private var previousStatusBarContrastEnforced: Boolean = false
+    private var previousNavigationBarContrastEnforced: Boolean = false
 
     fun show(message: CharSequence?) {
         if (activity.isFinishing || activity.isDestroyed) return
@@ -81,12 +85,19 @@ class GlobalLoadingDialog(
 
     private fun applySystemBarScrim() {
         val window = activity.window
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         val controller = WindowCompat.getInsetsController(window, window.decorView)
         if (!systemBarsOverridden) {
             previousStatusBarColor = window.statusBarColor
             previousNavigationBarColor = window.navigationBarColor
             previousLightStatusBars = controller?.isAppearanceLightStatusBars == true
             previousLightNavigationBars = controller?.isAppearanceLightNavigationBars == true
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                previousStatusBarContrastEnforced = window.isStatusBarContrastEnforced
+                previousNavigationBarContrastEnforced = window.isNavigationBarContrastEnforced
+                window.isStatusBarContrastEnforced = false
+                window.isNavigationBarContrastEnforced = false
+            }
             systemBarsOverridden = true
         }
         window.statusBarColor = barScrimColor
@@ -103,6 +114,10 @@ class GlobalLoadingDialog(
         window.navigationBarColor = previousNavigationBarColor
         controller?.isAppearanceLightStatusBars = previousLightStatusBars
         controller?.isAppearanceLightNavigationBars = previousLightNavigationBars
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isStatusBarContrastEnforced = previousStatusBarContrastEnforced
+            window.isNavigationBarContrastEnforced = previousNavigationBarContrastEnforced
+        }
         systemBarsOverridden = false
     }
 }

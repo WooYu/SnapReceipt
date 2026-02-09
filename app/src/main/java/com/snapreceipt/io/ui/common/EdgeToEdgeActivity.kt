@@ -2,9 +2,11 @@ package com.snapreceipt.io.ui.common
 
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Build
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.snapreceipt.io.R
 import com.snapreceipt.io.ui.widget.LoadingOverlayController
 import com.skybound.space.base.presentation.LoadingOverlayHost
@@ -19,6 +21,15 @@ open class EdgeToEdgeActivity : AppCompatActivity(), LoadingOverlayHost {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = Color.TRANSPARENT
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isStatusBarContrastEnforced = false
+            window.isNavigationBarContrastEnforced = false
+        }
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
+        }
     }
 
     override fun showGlobalLoading(message: CharSequence?) {
