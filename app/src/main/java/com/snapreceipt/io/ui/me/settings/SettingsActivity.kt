@@ -24,7 +24,9 @@ import javax.inject.Inject
 class SettingsActivity : EdgeToEdgeActivity() {
 
     @Inject
-    lateinit var sessionManager: SessionManager
+    lateinit var injectedSessionManager: SessionManager
+    override val sessionManager: SessionManager
+        get() = injectedSessionManager
     private var _binding: ActivitySettingsBinding? = null
     private val binding get() = _binding!!
 
