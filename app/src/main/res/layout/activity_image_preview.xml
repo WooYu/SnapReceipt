@@ -4,6 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black">
+    <!--上边界-->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/bound_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="@dimen/status_bar_height" />
 
     <ImageView
         android:id="@+id/preview_image"
@@ -11,20 +18,21 @@
         android:layout_height="0dp"
         android:contentDescription="@string/preview"
         android:scaleType="fitCenter"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <!--关闭按钮-->
     <ImageView
         android:id="@+id/btn_close"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="@dimen/page_start_margin"
+        android:layout_marginTop="@dimen/page_end_margin"
         android:contentDescription="@string/back"
         android:src="@drawable/ic_back_white"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/bound_top" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

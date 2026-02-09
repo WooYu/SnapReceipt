@@ -444,7 +444,7 @@
                             android:layout_height="15dp"
                             android:layout_marginEnd="16dp"
                             android:contentDescription="@string/date"
-                            android:src="@drawable/ic_calendar_light" />
+                            android:src="@drawable/ic_calendar_gray" />
                     </LinearLayout>
 
                     <TextView
@@ -463,7 +463,6 @@
                         android:background="@drawable/bg_invoice_field_block"
                         android:digits="0123456789 -"
                         android:gravity="center_vertical"
-                        android:hint="@string/bank_card_hint"
                         android:imeOptions="actionNext"
                         android:importantForAutofill="no"
                         android:inputType="phone"
