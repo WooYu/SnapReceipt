@@ -16,7 +16,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:paddingBottom="36dp" />
+                android:paddingBottom="8dp" />
 
             <!--空状态-->
             <LinearLayout
@@ -45,27 +45,6 @@
                     android:textColor="@color/text_muted_dark"
                     android:textSize="@dimen/text_size_secondary" />
             </LinearLayout>
-
-            <!--加载更多-->
-            <com.skybound.space.base.presentation.widget.BrandLoadingView
-                android:id="@+id/sll_load_more"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_gravity="bottom|center_horizontal"
-                android:layout_marginBottom="12dp"
-                android:visibility="gone" />
-
-            <!--没有更多-->
-            <TextView
-                android:id="@+id/sll_no_more"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|center_horizontal"
-                android:layout_marginBottom="12dp"
-                android:text="@string/no_more_records"
-                android:textColor="@color/text_muted"
-                android:textSize="13sp"
-                android:visibility="gone" />
 
             <!--居中加载（首次加载）-->
             <com.skybound.space.base.presentation.widget.BrandLoadingView
