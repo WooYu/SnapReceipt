@@ -9,12 +9,10 @@ import com.snapreceipt.io.data.network.model.category.CategoryItemDto
 import com.snapreceipt.io.data.network.model.category.CategoryListRequestDto
 import com.snapreceipt.io.data.network.model.receipt.ReceiptDeleteRequestDto
 import com.snapreceipt.io.data.network.model.receipt.ReceiptExportRequestDto
-import com.snapreceipt.io.data.network.model.receipt.ReceiptItemDto
-import com.snapreceipt.io.data.network.model.receipt.ReceiptSaveRequestDto
 import com.snapreceipt.io.data.network.model.receipt.ReceiptScanResultDto
-import com.snapreceipt.io.data.network.model.receipt.ReceiptUpdateRequestDto
 import com.snapreceipt.io.data.network.model.receipt.ScanRequestDto
 import com.snapreceipt.io.domain.model.ExportRecordEntity
+import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.domain.model.query.ExportRecordListQueryEntity
 import com.snapreceipt.io.domain.model.query.ReceiptListQueryEntity
 import retrofit2.http.Body
@@ -25,13 +23,13 @@ interface ReceiptApi {
     suspend fun scan(@Body request: ScanRequestDto): BaseResponse<ReceiptScanResultDto>
 
     @POST("api/receipt/save")
-    suspend fun save(@Body request: ReceiptSaveRequestDto): BaseEmptyResponse
+    suspend fun save(@Body request: Map<String, Any>): BaseEmptyResponse
 
     @POST("api/receipt/update")
-    suspend fun update(@Body request: ReceiptUpdateRequestDto): BaseEmptyResponse
+    suspend fun update(@Body request: Map<String, Any>): BaseEmptyResponse
 
     @POST("api/receipt/list")
-    suspend fun list(@Body request: ReceiptListQueryEntity): BasePagedResponse<ReceiptItemDto>
+    suspend fun list(@Body request: ReceiptListQueryEntity): BasePagedResponse<ReceiptEntity>
 
     @POST("api/receipt/delete")
     suspend fun delete(@Body request: ReceiptDeleteRequestDto): BaseEmptyResponse

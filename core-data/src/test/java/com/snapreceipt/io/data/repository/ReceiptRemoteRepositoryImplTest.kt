@@ -1,7 +1,6 @@
 package com.snapreceipt.io.data.repository
 
 import com.snapreceipt.io.data.network.datasource.ReceiptRemoteDataSource
-import com.snapreceipt.io.data.network.model.receipt.ReceiptItemDto
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.domain.model.query.ReceiptListQueryEntity
 import com.skybound.space.core.network.BasePagedResponse
@@ -23,9 +22,8 @@ class ReceiptRemoteRepositoryImplTest {
     fun list_success_returnsMappedList() = runBlocking {
         val query = ReceiptListQueryEntity()
         val rows = listOf(
-            ReceiptItemDto(
+            ReceiptEntity(
                 receiptId = 1L,
-                userId = 0L,
                 categoryId = 0L,
                 receiptUrl = "",
                 merchant = "Shop",

@@ -3,8 +3,8 @@ package com.snapreceipt.io.data.repository
 import com.snapreceipt.io.data.network.datasource.ReceiptRemoteDataSource
 import com.snapreceipt.io.data.network.model.category.toItem
 import com.snapreceipt.io.data.network.model.receipt.toEntity
-import com.snapreceipt.io.data.network.model.receipt.toSaveRequestDto
-import com.snapreceipt.io.data.network.model.receipt.toUpdateRequestDto
+import com.snapreceipt.io.data.network.model.receipt.toSaveRequestPayload
+import com.snapreceipt.io.data.network.model.receipt.toUpdateRequestPayload
 import com.snapreceipt.io.domain.model.ExportRecordEntity
 import com.snapreceipt.io.domain.model.query.ExportRecordListQueryEntity
 import com.snapreceipt.io.domain.model.ReceiptCategory
@@ -22,11 +22,11 @@ class ReceiptRemoteRepositoryImpl @Inject constructor(
         remoteDataSource.scan(imageUrl).getOrThrow().toEntity()
 
     override suspend fun save(request: ReceiptEntity) {
-        remoteDataSource.save(request.toSaveRequestDto()).getOrThrow()
+        remoteDataSource.save(request.toSaveRequestPayload()).getOrThrow()
     }
 
     override suspend fun update(request: ReceiptEntity) {
-        remoteDataSource.update(request.toUpdateRequestDto()).getOrThrow()
+        remoteDataSource.update(request.toUpdateRequestPayload()).getOrThrow()
     }
 
     override suspend fun delete(receiptId: Long) {
@@ -34,7 +34,7 @@ class ReceiptRemoteRepositoryImpl @Inject constructor(
     }
 
     override suspend fun list(query: ReceiptListQueryEntity): List<ReceiptEntity> =
-        remoteDataSource.list(query).getOrThrow().rows.map { it.toEntity() }
+        remoteDataSource.list(query).getOrThrow().rows
 
     override suspend fun export(receiptIds: List<Long>): String =
         remoteDataSource.export(receiptIds).getOrThrow()
