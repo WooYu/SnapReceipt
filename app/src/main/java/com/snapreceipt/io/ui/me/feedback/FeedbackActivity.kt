@@ -2,9 +2,10 @@ package com.snapreceipt.io.ui.me.feedback
 
 import android.os.Bundle
 import com.snapreceipt.io.databinding.ActivityFeedbackBinding
-import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
+import com.skybound.space.base.presentation.BaseActivity
+import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 
-class FeedbackActivity : EdgeToEdgeActivity() {
+class FeedbackActivity : BaseActivity<BaseViewModel>() {
     private var _binding: ActivityFeedbackBinding? = null
     private val binding get() = _binding!!
 

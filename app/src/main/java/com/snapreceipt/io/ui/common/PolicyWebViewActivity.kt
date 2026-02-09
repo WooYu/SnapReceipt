@@ -7,8 +7,10 @@ import android.widget.Toast
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import com.snapreceipt.io.R
+import com.skybound.space.base.presentation.BaseActivity
+import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 
-class PolicyWebViewActivity : EdgeToEdgeActivity() {
+class PolicyWebViewActivity : BaseActivity<BaseViewModel>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

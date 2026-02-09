@@ -6,10 +6,11 @@ import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityImagePreviewBinding
-import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
+import com.skybound.space.base.presentation.BaseActivity
+import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 import java.io.File
 
-class ImagePreviewActivity : EdgeToEdgeActivity() {
+class ImagePreviewActivity : BaseActivity<BaseViewModel>() {
     companion object {
         const val EXTRA_IMAGE_PATH = "extra_image_path"
         const val EXTRA_IMAGE_URL = "extra_image_url"

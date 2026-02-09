@@ -4,19 +4,20 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import com.skybound.space.base.presentation.BaseActivity
+import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 import com.snapreceipt.io.BuildConfig
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityAboutUsBinding
 import com.snapreceipt.io.domain.model.PolicyEntity
 import com.snapreceipt.io.domain.usecase.config.FetchPolicyUseCase
-import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
 import com.snapreceipt.io.ui.common.PolicyWebViewActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class AboutUsActivity : EdgeToEdgeActivity() {
+class AboutUsActivity : BaseActivity<BaseViewModel>() {
 
     @Inject
     lateinit var fetchPolicyUseCase: FetchPolicyUseCase

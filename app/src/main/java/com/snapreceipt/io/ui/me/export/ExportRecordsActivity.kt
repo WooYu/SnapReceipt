@@ -8,18 +8,18 @@ import android.os.Environment
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.content.FileProvider
+import com.skybound.space.base.presentation.BaseActivity
+import com.skybound.space.base.presentation.observeState
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityExportRecordsBinding
 import com.snapreceipt.io.domain.model.ExportRecordEntity
-import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
-import com.skybound.space.base.presentation.observeState
 import com.skybound.space.core.config.AppConfig
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class ExportRecordsActivity : EdgeToEdgeActivity() {
+class ExportRecordsActivity : BaseActivity<ExportRecordsViewModel>() {
 
-    private val viewModel: ExportRecordsViewModel by viewModels()
+    override val viewModel: ExportRecordsViewModel by viewModels()
     private var _binding: ActivityExportRecordsBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: ExportRecordsAdapter

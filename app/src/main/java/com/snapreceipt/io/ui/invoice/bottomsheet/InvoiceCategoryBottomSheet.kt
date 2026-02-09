@@ -42,6 +42,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
 
     companion object {
         private const val ARG_INITIAL = "arg_initial"
+        // 3 columns to balance readability and touch area in bottom sheet width.
         private const val GRID_SPAN_COUNT = 3
         private const val CATEGORY_ROW_HEIGHT_DP = 62f
         private const val CATEGORY_MIN_HEIGHT_DP = 120f
@@ -86,7 +87,9 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         setupCategoryList()
         setupActions()
 
+        // Show cached categories immediately so UI is not blocked by network.
         ReceiptCategory.all().takeIf { it.isNotEmpty() }?.let { applyCategories(it) }
+        // Then refresh from remote and reconcile selection state.
         refreshCategoriesFromRemote()
         return dialog
     }
@@ -121,6 +124,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
             isNestedScrollingEnabled = true
             overScrollMode = View.OVER_SCROLL_NEVER
             if (itemDecorationCount == 0) {
+                // ItemDecoration provides spacing around chips (visual divider/gutter effect).
                 addItemDecoration(
                     GridSpacingItemDecoration(
                         spanCount = GRID_SPAN_COUNT,
@@ -179,6 +183,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
                 ReceiptCategory.update(list)
                 applyCategories(list)
             }.onFailure {
+                // If request fails and nothing is rendered yet, fallback to cached data.
                 if (adapter.itemCount == 0) {
                     val cached = ReceiptCategory.all()
                     if (cached.isNotEmpty()) {
@@ -231,6 +236,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
                 isCustom = item.isCustom
             )
         }
+        // Keep previous selection only when it still exists in refreshed list.
         selectedLabel = selectedLabel.takeIf { selected ->
             options.any { option -> option.matches(selected) }
         }.orEmpty()
@@ -282,6 +288,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
             val previousIndex = items.indexOfFirst { it.matches(selectedLabel) }
             val currentIndex = items.indexOfFirst { it.matches(label) }
             selectedLabel = label
+            // Only refresh old/new selected rows, avoid full list redraw.
             if (previousIndex >= 0) notifyItemChanged(previousIndex)
             if (currentIndex >= 0 && currentIndex != previousIndex) notifyItemChanged(currentIndex)
         }
@@ -358,6 +365,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
             val trailingSpacing = horizontalSpacing / 2
             val leadingSpacing = horizontalSpacing - trailingSpacing
 
+            // Keep outer edges flush with container while preserving inter-item spacing.
             when (column) {
                 0 -> {
                     outRect.left = 0
@@ -374,6 +382,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
                     outRect.right = trailingSpacing
                 }
             }
+            // Add vertical gap starting from the second row.
             if (position >= spanCount) {
                 outRect.top = verticalSpacing
             }

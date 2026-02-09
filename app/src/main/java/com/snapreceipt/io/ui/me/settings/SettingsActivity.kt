@@ -7,10 +7,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
+import com.skybound.space.base.presentation.BaseActivity
+import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 import com.skybound.space.core.network.auth.SessionManager
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivitySettingsBinding
-import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
 import com.snapreceipt.io.ui.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +22,7 @@ import java.util.Locale
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SettingsActivity : EdgeToEdgeActivity() {
+class SettingsActivity : BaseActivity<BaseViewModel>() {
 
     @Inject
     lateinit var injectedSessionManager: SessionManager

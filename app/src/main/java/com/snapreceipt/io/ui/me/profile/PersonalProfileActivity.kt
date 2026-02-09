@@ -3,19 +3,20 @@ package com.snapreceipt.io.ui.me.profile
 import android.os.Bundle
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import com.skybound.space.base.presentation.BaseActivity
 import com.skybound.space.base.presentation.observeState
+import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityPersonalProfileBinding
 import com.snapreceipt.io.domain.usecase.auth.AuthFetchUserProfileUseCase
 import com.snapreceipt.io.domain.usecase.user.GetUserUseCase
 import com.snapreceipt.io.domain.usecase.user.InsertUserUseCase
-import com.snapreceipt.io.ui.common.EdgeToEdgeActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PersonalProfileActivity : EdgeToEdgeActivity() {
+class PersonalProfileActivity : BaseActivity<BaseViewModel>() {
 
     @Inject
     lateinit var getUserUseCase: GetUserUseCase
