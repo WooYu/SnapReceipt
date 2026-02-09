@@ -29,8 +29,18 @@ class ReceiptsSelectableAdapter(
     }
 
     fun updateSelection(selected: Set<Long>) {
+        if (selectedIds == selected) return
+        val previous = selectedIds
         selectedIds = selected
-        notifyItemRangeChanged(0, currentList.size)
+        if (currentList.isEmpty()) return
+        currentList.forEachIndexed { index, receipt ->
+            val id = receipt.receiptId ?: return@forEachIndexed
+            val wasSelected = previous.contains(id)
+            val isSelected = selected.contains(id)
+            if (wasSelected != isSelected) {
+                notifyItemChanged(index)
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

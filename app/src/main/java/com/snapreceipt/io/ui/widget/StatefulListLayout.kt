@@ -79,8 +79,15 @@ class StatefulListLayout @JvmOverloads constructor(
         footerStateAdapter.setNoMoreText(noMoreText)
         a.recycle()
 
-        recyclerView.layoutManager = LinearLayoutManager(context)
+        recyclerView.layoutManager = LinearLayoutManager(context).apply {
+            reverseLayout = false
+            stackFromEnd = false
+        }
         recyclerView.adapter = concatAdapter
+        recyclerView.overScrollMode = View.OVER_SCROLL_NEVER
+        recyclerView.isNestedScrollingEnabled = false
+        recyclerView.descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
+        recyclerView.itemAnimator = null
 
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
