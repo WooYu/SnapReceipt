@@ -15,6 +15,7 @@ import com.snapreceipt.io.domain.model.ExportRecordEntity
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.domain.model.query.ExportRecordListQueryEntity
 import com.snapreceipt.io.domain.model.query.ReceiptListQueryEntity
+import kotlin.jvm.JvmSuppressWildcards
 import retrofit2.http.Body
 import retrofit2.http.POST
 
@@ -23,10 +24,10 @@ interface ReceiptApi {
     suspend fun scan(@Body request: ScanRequestDto): BaseResponse<ReceiptScanResultDto>
 
     @POST("api/receipt/save")
-    suspend fun save(@Body request: Map<String, Any>): BaseEmptyResponse
+    suspend fun save(@Body request: Map<String, @JvmSuppressWildcards Any>): BaseEmptyResponse
 
     @POST("api/receipt/update")
-    suspend fun update(@Body request: Map<String, Any>): BaseEmptyResponse
+    suspend fun update(@Body request: Map<String, @JvmSuppressWildcards Any>): BaseEmptyResponse
 
     @POST("api/receipt/list")
     suspend fun list(@Body request: ReceiptListQueryEntity): BasePagedResponse<ReceiptEntity>
