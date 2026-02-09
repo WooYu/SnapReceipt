@@ -2,57 +2,51 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/sll_swipe_refresh"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <FrameLayout
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/sll_recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="8dp" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/sll_recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:paddingBottom="8dp" />
+        <!--空状态-->
+        <LinearLayout
+            android:id="@+id/sll_empty_state"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
 
-            <!--空状态-->
-            <LinearLayout
-                android:id="@+id/sll_empty_state"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:visibility="gone"
-                tools:visibility="visible">
+            <ImageView
+                android:id="@+id/sll_empty_image"
+                android:layout_width="240dp"
+                android:layout_height="140dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/no_content"
+                android:src="@drawable/img_receipts_empty" />
 
-                <ImageView
-                    android:id="@+id/sll_empty_image"
-                    android:layout_width="240dp"
-                    android:layout_height="140dp"
-                    android:adjustViewBounds="true"
-                    android:contentDescription="@string/no_content"
-                    android:src="@drawable/img_receipts_empty" />
+            <TextView
+                android:id="@+id/sll_empty_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/no_content"
+                android:textColor="@color/text_muted_dark"
+                android:textSize="@dimen/text_size_secondary" />
+        </LinearLayout>
 
-                <TextView
-                    android:id="@+id/sll_empty_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/no_content"
-                    android:textColor="@color/text_muted_dark"
-                    android:textSize="@dimen/text_size_secondary" />
-            </LinearLayout>
-
-            <!--居中加载（首次加载）-->
-            <com.skybound.space.base.presentation.widget.BrandLoadingView
-                android:id="@+id/sll_center_loading"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:layout_gravity="center"
-                android:visibility="gone" />
-        </FrameLayout>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        <!--居中加载（首次加载）-->
+        <com.skybound.space.base.presentation.widget.BrandLoadingView
+            android:id="@+id/sll_center_loading"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+    </FrameLayout>
 </merge>

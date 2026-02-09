@@ -122,7 +122,6 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     }
 
     private fun setupListeners() {
-        binding.statefulList.setOnRefreshListener { viewModel.refresh() }
         binding.filterDateBtn.setOnClickListener {
             DateRangeBottomSheet(filterStartMillis, filterEndMillis) { start, end ->
                 filterStartMillis = start

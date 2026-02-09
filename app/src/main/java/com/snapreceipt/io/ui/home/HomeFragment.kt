@@ -133,7 +133,6 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     private fun setupListeners() {
         binding.cardScan.setOnClickListener { openCameraWithPermission() }
         binding.cardUpload.setOnClickListener { pickImageFromGallery() }
-        binding.statefulList.setOnRefreshListener { viewModel.refresh() }
     }
 
     private fun openReceiptForEdit(receipt: ReceiptEntity) {
