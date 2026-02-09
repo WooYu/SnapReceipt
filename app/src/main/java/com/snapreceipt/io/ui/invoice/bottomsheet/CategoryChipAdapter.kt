@@ -27,8 +27,7 @@ internal class CategoryChipAdapter(
 
     fun submitCategories(
         list: List<CategoryOption>,
-        selected: String,
-        onCommitted: (() -> Unit)? = null
+        selected: String
     ) {
         val items = ArrayList<CategoryListItem>(list.size + 1).apply {
             addAll(list.map { CategoryListItem.Category(it) })
@@ -38,7 +37,6 @@ internal class CategoryChipAdapter(
         selectedLabel = selected
         submitList(items) {
             notifySelectionChanged(previous, selectedLabel)
-            onCommitted?.invoke()
         }
     }
 
