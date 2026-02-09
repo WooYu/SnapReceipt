@@ -2,6 +2,8 @@ package com.snapreceipt.io.ui.invoice.bottomsheet
 
 import android.animation.ObjectAnimator
 import android.app.Dialog
+import android.graphics.Color
+import android.graphics.Rect
 import android.os.Bundle
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
@@ -11,7 +13,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -41,6 +46,8 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         private const val CATEGORY_ROW_HEIGHT_DP = 62f
         private const val CATEGORY_MIN_HEIGHT_DP = 120f
         private const val CATEGORY_MAX_HEIGHT_RATIO = 0.45f
+        private const val CATEGORY_ITEM_SPACING_HORIZONTAL_DP = 10f
+        private const val CATEGORY_ITEM_SPACING_VERTICAL_DP = 12f
 
         fun newInstance(initialSelection: String?, onSelected: (String) -> Unit): InvoiceCategoryBottomSheet {
             return InvoiceCategoryBottomSheet().apply {
@@ -73,13 +80,16 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         val dialog = BottomSheetDialog(requireContext())
         _binding = BottomSheetInvoiceCategoryBinding.inflate(LayoutInflater.from(requireContext()))
         dialog.setContentView(binding.root)
+        applyBottomInsets()
         dialog.setOnShowListener {
             val bottomSheet =
                 dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
             if (bottomSheet != null) {
+                bottomSheet.setBackgroundColor(Color.TRANSPARENT)
                 val behavior = BottomSheetBehavior.from(bottomSheet)
                 behavior.skipCollapsed = true
                 behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                behavior.isDraggable = false
             }
         }
 
@@ -87,7 +97,11 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
 
         adapter = CategoryChipAdapter(
             onSelect = { option ->
-                selectedLabel = option.label
+                selectedLabel = if (option.label.equals(selectedLabel, ignoreCase = true)) {
+                    ""
+                } else {
+                    option.label
+                }
                 adapter.updateSelection(selectedLabel)
             },
             onLongPress = { option ->
@@ -99,6 +113,21 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         binding.categoryList.layoutManager = GridLayoutManager(requireContext(), GRID_SPAN_COUNT)
         binding.categoryList.adapter = adapter
         binding.categoryList.setHasFixedSize(true)
+        binding.categoryList.isNestedScrollingEnabled = true
+        binding.categoryList.overScrollMode = View.OVER_SCROLL_NEVER
+        if (binding.categoryList.itemDecorationCount == 0) {
+            binding.categoryList.addItemDecoration(
+                GridSpacingItemDecoration(
+                    spanCount = GRID_SPAN_COUNT,
+                    horizontalSpacing = dpToPx(CATEGORY_ITEM_SPACING_HORIZONTAL_DP),
+                    verticalSpacing = dpToPx(CATEGORY_ITEM_SPACING_VERTICAL_DP)
+                )
+            )
+        }
+        binding.categoryList.setOnTouchListener { view, _ ->
+            view.parent?.requestDisallowInterceptTouchEvent(true)
+            false
+        }
 
         binding.typeAdd.setOnClickListener {
             CustomTypeDialog { customType -> addCustomType(customType) }
@@ -117,6 +146,16 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         }
         refreshCategoriesFromRemote()
         return dialog
+    }
+
+    private fun applyBottomInsets() {
+        val initialBottomPadding = binding.rootContainer.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(binding.rootContainer) { view, insets ->
+            val bottomInset = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            view.updatePadding(bottom = initialBottomPadding + bottomInset)
+            insets
+        }
+        ViewCompat.requestApplyInsets(binding.rootContainer)
     }
 
     override fun onDestroyView() {
@@ -199,14 +238,14 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         list.forEach { item ->
             options.add(CategoryOption(item.id, item.label, item.isCustom, isAll = false))
         }
-        if (options.isEmpty()) {
+        if (selectedLabel.isNotBlank() && options.none { it.label.equals(selectedLabel, ignoreCase = true) }) {
             selectedLabel = ""
-            return options
-        }
-        if (selectedLabel.isBlank() || options.none { it.label.equals(selectedLabel, ignoreCase = true) }) {
-            selectedLabel = options.first().label
         }
         return options
+    }
+
+    private fun dpToPx(dp: Float): Int {
+        return (dp * resources.displayMetrics.density).toInt()
     }
 
     data class CategoryOption(
@@ -280,6 +319,29 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
                     duration = 260L
                     start()
                 }
+            }
+        }
+    }
+
+    private class GridSpacingItemDecoration(
+        private val spanCount: Int,
+        private val horizontalSpacing: Int,
+        private val verticalSpacing: Int
+    ) : RecyclerView.ItemDecoration() {
+        override fun getItemOffsets(
+            outRect: Rect,
+            view: View,
+            parent: RecyclerView,
+            state: RecyclerView.State
+        ) {
+            val position = parent.getChildAdapterPosition(view)
+            if (position == RecyclerView.NO_POSITION) return
+            val column = position % spanCount
+
+            outRect.left = horizontalSpacing - column * horizontalSpacing / spanCount
+            outRect.right = (column + 1) * horizontalSpacing / spanCount
+            if (position >= spanCount) {
+                outRect.top = verticalSpacing
             }
         }
     }

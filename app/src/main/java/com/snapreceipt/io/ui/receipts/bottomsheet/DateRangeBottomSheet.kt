@@ -1,9 +1,14 @@
 package com.snapreceipt.io.ui.receipts.bottomsheet
 
 import android.app.Dialog
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.skybound.space.core.util.DateFormatUtil
@@ -37,6 +42,11 @@ class DateRangeBottomSheet(
         val dialog = BottomSheetDialog(requireContext())
         _binding = BottomSheetDateRangeBinding.inflate(LayoutInflater.from(context))
         dialog.setContentView(binding.root)
+        dialog.setOnShowListener {
+            val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+            bottomSheet?.setBackgroundColor(Color.TRANSPARENT)
+        }
+        applyBottomInsets()
 
         setupPickers()
         updateDateViews()
@@ -66,6 +76,16 @@ class DateRangeBottomSheet(
         }
 
         return dialog
+    }
+
+    private fun applyBottomInsets() {
+        val initialBottomPadding = binding.rootContainer.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(binding.rootContainer) { view, insets ->
+            val bottomInset = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            view.updatePadding(bottom = initialBottomPadding + bottomInset)
+            insets
+        }
+        ViewCompat.requestApplyInsets(binding.rootContainer)
     }
 
     override fun onDestroyView() {
