@@ -83,7 +83,13 @@
             android:layout_marginEnd="27dp"
             android:layout_weight="1"
             android:text="@string/cancel"
-            app:pabEnableShadow="false" />
+            app:pabBackgroundStyle="solid"
+            app:pabEnableShadow="false"
+            app:pabPressedDarkenFactor="0.92"
+            app:pabSolidColor="@android:color/white"
+            app:pabStrokeColor="@color/text_secondary"
+            app:pabStrokeWidth="1dp"
+            app:pabTextColor="@color/text_primary" />
 
         <!--确认-->
         <com.snapreceipt.io.ui.widget.PrimaryActionButton

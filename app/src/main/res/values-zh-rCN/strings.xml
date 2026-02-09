@@ -123,6 +123,7 @@
     <string name="add_category_failed">添加分类失败</string>
     <string name="delete_category_failed">删除分类失败</string>
     <string name="delete_category_confirm">确认删除"%s"？</string>
+    <string name="category_delete_hint">长按自定义类型可删除</string>
     <string name="delete_receipt_confirm">确认删除此收据？</string>
     <string name="receipt_default_name">收据</string>
 

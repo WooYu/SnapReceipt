@@ -1,14 +1,21 @@
 package com.snapreceipt.io.ui.invoice.bottomsheet
 
+import android.animation.ObjectAnimator
 import android.app.Dialog
 import android.os.Bundle
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.snapreceipt.io.R
@@ -30,6 +37,10 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
 
     companion object {
         private const val ARG_INITIAL = "arg_initial"
+        private const val GRID_SPAN_COUNT = 3
+        private const val CATEGORY_ROW_HEIGHT_DP = 62f
+        private const val CATEGORY_MIN_HEIGHT_DP = 120f
+        private const val CATEGORY_MAX_HEIGHT_RATIO = 0.45f
 
         fun newInstance(initialSelection: String?, onSelected: (String) -> Unit): InvoiceCategoryBottomSheet {
             return InvoiceCategoryBottomSheet().apply {
@@ -51,14 +62,26 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
     @Inject
     lateinit var dispatchers: CoroutineDispatchersProvider
 
+    private var _binding: BottomSheetInvoiceCategoryBinding? = null
+    private val binding get() = _binding!!
+
     private var onSelected: ((String) -> Unit)? = null
     private lateinit var adapter: CategoryChipAdapter
     private var selectedLabel: String = ""
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = BottomSheetDialog(requireContext())
-        val binding = BottomSheetInvoiceCategoryBinding.inflate(LayoutInflater.from(requireContext()))
+        _binding = BottomSheetInvoiceCategoryBinding.inflate(LayoutInflater.from(requireContext()))
         dialog.setContentView(binding.root)
+        dialog.setOnShowListener {
+            val bottomSheet =
+                dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+            if (bottomSheet != null) {
+                val behavior = BottomSheetBehavior.from(bottomSheet)
+                behavior.skipCollapsed = true
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            }
+        }
 
         selectedLabel = arguments?.getString(ARG_INITIAL).orEmpty()
 
@@ -73,8 +96,9 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
                 }
             }
         )
-        binding.categoryList.layoutManager = GridLayoutManager(requireContext(), 3)
+        binding.categoryList.layoutManager = GridLayoutManager(requireContext(), GRID_SPAN_COUNT)
         binding.categoryList.adapter = adapter
+        binding.categoryList.setHasFixedSize(true)
 
         binding.typeAdd.setOnClickListener {
             CustomTypeDialog { customType -> addCustomType(customType) }
@@ -87,17 +111,33 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
             dismiss()
         }
 
-        loadCategories()
+        val cached = ReceiptCategory.all()
+        if (cached.isNotEmpty()) {
+            applyCategories(cached)
+        }
+        refreshCategoriesFromRemote()
         return dialog
     }
 
-    private fun loadCategories() {
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private fun refreshCategoriesFromRemote() {
         lifecycleScope.launch {
             val result = withContext(dispatchers.io) { fetchCategoriesUseCase() }
-            val list = result.getOrElse { ReceiptCategory.all() }
-            ReceiptCategory.update(list)
-            val options = buildOptions(list)
-            adapter.submitList(options, selectedLabel)
+            result.onSuccess { list ->
+                ReceiptCategory.update(list)
+                applyCategories(list)
+            }.onFailure {
+                if (adapter.itemCount == 0) {
+                    val cached = ReceiptCategory.all()
+                    if (cached.isNotEmpty()) {
+                        applyCategories(cached)
+                    }
+                }
+            }
         }
     }
 
@@ -106,7 +146,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
             val result = withContext(dispatchers.io) { addCategoryUseCase(label) }
             result.onSuccess {
                 selectedLabel = label
-                loadCategories()
+                refreshCategoriesFromRemote()
             }.onFailure {
                 Toast.makeText(requireContext(), getString(R.string.add_category_failed), Toast.LENGTH_SHORT).show()
             }
@@ -128,10 +168,29 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
                 if (selectedLabel.equals(option.label, ignoreCase = true)) {
                     selectedLabel = ""
                 }
-                loadCategories()
+                refreshCategoriesFromRemote()
             }.onFailure {
                 Toast.makeText(requireContext(), getString(R.string.delete_category_failed), Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    private fun applyCategories(list: List<ReceiptCategory.Item>) {
+        val options = buildOptions(list)
+        adapter.submitList(options, selectedLabel)
+        binding.deleteHint.isVisible = options.any { it.isCustom && !it.isAll }
+        updateCategoryListHeight(options.size)
+    }
+
+    private fun updateCategoryListHeight(itemCount: Int) {
+        val rows = maxOf(1, (itemCount + GRID_SPAN_COUNT - 1) / GRID_SPAN_COUNT)
+        val rowHeight = (resources.displayMetrics.density * CATEGORY_ROW_HEIGHT_DP).toInt()
+        val desiredHeight = rows * rowHeight
+        val minHeight = (resources.displayMetrics.density * CATEGORY_MIN_HEIGHT_DP).toInt()
+        val maxHeight = (resources.displayMetrics.heightPixels * CATEGORY_MAX_HEIGHT_RATIO).toInt()
+        val finalHeight = desiredHeight.coerceIn(minHeight, maxHeight)
+        binding.categoryList.updateLayoutParams<ViewGroup.LayoutParams> {
+            height = finalHeight
         }
     }
 
@@ -176,7 +235,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): ViewHolder {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val binding = ItemCategoryChipBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
@@ -206,11 +265,20 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
                 binding.chipText.setOnClickListener { onSelect(option) }
                 binding.chipText.setOnLongClickListener {
                     if (option.isCustom && !option.isAll) {
+                        binding.chipText.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                        playDeleteAnimation(binding.chipText)
                         onLongPress(option)
                         true
                     } else {
                         false
                     }
+                }
+            }
+
+            private fun playDeleteAnimation(target: View) {
+                ObjectAnimator.ofFloat(target, View.ROTATION, 0f, -2.5f, 2.5f, -2f, 2f, 0f).apply {
+                    duration = 260L
+                    start()
                 }
             }
         }

@@ -7,8 +7,15 @@
         <attr name="pabTextColor" format="color" />
         <attr name="pabRippleColor" format="color" />
         <attr name="pabPressedDarkenFactor" format="float" />
+        <attr name="pabBackgroundStyle">
+            <enum name="gradient" value="0" />
+            <enum name="solid" value="1" />
+        </attr>
         <attr name="pabGradientStartColor" format="color" />
         <attr name="pabGradientEndColor" format="color" />
+        <attr name="pabSolidColor" format="color" />
+        <attr name="pabStrokeColor" format="color" />
+        <attr name="pabStrokeWidth" format="dimension" />
         <attr name="pabEnableShadow" format="boolean" />
     </declare-styleable>
 
