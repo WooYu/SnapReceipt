@@ -38,6 +38,8 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     companion object {
         const val EXTRA_START_TAB = "extra_start_tab"
         const val TAB_RECEIPTS = "receipts"
+        private const val RECEIPT_TYPE_BUSINESS = "Business"
+        private const val RECEIPT_TYPE_INDIVIDUAL = "Individual"
 
         fun createIntent(context: Context, receipt: ReceiptEntity): Intent {
             return Intent(context, InvoiceDetailsActivity::class.java).apply {
@@ -205,7 +207,8 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
                 .show()
             return
         }
-        val titleTypeValue = binding.inputTitleType.text.toString().trim()
+        val titleTypeDisplayValue = binding.inputTitleType.text.toString().trim()
+        val titleTypeValue = toReceiptTypePayloadValue(titleTypeDisplayValue)
         if (titleTypeValue.isBlank()) {
             Toast.makeText(this, getString(R.string.select_invoice_type), Toast.LENGTH_SHORT).show()
             return
@@ -345,9 +348,41 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun setTitleTypeSelection(value: String) {
-        val normalized = value.trim()
-        binding.inputTitleType.setText(normalized)
-        binding.valueTitleType.text = readonlyText(normalized)
+        val displayLabel = toReceiptTypeDisplayLabel(value)
+        binding.inputTitleType.setText(displayLabel)
+        binding.valueTitleType.text = readonlyText(displayLabel)
+    }
+
+    private fun toReceiptTypeDisplayLabel(raw: String): String {
+        val normalized = raw.trim()
+        if (normalized.isBlank()) return ""
+        val companyLabel = getString(R.string.type_company)
+        val individualLabel = getString(R.string.type_individual)
+        return when {
+            normalized.equals(RECEIPT_TYPE_BUSINESS, ignoreCase = true) ||
+                normalized.equals(companyLabel, ignoreCase = true) -> companyLabel
+
+            normalized.equals(RECEIPT_TYPE_INDIVIDUAL, ignoreCase = true) ||
+                normalized.equals(individualLabel, ignoreCase = true) -> individualLabel
+
+            else -> normalized
+        }
+    }
+
+    private fun toReceiptTypePayloadValue(raw: String): String {
+        val normalized = raw.trim()
+        if (normalized.isBlank()) return ""
+        val companyLabel = getString(R.string.type_company)
+        val individualLabel = getString(R.string.type_individual)
+        return when {
+            normalized.equals(companyLabel, ignoreCase = true) ||
+                normalized.equals(RECEIPT_TYPE_BUSINESS, ignoreCase = true) -> RECEIPT_TYPE_BUSINESS
+
+            normalized.equals(individualLabel, ignoreCase = true) ||
+                normalized.equals(RECEIPT_TYPE_INDIVIDUAL, ignoreCase = true) -> RECEIPT_TYPE_INDIVIDUAL
+
+            else -> normalized
+        }
     }
 
     private fun openDateTimePicker() {

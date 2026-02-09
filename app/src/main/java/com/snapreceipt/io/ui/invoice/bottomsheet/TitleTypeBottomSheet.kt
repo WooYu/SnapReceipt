@@ -19,7 +19,7 @@ class TitleTypeBottomSheet(
 
     private var _binding: BottomSheetTitleTypeBinding? = null
     private val binding get() = _binding!!
-    private var selectedLabel: String = initialSelection ?: ""
+    private var selectedLabel: String = initialSelection?.trim().orEmpty()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = BottomSheetDialog(requireContext())
@@ -34,7 +34,7 @@ class TitleTypeBottomSheet(
         val optionViews = listOf(binding.titleIndividual, binding.titleCompany)
         optionViews.forEach { option ->
             option.setOnClickListener {
-                val label = option.text.toString()
+                val label = option.text.toString().trim()
                 selectedLabel = if (label.equals(selectedLabel, ignoreCase = true)) {
                     ""
                 } else {
@@ -71,7 +71,8 @@ class TitleTypeBottomSheet(
 
     private fun updateSelection(optionViews: List<android.widget.TextView>) {
         optionViews.forEach { option ->
-            option.isSelected = option.text.toString().equals(selectedLabel, ignoreCase = true)
+            option.isSelected = option.text.toString().trim()
+                .equals(selectedLabel, ignoreCase = true)
         }
     }
 }

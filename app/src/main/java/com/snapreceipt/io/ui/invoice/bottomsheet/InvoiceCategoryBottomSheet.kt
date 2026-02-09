@@ -13,7 +13,6 @@ import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -44,8 +43,6 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
 
         // Keep three columns so each chip has enough touch area and text room.
         private const val GRID_SPAN_COUNT = 3
-        private const val CATEGORY_FALLBACK_ROW_HEIGHT_DP = 62f
-        private const val CATEGORY_MAX_HEIGHT_RATIO = 0.45f
         private const val CATEGORY_ITEM_SPACING_HORIZONTAL_DP = 21f
         private const val CATEGORY_ITEM_SPACING_VERTICAL_DP = 20f
 
@@ -95,6 +92,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         selectedLabel =
             savedInstanceState?.getString(STATE_SELECTED_LABEL)
                 ?: arguments?.getString(ARG_INITIAL).orEmpty()
+        selectedLabel = selectedLabel.trim()
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -117,7 +115,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         setupActions()
 
         // Render cached data first for instant feedback, then refresh from server.
-        applyCategories(ReceiptCategory.all())
+        applyCategories(ReceiptCategory.all(), reconcileSelection = false)
         refreshCategoriesFromRemote()
     }
 
@@ -161,6 +159,8 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
             setHasFixedSize(true)
             isNestedScrollingEnabled = true
             overScrollMode = View.OVER_SCROLL_NEVER
+            // Avoid default change animations causing spacing/jump artifacts after insert refresh.
+            itemAnimator = null
             if (itemDecorationCount == 0) {
                 addItemDecoration(
                     GridSpacingItemDecoration(
@@ -216,13 +216,14 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
             val result = withContext(dispatchers.io) { fetchCategoriesUseCase() }
             result.onSuccess { list ->
                 ReceiptCategory.update(list)
-                applyCategories(list)
+                // Remote list is authoritative, so we reconcile selection against it.
+                applyCategories(list, reconcileSelection = true)
             }.onFailure {
                 // If remote fetch fails, keep showing cached data rather than an empty list.
                 if (!adapter.hasCategoryItems()) {
                     val cached = ReceiptCategory.all()
                     if (cached.isNotEmpty()) {
-                        applyCategories(cached)
+                        applyCategories(cached, reconcileSelection = false)
                     }
                 }
             }
@@ -267,7 +268,10 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         }
     }
 
-    private fun applyCategories(list: List<ReceiptCategory.Item>) {
+    private fun applyCategories(
+        list: List<ReceiptCategory.Item>,
+        reconcileSelection: Boolean
+    ) {
         val options = list.map { item ->
             CategoryOption(
                 id = item.id,
@@ -276,45 +280,16 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
             )
         }
 
-        // Selection should survive refresh only when the category still exists.
-        selectedLabel = selectedLabel.takeIf { selected ->
-            options.any { option -> option.matches(selected) }
-        }.orEmpty()
-
-        adapter.submitCategories(options, selectedLabel) {
-            updateCategoryListHeight()
+        // Do not clear selection on cached/placeholder render.
+        // Only reconcile on authoritative (remote) data to avoid losing preselection.
+        if (reconcileSelection) {
+            selectedLabel = selectedLabel.takeIf { selected ->
+                options.any { option -> option.matches(selected) }
+            }.orEmpty()
         }
+
+        adapter.submitCategories(options, selectedLabel)
         binding.deleteHint.isVisible = options.any { it.isCustom }
-    }
-
-    private fun updateCategoryListHeight() {
-        val maxHeight = (resources.displayMetrics.heightPixels * CATEGORY_MAX_HEIGHT_RATIO).toInt()
-        binding.categoryList.post {
-            val categoryList = _binding?.categoryList ?: return@post
-            // `computeVerticalScrollRange` may be 0 on first layout pass, so we keep a deterministic
-            // fallback height estimate to avoid sudden jump after data is shown.
-            val measuredContentHeight =
-                categoryList.computeVerticalScrollRange() +
-                    categoryList.paddingTop +
-                    categoryList.paddingBottom
-            val fallbackHeight = estimateCategoryListHeight(adapter.itemCount)
-            val desiredHeight = measuredContentHeight.takeIf { it > 0 } ?: fallbackHeight
-            val finalHeight = desiredHeight.coerceAtMost(maxHeight)
-
-            categoryList.updateLayoutParams<ViewGroup.LayoutParams> {
-                if (height != finalHeight) {
-                    height = finalHeight
-                }
-            }
-        }
-    }
-
-    private fun estimateCategoryListHeight(itemCount: Int): Int {
-        val rows = maxOf(1, (itemCount + GRID_SPAN_COUNT - 1) / GRID_SPAN_COUNT)
-        val rowHeight = dpToPx(CATEGORY_FALLBACK_ROW_HEIGHT_DP)
-        val verticalGapCount = (rows - 1).coerceAtLeast(0)
-        val verticalGaps = verticalGapCount * dpToPx(CATEGORY_ITEM_SPACING_VERTICAL_DP)
-        return rows * rowHeight + verticalGaps
     }
 
     private fun showToast(@StringRes messageRes: Int) {

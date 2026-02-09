@@ -23,9 +23,10 @@ internal class GridSpacingItemDecoration(
         val position = parent.getChildAdapterPosition(view)
         if (position == RecyclerView.NO_POSITION) return
 
+        // Always reset to avoid stale offsets when a recycled view changes row/column.
+        outRect.set(0, 0, 0, 0)
+
         if (spanCount <= 1) {
-            outRect.left = 0
-            outRect.right = 0
             if (position > 0) outRect.top = verticalSpacing
             return
         }
