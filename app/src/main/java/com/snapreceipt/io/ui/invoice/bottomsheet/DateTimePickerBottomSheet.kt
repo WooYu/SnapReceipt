@@ -72,6 +72,7 @@ class DateTimePickerBottomSheet(
     private fun setupPickers() {
         val selectedColor = ContextCompat.getColor(requireContext(), R.color.colorPrimary)
         val unselectedColor = ContextCompat.getColor(requireContext(), R.color.text_primary)
+        val dividerColor = ContextCompat.getColor(requireContext(), R.color.picker_column_divider)
 
         val currentYear = calendar.get(Calendar.YEAR)
         binding.pickerYear.minValue = currentYear - 2
@@ -95,11 +96,36 @@ class DateTimePickerBottomSheet(
         binding.pickerHour.setFormatter { value -> value.toString().padStart(2, '0') }
         binding.pickerMinute.setFormatter { value -> value.toString().padStart(2, '0') }
 
-        binding.pickerYear.applyPickerStyle(selectedColor, unselectedColor)
-        binding.pickerMonth.applyPickerStyle(selectedColor, unselectedColor)
-        binding.pickerDay.applyPickerStyle(selectedColor, unselectedColor)
-        binding.pickerHour.applyPickerStyle(selectedColor, unselectedColor)
-        binding.pickerMinute.applyPickerStyle(selectedColor, unselectedColor)
+        binding.pickerYear.applyPickerStyle(
+            selectedTextColor = selectedColor,
+            unselectedTextColor = unselectedColor,
+            dividerColor = dividerColor,
+            dividerHeightDp = 1f
+        )
+        binding.pickerMonth.applyPickerStyle(
+            selectedTextColor = selectedColor,
+            unselectedTextColor = unselectedColor,
+            dividerColor = dividerColor,
+            dividerHeightDp = 1f
+        )
+        binding.pickerDay.applyPickerStyle(
+            selectedTextColor = selectedColor,
+            unselectedTextColor = unselectedColor,
+            dividerColor = dividerColor,
+            dividerHeightDp = 1f
+        )
+        binding.pickerHour.applyPickerStyle(
+            selectedTextColor = selectedColor,
+            unselectedTextColor = unselectedColor,
+            dividerColor = dividerColor,
+            dividerHeightDp = 1f
+        )
+        binding.pickerMinute.applyPickerStyle(
+            selectedTextColor = selectedColor,
+            unselectedTextColor = unselectedColor,
+            dividerColor = dividerColor,
+            dividerHeightDp = 1f
+        )
 
         updateDayPicker()
 

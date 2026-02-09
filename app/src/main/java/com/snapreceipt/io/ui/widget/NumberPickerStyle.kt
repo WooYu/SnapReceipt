@@ -11,6 +11,8 @@ import androidx.annotation.ColorInt
 internal fun NumberPicker.applyPickerStyle(
     @ColorInt selectedTextColor: Int,
     @ColorInt unselectedTextColor: Int,
+    @ColorInt dividerColor: Int = Color.TRANSPARENT,
+    dividerHeightDp: Float = 0f,
     textSizeSp: Float = 16f
 ) {
     descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS
@@ -21,10 +23,15 @@ internal fun NumberPicker.applyPickerStyle(
         textSizeSp,
         resources.displayMetrics
     )
+    val dividerHeightPx = TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP,
+        dividerHeightDp,
+        resources.displayMetrics
+    ).toInt()
 
     updateSelectedEditText(selectedTextColor, textSizePx)
     updateWheelPaint(unselectedTextColor, textSizePx)
-    removeSelectionDividers()
+    updateSelectionDividers(dividerColor, dividerHeightPx)
     invalidate()
 }
 
@@ -60,17 +67,20 @@ private fun NumberPicker.updateWheelPaint(
     }
 }
 
-private fun NumberPicker.removeSelectionDividers() {
+private fun NumberPicker.updateSelectionDividers(
+    @ColorInt dividerColor: Int,
+    dividerHeightPx: Int
+) {
     runCatching {
         val dividerField = NumberPicker::class.java.getDeclaredField("mSelectionDivider").apply {
             isAccessible = true
         }
-        dividerField.set(this, ColorDrawable(Color.TRANSPARENT))
+        dividerField.set(this, ColorDrawable(dividerColor))
     }
     runCatching {
         val dividerHeightField = NumberPicker::class.java.getDeclaredField("mSelectionDividerHeight").apply {
             isAccessible = true
         }
-        dividerHeightField.setInt(this, 0)
+        dividerHeightField.setInt(this, dividerHeightPx)
     }
 }
