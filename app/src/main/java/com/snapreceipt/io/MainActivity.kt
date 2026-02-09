@@ -10,16 +10,14 @@ import com.snapreceipt.io.databinding.ActivityMainBinding
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
 import com.snapreceipt.io.ui.main.MainViewModel
 import com.snapreceipt.io.ui.login.LoginActivity
-import com.snapreceipt.io.ui.widget.LoadingOverlayController
 import com.skybound.space.base.presentation.BaseActivity
-import com.skybound.space.base.presentation.LoadingOverlayHost
 import com.skybound.space.core.network.auth.SessionEvent
 import com.skybound.space.core.network.auth.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : BaseActivity<MainViewModel>(), LoadingOverlayHost {
+class MainActivity : BaseActivity<MainViewModel>() {
     override val viewModel: MainViewModel by viewModels()
     @Inject
     lateinit var injectedSessionManager: SessionManager
@@ -27,9 +25,6 @@ class MainActivity : BaseActivity<MainViewModel>(), LoadingOverlayHost {
         get() = injectedSessionManager
 
     private lateinit var binding: ActivityMainBinding
-    private val loadingOverlayController by lazy(LazyThreadSafetyMode.NONE) {
-        LoadingOverlayController(this)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,17 +57,9 @@ class MainActivity : BaseActivity<MainViewModel>(), LoadingOverlayHost {
         binding.bottomNav.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
-    override fun showGlobalLoading(message: CharSequence?) {
-        loadingOverlayController.show(message)
-    }
-
-    override fun hideGlobalLoading() {
-        loadingOverlayController.hide()
-    }
-
     fun showGlobalLoadingOverlay(@StringRes messageRes: Int? = null) {
         if (messageRes != null) {
-            loadingOverlayController.show(messageRes)
+            showGlobalLoading(getString(messageRes))
         } else {
             showGlobalLoading(null)
         }
@@ -80,11 +67,6 @@ class MainActivity : BaseActivity<MainViewModel>(), LoadingOverlayHost {
 
     fun hideGlobalLoadingOverlay() {
         hideGlobalLoading()
-    }
-
-    override fun onDestroy() {
-        loadingOverlayController.release()
-        super.onDestroy()
     }
 
     override fun onSessionExpired(event: SessionEvent) {

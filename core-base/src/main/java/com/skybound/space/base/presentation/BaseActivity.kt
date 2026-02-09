@@ -18,11 +18,17 @@ import kotlinx.coroutines.launch
  * Activity 基类：只负责监听 UiEvent，具体 UI 渲染留给子类。
  */
 abstract class BaseActivity<VM : com.skybound.space.base.presentation.viewmodel.BaseViewModel> :
-    AppCompatActivity() {
+    AppCompatActivity(),
+    LoadingOverlayHost {
 
-    protected abstract val viewModel: VM
+    /**
+     * 默认支持无 ViewModel 的 Activity（如纯展示页）。
+     * 需要事件分发的页面直接覆写为非空 VM。
+     */
+    protected open val viewModel: VM? = null
     protected open val sessionManager: SessionManager? = null
     private var sessionEventHandled = false
+    private var loadingDialogController: LoadingDialogController? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,9 +48,10 @@ abstract class BaseActivity<VM : com.skybound.space.base.presentation.viewmodel.
     }
 
     private fun observeEvents() {
+        val vm = viewModel ?: return
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.events.collect { event ->
+                vm.events.collect { event ->
                     when (event) {
                         is UiEvent.Toast -> {
                             val text = event.message.ifBlank { event.resId?.let { getString(it) } ?: "" }
@@ -108,5 +115,29 @@ abstract class BaseActivity<VM : com.skybound.space.base.presentation.viewmodel.
 
     open fun onSessionExpired(event: SessionEvent) {
         // 子类根据登录态失效处理
+    }
+
+    /**
+     * 全局 loading 由 BaseActivity 统一托管，Fragment 只需要通过 LoadingOverlayHost 调用。
+     */
+    override fun showGlobalLoading(message: CharSequence?) {
+        if (isFinishing || isDestroyed) return
+        ensureLoadingController().show(message)
+    }
+
+    override fun hideGlobalLoading() {
+        loadingDialogController?.hide()
+    }
+
+    override fun onDestroy() {
+        loadingDialogController?.hide()
+        loadingDialogController = null
+        super.onDestroy()
+    }
+
+    private fun ensureLoadingController(): LoadingDialogController {
+        return loadingDialogController ?: LoadingDialogController(supportFragmentManager).also {
+            loadingDialogController = it
+        }
     }
 }

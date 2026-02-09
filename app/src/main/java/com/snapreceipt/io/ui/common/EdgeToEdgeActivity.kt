@@ -1,44 +1,17 @@
 package com.snapreceipt.io.ui.common
 
-import android.graphics.Color
-import android.os.Bundle
-import android.os.Build
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import com.snapreceipt.io.R
-import com.snapreceipt.io.ui.widget.LoadingOverlayController
-import com.skybound.space.base.presentation.LoadingOverlayHost
+import com.skybound.space.base.presentation.BaseActivity
+import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 
-open class EdgeToEdgeActivity : AppCompatActivity(), LoadingOverlayHost {
+/**
+ * 兼容壳类：历史页面仍可继承该类，实际能力全部来自 BaseActivity。
+ * 后续新页面可直接继承 BaseActivity（若需要 ViewModel 事件）或继续沿用该壳类。
+ */
+open class EdgeToEdgeActivity : BaseActivity<BaseViewModel>() {
 
-    private val loadingOverlayController: LoadingOverlayController by lazy(LazyThreadSafetyMode.NONE) {
-        LoadingOverlayController(this)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.statusBarColor = Color.TRANSPARENT
-        window.navigationBarColor = Color.TRANSPARENT
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            window.isStatusBarContrastEnforced = false
-            window.isNavigationBarContrastEnforced = false
-        }
-        WindowInsetsControllerCompat(window, window.decorView).apply {
-            isAppearanceLightStatusBars = false
-            isAppearanceLightNavigationBars = false
-        }
-    }
-
-    override fun showGlobalLoading(message: CharSequence?) {
-        loadingOverlayController.show(message)
-    }
-
-    override fun hideGlobalLoading() {
-        loadingOverlayController.hide()
-    }
+    override val viewModel: BaseViewModel? = null
 
     protected fun showLoadingOverlay(show: Boolean, message: CharSequence? = null) {
         if (show) {
@@ -49,15 +22,10 @@ open class EdgeToEdgeActivity : AppCompatActivity(), LoadingOverlayHost {
     }
 
     protected fun showLoadingOverlay(@StringRes messageRes: Int = R.string.loading) {
-        loadingOverlayController.show(messageRes)
+        showGlobalLoading(getString(messageRes))
     }
 
     protected fun hideLoadingOverlay() {
         hideGlobalLoading()
-    }
-
-    override fun onDestroy() {
-        loadingOverlayController.release()
-        super.onDestroy()
     }
 }
