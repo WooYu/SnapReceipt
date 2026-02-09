@@ -12,9 +12,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
-import androidx.core.view.isVisible
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.BottomSheetInvoiceCategoryBinding
 import com.snapreceipt.io.databinding.ItemCategoryChipBinding
@@ -31,7 +32,6 @@ import com.snapreceipt.io.domain.usecase.category.AddCategoryUseCase
 import com.snapreceipt.io.domain.usecase.category.DeleteCategoryUseCase
 import com.snapreceipt.io.domain.usecase.category.FetchCategoriesUseCase
 import com.snapreceipt.io.ui.invoice.dialogs.CustomTypeDialog
-import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -42,15 +42,19 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
 
     companion object {
         private const val ARG_INITIAL = "arg_initial"
+
         // 3 columns to balance readability and touch area in bottom sheet width.
         private const val GRID_SPAN_COUNT = 3
         private const val CATEGORY_ROW_HEIGHT_DP = 62f
         private const val CATEGORY_MIN_HEIGHT_DP = 120f
         private const val CATEGORY_MAX_HEIGHT_RATIO = 0.45f
-        private const val CATEGORY_ITEM_SPACING_HORIZONTAL_DP = 10f
-        private const val CATEGORY_ITEM_SPACING_VERTICAL_DP = 12f
+        private const val CATEGORY_ITEM_SPACING_HORIZONTAL_DP = 21f
+        private const val CATEGORY_ITEM_SPACING_VERTICAL_DP = 20f
 
-        fun newInstance(initialSelection: String?, onSelected: (String) -> Unit): InvoiceCategoryBottomSheet {
+        fun newInstance(
+            initialSelection: String?,
+            onSelected: (String) -> Unit
+        ): InvoiceCategoryBottomSheet {
             return InvoiceCategoryBottomSheet().apply {
                 arguments = bundleOf(ARG_INITIAL to initialSelection)
                 this.onSelected = onSelected
@@ -201,7 +205,11 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
                 selectedLabel = label
                 refreshCategoriesFromRemote()
             }.onFailure {
-                Toast.makeText(requireContext(), getString(R.string.add_category_failed), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.add_category_failed),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -223,7 +231,11 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
                 }
                 refreshCategoriesFromRemote()
             }.onFailure {
-                Toast.makeText(requireContext(), getString(R.string.delete_category_failed), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.delete_category_failed),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
