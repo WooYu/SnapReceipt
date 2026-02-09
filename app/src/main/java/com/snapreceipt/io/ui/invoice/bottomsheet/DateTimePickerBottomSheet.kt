@@ -22,6 +22,10 @@ class DateTimePickerBottomSheet(
     private val onSelected: (date: String, time: String, display: String) -> Unit
 ) : BottomSheetDialogFragment() {
 
+    companion object {
+        private const val RECENT_YEAR_COUNT = 50
+    }
+
     private val calendar: Calendar = Calendar.getInstance().apply {
         if (initialTime != null) timeInMillis = initialTime
     }
@@ -72,23 +76,30 @@ class DateTimePickerBottomSheet(
     private fun setupPickers() {
         val selectedColor = ContextCompat.getColor(requireContext(), R.color.colorPrimary)
         val unselectedColor = ContextCompat.getColor(requireContext(), R.color.text_primary)
-        val dividerColor = ContextCompat.getColor(requireContext(), R.color.picker_column_divider)
+        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+        val minYear = currentYear - (RECENT_YEAR_COUNT - 1)
+        val maxYear = currentYear
+        val clampedYear = calendar.get(Calendar.YEAR).coerceIn(minYear, maxYear)
+        calendar.set(Calendar.YEAR, clampedYear)
 
-        val currentYear = calendar.get(Calendar.YEAR)
-        binding.pickerYear.minValue = currentYear - 2
-        binding.pickerYear.maxValue = currentYear + 2
-        binding.pickerYear.value = currentYear
+        binding.pickerYear.minValue = minYear
+        binding.pickerYear.maxValue = maxYear
+        binding.pickerYear.wrapSelectorWheel = false
+        binding.pickerYear.value = clampedYear
 
         binding.pickerMonth.minValue = 1
         binding.pickerMonth.maxValue = 12
+        binding.pickerMonth.wrapSelectorWheel = false
         binding.pickerMonth.value = calendar.get(Calendar.MONTH) + 1
 
         binding.pickerHour.minValue = 0
         binding.pickerHour.maxValue = 23
+        binding.pickerHour.wrapSelectorWheel = false
         binding.pickerHour.value = calendar.get(Calendar.HOUR_OF_DAY)
 
         binding.pickerMinute.minValue = 0
         binding.pickerMinute.maxValue = 59
+        binding.pickerMinute.wrapSelectorWheel = false
         binding.pickerMinute.value = calendar.get(Calendar.MINUTE)
 
         binding.pickerMonth.setFormatter { value -> value.toString().padStart(2, '0') }
@@ -99,32 +110,37 @@ class DateTimePickerBottomSheet(
         binding.pickerYear.applyPickerStyle(
             selectedTextColor = selectedColor,
             unselectedTextColor = unselectedColor,
-            dividerColor = dividerColor,
-            dividerHeightDp = 1f
+            dividerColor = Color.TRANSPARENT,
+            dividerHeightDp = 0f,
+            maxVisibleItemCount = 5
         )
         binding.pickerMonth.applyPickerStyle(
             selectedTextColor = selectedColor,
             unselectedTextColor = unselectedColor,
-            dividerColor = dividerColor,
-            dividerHeightDp = 1f
+            dividerColor = Color.TRANSPARENT,
+            dividerHeightDp = 0f,
+            maxVisibleItemCount = 5
         )
         binding.pickerDay.applyPickerStyle(
             selectedTextColor = selectedColor,
             unselectedTextColor = unselectedColor,
-            dividerColor = dividerColor,
-            dividerHeightDp = 1f
+            dividerColor = Color.TRANSPARENT,
+            dividerHeightDp = 0f,
+            maxVisibleItemCount = 5
         )
         binding.pickerHour.applyPickerStyle(
             selectedTextColor = selectedColor,
             unselectedTextColor = unselectedColor,
-            dividerColor = dividerColor,
-            dividerHeightDp = 1f
+            dividerColor = Color.TRANSPARENT,
+            dividerHeightDp = 0f,
+            maxVisibleItemCount = 5
         )
         binding.pickerMinute.applyPickerStyle(
             selectedTextColor = selectedColor,
             unselectedTextColor = unselectedColor,
-            dividerColor = dividerColor,
-            dividerHeightDp = 1f
+            dividerColor = Color.TRANSPARENT,
+            dividerHeightDp = 0f,
+            maxVisibleItemCount = 5
         )
 
         updateDayPicker()
@@ -152,6 +168,7 @@ class DateTimePickerBottomSheet(
         val currentDay = calendar.get(Calendar.DAY_OF_MONTH).coerceAtMost(maxDay)
         binding.pickerDay.minValue = 1
         binding.pickerDay.maxValue = maxDay
+        binding.pickerDay.wrapSelectorWheel = false
         binding.pickerDay.value = currentDay
     }
 

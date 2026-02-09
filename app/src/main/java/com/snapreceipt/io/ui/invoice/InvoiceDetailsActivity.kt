@@ -99,12 +99,8 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         binding.valueCard.text = readonlyText(cardText)
         scanConsumer = receipt.consumer.orEmpty()
         scanTipAmount = receipt.tipAmount
-        val categoryLabel = receipt.categoryName.orEmpty()
-        binding.inputInvoiceCategory.setText(categoryLabel)
-        binding.valueInvoiceType.text = readonlyText(categoryLabel)
-        val titleType = receipt.receiptType.orEmpty()
-        binding.inputTitleType.setText(titleType)
-        binding.valueTitleType.text = readonlyText(titleType)
+        setInvoiceCategorySelection(receipt.categoryName.orEmpty())
+        setTitleTypeSelection(receipt.receiptType.orEmpty())
         val noteText = receipt.remark.orEmpty()
         binding.inputNote.setText(noteText)
         binding.valueNote.text = readonlyText(noteText)
@@ -259,20 +255,33 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun setupPickers() {
-        binding.inputInvoiceCategory.apply {
+        bindPickerRow(
+            container = binding.containerInputInvoiceCategory,
+            input = binding.inputInvoiceCategory,
+            onClick = ::openInvoiceCategoryPicker
+        )
+        bindPickerRow(
+            container = binding.containerInputTitleType,
+            input = binding.inputTitleType,
+            onClick = ::openTitleTypePicker
+        )
+        bindPickerRow(
+            container = binding.containerInputDate,
+            input = binding.inputDate,
+            onClick = ::openDateTimePicker
+        )
+    }
+
+    private fun bindPickerRow(
+        container: View,
+        input: View,
+        onClick: () -> Unit
+    ) {
+        container.setOnClickListener { onClick() }
+        input.apply {
             isFocusable = false
             isClickable = true
-            setOnClickListener { openInvoiceTypePicker() }
-        }
-        binding.inputTitleType.apply {
-            isFocusable = false
-            isClickable = true
-            setOnClickListener { openTitleTypePicker() }
-        }
-        binding.inputDate.apply {
-            isFocusable = false
-            isClickable = true
-            setOnClickListener { openDateTimePicker() }
+            setOnClickListener { onClick() }
         }
     }
 
@@ -312,18 +321,28 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         startActivity(intent)
     }
 
-    private fun openInvoiceTypePicker() {
+    private fun openInvoiceCategoryPicker() {
         InvoiceCategoryBottomSheet.newInstance(binding.inputInvoiceCategory.text.toString()) { selected ->
-            binding.inputInvoiceCategory.setText(selected)
-            binding.valueInvoiceType.text = readonlyText(selected)
-        }.show(supportFragmentManager, "invoice_type_picker")
+            setInvoiceCategorySelection(selected)
+        }.show(supportFragmentManager, "invoice_category_picker")
     }
 
     private fun openTitleTypePicker() {
         TitleTypeBottomSheet(binding.inputTitleType.text.toString()) { selected ->
-            binding.inputTitleType.setText(selected)
-            binding.valueTitleType.text = readonlyText(selected)
+            setTitleTypeSelection(selected)
         }.show(supportFragmentManager, "title_type_picker")
+    }
+
+    private fun setInvoiceCategorySelection(value: String) {
+        val normalized = value.trim()
+        binding.inputInvoiceCategory.setText(normalized)
+        binding.valueInvoiceType.text = readonlyText(normalized)
+    }
+
+    private fun setTitleTypeSelection(value: String) {
+        val normalized = value.trim()
+        binding.inputTitleType.setText(normalized)
+        binding.valueTitleType.text = readonlyText(normalized)
     }
 
     private fun openDateTimePicker() {

@@ -7,6 +7,7 @@ import android.graphics.drawable.ColorDrawable
 import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.annotation.StringRes
+import androidx.core.view.WindowCompat
 import com.snapreceipt.io.R
 
 /**
@@ -68,12 +69,17 @@ class GlobalLoadingDialog(
             setContentView(overlay)
             setCancelable(false)
             setCanceledOnTouchOutside(false)
-            window?.setLayout(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            window?.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            window?.let { window ->
+                WindowCompat.setDecorFitsSystemWindows(window, false)
+                window.setLayout(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                window.statusBarColor = Color.TRANSPARENT
+                window.navigationBarColor = Color.TRANSPARENT
+                window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            }
         }
 
         overlayView = overlay

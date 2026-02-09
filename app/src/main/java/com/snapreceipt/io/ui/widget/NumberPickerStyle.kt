@@ -13,7 +13,8 @@ internal fun NumberPicker.applyPickerStyle(
     @ColorInt unselectedTextColor: Int,
     @ColorInt dividerColor: Int = Color.TRANSPARENT,
     dividerHeightDp: Float = 0f,
-    textSizeSp: Float = 16f
+    textSizeSp: Float = 16f,
+    maxVisibleItemCount: Int = 5
 ) {
     descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS
     setBackgroundColor(Color.TRANSPARENT)
@@ -32,6 +33,7 @@ internal fun NumberPicker.applyPickerStyle(
     updateSelectedEditText(selectedTextColor, textSizePx)
     updateWheelPaint(unselectedTextColor, textSizePx)
     updateSelectionDividers(dividerColor, dividerHeightPx)
+    updateVisibleItemCount(maxVisibleItemCount)
     invalidate()
 }
 
@@ -82,5 +84,37 @@ private fun NumberPicker.updateSelectionDividers(
             isAccessible = true
         }
         dividerHeightField.setInt(this, dividerHeightPx)
+    }
+}
+
+private fun NumberPicker.updateVisibleItemCount(maxVisibleItemCount: Int) {
+    if (maxVisibleItemCount < 3) return
+    val sanitizedCount = if (maxVisibleItemCount % 2 == 0) {
+        maxVisibleItemCount - 1
+    } else {
+        maxVisibleItemCount
+    }
+    runCatching {
+        val itemCountField = NumberPicker::class.java.getDeclaredField("mSelectorWheelItemCount").apply {
+            isAccessible = true
+        }
+        if (itemCountField.getInt(this) == sanitizedCount) {
+            return@runCatching
+        }
+
+        itemCountField.setInt(this, sanitizedCount)
+
+        val indicesField = NumberPicker::class.java.getDeclaredField("mSelectorIndices").apply {
+            isAccessible = true
+        }
+        indicesField.set(this, IntArray(sanitizedCount))
+
+        NumberPicker::class.java.getDeclaredMethod("initializeSelectorWheelIndices").apply {
+            isAccessible = true
+            invoke(this@updateVisibleItemCount)
+        }
+
+        requestLayout()
+        invalidate()
     }
 }

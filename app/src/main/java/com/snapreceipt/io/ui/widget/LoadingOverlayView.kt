@@ -3,8 +3,10 @@ package com.snapreceipt.io.ui.widget
 import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.StringRes
@@ -43,6 +45,7 @@ class LoadingOverlayView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
+    private val cardContainer: LinearLayout
     private val textView: TextView
 
     init {
@@ -52,6 +55,7 @@ class LoadingOverlayView @JvmOverloads constructor(
         visibility = GONE
 
         LayoutInflater.from(context).inflate(R.layout.view_loading_overlay, this, true)
+        cardContainer = findViewById(R.id.lov_card)
         textView = findViewById(R.id.lov_text)
 
         // Read custom attributes
@@ -69,6 +73,7 @@ class LoadingOverlayView @JvmOverloads constructor(
             }
         }
         a.recycle()
+        updateCardMinWidth()
     }
 
     /**
@@ -77,8 +82,9 @@ class LoadingOverlayView @JvmOverloads constructor(
     fun show(text: CharSequence? = null) {
         if (text != null) {
             textView.text = text
-            textView.visibility = VISIBLE
+            textView.visibility = if (text.isNotBlank()) VISIBLE else GONE
         }
+        updateCardMinWidth()
         visibility = VISIBLE
     }
 
@@ -88,6 +94,7 @@ class LoadingOverlayView @JvmOverloads constructor(
     fun show(@StringRes resId: Int) {
         textView.setText(resId)
         textView.visibility = VISIBLE
+        updateCardMinWidth()
         visibility = VISIBLE
     }
 
@@ -104,6 +111,7 @@ class LoadingOverlayView @JvmOverloads constructor(
     fun setText(text: CharSequence) {
         textView.text = text
         textView.visibility = if (text.isNotBlank()) VISIBLE else GONE
+        updateCardMinWidth()
     }
 
     /**
@@ -112,6 +120,7 @@ class LoadingOverlayView @JvmOverloads constructor(
     fun setText(@StringRes resId: Int) {
         textView.setText(resId)
         textView.visibility = VISIBLE
+        updateCardMinWidth()
     }
 
     /**
@@ -119,6 +128,22 @@ class LoadingOverlayView @JvmOverloads constructor(
      */
     val isShowing: Boolean
         get() = visibility == View.VISIBLE
+
+    private fun updateCardMinWidth() {
+        cardContainer.minimumWidth = if (textView.visibility == VISIBLE) {
+            dpToPx(200f)
+        } else {
+            0
+        }
+    }
+
+    private fun dpToPx(value: Float): Int {
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            value,
+            resources.displayMetrics
+        ).toInt()
+    }
 
     companion object {
         private val DEFAULT_OVERLAY_COLOR = Color.parseColor("#80000000")

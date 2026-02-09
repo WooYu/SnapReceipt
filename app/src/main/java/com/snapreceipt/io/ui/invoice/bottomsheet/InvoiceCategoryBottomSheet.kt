@@ -80,7 +80,18 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         val dialog = BottomSheetDialog(requireContext())
         _binding = BottomSheetInvoiceCategoryBinding.inflate(LayoutInflater.from(requireContext()))
         dialog.setContentView(binding.root)
+        selectedLabel = arguments?.getString(ARG_INITIAL).orEmpty()
+        setupBottomSheet(dialog)
         applyBottomInsets()
+        setupCategoryList()
+        setupActions()
+
+        ReceiptCategory.all().takeIf { it.isNotEmpty() }?.let { applyCategories(it) }
+        refreshCategoriesFromRemote()
+        return dialog
+    }
+
+    private fun setupBottomSheet(dialog: BottomSheetDialog) {
         dialog.setOnShowListener {
             val bottomSheet =
                 dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
@@ -92,60 +103,58 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
                 behavior.isDraggable = false
             }
         }
+    }
 
-        selectedLabel = arguments?.getString(ARG_INITIAL).orEmpty()
-
+    private fun setupCategoryList() {
         adapter = CategoryChipAdapter(
-            onSelect = { option ->
-                selectedLabel = if (option.label.equals(selectedLabel, ignoreCase = true)) {
-                    ""
-                } else {
-                    option.label
-                }
-                adapter.updateSelection(selectedLabel)
-            },
+            onSelect = { option -> toggleSelection(option.label) },
             onLongPress = { option ->
-                if (option.isCustom && !option.isAll) {
+                if (option.isCustom) {
                     confirmDelete(option)
                 }
             }
         )
-        binding.categoryList.layoutManager = GridLayoutManager(requireContext(), GRID_SPAN_COUNT)
-        binding.categoryList.adapter = adapter
-        binding.categoryList.setHasFixedSize(true)
-        binding.categoryList.isNestedScrollingEnabled = true
-        binding.categoryList.overScrollMode = View.OVER_SCROLL_NEVER
-        if (binding.categoryList.itemDecorationCount == 0) {
-            binding.categoryList.addItemDecoration(
-                GridSpacingItemDecoration(
-                    spanCount = GRID_SPAN_COUNT,
-                    horizontalSpacing = dpToPx(CATEGORY_ITEM_SPACING_HORIZONTAL_DP),
-                    verticalSpacing = dpToPx(CATEGORY_ITEM_SPACING_VERTICAL_DP)
+        binding.categoryList.apply {
+            layoutManager = GridLayoutManager(requireContext(), GRID_SPAN_COUNT)
+            adapter = this@InvoiceCategoryBottomSheet.adapter
+            setHasFixedSize(true)
+            isNestedScrollingEnabled = true
+            overScrollMode = View.OVER_SCROLL_NEVER
+            if (itemDecorationCount == 0) {
+                addItemDecoration(
+                    GridSpacingItemDecoration(
+                        spanCount = GRID_SPAN_COUNT,
+                        horizontalSpacing = dpToPx(CATEGORY_ITEM_SPACING_HORIZONTAL_DP),
+                        verticalSpacing = dpToPx(CATEGORY_ITEM_SPACING_VERTICAL_DP)
+                    )
                 )
-            )
+            }
+            setOnTouchListener { view, _ ->
+                view.parent?.requestDisallowInterceptTouchEvent(true)
+                false
+            }
         }
-        binding.categoryList.setOnTouchListener { view, _ ->
-            view.parent?.requestDisallowInterceptTouchEvent(true)
-            false
-        }
+    }
 
+    private fun setupActions() {
         binding.typeAdd.setOnClickListener {
             CustomTypeDialog { customType -> addCustomType(customType) }
                 .show(parentFragmentManager, "custom_type_dialog")
         }
-
         binding.cancelBtn.setOnClickListener { dismiss() }
         binding.confirmBtn.setOnClickListener {
             onSelected?.invoke(selectedLabel)
             dismiss()
         }
+    }
 
-        val cached = ReceiptCategory.all()
-        if (cached.isNotEmpty()) {
-            applyCategories(cached)
+    private fun toggleSelection(label: String) {
+        selectedLabel = if (label.equals(selectedLabel, ignoreCase = true)) {
+            ""
+        } else {
+            label
         }
-        refreshCategoriesFromRemote()
-        return dialog
+        adapter.updateSelection(selectedLabel)
     }
 
     private fun applyBottomInsets() {
@@ -215,9 +224,18 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun applyCategories(list: List<ReceiptCategory.Item>) {
-        val options = buildOptions(list)
+        val options = list.map { item ->
+            CategoryOption(
+                id = item.id,
+                label = item.label,
+                isCustom = item.isCustom
+            )
+        }
+        selectedLabel = selectedLabel.takeIf { selected ->
+            options.any { option -> option.matches(selected) }
+        }.orEmpty()
         adapter.submitList(options, selectedLabel)
-        binding.deleteHint.isVisible = options.any { it.isCustom && !it.isAll }
+        binding.deleteHint.isVisible = options.any { it.isCustom }
         updateCategoryListHeight(options.size)
     }
 
@@ -233,29 +251,19 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         }
     }
 
-    private fun buildOptions(list: List<ReceiptCategory.Item>): List<CategoryOption> {
-        val options = mutableListOf<CategoryOption>()
-        list.forEach { item ->
-            options.add(CategoryOption(item.id, item.label, item.isCustom, isAll = false))
-        }
-        if (selectedLabel.isNotBlank() && options.none { it.label.equals(selectedLabel, ignoreCase = true) }) {
-            selectedLabel = ""
-        }
-        return options
-    }
-
     private fun dpToPx(dp: Float): Int {
         return (dp * resources.displayMetrics.density).toInt()
     }
 
-    data class CategoryOption(
+    private data class CategoryOption(
         val id: Long,
         val label: String,
-        val isCustom: Boolean,
-        val isAll: Boolean
-    )
+        val isCustom: Boolean
+    ) {
+        fun matches(value: String): Boolean = label.equals(value, ignoreCase = true)
+    }
 
-    class CategoryChipAdapter(
+    private class CategoryChipAdapter(
         private val onSelect: (CategoryOption) -> Unit,
         private val onLongPress: (CategoryOption) -> Unit
     ) : RecyclerView.Adapter<CategoryChipAdapter.ViewHolder>() {
@@ -270,8 +278,12 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         }
 
         fun updateSelection(label: String) {
+            if (selectedLabel.equals(label, ignoreCase = true)) return
+            val previousIndex = items.indexOfFirst { it.matches(selectedLabel) }
+            val currentIndex = items.indexOfFirst { it.matches(label) }
             selectedLabel = label
-            notifyDataSetChanged()
+            if (previousIndex >= 0) notifyItemChanged(previousIndex)
+            if (currentIndex >= 0 && currentIndex != previousIndex) notifyItemChanged(currentIndex)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -300,10 +312,10 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
                 onLongPress: (CategoryOption) -> Unit
             ) {
                 binding.chipText.text = option.label
-                binding.chipText.isSelected = option.label.equals(selectedLabel, ignoreCase = true)
+                binding.chipText.isSelected = option.matches(selectedLabel)
                 binding.chipText.setOnClickListener { onSelect(option) }
                 binding.chipText.setOnLongClickListener {
-                    if (option.isCustom && !option.isAll) {
+                    if (option.isCustom) {
                         binding.chipText.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                         playDeleteAnimation(binding.chipText)
                         onLongPress(option)
@@ -336,10 +348,32 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         ) {
             val position = parent.getChildAdapterPosition(view)
             if (position == RecyclerView.NO_POSITION) return
+            if (spanCount <= 1) {
+                outRect.left = 0
+                outRect.right = 0
+                if (position > 0) outRect.top = verticalSpacing
+                return
+            }
             val column = position % spanCount
+            val trailingSpacing = horizontalSpacing / 2
+            val leadingSpacing = horizontalSpacing - trailingSpacing
 
-            outRect.left = horizontalSpacing - column * horizontalSpacing / spanCount
-            outRect.right = (column + 1) * horizontalSpacing / spanCount
+            when (column) {
+                0 -> {
+                    outRect.left = 0
+                    outRect.right = trailingSpacing
+                }
+
+                spanCount - 1 -> {
+                    outRect.left = leadingSpacing
+                    outRect.right = 0
+                }
+
+                else -> {
+                    outRect.left = leadingSpacing
+                    outRect.right = trailingSpacing
+                }
+            }
             if (position >= spanCount) {
                 outRect.top = verticalSpacing
             }

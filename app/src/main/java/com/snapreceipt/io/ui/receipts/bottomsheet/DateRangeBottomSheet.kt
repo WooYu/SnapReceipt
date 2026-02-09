@@ -23,6 +23,10 @@ class DateRangeBottomSheet(
     private val onSelected: (start: Long, end: Long) -> Unit
 ) : BottomSheetDialogFragment() {
 
+    companion object {
+        private const val RECENT_YEAR_COUNT = 50
+    }
+
     private val startCalendar: Calendar = Calendar.getInstance()
     private val endCalendar: Calendar = Calendar.getInstance()
     private var editingStart = true
@@ -96,14 +100,19 @@ class DateRangeBottomSheet(
     private fun setupPickers() {
         val selectedColor = ContextCompat.getColor(requireContext(), R.color.colorPrimary)
         val unselectedColor = ContextCompat.getColor(requireContext(), R.color.text_primary)
-        val dividerColor = ContextCompat.getColor(requireContext(), R.color.picker_column_divider)
-
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-        binding.pickerYear.minValue = currentYear - 2
-        binding.pickerYear.maxValue = currentYear + 2
+        val minYear = currentYear - (RECENT_YEAR_COUNT - 1)
+        val maxYear = currentYear
+        clampCalendarYear(startCalendar, minYear, maxYear)
+        clampCalendarYear(endCalendar, minYear, maxYear)
+
+        binding.pickerYear.minValue = minYear
+        binding.pickerYear.maxValue = maxYear
+        binding.pickerYear.wrapSelectorWheel = false
 
         binding.pickerMonth.minValue = 1
         binding.pickerMonth.maxValue = 12
+        binding.pickerMonth.wrapSelectorWheel = false
 
         binding.pickerYear.setFormatter { value -> value.toString() }
         binding.pickerMonth.setFormatter { value -> value.toString().padStart(2, '0') }
@@ -112,20 +121,23 @@ class DateRangeBottomSheet(
         binding.pickerYear.applyPickerStyle(
             selectedTextColor = selectedColor,
             unselectedTextColor = unselectedColor,
-            dividerColor = dividerColor,
-            dividerHeightDp = 1f
+            dividerColor = Color.TRANSPARENT,
+            dividerHeightDp = 0f,
+            maxVisibleItemCount = 5
         )
         binding.pickerMonth.applyPickerStyle(
             selectedTextColor = selectedColor,
             unselectedTextColor = unselectedColor,
-            dividerColor = dividerColor,
-            dividerHeightDp = 1f
+            dividerColor = Color.TRANSPARENT,
+            dividerHeightDp = 0f,
+            maxVisibleItemCount = 5
         )
         binding.pickerDay.applyPickerStyle(
             selectedTextColor = selectedColor,
             unselectedTextColor = unselectedColor,
-            dividerColor = dividerColor,
-            dividerHeightDp = 1f
+            dividerColor = Color.TRANSPARENT,
+            dividerHeightDp = 0f,
+            maxVisibleItemCount = 5
         )
 
         syncPickersWithCalendar(startCalendar)
@@ -150,6 +162,7 @@ class DateRangeBottomSheet(
         val currentDay = calendar.get(Calendar.DAY_OF_MONTH).coerceAtMost(maxDay)
         binding.pickerDay.minValue = 1
         binding.pickerDay.maxValue = maxDay
+        binding.pickerDay.wrapSelectorWheel = false
         binding.pickerDay.value = currentDay
     }
 
@@ -185,5 +198,12 @@ class DateRangeBottomSheet(
         calendar.set(Calendar.MINUTE, 0)
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.MILLISECOND, 0)
+    }
+
+    private fun clampCalendarYear(calendar: Calendar, minYear: Int, maxYear: Int) {
+        val clampedYear = calendar.get(Calendar.YEAR).coerceIn(minYear, maxYear)
+        if (clampedYear != calendar.get(Calendar.YEAR)) {
+            calendar.set(Calendar.YEAR, clampedYear)
+        }
     }
 }
