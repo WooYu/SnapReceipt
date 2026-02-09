@@ -20,6 +20,18 @@ class GlobalLoadingDialog(
     private var dialog: Dialog? = null
     private var overlayView: LoadingOverlayView? = null
 
+    fun show(message: CharSequence?) {
+        if (activity.isFinishing || activity.isDestroyed) return
+        ensureDialog()
+        if (message.isNullOrBlank()) {
+            overlayView?.setText("")
+            overlayView?.show()
+        } else {
+            overlayView?.show(message)
+        }
+        dialog?.takeIf { !it.isShowing }?.show()
+    }
+
     fun show(@StringRes messageRes: Int = R.string.loading) {
         if (activity.isFinishing || activity.isDestroyed) return
         ensureDialog()

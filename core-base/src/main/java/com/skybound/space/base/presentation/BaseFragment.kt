@@ -25,6 +25,7 @@ abstract class BaseFragment<VM : com.skybound.space.base.presentation.viewmodel.
     protected abstract val viewModel: VM
 
     private var loadingDialog: Dialog? = null
+    private var hostLoadingShown: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -32,6 +33,7 @@ abstract class BaseFragment<VM : com.skybound.space.base.presentation.viewmodel.
     }
 
     override fun onDestroyView() {
+        hideHostLoadingIfNeeded()
         dismissLoading()
         super.onDestroyView()
     }
@@ -42,10 +44,19 @@ abstract class BaseFragment<VM : com.skybound.space.base.presentation.viewmodel.
 
     protected fun showLoading(show: Boolean, message: CharSequence?) {
         if (!show) {
+            hideHostLoadingIfNeeded()
             dismissLoading()
             return
         }
         if (!isAdded) return
+        val host = activity as? LoadingOverlayHost
+        if (host != null) {
+            host.showGlobalLoading(message)
+            hostLoadingShown = true
+            dismissLoading()
+            return
+        }
+        hostLoadingShown = false
         val dialog = loadingDialog ?: createLoadingDialog().also { loadingDialog = it }
         updateLoadingMessage(dialog, message)
         if (!dialog.isShowing) {
@@ -103,6 +114,12 @@ abstract class BaseFragment<VM : com.skybound.space.base.presentation.viewmodel.
     private fun dismissLoading() {
         loadingDialog?.dismiss()
         loadingDialog = null
+    }
+
+    private fun hideHostLoadingIfNeeded() {
+        if (!hostLoadingShown) return
+        (activity as? LoadingOverlayHost)?.hideGlobalLoading()
+        hostLoadingShown = false
     }
 
     private fun updateLoadingMessage(dialog: Dialog, message: CharSequence?) {
