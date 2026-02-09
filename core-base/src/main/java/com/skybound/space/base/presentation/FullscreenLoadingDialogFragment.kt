@@ -27,7 +27,7 @@ internal class FullscreenLoadingDialogFragment : DialogFragment() {
         isCancelable = false
         pendingMessage = savedInstanceState?.getCharSequence(ARG_MESSAGE)
             ?: arguments?.getCharSequence(ARG_MESSAGE)
-        setStyle(STYLE_NO_FRAME, android.R.style.Theme_Translucent_NoTitleBar)
+        setStyle(STYLE_NORMAL, R.style.BaseFullscreenLoadingDialogTheme)
     }
 
     override fun onCreateView(
@@ -83,6 +83,14 @@ internal class FullscreenLoadingDialogFragment : DialogFragment() {
         )
         window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val params = window.attributes
+            params.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            window.attributes = params
+        }
         // Cover system bars as well so the loading scrim is truly fullscreen.
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.statusBarColor = Color.TRANSPARENT
