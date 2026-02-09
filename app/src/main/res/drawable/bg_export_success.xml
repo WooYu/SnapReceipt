@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 底层：白色底色 + 完整圆角（保证整体圆角效果） -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/white" />
+            <corners android:radius="@dimen/corner_radius_large" />
+        </shape>
+    </item>
+
+    <!-- 上层：仅顶部小区域渐变 + 顶部圆角（和底层匹配） -->
+    <!-- 渐变区域高度（核心：控制顶部渐变的大小） -->
+    <!-- 渐变层贴顶，底部无延伸 -->
+    <item
+        android:height="60dp"
+        android:bottom="0dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="270"
+                android:endColor="#FFFFFF"
+                android:startColor="#E8ECFF"
+                android:type="linear"
+                android:useLevel="false" />
+
+            <!-- 仅设置顶部圆角，避免和底层圆角冲突 -->
+            <corners
+                android:bottomLeftRadius="0dp"
+                android:bottomRightRadius="0dp"
+                android:topLeftRadius="@dimen/corner_radius_large"
+                android:topRightRadius="@dimen/corner_radius_large" />
+        </shape>
+    </item>
+</layer-list>

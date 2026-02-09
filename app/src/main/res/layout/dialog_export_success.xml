@@ -8,7 +8,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_export_dialog"
+        android:background="@drawable/bg_export_success"
         android:padding="20dp">
 
         <!--关闭-->
