@@ -6,12 +6,13 @@
 
     <TextView
         android:id="@+id/chip_text"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:background="@drawable/bg_chip_selector"
+        android:ellipsize="end"
         android:gravity="center"
-        android:minWidth="90dp"
+        android:maxLines="1"
         android:minHeight="40dp"
         android:padding="13dp"
         android:textColor="@color/chip_text_selector"

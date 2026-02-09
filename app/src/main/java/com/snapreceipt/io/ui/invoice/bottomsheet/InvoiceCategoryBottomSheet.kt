@@ -16,6 +16,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
@@ -26,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.BottomSheetInvoiceCategoryBinding
 import com.snapreceipt.io.databinding.ItemCategoryAddBinding
@@ -35,7 +37,6 @@ import com.snapreceipt.io.domain.usecase.category.AddCategoryUseCase
 import com.snapreceipt.io.domain.usecase.category.DeleteCategoryUseCase
 import com.snapreceipt.io.domain.usecase.category.FetchCategoriesUseCase
 import com.snapreceipt.io.ui.invoice.dialogs.CustomTypeDialog
-import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -53,10 +54,13 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         private const val GRID_SPAN_COUNT = 3
         private const val CATEGORY_FALLBACK_ROW_HEIGHT_DP = 62f
         private const val CATEGORY_MAX_HEIGHT_RATIO = 0.45f
-        private const val CATEGORY_ITEM_SPACING_HORIZONTAL_DP = 10f
-        private const val CATEGORY_ITEM_SPACING_VERTICAL_DP = 12f
+        private const val CATEGORY_ITEM_SPACING_HORIZONTAL_DP = 21f
+        private const val CATEGORY_ITEM_SPACING_VERTICAL_DP = 20f
 
-        fun newInstance(initialSelection: String?, onSelected: (String) -> Unit): InvoiceCategoryBottomSheet {
+        fun newInstance(
+            initialSelection: String?,
+            onSelected: (String) -> Unit
+        ): InvoiceCategoryBottomSheet {
             return InvoiceCategoryBottomSheet().apply {
                 arguments = bundleOf(ARG_INITIAL to initialSelection)
                 this.onSelected = onSelected
