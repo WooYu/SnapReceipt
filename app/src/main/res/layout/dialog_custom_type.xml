@@ -37,14 +37,14 @@
         android:id="@+id/custom_type_input"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:layout_marginTop="35dp"
+        android:layout_marginTop="32dp"
         android:background="@drawable/bg_custom_type_input"
         android:hint="@string/custom_type_hint"
         android:inputType="textCapWords"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:textColor="@color/text_primary"
-        android:textColorHint="@color/text_muted"
+        android:textColorHint="@color/text_secondary"
         android:textSize="@dimen/text_size_secondary" />
 
     <LinearLayout
