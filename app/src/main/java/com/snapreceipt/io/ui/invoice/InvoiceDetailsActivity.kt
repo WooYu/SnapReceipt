@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
+import com.bumptech.glide.Glide
 import com.skybound.space.base.presentation.BaseActivity
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.presentation.observeState
@@ -25,6 +26,7 @@ import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
 import com.snapreceipt.io.ui.login.LoginActivity
 import com.snapreceipt.io.ui.receipts.ReceiptsRefreshSignal
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
 import java.util.Locale
 import javax.inject.Inject
 
@@ -69,51 +71,41 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         setContentView(binding.root)
 
         val receipt = readReceipt(intent)
-        val rawImage = receipt.receiptUrl.orEmpty()
-        if (rawImage.startsWith("http", ignoreCase = true)) {
-            receiptImageUrl = rawImage
-            receiptImagePath = ""
-        } else {
-            receiptImagePath = rawImage
-            receiptImageUrl = ""
-        }
+        val rawImage = receipt.receiptUrl.orEmpty().trim()
+        resolveImageSource(rawImage)
         receiptId = receipt.receiptId
         hasSavedReceipt = (receiptId ?: 0L) > 0L
         isEditing = !hasSavedReceipt
-        if (receiptImagePath.isNotEmpty()) {
-            binding.invoiceImage.setImageURI(Uri.fromFile(java.io.File(receiptImagePath)))
-        } else if (receiptImageUrl.isNotEmpty()) {
-            binding.invoiceImage.setImageURI(Uri.parse(receiptImageUrl))
-        }
+        loadInvoiceImage()
 
         val amountText = receipt.totalAmount?.let { formatAmount(it) }.orEmpty()
         binding.inputAmount.setText(amountText)
-        binding.amountReadonlyValue.text = amountText.ifBlank { "0.00" }
+        bindReadonlyAmount(amountText)
         val merchantText = receipt.merchant.orEmpty()
         val addressText = receipt.address.orEmpty()
         binding.inputMerchant.setText(merchantText)
         binding.inputAddress.setText(addressText)
-        binding.valueMerchant.text = merchantText
-        binding.valueAddress.text = addressText
+        binding.valueMerchant.text = readonlyText(merchantText)
+        binding.valueAddress.text = readonlyText(addressText)
         receiptDate = receipt.receiptDate.orEmpty()
         receiptTime = receipt.receiptTime.orEmpty()
         val displayDate = buildDisplayDate(receiptDate, receiptTime)
         binding.inputDate.setText(displayDate)
-        binding.valueDate.text = displayDate
+        binding.valueDate.text = readonlyText(displayDate)
         val cardText = receipt.paymentCardNo.orEmpty()
         binding.inputCard.setText(cardText)
-        binding.valueCard.text = cardText
+        binding.valueCard.text = readonlyText(cardText)
         scanConsumer = receipt.consumer.orEmpty()
         scanTipAmount = receipt.tipAmount
         val categoryLabel = receipt.categoryName.orEmpty()
         binding.inputInvoiceCategory.setText(categoryLabel)
-        binding.valueInvoiceType.text = categoryLabel
+        binding.valueInvoiceType.text = readonlyText(categoryLabel)
         val titleType = receipt.receiptType.orEmpty()
         binding.inputTitleType.setText(titleType)
-        binding.valueTitleType.text = titleType
+        binding.valueTitleType.text = readonlyText(titleType)
         val noteText = receipt.remark.orEmpty()
         binding.inputNote.setText(noteText)
-        binding.valueNote.text = noteText
+        binding.valueNote.text = readonlyText(noteText)
 
         binding.pageTitle.setOnLeftIconClickListener { finish() }
         binding.pageTitle.setOnRightIconClickListener { onTopRightActionClick() }
@@ -310,14 +302,14 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private fun openInvoiceTypePicker() {
         InvoiceCategoryBottomSheet.newInstance(binding.inputInvoiceCategory.text.toString()) { selected ->
             binding.inputInvoiceCategory.setText(selected)
-            binding.valueInvoiceType.text = selected
+            binding.valueInvoiceType.text = readonlyText(selected)
         }.show(supportFragmentManager, "invoice_type_picker")
     }
 
     private fun openTitleTypePicker() {
         TitleTypeBottomSheet(binding.inputTitleType.text.toString()) { selected ->
             binding.inputTitleType.setText(selected)
-            binding.valueTitleType.text = selected
+            binding.valueTitleType.text = readonlyText(selected)
         }.show(supportFragmentManager, "title_type_picker")
     }
 
@@ -327,7 +319,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             receiptDate = date
             receiptTime = time
             binding.inputDate.setText(display)
-            binding.valueDate.text = display
+            binding.valueDate.text = readonlyText(display)
         }.show(supportFragmentManager, "date_time_picker")
     }
 
@@ -352,6 +344,54 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
 
     private fun formatAmount(amount: Double): String =
         String.format(Locale.US, "%.2f", amount)
+
+    private fun bindReadonlyAmount(amountText: String) {
+        val hasAmount = amountText.isNotBlank()
+        binding.amountReadonlyValue.text = if (hasAmount) amountText else placeholder()
+        binding.amountPrefixView.visibility = if (hasAmount) View.VISIBLE else View.GONE
+    }
+
+    private fun placeholder(): String = getString(R.string.placeholder_dash)
+
+    private fun readonlyText(raw: String): String = raw.ifBlank { placeholder() }
+
+    private fun resolveImageSource(rawImage: String) {
+        if (rawImage.isBlank()) {
+            receiptImagePath = ""
+            receiptImageUrl = ""
+            return
+        }
+        if (rawImage.startsWith("http", ignoreCase = true)) {
+            receiptImageUrl = rawImage
+            receiptImagePath = ""
+            return
+        }
+        receiptImagePath = rawImage
+        receiptImageUrl = ""
+    }
+
+    private fun loadInvoiceImage() {
+        val model = imageModel(receiptImagePath, receiptImageUrl) ?: return
+        Glide.with(this)
+            .load(model)
+            .centerCrop()
+            .into(binding.invoiceImage)
+    }
+
+    private fun imageModel(imagePath: String, imageUrl: String): Any? {
+        localImageModel(imagePath)?.let { return it }
+        return imageUrl.takeIf { it.isNotBlank() }
+    }
+
+    private fun localImageModel(path: String): Any? {
+        if (path.isBlank()) return null
+        if (path.startsWith("content://", ignoreCase = true) ||
+            path.startsWith("file://", ignoreCase = true)
+        ) {
+            return Uri.parse(path)
+        }
+        return File(path).takeIf { it.exists() }
+    }
 
     private fun currentDate(): String =
         DateFormatUtil.todayApiDate()

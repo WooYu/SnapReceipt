@@ -98,6 +98,7 @@
     <string name="no_content">No content</string>
     <string name="selected_count">Selected: %d</string>
     <string name="total_label">Total</string>
+    <string name="currency_symbol_usd">$</string>
     <string name="amount_currency_format">$%1$.2f</string>
     <string name="amount_number_format">%1$.2f</string>
     <string name="receipt_meta_format">%1$s • %2$s • %3$s</string>
