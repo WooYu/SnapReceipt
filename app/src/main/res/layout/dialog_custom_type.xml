@@ -41,6 +41,7 @@
         android:background="@drawable/bg_custom_type_input"
         android:hint="@string/custom_type_hint"
         android:inputType="textCapWords"
+        android:maxLines="30"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:textColor="@color/text_primary"

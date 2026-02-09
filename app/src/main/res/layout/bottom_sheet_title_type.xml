@@ -4,7 +4,7 @@
     android:id="@+id/root_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_surface_card_large"
+    android:background="@drawable/bg_surface_bottom_sheet"
     android:orientation="vertical"
     android:padding="20dp"
     android:paddingBottom="16dp">

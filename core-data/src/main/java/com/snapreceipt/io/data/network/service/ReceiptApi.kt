@@ -1,8 +1,8 @@
 package com.snapreceipt.io.data.network.service
 
-import com.skybound.space.core.network.BaseResponse
 import com.skybound.space.core.network.BaseEmptyResponse
 import com.skybound.space.core.network.BasePagedResponse
+import com.skybound.space.core.network.BaseResponse
 import com.snapreceipt.io.data.network.model.category.CategoryCreateRequestDto
 import com.snapreceipt.io.data.network.model.category.CategoryDeleteRequestDto
 import com.snapreceipt.io.data.network.model.category.CategoryItemDto
@@ -45,7 +45,7 @@ interface ReceiptApi {
     @POST("api/category/list")
     suspend fun listCategories(@Body request: CategoryListRequestDto): BaseResponse<List<CategoryItemDto>>
 
-    @POST("api/category/remove")
+    @POST("api/category/add")
     suspend fun addCategory(@Body request: CategoryCreateRequestDto): BaseEmptyResponse
 
     @POST("api/category/remove")
