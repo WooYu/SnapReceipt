@@ -12,13 +12,14 @@ import com.snapreceipt.io.ui.main.MainViewModel
 import com.snapreceipt.io.ui.login.LoginActivity
 import com.snapreceipt.io.ui.widget.GlobalLoadingDialog
 import com.skybound.space.base.presentation.BaseActivity
+import com.skybound.space.base.presentation.LoadingOverlayHost
 import com.skybound.space.core.network.auth.SessionEvent
 import com.skybound.space.core.network.auth.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : BaseActivity<MainViewModel>() {
+class MainActivity : BaseActivity<MainViewModel>(), LoadingOverlayHost {
     override val viewModel: MainViewModel by viewModels()
     @Inject
     lateinit var injectedSessionManager: SessionManager
@@ -58,6 +59,14 @@ class MainActivity : BaseActivity<MainViewModel>() {
 
     fun setBottomNavVisible(visible: Boolean) {
         binding.bottomNav.visibility = if (visible) View.VISIBLE else View.GONE
+    }
+
+    override fun showGlobalLoading(message: CharSequence?) {
+        globalLoadingDialog.show(message)
+    }
+
+    override fun hideGlobalLoading() {
+        globalLoadingDialog.hide()
     }
 
     fun showGlobalLoadingOverlay(@StringRes messageRes: Int? = null) {
