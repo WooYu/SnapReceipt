@@ -91,6 +91,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/content_scroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="@dimen/page_start_margin"
@@ -98,6 +99,8 @@
         android:layout_marginEnd="@dimen/page_end_margin"
         android:layout_marginBottom="20dp"
         android:background="@drawable/bg_surface_card_large"
+        android:clipToPadding="false"
+        android:fillViewport="true"
         android:overScrollMode="never"
         android:paddingTop="20dp"
         android:paddingBottom="16dp"

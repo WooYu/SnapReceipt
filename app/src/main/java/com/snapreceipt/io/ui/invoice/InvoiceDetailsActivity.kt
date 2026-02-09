@@ -3,11 +3,13 @@ package com.snapreceipt.io.ui.invoice
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.bumptech.glide.Glide
 import com.skybound.space.base.presentation.BaseActivity
 import com.skybound.space.base.presentation.UiEvent
@@ -29,78 +31,18 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.util.Locale
 import javax.inject.Inject
-import org.json.JSONObject
+import kotlin.math.max
 
 @AndroidEntryPoint
 class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     companion object {
-        const val EXTRA_ARGS = "extra_invoice_args"
-        private const val EXTRA_RECEIPT_JSON = "extra_receipt_json"
-
         const val EXTRA_START_TAB = "extra_start_tab"
         const val TAB_RECEIPTS = "receipts"
 
         fun createIntent(context: Context, receipt: ReceiptEntity): Intent {
             return Intent(context, InvoiceDetailsActivity::class.java).apply {
-                putExtra(EXTRA_RECEIPT_JSON, receipt.toIntentJson())
+                InvoiceDetailsArgsCodec.writeReceipt(this, receipt)
             }
-        }
-
-        private fun ReceiptEntity.toIntentJson(): String =
-            JSONObject().apply {
-                putIfNotNull("receiptId", receiptId)
-                putIfNotNull("merchant", merchant)
-                putIfNotNull("address", address)
-                putIfNotNull("receiptDate", receiptDate)
-                putIfNotNull("receiptTime", receiptTime)
-                putIfNotNull("totalAmount", totalAmount)
-                putIfNotNull("tipAmount", tipAmount)
-                putIfNotNull("paymentCardNo", paymentCardNo)
-                putIfNotNull("consumer", consumer)
-                putIfNotNull("remark", remark)
-                putIfNotNull("receiptUrl", receiptUrl)
-                putIfNotNull("categoryId", categoryId)
-                putIfNotNull("categoryName", categoryName)
-                putIfNotNull("receiptType", receiptType)
-            }.toString()
-
-        private fun JSONObject.putIfNotNull(key: String, value: Any?) {
-            if (value != null) put(key, value)
-        }
-
-        private fun receiptFromIntentJson(raw: String): ReceiptEntity? = runCatching {
-            val json = JSONObject(raw)
-            ReceiptEntity(
-                receiptId = json.optLongOrNull("receiptId"),
-                merchant = json.optStringOrNull("merchant"),
-                address = json.optStringOrNull("address"),
-                receiptDate = json.optStringOrNull("receiptDate"),
-                receiptTime = json.optStringOrNull("receiptTime"),
-                totalAmount = json.optDoubleOrNull("totalAmount"),
-                tipAmount = json.optDoubleOrNull("tipAmount"),
-                paymentCardNo = json.optStringOrNull("paymentCardNo"),
-                consumer = json.optStringOrNull("consumer"),
-                remark = json.optStringOrNull("remark"),
-                receiptUrl = json.optStringOrNull("receiptUrl"),
-                categoryId = json.optLongOrNull("categoryId"),
-                categoryName = json.optStringOrNull("categoryName"),
-                receiptType = json.optStringOrNull("receiptType")
-            )
-        }.getOrNull()
-
-        private fun JSONObject.optStringOrNull(key: String): String? {
-            if (!has(key) || isNull(key)) return null
-            return getString(key)
-        }
-
-        private fun JSONObject.optLongOrNull(key: String): Long? {
-            if (!has(key) || isNull(key)) return null
-            return getLong(key)
-        }
-
-        private fun JSONObject.optDoubleOrNull(key: String): Double? {
-            if (!has(key) || isNull(key)) return null
-            return getDouble(key)
         }
     }
 
@@ -128,8 +70,9 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         super.onCreate(savedInstanceState)
         _binding = ActivityInvoiceDetailsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applyWindowInsets()
 
-        val receipt = readReceipt(intent)
+        val receipt = InvoiceDetailsArgsCodec.readReceipt(intent)
         val rawImage = receipt.receiptUrl.orEmpty().trim()
         resolveImageSource(rawImage)
         receiptId = receipt.receiptId
@@ -182,21 +125,6 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         _binding = null
     }
 
-    private fun readReceipt(intent: Intent): ReceiptEntity {
-        val safeJson = intent.getStringExtra(EXTRA_RECEIPT_JSON).orEmpty()
-        if (safeJson.isNotBlank()) {
-            receiptFromIntentJson(safeJson)?.let { return it }
-        }
-
-        val legacyParcelable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra(EXTRA_ARGS, ReceiptEntity::class.java)
-        } else {
-            @Suppress("DEPRECATION")
-            intent.getParcelableExtra(EXTRA_ARGS) as? ReceiptEntity
-        }
-        return legacyParcelable ?: ReceiptEntity()
-    }
-
     private fun renderState(state: InvoiceDetailsUiState) {
         binding.saveBtn.isEnabled = !state.loading
     }
@@ -219,6 +147,27 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
                 binding.pageTitle.setRightIcon(R.drawable.ic_edit_white)
             }
         }
+        ViewCompat.requestApplyInsets(binding.root)
+    }
+
+    private fun applyWindowInsets() {
+        val initialScrollBottomPadding = binding.contentScroll.paddingBottom
+        val initialBottomActionPadding = binding.bottomActionContainer.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val navigationBottom = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            val imeBottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+            val bottomInset = max(navigationBottom, imeBottom)
+
+            val scrollBottomInset = if (binding.bottomActionContainer.visibility == View.VISIBLE) {
+                0
+            } else {
+                bottomInset
+            }
+            binding.contentScroll.updatePadding(bottom = initialScrollBottomPadding + scrollBottomInset)
+            binding.bottomActionContainer.updatePadding(bottom = initialBottomActionPadding + bottomInset)
+            insets
+        }
+        ViewCompat.requestApplyInsets(binding.root)
     }
 
     private fun onTopRightActionClick() {
