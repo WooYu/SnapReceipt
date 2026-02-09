@@ -114,14 +114,9 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
             loadingMore = state.loadingMore
         )
 
-        val showRecognitionOverlay = state.recognitionStatusResId != null
-        if (showRecognitionOverlay) {
-            binding.recognitionOverlay.show(state.recognitionStatusResId!!)
-        } else {
-            binding.recognitionOverlay.hide()
-        }
-        (activity as? com.snapreceipt.io.MainActivity)?.setBottomNavVisible(!showRecognitionOverlay)
-        showLoading(state.loading && !showRecognitionOverlay)
+        val recognitionMessage = state.recognitionStatusResId?.let(::getString)
+        val shouldShowLoading = state.loading || recognitionMessage != null
+        showLoading(shouldShowLoading, recognitionMessage ?: "")
 
         binding.cardScan.isEnabled = !state.loading
         binding.cardUpload.isEnabled = !state.loading

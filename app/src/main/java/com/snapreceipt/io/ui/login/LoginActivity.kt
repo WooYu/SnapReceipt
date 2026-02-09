@@ -7,7 +7,9 @@ import androidx.activity.viewModels
 import android.widget.Toast
 import com.snapreceipt.io.MainActivity
 import com.snapreceipt.io.R
+import com.snapreceipt.io.ui.widget.LoadingOverlayController
 import com.skybound.space.base.presentation.BaseActivity
+import com.skybound.space.base.presentation.LoadingOverlayHost
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.presentation.observeState
 import com.skybound.space.core.network.auth.SessionManager
@@ -16,12 +18,15 @@ import javax.inject.Inject
 import com.snapreceipt.io.ui.common.PolicyWebViewActivity
 
 @AndroidEntryPoint
-class LoginActivity : BaseActivity<LoginViewModel>() {
+class LoginActivity : BaseActivity<LoginViewModel>(), LoadingOverlayHost {
     override val viewModel: LoginViewModel by viewModels()
     @Inject
     lateinit var injectedSessionManager: SessionManager
     override val sessionManager: SessionManager
         get() = injectedSessionManager
+    private val loadingOverlayController by lazy(LazyThreadSafetyMode.NONE) {
+        LoadingOverlayController(this)
+    }
     private var currentMode: LoginMode? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -100,5 +105,18 @@ class LoginActivity : BaseActivity<LoginViewModel>() {
                 }
             }
         )
+    }
+
+    override fun showGlobalLoading(message: CharSequence?) {
+        loadingOverlayController.show(message)
+    }
+
+    override fun hideGlobalLoading() {
+        loadingOverlayController.hide()
+    }
+
+    override fun onDestroy() {
+        loadingOverlayController.release()
+        super.onDestroy()
     }
 }

@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import com.bumptech.glide.Glide
 import com.skybound.space.base.presentation.BaseActivity
+import com.skybound.space.base.presentation.LoadingOverlayHost
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.presentation.observeState
 import com.skybound.space.core.network.auth.SessionEvent
@@ -27,6 +28,7 @@ import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceCategoryBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
 import com.snapreceipt.io.ui.login.LoginActivity
 import com.snapreceipt.io.ui.receipts.ReceiptsRefreshSignal
+import com.snapreceipt.io.ui.widget.LoadingOverlayController
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.util.Locale
@@ -34,7 +36,7 @@ import javax.inject.Inject
 import kotlin.math.max
 
 @AndroidEntryPoint
-class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
+class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>(), LoadingOverlayHost {
     companion object {
         const val EXTRA_START_TAB = "extra_start_tab"
         const val TAB_RECEIPTS = "receipts"
@@ -65,6 +67,9 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private var receiptId: Long? = null
     private var hasSavedReceipt: Boolean = false
     private var isEditing: Boolean = false
+    private val loadingOverlayController by lazy(LazyThreadSafetyMode.NONE) {
+        LoadingOverlayController(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -117,12 +122,18 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     override fun onDestroy() {
+        loadingOverlayController.release()
         super.onDestroy()
         _binding = null
     }
 
     private fun renderState(state: InvoiceDetailsUiState) {
         binding.saveBtn.isEnabled = !state.loading
+        if (state.loading) {
+            showGlobalLoading(null)
+        } else {
+            hideGlobalLoading()
+        }
     }
 
     private fun renderModeUi() {
@@ -438,5 +449,13 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             }
         )
         finish()
+    }
+
+    override fun showGlobalLoading(message: CharSequence?) {
+        loadingOverlayController.show(message)
+    }
+
+    override fun hideGlobalLoading() {
+        loadingOverlayController.hide()
     }
 }

@@ -29,7 +29,6 @@ abstract class BaseLoginFragment(@LayoutRes layoutId: Int) : BaseFragment<LoginV
     protected lateinit var agreementCheck: ImageView
     protected lateinit var agreementText: TextView
     protected lateinit var agreementContainer: View
-    private var codeLoadingDialog: Dialog? = null
 
     protected fun bindAgreementViews(root: View) {
         agreementCheck = root.findViewById(R.id.agreement_check)
@@ -55,15 +54,8 @@ abstract class BaseLoginFragment(@LayoutRes layoutId: Int) : BaseFragment<LoginV
     }
 
     protected fun updateCodeRequestLoading(show: Boolean) {
-        if (!show) {
-            codeLoadingDialog?.dismiss()
-            return
-        }
-        if (!isAdded) return
-        val dialog = codeLoadingDialog ?: createCodeLoadingDialog().also { codeLoadingDialog = it }
-        if (!dialog.isShowing) {
-            dialog.show()
-        }
+        val message = if (show) getString(R.string.login_requesting_code) else null
+        showLoading(show, message)
     }
 
     protected fun showAgreementDialog(onResult: (Boolean) -> Unit) {
@@ -96,12 +88,6 @@ abstract class BaseLoginFragment(@LayoutRes layoutId: Int) : BaseFragment<LoginV
         }
 
         dialog.show()
-    }
-
-    override fun onDestroyView() {
-        codeLoadingDialog?.dismiss()
-        codeLoadingDialog = null
-        super.onDestroyView()
     }
 
     protected fun toggleAgreement() {
@@ -184,16 +170,6 @@ abstract class BaseLoginFragment(@LayoutRes layoutId: Int) : BaseFragment<LoginV
             toggleAgreement()
         }
         return true
-    }
-
-    private fun createCodeLoadingDialog(): Dialog {
-        return Dialog(requireContext()).apply {
-            requestWindowFeature(Window.FEATURE_NO_TITLE)
-            setContentView(R.layout.dialog_code_request_loading)
-            setCancelable(false)
-            setCanceledOnTouchOutside(false)
-            window?.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
-        }
     }
 
     private fun expandTouchArea(target: View, extraPaddingDp: Int) {

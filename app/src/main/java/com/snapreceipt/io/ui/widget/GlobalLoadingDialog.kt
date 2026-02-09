@@ -1,9 +1,11 @@
 package com.snapreceipt.io.ui.widget
 
 import android.app.Activity
+import android.graphics.Color
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
+import androidx.core.view.WindowCompat
 import com.snapreceipt.io.R
 
 /**
@@ -14,11 +16,18 @@ class GlobalLoadingDialog(
     private val activity: Activity
 ) {
 
+    private val barScrimColor = Color.parseColor("#80000000")
     private var overlayView: LoadingOverlayView? = null
+    private var systemBarsOverridden = false
+    private var previousStatusBarColor: Int = Color.TRANSPARENT
+    private var previousNavigationBarColor: Int = Color.TRANSPARENT
+    private var previousLightStatusBars: Boolean = false
+    private var previousLightNavigationBars: Boolean = false
 
     fun show(message: CharSequence?) {
         if (activity.isFinishing || activity.isDestroyed) return
         val overlay = ensureOverlay()
+        applySystemBarScrim()
         if (message.isNullOrBlank()) {
             overlay.setText("")
             overlay.show()
@@ -31,12 +40,14 @@ class GlobalLoadingDialog(
     fun show(@StringRes messageRes: Int = R.string.loading) {
         if (activity.isFinishing || activity.isDestroyed) return
         val overlay = ensureOverlay()
+        applySystemBarScrim()
         overlay.show(messageRes)
         overlay.bringToFront()
     }
 
     fun hide() {
         overlayView?.hide()
+        restoreSystemBars()
     }
 
     fun release() {
@@ -66,5 +77,32 @@ class GlobalLoadingDialog(
     private fun removeOverlayFromParent() {
         val overlay = overlayView ?: return
         (overlay.parent as? ViewGroup)?.removeView(overlay)
+    }
+
+    private fun applySystemBarScrim() {
+        val window = activity.window
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+        if (!systemBarsOverridden) {
+            previousStatusBarColor = window.statusBarColor
+            previousNavigationBarColor = window.navigationBarColor
+            previousLightStatusBars = controller?.isAppearanceLightStatusBars == true
+            previousLightNavigationBars = controller?.isAppearanceLightNavigationBars == true
+            systemBarsOverridden = true
+        }
+        window.statusBarColor = barScrimColor
+        window.navigationBarColor = barScrimColor
+        controller?.isAppearanceLightStatusBars = false
+        controller?.isAppearanceLightNavigationBars = false
+    }
+
+    private fun restoreSystemBars() {
+        if (!systemBarsOverridden) return
+        val window = activity.window
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+        window.statusBarColor = previousStatusBarColor
+        window.navigationBarColor = previousNavigationBarColor
+        controller?.isAppearanceLightStatusBars = previousLightStatusBars
+        controller?.isAppearanceLightNavigationBars = previousLightNavigationBars
+        systemBarsOverridden = false
     }
 }

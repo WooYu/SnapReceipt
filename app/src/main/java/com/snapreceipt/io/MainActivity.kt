@@ -10,7 +10,7 @@ import com.snapreceipt.io.databinding.ActivityMainBinding
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
 import com.snapreceipt.io.ui.main.MainViewModel
 import com.snapreceipt.io.ui.login.LoginActivity
-import com.snapreceipt.io.ui.widget.GlobalLoadingDialog
+import com.snapreceipt.io.ui.widget.LoadingOverlayController
 import com.skybound.space.base.presentation.BaseActivity
 import com.skybound.space.base.presentation.LoadingOverlayHost
 import com.skybound.space.core.network.auth.SessionEvent
@@ -27,13 +27,14 @@ class MainActivity : BaseActivity<MainViewModel>(), LoadingOverlayHost {
         get() = injectedSessionManager
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var globalLoadingDialog: GlobalLoadingDialog
+    private val loadingOverlayController by lazy(LazyThreadSafetyMode.NONE) {
+        LoadingOverlayController(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        globalLoadingDialog = GlobalLoadingDialog(this)
 
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.fragment_container) as NavHostFragment
@@ -62,27 +63,27 @@ class MainActivity : BaseActivity<MainViewModel>(), LoadingOverlayHost {
     }
 
     override fun showGlobalLoading(message: CharSequence?) {
-        globalLoadingDialog.show(message)
+        loadingOverlayController.show(message)
     }
 
     override fun hideGlobalLoading() {
-        globalLoadingDialog.hide()
+        loadingOverlayController.hide()
     }
 
     fun showGlobalLoadingOverlay(@StringRes messageRes: Int? = null) {
         if (messageRes != null) {
-            globalLoadingDialog.show(messageRes)
+            loadingOverlayController.show(messageRes)
         } else {
-            globalLoadingDialog.show()
+            showGlobalLoading(null)
         }
     }
 
     fun hideGlobalLoadingOverlay() {
-        globalLoadingDialog.hide()
+        hideGlobalLoading()
     }
 
     override fun onDestroy() {
-        globalLoadingDialog.release()
+        loadingOverlayController.release()
         super.onDestroy()
     }
 
