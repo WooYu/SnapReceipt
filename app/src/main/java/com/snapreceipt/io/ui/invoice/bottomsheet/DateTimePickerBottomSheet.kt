@@ -3,10 +3,12 @@ package com.snapreceipt.io.ui.invoice.bottomsheet
 import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
+import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.BottomSheetDatetimeBinding
+import com.snapreceipt.io.ui.widget.applyPickerStyle
 import com.skybound.space.core.util.DateFormatUtil
 import java.util.Calendar
 
@@ -48,6 +50,9 @@ class DateTimePickerBottomSheet(
     }
 
     private fun setupPickers() {
+        val selectedColor = ContextCompat.getColor(requireContext(), R.color.colorPrimary)
+        val unselectedColor = ContextCompat.getColor(requireContext(), R.color.text_primary)
+
         val currentYear = calendar.get(Calendar.YEAR)
         binding.pickerYear.minValue = currentYear - 2
         binding.pickerYear.maxValue = currentYear + 2
@@ -69,6 +74,12 @@ class DateTimePickerBottomSheet(
         binding.pickerDay.setFormatter { value -> value.toString().padStart(2, '0') }
         binding.pickerHour.setFormatter { value -> value.toString().padStart(2, '0') }
         binding.pickerMinute.setFormatter { value -> value.toString().padStart(2, '0') }
+
+        binding.pickerYear.applyPickerStyle(selectedColor, unselectedColor)
+        binding.pickerMonth.applyPickerStyle(selectedColor, unselectedColor)
+        binding.pickerDay.applyPickerStyle(selectedColor, unselectedColor)
+        binding.pickerHour.applyPickerStyle(selectedColor, unselectedColor)
+        binding.pickerMinute.applyPickerStyle(selectedColor, unselectedColor)
 
         updateDayPicker()
 
