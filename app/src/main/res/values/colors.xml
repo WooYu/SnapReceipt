@@ -43,8 +43,8 @@
     <color name="text_secondary">#7D899C</color>
     <color name="text_muted">#BDC4D0</color>
     <color name="text_muted_dark">#B2B9C5</color>
-    <color name="picker_selection_bg">#EEF2FF</color>
-    <color name="picker_column_divider">#E6EBF4</color>
+    <color name="picker_selection_bg">#0F103CED</color>
+    <color name="picker_column_divider">#EFF1F5</color>
 
     <!-- 底部导航栏文字颜色 -->
     <color name="nav_text_selected">#103CED</color>
