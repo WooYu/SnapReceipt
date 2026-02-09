@@ -34,7 +34,8 @@
 
         <activity
             android:name=".ui.invoice.InvoiceDetailsActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".ui.preview.ImagePreviewActivity"
