@@ -29,46 +29,78 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.util.Locale
 import javax.inject.Inject
+import org.json.JSONObject
 
 @AndroidEntryPoint
 class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     companion object {
         const val EXTRA_ARGS = "extra_invoice_args"
-        private const val EXTRA_RECEIPT_ID = "extra_receipt_id"
-        private const val EXTRA_MERCHANT = "extra_receipt_merchant"
-        private const val EXTRA_ADDRESS = "extra_receipt_address"
-        private const val EXTRA_RECEIPT_DATE = "extra_receipt_date"
-        private const val EXTRA_RECEIPT_TIME = "extra_receipt_time"
-        private const val EXTRA_TOTAL_AMOUNT = "extra_receipt_total_amount"
-        private const val EXTRA_TIP_AMOUNT = "extra_receipt_tip_amount"
-        private const val EXTRA_CARD_NO = "extra_receipt_card_no"
-        private const val EXTRA_CONSUMER = "extra_receipt_consumer"
-        private const val EXTRA_REMARK = "extra_receipt_remark"
-        private const val EXTRA_RECEIPT_URL = "extra_receipt_url"
-        private const val EXTRA_CATEGORY_ID = "extra_receipt_category_id"
-        private const val EXTRA_CATEGORY_NAME = "extra_receipt_category_name"
-        private const val EXTRA_RECEIPT_TYPE = "extra_receipt_type"
+        private const val EXTRA_RECEIPT_JSON = "extra_receipt_json"
 
         const val EXTRA_START_TAB = "extra_start_tab"
         const val TAB_RECEIPTS = "receipts"
 
         fun createIntent(context: Context, receipt: ReceiptEntity): Intent {
             return Intent(context, InvoiceDetailsActivity::class.java).apply {
-                receipt.receiptId?.let { putExtra(EXTRA_RECEIPT_ID, it) }
-                receipt.merchant?.let { putExtra(EXTRA_MERCHANT, it) }
-                receipt.address?.let { putExtra(EXTRA_ADDRESS, it) }
-                receipt.receiptDate?.let { putExtra(EXTRA_RECEIPT_DATE, it) }
-                receipt.receiptTime?.let { putExtra(EXTRA_RECEIPT_TIME, it) }
-                receipt.totalAmount?.let { putExtra(EXTRA_TOTAL_AMOUNT, it) }
-                receipt.tipAmount?.let { putExtra(EXTRA_TIP_AMOUNT, it) }
-                receipt.paymentCardNo?.let { putExtra(EXTRA_CARD_NO, it) }
-                receipt.consumer?.let { putExtra(EXTRA_CONSUMER, it) }
-                receipt.remark?.let { putExtra(EXTRA_REMARK, it) }
-                receipt.receiptUrl?.let { putExtra(EXTRA_RECEIPT_URL, it) }
-                receipt.categoryId?.let { putExtra(EXTRA_CATEGORY_ID, it) }
-                receipt.categoryName?.let { putExtra(EXTRA_CATEGORY_NAME, it) }
-                receipt.receiptType?.let { putExtra(EXTRA_RECEIPT_TYPE, it) }
+                putExtra(EXTRA_RECEIPT_JSON, receipt.toIntentJson())
             }
+        }
+
+        private fun ReceiptEntity.toIntentJson(): String =
+            JSONObject().apply {
+                putIfNotNull("receiptId", receiptId)
+                putIfNotNull("merchant", merchant)
+                putIfNotNull("address", address)
+                putIfNotNull("receiptDate", receiptDate)
+                putIfNotNull("receiptTime", receiptTime)
+                putIfNotNull("totalAmount", totalAmount)
+                putIfNotNull("tipAmount", tipAmount)
+                putIfNotNull("paymentCardNo", paymentCardNo)
+                putIfNotNull("consumer", consumer)
+                putIfNotNull("remark", remark)
+                putIfNotNull("receiptUrl", receiptUrl)
+                putIfNotNull("categoryId", categoryId)
+                putIfNotNull("categoryName", categoryName)
+                putIfNotNull("receiptType", receiptType)
+            }.toString()
+
+        private fun JSONObject.putIfNotNull(key: String, value: Any?) {
+            if (value != null) put(key, value)
+        }
+
+        private fun receiptFromIntentJson(raw: String): ReceiptEntity? = runCatching {
+            val json = JSONObject(raw)
+            ReceiptEntity(
+                receiptId = json.optLongOrNull("receiptId"),
+                merchant = json.optStringOrNull("merchant"),
+                address = json.optStringOrNull("address"),
+                receiptDate = json.optStringOrNull("receiptDate"),
+                receiptTime = json.optStringOrNull("receiptTime"),
+                totalAmount = json.optDoubleOrNull("totalAmount"),
+                tipAmount = json.optDoubleOrNull("tipAmount"),
+                paymentCardNo = json.optStringOrNull("paymentCardNo"),
+                consumer = json.optStringOrNull("consumer"),
+                remark = json.optStringOrNull("remark"),
+                receiptUrl = json.optStringOrNull("receiptUrl"),
+                categoryId = json.optLongOrNull("categoryId"),
+                categoryName = json.optStringOrNull("categoryName"),
+                receiptType = json.optStringOrNull("receiptType")
+            )
+        }.getOrNull()
+
+        private fun JSONObject.optStringOrNull(key: String): String? {
+            if (!has(key) || isNull(key)) return null
+            return getString(key)
+        }
+
+        private fun JSONObject.optLongOrNull(key: String): Long? {
+            if (!has(key) || isNull(key)) return null
+            return getLong(key)
+        }
+
+        private fun JSONObject.optDoubleOrNull(key: String): Double? {
+            if (!has(key) || isNull(key)) return null
+            return getDouble(key)
         }
     }
 
@@ -151,23 +183,9 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun readReceipt(intent: Intent): ReceiptEntity {
-        if (intent.hasSafeReceiptExtras()) {
-            return ReceiptEntity(
-                receiptId = intent.getLongExtraOrNull(EXTRA_RECEIPT_ID),
-                merchant = intent.getStringExtra(EXTRA_MERCHANT),
-                address = intent.getStringExtra(EXTRA_ADDRESS),
-                receiptDate = intent.getStringExtra(EXTRA_RECEIPT_DATE),
-                receiptTime = intent.getStringExtra(EXTRA_RECEIPT_TIME),
-                totalAmount = intent.getDoubleExtraOrNull(EXTRA_TOTAL_AMOUNT),
-                tipAmount = intent.getDoubleExtraOrNull(EXTRA_TIP_AMOUNT),
-                paymentCardNo = intent.getStringExtra(EXTRA_CARD_NO),
-                consumer = intent.getStringExtra(EXTRA_CONSUMER),
-                remark = intent.getStringExtra(EXTRA_REMARK),
-                receiptUrl = intent.getStringExtra(EXTRA_RECEIPT_URL),
-                categoryId = intent.getLongExtraOrNull(EXTRA_CATEGORY_ID),
-                categoryName = intent.getStringExtra(EXTRA_CATEGORY_NAME),
-                receiptType = intent.getStringExtra(EXTRA_RECEIPT_TYPE)
-            )
+        val safeJson = intent.getStringExtra(EXTRA_RECEIPT_JSON).orEmpty()
+        if (safeJson.isNotBlank()) {
+            receiptFromIntentJson(safeJson)?.let { return it }
         }
 
         val legacyParcelable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -444,29 +462,6 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
 
     private fun parseDateTime(date: String, time: String): Long? =
         DateFormatUtil.parseApiDateTime(date, time)
-
-    private fun Intent.hasSafeReceiptExtras(): Boolean {
-        return hasExtra(EXTRA_RECEIPT_ID) ||
-            hasExtra(EXTRA_MERCHANT) ||
-            hasExtra(EXTRA_ADDRESS) ||
-            hasExtra(EXTRA_RECEIPT_DATE) ||
-            hasExtra(EXTRA_RECEIPT_TIME) ||
-            hasExtra(EXTRA_TOTAL_AMOUNT) ||
-            hasExtra(EXTRA_TIP_AMOUNT) ||
-            hasExtra(EXTRA_CARD_NO) ||
-            hasExtra(EXTRA_CONSUMER) ||
-            hasExtra(EXTRA_REMARK) ||
-            hasExtra(EXTRA_RECEIPT_URL) ||
-            hasExtra(EXTRA_CATEGORY_ID) ||
-            hasExtra(EXTRA_CATEGORY_NAME) ||
-            hasExtra(EXTRA_RECEIPT_TYPE)
-    }
-
-    private fun Intent.getLongExtraOrNull(key: String): Long? =
-        if (hasExtra(key)) getLongExtra(key, 0L) else null
-
-    private fun Intent.getDoubleExtraOrNull(key: String): Double? =
-        if (hasExtra(key)) getDoubleExtra(key, 0.0) else null
 
     override fun onSessionExpired(event: SessionEvent) {
         startActivity(
