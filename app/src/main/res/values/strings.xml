@@ -13,7 +13,7 @@
     <string name="login_email_hint">Enter email</string>
     <string name="login_code_hint">Enter code</string>
     <string name="login_captcha">CAPTCHA</string>
-    <string name="login_requesting_code">Requesting code...</string>
+    <string name="login_requesting_code">Requesting code…</string>
     <string name="login_agreement_html">I have read and agree to the User Agreement and Privacy Policy</string>
     <string name="login">Log In</string>
     <string name="phone_empty">Please enter phone number</string>

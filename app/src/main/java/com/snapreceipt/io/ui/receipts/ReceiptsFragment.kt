@@ -7,6 +7,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.viewModels
+import com.skybound.space.base.presentation.BaseFragment
+import com.skybound.space.base.presentation.observeState
+import com.skybound.space.core.config.AppConfig
+import com.skybound.space.core.util.DateFormatUtil
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentReceiptsBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
@@ -14,10 +18,6 @@ import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceCategoryBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
 import com.snapreceipt.io.ui.receipts.bottomsheet.DateRangeBottomSheet
 import com.snapreceipt.io.ui.receipts.dialogs.ExportSuccessDialog
-import com.skybound.space.core.config.AppConfig
-import com.skybound.space.core.util.DateFormatUtil
-import com.skybound.space.base.presentation.BaseFragment
-import com.skybound.space.base.presentation.observeState
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -92,7 +92,8 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
             .sumOf { it.totalAmount ?: 0.0 }
         binding.totalAmount.text = getString(R.string.amount_currency_format, selectedTotal)
 
-        val allSelected = state.receipts.isNotEmpty() && state.selectedIds.size == state.receipts.size
+        val allSelected =
+            state.receipts.isNotEmpty() && state.selectedIds.size == state.receipts.size
         binding.selectAllIcon.isSelected = allSelected
 
         updateLoadingDialog(state)
@@ -146,7 +147,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         }
         binding.selectAllBtn.setOnClickListener {
             val isAllSelected = currentState.receipts.isNotEmpty() &&
-                currentState.selectedIds.size == currentState.receipts.size
+                    currentState.selectedIds.size == currentState.receipts.size
             if (isAllSelected) {
                 viewModel.clearSelection()
             } else {
@@ -157,7 +158,10 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
 
     private fun openReceiptDetails(receipt: ReceiptEntity) {
         startActivity(
-            com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.createIntent(requireContext(), receipt)
+            com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.createIntent(
+                requireContext(),
+                receipt
+            )
         )
     }
 
@@ -181,7 +185,11 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     private fun openExportUrl(raw: String) {
         val trimmed = raw.trim()
         if (trimmed.isBlank()) {
-            Toast.makeText(requireContext(), getString(R.string.export_file_unavailable), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.export_file_unavailable),
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
         val url = if (trimmed.startsWith("http", ignoreCase = true)) {
@@ -191,18 +199,23 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
             val path = if (trimmed.startsWith("/")) trimmed else "/$trimmed"
             "$base$path"
         }
-        Toast.makeText(requireContext(), getString(R.string.opening_export_file), Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            requireContext(),
+            getString(R.string.opening_export_file),
+            Toast.LENGTH_SHORT
+        ).show()
         try {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         } catch (ex: ActivityNotFoundException) {
-            Toast.makeText(requireContext(), getString(R.string.no_app_to_open), Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.no_app_to_open), Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
     private fun updateLoadingDialog(state: ReceiptsUiState) {
         when {
             state.exporting -> showLoading(true, getString(R.string.exporting_receipts))
-            state.loading || state.refreshing -> showLoading(true, getString(R.string.loading))
+            state.loading || state.refreshing -> showLoading(true, "")
             else -> showLoading(false)
         }
     }
