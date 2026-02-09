@@ -3,8 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/bg_surface_card_large"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:paddingStart="20dp"
+    android:paddingTop="24dp"
+    android:paddingEnd="20dp"
+    android:paddingBottom="20dp">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -26,15 +30,25 @@
             android:layout_marginStart="8dp"
             android:text="@string/select_invoice_category"
             android:textColor="@color/text_primary"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/delete_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/category_delete_hint"
+        android:textColor="@color/text_secondary"
+        android:textSize="@dimen/text_size_small"
+        android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/category_list"
         android:layout_width="match_parent"
-        android:layout_height="240dp"
-        android:layout_marginTop="16dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
         android:overScrollMode="ifContentScrolls" />
 
     <TextView
@@ -45,12 +59,14 @@
         android:background="@drawable/bg_chip_dashed"
         android:gravity="center"
         android:text="@string/type_add"
-        android:textColor="@color/colorSecondary" />
+        android:textColor="@color/colorSecondary"
+        android:textSize="15sp"
+        android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="22dp"
         android:orientation="horizontal">
         <!--取消-->
         <com.snapreceipt.io.ui.widget.PrimaryActionButton
@@ -60,7 +76,13 @@
             android:layout_marginEnd="27dp"
             android:layout_weight="1"
             android:text="@string/cancel"
-            app:pabEnableShadow="false" />
+            app:pabBackgroundStyle="solid"
+            app:pabEnableShadow="false"
+            app:pabPressedDarkenFactor="0.92"
+            app:pabSolidColor="@android:color/white"
+            app:pabStrokeColor="@color/text_secondary"
+            app:pabStrokeWidth="1dp"
+            app:pabTextColor="@color/text_primary" />
 
         <!--确认-->
         <com.snapreceipt.io.ui.widget.PrimaryActionButton

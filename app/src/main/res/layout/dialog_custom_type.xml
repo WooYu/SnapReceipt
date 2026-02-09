@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/bg_surface_card_large"
     android:orientation="vertical"
     android:padding="20dp"
     android:paddingBottom="16dp">
@@ -60,7 +61,13 @@
             android:layout_marginEnd="27dp"
             android:layout_weight="1"
             android:text="@string/cancel"
-            app:pabEnableShadow="false" />
+            app:pabBackgroundStyle="solid"
+            app:pabEnableShadow="false"
+            app:pabPressedDarkenFactor="0.92"
+            app:pabSolidColor="@android:color/white"
+            app:pabStrokeColor="@color/text_secondary"
+            app:pabStrokeWidth="1dp"
+            app:pabTextColor="@color/text_primary" />
 
         <!--确认-->
         <com.snapreceipt.io.ui.widget.PrimaryActionButton

@@ -1,25 +1,29 @@
 package com.snapreceipt.io.ui.invoice.dialogs
 
 import android.app.Dialog
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.ViewGroup
 import android.widget.Toast
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import androidx.fragment.app.DialogFragment
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.DialogCustomTypeBinding
 
 class CustomTypeDialog(
     private val onConfirm: (String) -> Unit
-) : BottomSheetDialogFragment() {
+) : DialogFragment() {
 
     private var _binding: DialogCustomTypeBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val dialog = BottomSheetDialog(requireContext())
+        val dialog = Dialog(requireContext())
         _binding = DialogCustomTypeBinding.inflate(LayoutInflater.from(context))
         dialog.setContentView(binding.root)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
         binding.cancelBtn.setOnClickListener { dismiss() }
         binding.confirmBtn.setOnClickListener {
@@ -33,6 +37,14 @@ class CustomTypeDialog(
         }
 
         return dialog
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val window = dialog?.window ?: return
+        val width = (resources.displayMetrics.widthPixels * 0.9f).toInt()
+        window.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT)
+        window.setGravity(Gravity.CENTER)
     }
 
     override fun onDestroyView() {
