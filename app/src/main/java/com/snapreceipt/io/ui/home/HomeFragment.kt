@@ -18,6 +18,7 @@ import com.snapreceipt.io.ui.home.dialogs.ScanFailedDialog
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
 import com.snapreceipt.io.ui.receipts.ReceiptsRefreshSignal
 import com.snapreceipt.io.ui.widget.CurvedGradientDrawable
+import com.snapreceipt.io.ui.widget.StatefulListLayout
 import com.skybound.space.base.presentation.BaseFragment
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.presentation.observeState
@@ -105,14 +106,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
 
     private fun renderState(state: HomeUiState) {
         adapter.setReceipts(state.receipts)
-        binding.statefulList.applyState(
-            hasLoaded = state.hasLoaded,
-            isEmpty = state.empty,
-            hasMore = state.hasMore,
-            itemCount = state.receipts.size,
-            refreshing = state.refreshing,
-            loadingMore = state.loadingMore
-        )
+        binding.statefulList.submit(buildListState(state))
 
         val recognitionMessage = state.recognitionStatusResId?.let(::getString)
         val shouldShowLoading = state.loading || recognitionMessage != null
@@ -128,6 +122,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         }
         binding.statefulList.setAdapter(adapter)
         binding.statefulList.setOnLoadMoreListener { viewModel.loadMore() }
+        binding.statefulList.setOnRetryListener { viewModel.loadReceipts() }
     }
 
     private fun setupListeners() {
@@ -230,5 +225,22 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
 
     private fun openInvoiceDetails(receipt: ReceiptEntity) {
         startActivity(InvoiceDetailsActivity.createIntent(requireContext(), receipt))
+    }
+
+    private fun buildListState(state: HomeUiState): StatefulListLayout.State {
+        val contentState = when {
+            state.loading && !state.hasLoaded -> StatefulListLayout.ContentState.LOADING
+            !state.error.isNullOrBlank() && state.receipts.isEmpty() ->
+                StatefulListLayout.ContentState.ERROR
+            state.hasLoaded && state.empty -> StatefulListLayout.ContentState.EMPTY
+            else -> StatefulListLayout.ContentState.CONTENT
+        }
+        val showNoMore = state.hasLoaded && !state.hasMore && state.receipts.isNotEmpty() && !state.loadingMore
+        return StatefulListLayout.State(
+            contentState = contentState,
+            loadingMore = state.loadingMore,
+            noMore = showNoMore,
+            errorText = state.error
+        )
     }
 }

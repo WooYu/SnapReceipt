@@ -19,6 +19,7 @@ import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceCategoryBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
 import com.snapreceipt.io.ui.receipts.bottomsheet.DateRangeBottomSheet
 import com.snapreceipt.io.ui.receipts.dialogs.ExportSuccessDialog
+import com.snapreceipt.io.ui.widget.StatefulListLayout
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -71,14 +72,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         } else {
             adapter.setReceipts(state.receipts)
         }
-        binding.statefulList.applyState(
-            hasLoaded = state.hasLoaded,
-            isEmpty = state.empty,
-            hasMore = state.hasMore,
-            itemCount = state.receipts.size,
-            refreshing = state.refreshing,
-            loadingMore = state.loadingMore
-        )
+        binding.statefulList.submit(buildListState(state))
 
         val selectedCount = state.selectedIds.size
         binding.toolbarTitle.text = if (selectedCount > 0) {
@@ -119,6 +113,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         )
         binding.statefulList.setAdapter(adapter)
         binding.statefulList.setOnLoadMoreListener { viewModel.loadMore() }
+        binding.statefulList.setOnRetryListener { viewModel.refresh() }
     }
 
     private fun setupListeners() {
@@ -244,5 +239,22 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
             state.loading || state.refreshing -> showLoading(true, "")
             else -> showLoading(false)
         }
+    }
+
+    private fun buildListState(state: ReceiptsUiState): StatefulListLayout.State {
+        val contentState = when {
+            state.loading && !state.hasLoaded -> StatefulListLayout.ContentState.LOADING
+            !state.error.isNullOrBlank() && state.receipts.isEmpty() ->
+                StatefulListLayout.ContentState.ERROR
+            state.hasLoaded && state.empty -> StatefulListLayout.ContentState.EMPTY
+            else -> StatefulListLayout.ContentState.CONTENT
+        }
+        val showNoMore = state.hasLoaded && !state.hasMore && state.receipts.isNotEmpty() && !state.loadingMore
+        return StatefulListLayout.State(
+            contentState = contentState,
+            loadingMore = state.loadingMore,
+            noMore = showNoMore,
+            errorText = state.error
+        )
     }
 }

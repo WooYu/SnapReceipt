@@ -1,17 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <FrameLayout
+    <com.snapreceipt.io.ui.widget.MultiStateLayout
+        android:id="@+id/sll_multi_state"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/sll_recycler_view"
+        <!--加载态-->
+        <LinearLayout
+            android:id="@+id/sll_loading_state"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingBottom="8dp" />
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <com.skybound.space.base.presentation.widget.BrandLoadingView
+                android:layout_width="56dp"
+                android:layout_height="56dp" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/sll_content_state"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/sll_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="8dp" />
+        </FrameLayout>
 
         <!--空状态-->
         <LinearLayout
@@ -41,12 +63,32 @@
                 android:textSize="@dimen/text_size_secondary" />
         </LinearLayout>
 
-        <!--居中加载（首次加载）-->
-        <com.skybound.space.base.presentation.widget.BrandLoadingView
-            android:id="@+id/sll_center_loading"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_gravity="center"
-            android:visibility="gone" />
-    </FrameLayout>
+        <!--错误状态-->
+        <LinearLayout
+            android:id="@+id/sll_error_state"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/sll_error_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/unexpected_error"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/text_size_secondary"
+                tools:text="Unexpected error" />
+
+            <com.snapreceipt.io.ui.widget.PrimaryActionButton
+                android:id="@+id/sll_error_retry"
+                android:layout_width="120dp"
+                android:layout_height="@dimen/button_height_small"
+                android:layout_marginTop="16dp"
+                android:text="@string/retry"
+                app:pabEnableShadow="false" />
+        </LinearLayout>
+    </com.snapreceipt.io.ui.widget.MultiStateLayout>
 </merge>

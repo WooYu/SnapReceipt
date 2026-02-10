@@ -13,6 +13,7 @@ import com.skybound.space.base.presentation.observeState
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityExportRecordsBinding
 import com.snapreceipt.io.domain.model.ExportRecordEntity
+import com.snapreceipt.io.ui.widget.StatefulListLayout
 import com.skybound.space.core.config.AppConfig
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -32,6 +33,7 @@ class ExportRecordsActivity : BaseActivity<ExportRecordsViewModel>() {
         adapter = ExportRecordsAdapter { record -> openExportFile(record) }
         binding.statefulList.setAdapter(adapter)
         binding.statefulList.setOnLoadMoreListener { viewModel.loadMore() }
+        binding.statefulList.setOnRetryListener { viewModel.loadRecords() }
         // RecyclerView in this page needs horizontal padding
         val horizontalPadding = resources.getDimensionPixelSize(R.dimen.page_start_margin)
         binding.statefulList.recyclerView.setPadding(
@@ -50,16 +52,25 @@ class ExportRecordsActivity : BaseActivity<ExportRecordsViewModel>() {
     }
 
     private fun renderState(state: ExportRecordsUiState) {
-        binding.statefulList.applyState(
-            hasLoaded = state.hasLoaded,
-            isEmpty = state.empty,
-            hasMore = state.hasMore,
-            itemCount = state.records.size,
-            refreshing = state.refreshing,
-            loadingMore = state.loadingMore,
-            centerLoading = state.loading && !state.hasLoaded
-        )
+        binding.statefulList.submit(buildListState(state))
         adapter.submitList(state.records)
+    }
+
+    private fun buildListState(state: ExportRecordsUiState): StatefulListLayout.State {
+        val contentState = when {
+            state.loading && !state.hasLoaded -> StatefulListLayout.ContentState.LOADING
+            !state.error.isNullOrBlank() && state.records.isEmpty() ->
+                StatefulListLayout.ContentState.ERROR
+            state.hasLoaded && state.empty -> StatefulListLayout.ContentState.EMPTY
+            else -> StatefulListLayout.ContentState.CONTENT
+        }
+        val showNoMore = state.hasLoaded && !state.hasMore && state.records.isNotEmpty() && !state.loadingMore
+        return StatefulListLayout.State(
+            contentState = contentState,
+            loadingMore = state.loadingMore,
+            noMore = showNoMore,
+            errorText = state.error
+        )
     }
 
     private fun openExportFile(record: ExportRecordEntity) {

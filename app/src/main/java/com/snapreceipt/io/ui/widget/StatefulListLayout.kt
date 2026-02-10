@@ -18,9 +18,8 @@ import com.snapreceipt.io.R
 /**
  * A composite list widget that encapsulates common list patterns:
  * - RecyclerView (list content)
- * - Empty state (image + text)
+ * - Multi-state container (loading/content/empty/error)
  * - In-list load-state footer (bottom item)
- * - Center loading indicator (large spinner for initial load)
  *
  * Supported attrs:
  * - `sllEmptyImage`: drawable for empty state (default: `@drawable/img_receipts_empty`)
@@ -33,6 +32,20 @@ class StatefulListLayout @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
+    enum class ContentState {
+        LOADING,
+        CONTENT,
+        EMPTY,
+        ERROR
+    }
+
+    data class State(
+        val contentState: ContentState = ContentState.CONTENT,
+        val loadingMore: Boolean = false,
+        val noMore: Boolean = false,
+        val errorText: CharSequence? = null
+    )
+
     private enum class FooterUiState {
         HIDDEN,
         LOADING,
@@ -44,28 +57,43 @@ class StatefulListLayout @JvmOverloads constructor(
     }
 
     val recyclerView: RecyclerView
-    private val emptyStateView: View
+    private val multiStateLayout: MultiStateLayout
     private val emptyImageView: ImageView
     private val emptyTextView: TextView
-    private val centerLoadingView: View
+    private val errorTextView: TextView
+    private val errorRetryView: View
 
     private val footerStateAdapter = FooterStateAdapter()
     private val concatAdapter = ConcatAdapter(EmptyContentAdapter, footerStateAdapter)
     private var contentAdapter: RecyclerView.Adapter<out RecyclerView.ViewHolder> = EmptyContentAdapter
 
     private var onLoadMoreListener: (() -> Unit)? = null
-    private var isRefreshingState: Boolean = false
+    private var onRetryListener: (() -> Unit)? = null
     private var isLoadingMoreState: Boolean = false
     private var isNoMoreState: Boolean = false
+    private var hasPendingLoadMoreRequest: Boolean = false
+    private var currentState: State = State()
 
     init {
         LayoutInflater.from(context).inflate(R.layout.view_stateful_list, this, true)
 
+        multiStateLayout = findViewById(R.id.sll_multi_state)
         recyclerView = findViewById(R.id.sll_recycler_view)
-        emptyStateView = findViewById(R.id.sll_empty_state)
+        val loadingStateView: View = findViewById(R.id.sll_loading_state)
+        val contentStateView: View = findViewById(R.id.sll_content_state)
+        val emptyStateView: View = findViewById(R.id.sll_empty_state)
+        val errorStateView: View = findViewById(R.id.sll_error_state)
         emptyImageView = findViewById(R.id.sll_empty_image)
         emptyTextView = findViewById(R.id.sll_empty_text)
-        centerLoadingView = findViewById(R.id.sll_center_loading)
+        errorTextView = findViewById(R.id.sll_error_text)
+        errorRetryView = findViewById(R.id.sll_error_retry)
+
+        multiStateLayout.bindStateViews(
+            loadingView = loadingStateView,
+            contentView = contentStateView,
+            emptyView = emptyStateView,
+            errorView = errorStateView
+        )
 
         val a = context.obtainStyledAttributes(attrs, R.styleable.StatefulListLayout, defStyleAttr, 0)
         a.getDrawable(R.styleable.StatefulListLayout_sllEmptyImage)?.let {
@@ -85,24 +113,31 @@ class StatefulListLayout @JvmOverloads constructor(
         }
         recyclerView.adapter = concatAdapter
         recyclerView.overScrollMode = View.OVER_SCROLL_NEVER
-        recyclerView.isNestedScrollingEnabled = false
         recyclerView.descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
         recyclerView.itemAnimator = null
+
+        errorRetryView.setOnClickListener {
+            onRetryListener?.invoke()
+        }
 
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 if (dy <= 0) return
+                if (currentState.contentState != ContentState.CONTENT) return
                 if (onLoadMoreListener == null) return
-                if (isLoadingMoreState || isNoMoreState) return
+                if (isLoadingMoreState || isNoMoreState || hasPendingLoadMoreRequest) return
                 if (contentAdapter.itemCount == 0) return
                 val lm = recyclerView.layoutManager as? LinearLayoutManager ?: return
                 val total = lm.itemCount
                 val lastVisible = lm.findLastVisibleItemPosition()
                 if (total > 0 && lastVisible >= total - LOAD_MORE_TRIGGER_THRESHOLD) {
+                    hasPendingLoadMoreRequest = true
                     onLoadMoreListener?.invoke()
                 }
             }
         })
+
+        render(currentState)
     }
 
     private fun updateFooterState() {
@@ -114,46 +149,76 @@ class StatefulListLayout @JvmOverloads constructor(
         footerStateAdapter.setState(footerState)
     }
 
+    private fun renderContainerState(contentState: ContentState) {
+        when (contentState) {
+            ContentState.LOADING -> multiStateLayout.showLoading()
+            ContentState.CONTENT -> multiStateLayout.showContent()
+            ContentState.EMPTY -> multiStateLayout.showEmpty()
+            ContentState.ERROR -> multiStateLayout.showError()
+        }
+    }
+
     fun setAdapter(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>) {
         if (adapter === contentAdapter) return
         concatAdapter.removeAdapter(contentAdapter)
         contentAdapter = adapter
         concatAdapter.addAdapter(0, adapter)
+        hasPendingLoadMoreRequest = false
     }
 
-    fun setOnLoadMoreListener(listener: () -> Unit) {
+    fun setOnLoadMoreListener(listener: (() -> Unit)?) {
         onLoadMoreListener = listener
+        if (listener == null) {
+            hasPendingLoadMoreRequest = false
+        }
     }
 
-    fun setRefreshing(refreshing: Boolean) {
-        if (isRefreshingState == refreshing) return
-        isRefreshingState = refreshing
+    fun setOnRetryListener(listener: (() -> Unit)?) {
+        onRetryListener = listener
     }
 
-    fun showContent() {
-        recyclerView.visibility = VISIBLE
-        emptyStateView.visibility = GONE
-    }
-
-    fun showEmpty() {
-        recyclerView.visibility = GONE
-        emptyStateView.visibility = VISIBLE
-    }
-
-    fun showLoadingMore(visible: Boolean) {
+    private fun setLoadingMoreVisible(visible: Boolean) {
         if (isLoadingMoreState == visible) return
+        val wasLoadingMore = isLoadingMoreState
         isLoadingMoreState = visible
+        if (visible) {
+            hasPendingLoadMoreRequest = true
+        } else if (wasLoadingMore && !isNoMoreState) {
+            hasPendingLoadMoreRequest = false
+        }
         updateFooterState()
     }
 
-    fun showNoMore(visible: Boolean) {
+    private fun setNoMoreVisible(visible: Boolean) {
         if (isNoMoreState == visible) return
         isNoMoreState = visible
+        if (visible) {
+            hasPendingLoadMoreRequest = true
+        } else if (!isLoadingMoreState) {
+            hasPendingLoadMoreRequest = false
+        }
         updateFooterState()
     }
 
-    fun showCenterLoading(visible: Boolean) {
-        centerLoadingView.visibility = if (visible) VISIBLE else GONE
+    fun submit(state: State) {
+        currentState = state
+        render(state)
+    }
+
+    private fun render(state: State) {
+        if (!state.errorText.isNullOrBlank()) {
+            errorTextView.text = state.errorText
+        }
+        renderContainerState(state.contentState)
+
+        val shouldShowFooter = state.contentState == ContentState.CONTENT
+        val loadingMoreVisible = shouldShowFooter && state.loadingMore
+        val noMoreVisible = shouldShowFooter && state.noMore && !state.loadingMore
+        setLoadingMoreVisible(loadingMoreVisible)
+        setNoMoreVisible(noMoreVisible)
+        if (!loadingMoreVisible && !noMoreVisible) {
+            hasPendingLoadMoreRequest = false
+        }
     }
 
     fun setEmptyImage(@DrawableRes resId: Int) {
@@ -174,28 +239,6 @@ class StatefulListLayout @JvmOverloads constructor(
 
     fun setNoMoreText(@StringRes resId: Int) {
         setNoMoreText(context.getText(resId))
-    }
-
-    fun applyState(
-        hasLoaded: Boolean,
-        isEmpty: Boolean,
-        hasMore: Boolean,
-        itemCount: Int,
-        refreshing: Boolean,
-        loadingMore: Boolean,
-        centerLoading: Boolean = false
-    ) {
-        setRefreshing(refreshing)
-
-        val showEmpty = hasLoaded && isEmpty
-        if (showEmpty) showEmpty() else showContent()
-
-        showLoadingMore(loadingMore)
-
-        val showNoMore = hasLoaded && !hasMore && itemCount > 0 && !loadingMore
-        showNoMore(showNoMore)
-
-        showCenterLoading(centerLoading)
     }
 
     private class FooterStateAdapter : RecyclerView.Adapter<FooterStateAdapter.FooterStateViewHolder>() {
