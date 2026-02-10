@@ -62,7 +62,7 @@ class MultiStateLayout @JvmOverloads constructor(
     }
 
     private fun render() {
-        loadingView?.isVisible = state == State.LOADING
+//        loadingView?.isVisible = state == State.LOADING
         contentView?.isVisible = state == State.CONTENT
         emptyView?.isVisible = state == State.EMPTY
         errorView?.isVisible = state == State.ERROR
