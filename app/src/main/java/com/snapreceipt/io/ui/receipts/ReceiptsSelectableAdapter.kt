@@ -24,8 +24,12 @@ class ReceiptsSelectableAdapter(
         }
     }
 
-    fun setReceipts(newReceipts: List<ReceiptEntity>) {
-        submitList(newReceipts)
+    /**
+     * Updates the receipt list.
+     * @param commitCallback optional callback invoked after the list is committed to the adapter.
+     */
+    fun setReceipts(newReceipts: List<ReceiptEntity>, commitCallback: Runnable? = null) {
+        submitList(newReceipts, commitCallback)
     }
 
     fun updateSelection(selected: Set<Long>) {

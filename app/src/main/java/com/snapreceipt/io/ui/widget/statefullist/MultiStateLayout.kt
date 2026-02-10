@@ -1,4 +1,4 @@
-package com.snapreceipt.io.ui.widget
+package com.snapreceipt.io.ui.widget.statefullist
 
 import android.content.Context
 import android.util.AttributeSet
@@ -13,7 +13,7 @@ import androidx.core.view.isVisible
  * - empty
  * - error
  */
-class MultiStateLayout @JvmOverloads constructor(
+internal class MultiStateLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
@@ -62,10 +62,9 @@ class MultiStateLayout @JvmOverloads constructor(
     }
 
     private fun render() {
-//        loadingView?.isVisible = state == State.LOADING
+        loadingView?.isVisible = state == State.LOADING
         contentView?.isVisible = state == State.CONTENT
         emptyView?.isVisible = state == State.EMPTY
         errorView?.isVisible = state == State.ERROR
     }
 }
-

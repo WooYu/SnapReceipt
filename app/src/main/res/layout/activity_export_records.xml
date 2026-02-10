@@ -16,7 +16,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:ptbTitleText="@string/export_records" />
 
-    <com.snapreceipt.io.ui.widget.StatefulListLayout
+    <com.snapreceipt.io.ui.widget.statefullist.StatefulListLayout
         android:id="@+id/stateful_list"
         android:layout_width="0dp"
         android:layout_height="0dp"

@@ -36,6 +36,8 @@
         <attr name="sllEmptyImage" format="reference" />
         <attr name="sllEmptyText" format="reference|string" />
         <attr name="sllNoMoreText" format="reference|string" />
+        <attr name="sllEnableRefresh" format="boolean" />
+        <attr name="sllEnableLoading" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="PageTitleBar">

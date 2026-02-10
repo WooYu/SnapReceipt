@@ -516,7 +516,7 @@
                             android:cursorVisible="false"
                             android:focusable="false"
                             android:focusableInTouchMode="false"
-                            android:hint="@string/filter_title"
+                            android:hint="@string/filter_category"
                             android:importantForAutofill="no"
                             android:longClickable="false"
                             android:padding="16dp"

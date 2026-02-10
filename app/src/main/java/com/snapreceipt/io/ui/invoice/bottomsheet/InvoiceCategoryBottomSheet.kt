@@ -22,6 +22,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.BottomSheetInvoiceCategoryBinding
+import com.snapreceipt.io.domain.manager.CategoryCacheManager
 import com.snapreceipt.io.domain.model.ReceiptCategory
 import com.snapreceipt.io.domain.usecase.category.AddCategoryUseCase
 import com.snapreceipt.io.domain.usecase.category.DeleteCategoryUseCase
@@ -69,6 +70,9 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
     @Inject
     lateinit var dispatchers: CoroutineDispatchersProvider
 
+    @Inject
+    lateinit var categoryCache: CategoryCacheManager
+
     private var _binding: BottomSheetInvoiceCategoryBinding? = null
     private val binding: BottomSheetInvoiceCategoryBinding
         get() = checkNotNull(_binding) {
@@ -114,9 +118,11 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         setupCategoryList()
         setupActions()
 
-        // Render cached data first for instant feedback, then refresh from server.
-        applyCategories(ReceiptCategory.all(), reconcileSelection = false)
-        refreshCategoriesFromRemote()
+        viewLifecycleOwner.lifecycleScope.launch {
+            val cached = categoryCache.getCategories()
+            applyCategories(cached, reconcileSelection = false)
+            refreshCategoriesFromRemote()
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -211,13 +217,12 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         refreshJob = viewLifecycleOwner.lifecycleScope.launch {
             val result = withContext(dispatchers.io) { fetchCategoriesUseCase() }
             result.onSuccess { list ->
-                ReceiptCategory.update(list)
-                // Remote list is authoritative, so we reconcile selection against it.
+                categoryCache.update(list)
                 applyCategories(list, reconcileSelection = true)
             }.onFailure {
                 // If remote fetch fails, keep showing cached data rather than an empty list.
                 if (!adapter.hasCategoryItems()) {
-                    val cached = ReceiptCategory.all()
+                    val cached = categoryCache.getCategories()
                     if (cached.isNotEmpty()) {
                         applyCategories(cached, reconcileSelection = false)
                     }

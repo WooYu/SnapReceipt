@@ -1,44 +1,28 @@
 package com.snapreceipt.io.domain.model
 
 /**
- * 分类内存缓存（来自 /api/category/list）。
- *
- * 缓存更新时机：
- * - FetchCategoriesUseCase 成功返回后调用 update。
- * - 分类新增/删除后重新拉取并 update。
+ * 收据分类领域模型
+ * 
+ * 职责：
+ * - 定义分类的数据结构
+ * - 不包含缓存逻辑（缓存由 CategoryCacheManager 管理）
+ * 
+ * 架构说明：
+ * - data 层的 CategoryItemDto 映射为此模型
+ * - domain 层的 CategoryCacheManager 缓存此模型
+ * - UI 层展示此模型
  */
 object ReceiptCategory {
     /**
-     * 分类条目。
+     * 分类条目
      *
-     * @property id 分类ID
-     * @property label 分类名称
-     * @property isCustom 是否用户自定义分类
+     * @property id 分类 ID（服务端唯一标识）
+     * @property label 分类名称（如"餐饮"、"交通"、"办公"等）
+     * @property isCustom 是否用户自定义分类（true = 用户创建，false = 系统预设）
      */
     data class Item(
         val id: Long,
         val label: String,
         val isCustom: Boolean = false
     )
-
-    @Volatile
-    private var categories: List<Item> = emptyList()
-
-    @Volatile
-    private var lastUpdatedAt: Long? = null
-
-    fun all(): List<Item> = categories
-
-    fun update(items: List<Item>) {
-        categories = items
-        lastUpdatedAt = System.currentTimeMillis()
-    }
-
-    fun idForLabel(label: String): Long {
-        val fromList = categories.firstOrNull { it.label.equals(label, ignoreCase = true) }?.id
-        if (fromList != null) return fromList
-        return -1L
-    }
-
-    fun lastUpdatedAt(): Long? = lastUpdatedAt
 }

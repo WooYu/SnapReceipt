@@ -3,19 +3,19 @@ package com.snapreceipt.io.ui.receipts
 import android.content.Context
 import android.os.Bundle
 import androidx.lifecycle.viewModelScope
+import com.skybound.space.base.presentation.viewmodel.BaseViewModel
+import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
+import com.skybound.space.core.util.DateFormatUtil
+import com.skybound.space.core.util.LogHelper
 import com.snapreceipt.io.R
-import com.snapreceipt.io.domain.model.ReceiptCategory
+import com.snapreceipt.io.domain.manager.CategoryCacheManager
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.domain.model.query.ReceiptListQueryEntity
 import com.snapreceipt.io.domain.usecase.receipt.DeleteReceiptRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.ExportReceiptsRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.FetchReceiptsUseCase
 import com.snapreceipt.io.domain.usecase.receipt.UpdateReceiptRemoteUseCase
-import com.snapreceipt.io.ui.common.ReceiptTypeMapper
-import com.skybound.space.base.presentation.viewmodel.BaseViewModel
-import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
-import com.skybound.space.core.util.DateFormatUtil
-import com.skybound.space.core.util.LogHelper
+import com.snapreceipt.io.util.ReceiptTypeHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,6 +32,9 @@ class ReceiptsViewModel @Inject constructor(
     private val deleteReceiptRemoteUseCase: DeleteReceiptRemoteUseCase,
     private val updateReceiptRemoteUseCase: UpdateReceiptRemoteUseCase,
     private val exportReceiptsRemoteUseCase: ExportReceiptsRemoteUseCase,
+    
+    private val receiptTypeHelper: ReceiptTypeHelper,
+    private val categoryCache: CategoryCacheManager,
     private val dispatchers: CoroutineDispatchersProvider
 ) : BaseViewModel(dispatchers, R.string.unexpected_error) {
 
@@ -47,8 +50,6 @@ class ReceiptsViewModel @Inject constructor(
     private val pageSize = 20
     private var hasMore = true
     private var currentQuery = ReceiptListQueryEntity()
-    private val companyLabel by lazy { appContext.getString(R.string.type_company) }
-    private val individualLabel by lazy { appContext.getString(R.string.type_individual) }
 
     init {
         loadReceipts()
@@ -79,25 +80,21 @@ class ReceiptsViewModel @Inject constructor(
         fetchPage(page = 1, reset = true, showLoading = true)
     }
 
-    fun filterByType(type: String) {
+    fun filterByInvoiceCategory(type: String) {
         val normalizedType = type.trim()
-        val categoryId = ReceiptCategory.idForLabel(normalizedType).takeIf { it > 0L }
+        val categoryId = categoryCache.idForLabel(normalizedType).takeIf { it > 0L }
         LogHelper.d(LOG_TAG, "filterByType label='$normalizedType' categoryId=$categoryId")
         currentQuery = ReceiptListQueryEntity(categoryId = categoryId)
         fetchPage(page = 1, reset = true, showLoading = true)
     }
 
-    fun filterByTitleType(type: String?) {
+    fun filterByReceiptType(type: String?) {
         val normalized = type?.trim().orEmpty()
-        val payloadType = ReceiptTypeMapper.toPayloadValue(
-            raw = normalized,
-            companyLabel = companyLabel,
-            individualLabel = individualLabel
-        )
+        val payloadType = receiptTypeHelper.toPayloadValue(normalized)
         titleTypeFilter = payloadType.takeIf { it.isNotBlank() }
         LogHelper.d(
             LOG_TAG,
-            "filterByTitleType input='${normalized}' payload='${titleTypeFilter.orEmpty()}'"
+            "filterByTitleType input='$normalized' payload='${titleTypeFilter.orEmpty()}'"
         )
         val filtered = applyTitleFilter(lastFetchedReceipts)
         _uiState.update { current ->
@@ -280,11 +277,7 @@ class ReceiptsViewModel @Inject constructor(
         val payloadType = titleTypeFilter?.trim().orEmpty()
         if (payloadType.isBlank()) return receipts
         return receipts.filter { receipt ->
-            val receiptPayload = ReceiptTypeMapper.toPayloadValue(
-                raw = receipt.receiptType.orEmpty(),
-                companyLabel = companyLabel,
-                individualLabel = individualLabel
-            )
+            val receiptPayload = receiptTypeHelper.toPayloadValue(receipt.receiptType.orEmpty())
             receiptPayload.equals(payloadType, ignoreCase = true)
         }
     }

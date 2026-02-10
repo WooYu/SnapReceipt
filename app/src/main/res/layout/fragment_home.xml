@@ -176,7 +176,7 @@
         app:layout_constraintTop_toBottomOf="@id/action_cards" />
 
     <!--列表-->
-    <com.snapreceipt.io.ui.widget.StatefulListLayout
+    <com.snapreceipt.io.ui.widget.statefullist.StatefulListLayout
         android:id="@+id/stateful_list"
         android:layout_width="0dp"
         android:layout_height="0dp"

@@ -89,7 +89,7 @@
     <string name="export_excel">Export as Excel</string>
     <string name="export_csv">Export as CSV</string>
     <string name="filter_date">Date</string>
-    <string name="filter_title">Category</string>
+    <string name="filter_category">Category</string>
     <string name="filter_type">Type</string>
     <string name="no_content">No content</string>
     <string name="selected_count">Selected: %d</string>

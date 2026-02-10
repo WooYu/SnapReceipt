@@ -1,9 +1,9 @@
 package com.snapreceipt.io.domain.repository
 
-import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.domain.model.ExportRecordEntity
-import com.snapreceipt.io.domain.model.query.ExportRecordListQueryEntity
 import com.snapreceipt.io.domain.model.ReceiptCategory
+import com.snapreceipt.io.domain.model.ReceiptEntity
+import com.snapreceipt.io.domain.model.query.ExportRecordListQueryEntity
 import com.snapreceipt.io.domain.model.query.ReceiptListQueryEntity
 
 interface ReceiptRemoteRepository {

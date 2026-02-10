@@ -1,9 +1,3 @@
-/**
- * 应用设置和首选项管理
- * 
- * 使用 DataStore 进行类型安全的持久化存储
- * 支持异步读写和热更新
- */
 package com.snapreceipt.io.config.settings
 
 import android.content.Context
@@ -17,27 +11,31 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
-// DataStore 扩展
+/**
+ * DataStore 扩展属性。
+ * 
+ * 为 Context 添加 settingsDataStore 属性，使用单例模式确保全局只有一个实例。
+ * DataStore 文件位于 `/data/data/{package}/files/datastore/settings.preferences_pb`
+ */
 val Context.settingsDataStore by preferencesDataStore(name = "settings")
 
 /**
- * 应用设置数据类
- */
-data class AppSettings(
-    val isDarkMode: Boolean = false,
-    val language: String = "English",
-    val fontSize: Float = 14f,
-    val enableNotifications: Boolean = true,
-    val enableCrashReporting: Boolean = true,
-    val enableAnalytics: Boolean = true,
-    val appTheme: String = "Light",
-    val lastSyncTime: Long = 0L
-)
-
-/**
- * 设置管理器
+ * 应用设置管理器
  * 
- * 使用 DataStore 管理应用全局设置
+ * 职责：
+ * - 管理应用全局设置（主题、语言、字体、开关等）
+ * - 基于 DataStore 提供类型安全的持久化存储
+ * - 通过 Flow 提供响应式读取，支持 UI 热更新
+ * 
+ * 技术选型：
+ * - DataStore（替代 SharedPreferences）：支持协程、类型安全、无阻塞主线程
+ * - Flow：响应式数据流，UI 可自动订阅变化
+ * 
+ * 注意事项：
+ * - 所有写操作（setXxx）都是 suspend 函数，需在协程中调用
+ * - settings Flow 在 UI 层用 `collectAsState` / `collect` 订阅
+ * 
+ * @param context Application Context，由 Hilt 自动注入
  */
 @Singleton
 class SettingsManager @Inject constructor(
@@ -45,7 +43,7 @@ class SettingsManager @Inject constructor(
 ) {
     
     companion object {
-        // 定义 DataStore key
+        // DataStore key 定义（类型安全）
         private val DARK_MODE_KEY = booleanPreferencesKey("dark_mode")
         private val LANGUAGE_KEY = stringPreferencesKey("language")
         private val FONT_SIZE_KEY = stringPreferencesKey("font_size")
@@ -54,10 +52,23 @@ class SettingsManager @Inject constructor(
         private val ANALYTICS_KEY = booleanPreferencesKey("analytics")
         private val APP_THEME_KEY = stringPreferencesKey("app_theme")
         private val LAST_SYNC_TIME_KEY = stringPreferencesKey("last_sync_time")
+        private val DEBUG_LOGGING_KEY = stringPreferencesKey("debug_logging")  // "true" / "false" / null
     }
     
     /**
-     * 获取所有设置的 Flow
+     * 应用设置的响应式数据流。
+     * 
+     * UI 层订阅此 Flow，当任何设置变更时自动收到最新值。
+     * 
+     * 使用示例：
+     * ```kotlin
+     * viewLifecycleOwner.lifecycleScope.launch {
+     *     settingsManager.settings.collect { settings ->
+     *         applyTheme(settings.isDarkMode)
+     *         updateFontSize(settings.fontSize)
+     *     }
+     * }
+     * ```
      */
     val settings: Flow<AppSettings> = context.settingsDataStore.data.map { preferences ->
         AppSettings(
@@ -68,76 +79,63 @@ class SettingsManager @Inject constructor(
             enableCrashReporting = preferences[CRASH_REPORTING_KEY] ?: true,
             enableAnalytics = preferences[ANALYTICS_KEY] ?: true,
             appTheme = preferences[APP_THEME_KEY] ?: "Light",
-            lastSyncTime = (preferences[LAST_SYNC_TIME_KEY] ?: "0").toLongOrNull() ?: 0L
+            lastSyncTime = (preferences[LAST_SYNC_TIME_KEY] ?: "0").toLongOrNull() ?: 0L,
+            enableDebugLogging = preferences[DEBUG_LOGGING_KEY]?.toBooleanStrictOrNull()
         )
     }
     
-    /**
-     * 设置深色模式
-     */
+    // ── 设置更新方法（所有写操作都是 suspend 函数） ────────────
+    
+    /** 设置深色模式开关 */
     suspend fun setDarkMode(isDarkMode: Boolean) {
         context.settingsDataStore.edit { preferences ->
             preferences[DARK_MODE_KEY] = isDarkMode
         }
     }
     
-    /**
-     * 设置语言
-     */
+    /** 设置界面语言 */
     suspend fun setLanguage(language: String) {
         context.settingsDataStore.edit { preferences ->
             preferences[LANGUAGE_KEY] = language
         }
     }
     
-    /**
-     * 设置字体大小
-     */
+    /** 设置全局字体大小（单位：sp） */
     suspend fun setFontSize(size: Float) {
         context.settingsDataStore.edit { preferences ->
             preferences[FONT_SIZE_KEY] = size.toString()
         }
     }
     
-    /**
-     * 设置通知开关
-     */
+    /** 设置推送通知开关 */
     suspend fun setNotifications(enabled: Boolean) {
         context.settingsDataStore.edit { preferences ->
             preferences[NOTIFICATIONS_KEY] = enabled
         }
     }
     
-    /**
-     * 设置崩溃报告开关
-     */
+    /** 设置崩溃报告上传开关 */
     suspend fun setCrashReporting(enabled: Boolean) {
         context.settingsDataStore.edit { preferences ->
             preferences[CRASH_REPORTING_KEY] = enabled
         }
     }
     
-    /**
-     * 设置分析开关
-     */
+    /** 设置数据分析（埋点）开关 */
     suspend fun setAnalytics(enabled: Boolean) {
         context.settingsDataStore.edit { preferences ->
             preferences[ANALYTICS_KEY] = enabled
         }
     }
     
-    /**
-     * 设置应用主题
-     */
+    /** 设置应用主题（"Light" / "Dark" / "Auto"） */
     suspend fun setAppTheme(theme: String) {
         context.settingsDataStore.edit { preferences ->
             preferences[APP_THEME_KEY] = theme
         }
     }
     
-    /**
-     * 更新最后同步时间
-     */
+    /** 更新最后同步时间为当前时刻 */
     suspend fun updateLastSyncTime() {
         context.settingsDataStore.edit { preferences ->
             preferences[LAST_SYNC_TIME_KEY] = System.currentTimeMillis().toString()
@@ -145,90 +143,28 @@ class SettingsManager @Inject constructor(
     }
     
     /**
-     * 重置所有设置为默认值
+     * 设置调试日志开关（运行时覆盖）
+     * 
+     * @param enabled null = 恢复跟随编译期配置，true/false = 强制开启/关闭
+     * 
+     * 使用场景：
+     * - 生产包临时开启日志排查问题（测试人员/客服）
+     * - 开发包关闭日志减少噪音（大量日志影响性能时）
      */
+    suspend fun setDebugLogging(enabled: Boolean?) {
+        context.settingsDataStore.edit { preferences ->
+            if (enabled == null) {
+                preferences.remove(DEBUG_LOGGING_KEY)
+            } else {
+                preferences[DEBUG_LOGGING_KEY] = enabled.toString()
+            }
+        }
+    }
+    
+    /** 重置所有设置为默认值（清空 DataStore） */
     suspend fun resetAllSettings() {
         context.settingsDataStore.edit { preferences ->
             preferences.clear()
-        }
-    }
-}
-
-/**
- * 用户偏好管理
- * 
- * 处理用户特定的偏好设置
- */
-@Singleton
-class UserPreferenceManager @Inject constructor(
-    @ApplicationContext private val context: Context
-) {
-    
-    companion object {
-        private val LAST_OPENED_KEY = stringPreferencesKey("last_opened")
-        private val FAVORITE_RECEIPTS_KEY = stringPreferencesKey("favorite_receipts")
-        private val USER_ID_KEY = stringPreferencesKey("user_id")
-        private val AUTH_TOKEN_KEY = stringPreferencesKey("auth_token")
-    }
-    
-    /**
-     * 获取最后打开的收据 ID
-     */
-    fun getLastOpenedReceipt(): Flow<String?> =
-        context.settingsDataStore.data.map { preferences ->
-            preferences[LAST_OPENED_KEY]
-        }
-    
-    /**
-     * 设置最后打开的收据 ID
-     */
-    suspend fun setLastOpenedReceipt(receiptId: String) {
-        context.settingsDataStore.edit { preferences ->
-            preferences[LAST_OPENED_KEY] = receiptId
-        }
-    }
-    
-    /**
-     * 获取用户 ID
-     */
-    fun getUserId(): Flow<String?> =
-        context.settingsDataStore.data.map { preferences ->
-            preferences[USER_ID_KEY]
-        }
-    
-    /**
-     * 设置用户 ID
-     */
-    suspend fun setUserId(userId: String) {
-        context.settingsDataStore.edit { preferences ->
-            preferences[USER_ID_KEY] = userId
-        }
-    }
-    
-    /**
-     * 获取认证令牌
-     */
-    fun getAuthToken(): Flow<String?> =
-        context.settingsDataStore.data.map { preferences ->
-            preferences[AUTH_TOKEN_KEY]
-        }
-    
-    /**
-     * 设置认证令牌
-     */
-    suspend fun setAuthToken(token: String) {
-        context.settingsDataStore.edit { preferences ->
-            preferences[AUTH_TOKEN_KEY] = token
-        }
-    }
-    
-    /**
-     * 清除用户认证数据
-     */
-    suspend fun clearAuthData() {
-        context.settingsDataStore.edit { preferences ->
-            preferences.remove(USER_ID_KEY)
-            preferences.remove(AUTH_TOKEN_KEY)
         }
     }
 }

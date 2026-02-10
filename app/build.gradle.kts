@@ -87,6 +87,7 @@ kotlin {
 }
 
 dependencies {
+    implementation(libs.androidx.lifecycle.process)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     // Core 依赖
@@ -115,6 +116,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.timber)
     implementation(libs.glide)
+    implementation(libs.swiperefreshlayout)
     implementation(libs.ucrop)
     ksp(libs.hilt.compiler)
 

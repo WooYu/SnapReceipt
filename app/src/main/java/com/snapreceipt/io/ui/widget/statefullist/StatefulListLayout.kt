@@ -1,4 +1,4 @@
-package com.snapreceipt.io.ui.widget
+package com.snapreceipt.io.ui.widget.statefullist
 
 import android.content.Context
 import android.util.AttributeSet
@@ -10,21 +10,29 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.snapreceipt.io.R
 
 /**
  * A composite list widget that encapsulates common list patterns:
+ * - SwipeRefreshLayout (pull-to-refresh)
  * - RecyclerView (list content)
  * - Multi-state container (loading/content/empty/error)
  * - In-list load-state footer (bottom item)
+ * - Network-error retry
  *
  * Supported attrs:
- * - `sllEmptyImage`: drawable for empty state (default: `@drawable/img_receipts_empty`)
- * - `sllEmptyText`: text for empty state (default: `@string/no_content`)
- * - `sllNoMoreText`: text for no-more hint (default: `@string/no_more_records`)
+ * - `sllEmptyImage`   : drawable for empty state (default: `@drawable/img_receipts_empty`)
+ * - `sllEmptyText`    : text for empty state (default: `@string/no_content`)
+ * - `sllNoMoreText`   : text for no-more hint (default: `@string/no_more_records`)
+ * - `sllEnableRefresh` : whether pull-to-refresh is enabled (default: true)
+ * - `sllEnableLoading` : whether the built-in first-load loading view is enabled (default: true).
+ *                        When false, ContentState.LOADING is treated as CONTENT so the host
+ *                        can show its own loading indicator (e.g. a modal dialog).
  */
 class StatefulListLayout @JvmOverloads constructor(
     context: Context,
@@ -41,6 +49,7 @@ class StatefulListLayout @JvmOverloads constructor(
 
     data class State(
         val contentState: ContentState = ContentState.CONTENT,
+        val refreshing: Boolean = false,
         val loadingMore: Boolean = false,
         val noMore: Boolean = false,
         val errorText: CharSequence? = null
@@ -57,6 +66,7 @@ class StatefulListLayout @JvmOverloads constructor(
     }
 
     val recyclerView: RecyclerView
+    private val swipeRefreshLayout: SwipeRefreshLayout
     private val multiStateLayout: MultiStateLayout
     private val emptyImageView: ImageView
     private val emptyTextView: TextView
@@ -64,20 +74,30 @@ class StatefulListLayout @JvmOverloads constructor(
     private val errorRetryView: View
 
     private val footerStateAdapter = FooterStateAdapter()
-    private val concatAdapter = ConcatAdapter(EmptyContentAdapter, footerStateAdapter)
+    private val concatAdapter = ConcatAdapter(
+        ConcatAdapter.Config.Builder()
+            .setStableIdMode(ConcatAdapter.Config.StableIdMode.NO_STABLE_IDS)  // Prevent scroll restoration
+            .build(),
+        EmptyContentAdapter,
+        footerStateAdapter
+    )
     private var contentAdapter: RecyclerView.Adapter<out RecyclerView.ViewHolder> = EmptyContentAdapter
 
     private var onLoadMoreListener: (() -> Unit)? = null
     private var onRetryListener: (() -> Unit)? = null
+    private var onRefreshListener: (() -> Unit)? = null
     private var isLoadingMoreState: Boolean = false
     private var isNoMoreState: Boolean = false
     private var hasPendingLoadMoreRequest: Boolean = false
     private var currentState: State = State()
+    private var refreshEnabled: Boolean = true
+    private var loadingEnabled: Boolean = true
 
     init {
         LayoutInflater.from(context).inflate(R.layout.view_stateful_list, this, true)
 
         multiStateLayout = findViewById(R.id.sll_multi_state)
+        swipeRefreshLayout = findViewById(R.id.sll_swipe_refresh)
         recyclerView = findViewById(R.id.sll_recycler_view)
         val loadingStateView: View = findViewById(R.id.sll_loading_state)
         val contentStateView: View = findViewById(R.id.sll_content_state)
@@ -88,13 +108,15 @@ class StatefulListLayout @JvmOverloads constructor(
         errorTextView = findViewById(R.id.sll_error_text)
         errorRetryView = findViewById(R.id.sll_error_retry)
 
+        // SwipeRefreshLayout wraps content, so it acts as the content view for MultiStateLayout
         multiStateLayout.bindStateViews(
             loadingView = loadingStateView,
-            contentView = contentStateView,
+            contentView = swipeRefreshLayout,
             emptyView = emptyStateView,
             errorView = errorStateView
         )
 
+        // -- Parse custom attributes --
         val a = context.obtainStyledAttributes(attrs, R.styleable.StatefulListLayout, defStyleAttr, 0)
         a.getDrawable(R.styleable.StatefulListLayout_sllEmptyImage)?.let {
             emptyImageView.setImageDrawable(it)
@@ -105,16 +127,33 @@ class StatefulListLayout @JvmOverloads constructor(
         val noMoreText = a.getText(R.styleable.StatefulListLayout_sllNoMoreText)
             ?: context.getString(R.string.no_more_records)
         footerStateAdapter.setNoMoreText(noMoreText)
+        refreshEnabled = a.getBoolean(R.styleable.StatefulListLayout_sllEnableRefresh, true)
+        loadingEnabled = a.getBoolean(R.styleable.StatefulListLayout_sllEnableLoading, true)
         a.recycle()
 
+        // -- SwipeRefreshLayout setup --
+        swipeRefreshLayout.setColorSchemeColors(
+            ContextCompat.getColor(context, R.color.colorPrimary),
+            ContextCompat.getColor(context, R.color.colorPrimaryGradientEnd)
+        )
+        swipeRefreshLayout.isEnabled = refreshEnabled
+        swipeRefreshLayout.setOnRefreshListener {
+            onRefreshListener?.invoke()
+        }
+
+        // -- RecyclerView setup --
         recyclerView.layoutManager = LinearLayoutManager(context).apply {
             reverseLayout = false
             stackFromEnd = false
+            // Prevent auto-scroll when items are inserted/updated
+            isSmoothScrollbarEnabled = false
         }
         recyclerView.adapter = concatAdapter
         recyclerView.overScrollMode = View.OVER_SCROLL_NEVER
         recyclerView.descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
         recyclerView.itemAnimator = null
+        // Prevent RecyclerView from auto-scrolling to maintain child focus
+        recyclerView.isFocusable = false
 
         errorRetryView.setOnClickListener {
             onRetryListener?.invoke()
@@ -140,6 +179,12 @@ class StatefulListLayout @JvmOverloads constructor(
         render(currentState)
     }
 
+    // -- Footer state management --
+
+    /**
+     * Updates the footer state.
+     * Footer uses LayoutParams.height = 0 when HIDDEN to avoid triggering RecyclerView auto-scroll.
+     */
     private fun updateFooterState() {
         val footerState = when {
             isLoadingMoreState -> FooterUiState.LOADING
@@ -149,14 +194,33 @@ class StatefulListLayout @JvmOverloads constructor(
         footerStateAdapter.setState(footerState)
     }
 
+    // -- Multi-state switching --
+
+    /**
+     * Resolves the effective [ContentState] considering [loadingEnabled].
+     * When loading is disabled, LOADING is remapped to CONTENT so the host
+     * can use its own loading indicator (e.g. a modal dialog from BaseFragment).
+     */
+    private fun resolveContentState(contentState: ContentState): ContentState {
+        if (contentState == ContentState.LOADING && !loadingEnabled) {
+            return ContentState.CONTENT
+        }
+        return contentState
+    }
+
     private fun renderContainerState(contentState: ContentState) {
-        when (contentState) {
+        val effective = resolveContentState(contentState)
+        when (effective) {
             ContentState.LOADING -> multiStateLayout.showLoading()
             ContentState.CONTENT -> multiStateLayout.showContent()
             ContentState.EMPTY -> multiStateLayout.showEmpty()
             ContentState.ERROR -> multiStateLayout.showError()
         }
+        // Disable pull-to-refresh outside CONTENT state or when no listener is set
+        updateSwipeRefreshEnabled()
     }
+
+    // -- Public API --
 
     fun setAdapter(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>) {
         if (adapter === contentAdapter) return
@@ -175,6 +239,27 @@ class StatefulListLayout @JvmOverloads constructor(
 
     fun setOnRetryListener(listener: (() -> Unit)?) {
         onRetryListener = listener
+    }
+
+    fun setOnRefreshListener(listener: (() -> Unit)?) {
+        onRefreshListener = listener
+        // Disable SwipeRefreshLayout when there's no listener to prevent orphan indicators
+        updateSwipeRefreshEnabled()
+    }
+
+    fun setRefreshEnabled(enabled: Boolean) {
+        refreshEnabled = enabled
+        updateSwipeRefreshEnabled()
+    }
+
+    fun setLoadingEnabled(enabled: Boolean) {
+        loadingEnabled = enabled
+    }
+
+    private fun updateSwipeRefreshEnabled() {
+        val effectiveState = resolveContentState(currentState.contentState)
+        swipeRefreshLayout.isEnabled =
+            refreshEnabled && onRefreshListener != null && effectiveState == ContentState.CONTENT
     }
 
     private fun setLoadingMoreVisible(visible: Boolean) {
@@ -211,7 +296,11 @@ class StatefulListLayout @JvmOverloads constructor(
         }
         renderContainerState(state.contentState)
 
-        val shouldShowFooter = state.contentState == ContentState.CONTENT
+        // Control SwipeRefreshLayout refreshing animation
+        swipeRefreshLayout.isRefreshing = state.refreshing
+
+        val effectiveState = resolveContentState(state.contentState)
+        val shouldShowFooter = effectiveState == ContentState.CONTENT
         val loadingMoreVisible = shouldShowFooter && state.loadingMore
         val noMoreVisible = shouldShowFooter && state.noMore && !state.loadingMore
         setLoadingMoreVisible(loadingMoreVisible)
@@ -241,6 +330,11 @@ class StatefulListLayout @JvmOverloads constructor(
         setNoMoreText(context.getText(resId))
     }
 
+    // -- FooterStateAdapter --
+    // Always keeps exactly 1 item; uses notifyItemChanged to toggle visibility.
+    // This avoids notifyItemInserted/notifyItemRemoved which cause RecyclerView
+    // to auto-scroll to the bottom when the footer is appended.
+
     private class FooterStateAdapter : RecyclerView.Adapter<FooterStateAdapter.FooterStateViewHolder>() {
 
         private var state: FooterUiState = FooterUiState.HIDDEN
@@ -256,18 +350,12 @@ class StatefulListLayout @JvmOverloads constructor(
             holder.bind(state, noMoreText)
         }
 
-        override fun getItemCount(): Int = if (state == FooterUiState.HIDDEN) 0 else 1
+        override fun getItemCount(): Int = 1
 
         fun setState(newState: FooterUiState) {
             if (state == newState) return
-            val hadItem = state != FooterUiState.HIDDEN
-            val hasItem = newState != FooterUiState.HIDDEN
             state = newState
-            when {
-                !hadItem && hasItem -> notifyItemInserted(0)
-                hadItem && !hasItem -> notifyItemRemoved(0)
-                else -> notifyItemChanged(0)
-            }
+            notifyItemChanged(0)
         }
 
         fun setNoMoreText(text: CharSequence) {
@@ -282,19 +370,28 @@ class StatefulListLayout @JvmOverloads constructor(
             private val noMoreTextView: TextView = itemView.findViewById(R.id.sll_footer_no_more_text)
 
             fun bind(state: FooterUiState, noMoreText: CharSequence) {
+                // 策略：通过设置 itemView 高度为 0 或 WRAP_CONTENT 来控制显示，
+                // 而非 visibility（visibility 变化会触发 RecyclerView 滚动）
+                val layoutParams = itemView.layoutParams
                 when (state) {
                     FooterUiState.LOADING -> {
+                        layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                        itemView.layoutParams = layoutParams
                         loadingContainer.visibility = VISIBLE
                         noMoreTextView.visibility = GONE
                     }
 
                     FooterUiState.NO_MORE -> {
+                        layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                        itemView.layoutParams = layoutParams
                         loadingContainer.visibility = GONE
                         noMoreTextView.visibility = VISIBLE
                         noMoreTextView.text = noMoreText
                     }
 
                     FooterUiState.HIDDEN -> {
+                        layoutParams.height = 0
+                        itemView.layoutParams = layoutParams
                         loadingContainer.visibility = GONE
                         noMoreTextView.visibility = GONE
                     }

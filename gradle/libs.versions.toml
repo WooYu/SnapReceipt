@@ -37,6 +37,7 @@ turbine = "1.2.1"
 ucrop = "2.2.11-native"
 viewbinding = "9.0.0"
 desugarJdkLibs = "2.1.4"
+lifecycleProcess = "2.10.0"
 
 [libraries]
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
@@ -87,6 +88,7 @@ turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine
 ucrop = { group = "com.github.yalantis", name = "ucrop", version.ref = "ucrop" }
 androidx-viewbinding = { group = "androidx.databinding", name = "viewbinding", version.ref = "viewbinding" }
 desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdkLibs" }
+androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleProcess" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

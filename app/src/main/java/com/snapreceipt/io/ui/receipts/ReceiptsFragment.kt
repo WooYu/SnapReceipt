@@ -17,9 +17,9 @@ import com.snapreceipt.io.databinding.FragmentReceiptsBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceCategoryBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
-import com.snapreceipt.io.ui.receipts.bottomsheet.DateRangeBottomSheet
 import com.snapreceipt.io.ui.receipts.dialogs.ExportSuccessDialog
-import com.snapreceipt.io.ui.widget.StatefulListLayout
+import com.snapreceipt.io.ui.widget.datepicker.DateRangeBottomSheet
+import com.snapreceipt.io.ui.widget.statefullist.StatefulListLayout
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -37,7 +37,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     private var filterStartMillis: Long? = null
     private var filterEndMillis: Long? = null
     private var filterTypeLabel: String? = null
-    private var filterTitleLabel: String? = null
+    private var filterCategoryLabel: String? = null
     private var currentState: ReceiptsUiState = ReceiptsUiState()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -64,25 +64,36 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         }
     }
 
+    /**
+     * Renders UI state.
+     * Data is submitted before footer state to prevent auto-scroll when footer appears.
+     */
     private fun renderState(state: ReceiptsUiState) {
         currentState = state
-        val showEmpty = state.hasLoaded && state.empty
-        if (showEmpty) {
-            adapter.setReceipts(emptyList())
-        } else {
-            adapter.setReceipts(state.receipts)
-        }
-        binding.statefulList.submit(buildListState(state))
 
+        // Determine which data to show
+        val receiptsToShow = if (state.hasLoaded && state.empty) emptyList() else state.receipts
+
+        // Submit data first (async), then update footer state in callback
+        adapter.setReceipts(receiptsToShow) {
+            binding.statefulList.submit(buildListState(state))
+        }
+
+        // Update toolbar title
         val selectedCount = state.selectedIds.size
         binding.toolbarTitle.text = if (selectedCount > 0) {
             getString(R.string.selected_count, selectedCount)
         } else {
             getString(R.string.receipts_title)
         }
+
+        // Update action bar visibility
         binding.actionBar.visibility = if (selectedCount > 0) View.VISIBLE else View.GONE
+
+        // Update selection states
         adapter.updateSelection(state.selectedIds)
 
+        // Calculate selected total amount
         val selectedTotal = state.receipts
             .filter { receipt ->
                 val id = receipt.receiptId ?: return@filter false
@@ -91,11 +102,15 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
             .sumOf { it.totalAmount ?: 0.0 }
         binding.totalAmount.text = getString(R.string.amount_currency_format, selectedTotal)
 
+        // Update select-all checkbox state
         val allSelected =
             state.receipts.isNotEmpty() && state.selectedIds.size == state.receipts.size
         binding.selectAllIcon.isSelected = allSelected
 
+        // Control modal loading dialog
         updateLoadingDialog(state)
+
+        // Control export button state
         binding.exportActionBtn.isEnabled = !state.exporting
         binding.exportActionBtn.alpha = if (state.exporting) 0.6f else 1f
         binding.selectAllBtn.isEnabled = !state.exporting
@@ -112,6 +127,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
             }
         )
         binding.statefulList.setAdapter(adapter)
+        binding.statefulList.setOnRefreshListener { viewModel.refresh() }
         binding.statefulList.setOnLoadMoreListener { viewModel.loadMore() }
         binding.statefulList.setOnRetryListener { viewModel.refresh() }
     }
@@ -124,22 +140,26 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                 binding.filterDateBtn.text = formatDateRange(start, end)
                 LogHelper.d(
                     LOG_TAG,
-                    "Date filter selected start=${DateFormatUtil.formatApiDate(start)} end=${DateFormatUtil.formatApiDate(end)}"
+                    "Date filter selected start=${DateFormatUtil.formatApiDate(start)} end=${
+                        DateFormatUtil.formatApiDate(
+                            end
+                        )
+                    }"
                 )
                 viewModel.filterByDateRange(start, end)
             }.show(parentFragmentManager, "date_range_picker")
         }
+        binding.filterCategoryBtn.setOnClickListener {
+            val initial = filterCategoryLabel.orEmpty()
+            InvoiceCategoryBottomSheet.newInstance(initial) { selected ->
+                applyCategoryFilterSelection(selected)
+            }.show(parentFragmentManager, "category_filter_picker")
+        }
         binding.filterTypeBtn.setOnClickListener {
             val initial = filterTypeLabel.orEmpty()
-            InvoiceCategoryBottomSheet.newInstance(initial) { selected ->
+            TitleTypeBottomSheet(initial) { selected ->
                 applyTypeFilterSelection(selected)
             }.show(parentFragmentManager, "type_filter_picker")
-        }
-        binding.filterTitleBtn.setOnClickListener {
-            val initial = filterTitleLabel.orEmpty()
-            TitleTypeBottomSheet(initial) { selected ->
-                applyTitleFilterSelection(selected)
-            }.show(parentFragmentManager, "title_filter_picker")
         }
         binding.exportActionBtn.setOnClickListener {
             viewModel.exportSelected()
@@ -155,6 +175,17 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         }
     }
 
+    private fun applyCategoryFilterSelection(rawSelected: String) {
+        val normalized = rawSelected.trim()
+        filterCategoryLabel = normalized.ifBlank { null }
+        binding.filterCategoryBtn.text = filterCategoryLabel ?: getString(R.string.filter_category)
+        LogHelper.d(
+            LOG_TAG,
+            "Title filter selected='$normalized', applied='${filterCategoryLabel ?: getString(R.string.filter_category)}'"
+        )
+        viewModel.filterByInvoiceCategory(filterTypeLabel.orEmpty())
+    }
+
     private fun applyTypeFilterSelection(rawSelected: String) {
         val normalized = rawSelected.trim()
         filterTypeLabel = normalized.ifBlank { null }
@@ -163,18 +194,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
             LOG_TAG,
             "Type filter selected='$normalized', applied='${filterTypeLabel ?: getString(R.string.filter_type)}'"
         )
-        viewModel.filterByType(filterTypeLabel.orEmpty())
-    }
-
-    private fun applyTitleFilterSelection(rawSelected: String) {
-        val normalized = rawSelected.trim()
-        filterTitleLabel = normalized.ifBlank { null }
-        binding.filterTitleBtn.text = filterTitleLabel ?: getString(R.string.filter_title)
-        LogHelper.d(
-            LOG_TAG,
-            "Title filter selected='$normalized', applied='${filterTitleLabel ?: getString(R.string.filter_title)}'"
-        )
-        viewModel.filterByTitleType(filterTitleLabel)
+        viewModel.filterByReceiptType(filterCategoryLabel)
     }
 
     private fun openReceiptDetails(receipt: ReceiptEntity) {
@@ -233,11 +253,15 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         }
     }
 
+    /**
+     * 控制模态 loading 弹窗。
+     * 仅导出操作显示模态 loading，列表加载/刷新由 StatefulListLayout 内置 loading 展示。
+     */
     private fun updateLoadingDialog(state: ReceiptsUiState) {
-        when {
-            state.exporting -> showLoading(true, getString(R.string.exporting_receipts))
-            state.loading || state.refreshing -> showLoading(true, "")
-            else -> showLoading(false)
+        if (state.exporting) {
+            showLoading(true, getString(R.string.exporting_receipts))
+        } else {
+            showLoading(false)
         }
     }
 
@@ -246,12 +270,15 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
             state.loading && !state.hasLoaded -> StatefulListLayout.ContentState.LOADING
             !state.error.isNullOrBlank() && state.receipts.isEmpty() ->
                 StatefulListLayout.ContentState.ERROR
+
             state.hasLoaded && state.empty -> StatefulListLayout.ContentState.EMPTY
             else -> StatefulListLayout.ContentState.CONTENT
         }
-        val showNoMore = state.hasLoaded && !state.hasMore && state.receipts.isNotEmpty() && !state.loadingMore
+        val showNoMore =
+            state.hasLoaded && !state.hasMore && state.receipts.isNotEmpty() && !state.loadingMore
         return StatefulListLayout.State(
             contentState = contentState,
+            refreshing = state.refreshing,
             loadingMore = state.loadingMore,
             noMore = showNoMore,
             errorText = state.error

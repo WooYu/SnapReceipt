@@ -13,7 +13,7 @@ import com.skybound.space.base.presentation.observeState
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityExportRecordsBinding
 import com.snapreceipt.io.domain.model.ExportRecordEntity
-import com.snapreceipt.io.ui.widget.StatefulListLayout
+import com.snapreceipt.io.ui.widget.statefullist.StatefulListLayout
 import com.skybound.space.core.config.AppConfig
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -34,6 +34,7 @@ class ExportRecordsActivity : BaseActivity<ExportRecordsViewModel>() {
         binding.statefulList.setAdapter(adapter)
         binding.statefulList.setOnLoadMoreListener { viewModel.loadMore() }
         binding.statefulList.setOnRetryListener { viewModel.loadRecords() }
+        
         // RecyclerView in this page needs horizontal padding
         val horizontalPadding = resources.getDimensionPixelSize(R.dimen.page_start_margin)
         binding.statefulList.recyclerView.setPadding(
@@ -51,9 +52,17 @@ class ExportRecordsActivity : BaseActivity<ExportRecordsViewModel>() {
         _binding = null
     }
 
+    /**
+     * Renders UI state.
+     * Data is submitted before state to ensure ListAdapter's async DiffUtil
+     * completes before footer state changes (prevents auto-scroll).
+     */
     private fun renderState(state: ExportRecordsUiState) {
-        binding.statefulList.submit(buildListState(state))
-        adapter.submitList(state.records)
+        // Submit data first (ListAdapter's submitList is async)
+        adapter.submitList(state.records) {
+            // After data is committed, update footer state
+            binding.statefulList.submit(buildListState(state))
+        }
     }
 
     private fun buildListState(state: ExportRecordsUiState): StatefulListLayout.State {

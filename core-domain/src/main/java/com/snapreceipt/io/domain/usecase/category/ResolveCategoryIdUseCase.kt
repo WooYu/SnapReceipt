@@ -1,31 +1,38 @@
 package com.snapreceipt.io.domain.usecase.category
 
-import com.snapreceipt.io.domain.model.ReceiptCategory
+import com.snapreceipt.io.domain.manager.CategoryCacheManager
 import javax.inject.Inject
 
 /**
- * Resolves category id by label with cache-first strategy.
- *
- * Flow:
- * 1) Try in-memory cache.
- * 2) If missing, fetch latest categories once and refresh cache.
- * 3) Resolve again from refreshed cache.
+ * 根据分类标签解析分类 ID
+ * 
+ * 策略：
+ * 1. 先从内存缓存查找
+ * 2. 缓存未命中或过期，拉取最新分类并刷新缓存
+ * 3. 从刷新后的缓存再次查找
+ * 
+ * 使用场景：
+ * - 用户输入自定义分类名称，需要转换为 ID 传给服务端
+ * - 离线场景下尽量利用缓存，减少网络请求
  */
 class ResolveCategoryIdUseCase @Inject constructor(
-    private val fetchCategoriesUseCase: FetchCategoriesUseCase
+    private val fetchCategoriesUseCase: FetchCategoriesUseCase,
+    private val categoryCache: CategoryCacheManager
 ) {
     suspend operator fun invoke(label: String): Long {
         val normalized = label.trim()
         if (normalized.isBlank()) return -1L
 
-        ReceiptCategory.idForLabel(normalized).takeIf { it > 0L }?.let { return it }
+        // 先从缓存查找
+        categoryCache.idForLabel(normalized).takeIf { it > 0L }?.let { return it }
 
+        // 缓存未命中，拉取最新分类
         val remoteResult = fetchCategoriesUseCase()
         remoteResult.onSuccess { list ->
-            ReceiptCategory.update(list)
+            categoryCache.update(list)
         }
 
-        return ReceiptCategory.idForLabel(normalized)
+        // 从刷新后的缓存再次查找
+        return categoryCache.idForLabel(normalized)
     }
 }
-

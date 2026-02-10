@@ -21,12 +21,12 @@ import com.snapreceipt.io.MainActivity
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityInvoiceDetailsBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
-import com.snapreceipt.io.ui.common.ReceiptTypeMapper
-import com.snapreceipt.io.ui.invoice.bottomsheet.DateTimePickerBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceCategoryBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
 import com.snapreceipt.io.ui.login.LoginActivity
 import com.snapreceipt.io.ui.receipts.ReceiptsRefreshSignal
+import com.snapreceipt.io.ui.widget.datepicker.DateTimePickerBottomSheet
+import com.snapreceipt.io.util.ReceiptTypeHelper
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.util.Locale
@@ -50,6 +50,10 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
 
     @Inject
     lateinit var injectedSessionManager: SessionManager
+
+    @Inject
+    lateinit var receiptTypeHelper: ReceiptTypeHelper
+
     override val sessionManager: SessionManager
         get() = injectedSessionManager
 
@@ -211,11 +215,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             return
         }
         val titleTypeDisplayValue = binding.inputInvoiceType.text.toString().trim()
-        val titleTypeValue = ReceiptTypeMapper.toPayloadValue(
-            raw = titleTypeDisplayValue,
-            companyLabel = getString(R.string.type_company),
-            individualLabel = getString(R.string.type_individual)
-        )
+        val titleTypeValue = receiptTypeHelper.toPayloadValue(titleTypeDisplayValue)
         if (titleTypeValue.isBlank()) {
             Toast.makeText(this, getString(R.string.select_invoice_type), Toast.LENGTH_SHORT).show()
             return
@@ -353,11 +353,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun setTitleTypeSelection(value: String) {
-        val displayLabel = ReceiptTypeMapper.toDisplayLabel(
-            raw = value,
-            companyLabel = getString(R.string.type_company),
-            individualLabel = getString(R.string.type_individual)
-        )
+        val displayLabel = receiptTypeHelper.toDisplayLabel(value)
         binding.inputInvoiceType.setText(displayLabel)
         binding.valueInvoiceType.text = readonlyText(displayLabel)
     }

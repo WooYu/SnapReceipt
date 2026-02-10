@@ -18,7 +18,7 @@ import com.snapreceipt.io.ui.home.dialogs.ScanFailedDialog
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
 import com.snapreceipt.io.ui.receipts.ReceiptsRefreshSignal
 import com.snapreceipt.io.ui.widget.CurvedGradientDrawable
-import com.snapreceipt.io.ui.widget.StatefulListLayout
+import com.snapreceipt.io.ui.widget.statefullist.StatefulListLayout
 import com.skybound.space.base.presentation.BaseFragment
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.presentation.observeState
@@ -95,7 +95,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     private fun setupHeaderBackground() {
         val startColor = ContextCompat.getColor(requireContext(), R.color.colorPrimary)
         val endColor = ContextCompat.getColor(requireContext(), R.color.colorPrimaryGradientEnd)
-        val curveHeight = resources.displayMetrics.density * 45f // 45dp 转换为像素
+        val curveHeight = resources.displayMetrics.density * 45f
         binding.headerBg.background = CurvedGradientDrawable(startColor, endColor, curveHeight)
     }
 
@@ -104,16 +104,25 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         _binding = null
     }
 
+    /**
+     * Renders UI state.
+     * Data is submitted before state to prevent auto-scroll when footer appears.
+     */
     private fun renderState(state: HomeUiState) {
-        adapter.setReceipts(state.receipts)
-        binding.statefulList.submit(buildListState(state))
+        // Submit data first (async), then update footer state in callback
+        adapter.setReceipts(state.receipts) {
+            binding.statefulList.submit(buildListState(state))
+        }
 
-        val recognitionMessage = state.recognitionStatusResId?.let(::getString)
-        val shouldShowLoading = state.loading || recognitionMessage != null
-        showLoading(shouldShowLoading, recognitionMessage ?: "")
+        // 仅 OCR 识别（上传/扫描）时显示模态 loading，列表加载由 StatefulListLayout 内置 loading 展示
+        state.recognitionStatusResId?.let { resId ->
+            showLoading(true, getString(resId))
+        } ?: showLoading(false)
 
-        binding.cardScan.isEnabled = !state.loading
-        binding.cardUpload.isEnabled = !state.loading
+        // OCR 识别期间禁用扫描/上传按钮，防止重复操作
+        val isRecognizing = state.recognitionStatusResId != null
+        binding.cardScan.isEnabled = !isRecognizing
+        binding.cardUpload.isEnabled = !isRecognizing
     }
 
     private fun setupAdapter() {
@@ -121,6 +130,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
             openReceiptForEdit(receipt)
         }
         binding.statefulList.setAdapter(adapter)
+        binding.statefulList.setOnRefreshListener { viewModel.refresh() }
         binding.statefulList.setOnLoadMoreListener { viewModel.loadMore() }
         binding.statefulList.setOnRetryListener { viewModel.loadReceipts() }
     }
@@ -238,6 +248,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         val showNoMore = state.hasLoaded && !state.hasMore && state.receipts.isNotEmpty() && !state.loadingMore
         return StatefulListLayout.State(
             contentState = contentState,
+            refreshing = state.refreshing,
             loadingMore = state.loadingMore,
             noMore = showNoMore,
             errorText = state.error
