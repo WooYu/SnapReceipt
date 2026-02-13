@@ -114,8 +114,8 @@
     <string name="date_prefix">日期：%s</string>
     <string name="type_other">其他</string>
     <string name="type_add">+ 类型</string>
-    <string name="type_individual">个人</string>
-    <string name="type_company">企业</string>
+    <string name="type_individual">Individual</string>
+    <string name="type_company">Business</string>
     <string name="custom_type_title">自定义类型</string>
     <string name="custom_type_hint">请输入自定义类型</string>
     <string name="custom_type_empty">请输入自定义类型名称</string>

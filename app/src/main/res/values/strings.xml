@@ -115,7 +115,7 @@
     <string name="type_other">Other</string>
     <string name="type_add">+ Type</string>
     <string name="type_individual">Individual</string>
-    <string name="type_company">Company</string>
+    <string name="type_company">Business</string>
     <string name="custom_type_title">Custom Invoice Category</string>
     <string name="custom_type_hint">Enter custom invoice category</string>
     <string name="custom_type_empty">Please enter a custom type</string>
