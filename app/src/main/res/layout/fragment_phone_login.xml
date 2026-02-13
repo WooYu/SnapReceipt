@@ -275,18 +275,18 @@
 
             <ImageView
                 android:id="@+id/agreement_check"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
                 android:adjustViewBounds="true"
                 android:contentDescription="@string/agree_terms"
-                android:scaleType="centerInside"
+                android:scaleType="fitXY"
                 android:src="@drawable/ic_login_checkbox_unchecked" />
 
             <TextView
                 android:id="@+id/agreement_text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="6dp"
                 android:layout_weight="1"
                 android:text="@string/login_agreement_html"
                 android:textColor="@color/text_secondary"

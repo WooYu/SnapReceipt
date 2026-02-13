@@ -34,7 +34,7 @@ class LoginActivity : BaseActivity<LoginViewModel>() {
         setupBackPress()
 
         if (savedInstanceState == null) {
-            viewModel.switchToPhone()
+            viewModel.switchToEmail()
         }
         observeState(viewModel.uiState) { renderState(it) }
     }
