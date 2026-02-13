@@ -11,6 +11,7 @@ fun ReceiptEntity.toRequestPayload(includeReceiptId: Boolean = false): Map<Strin
         putIfNotNull("receiptId", receiptId)
     }
     putIfNotBlank("merchant", merchant)
+    putIfNotBlank("address", address)
     putIfNotBlank("receiptDate", receiptDate)
     putIfNotNull("totalAmount", totalAmount)
     putIfNotNull("tipAmount", tipAmount)
