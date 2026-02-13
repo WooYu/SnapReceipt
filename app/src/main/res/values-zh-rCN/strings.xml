@@ -77,6 +77,13 @@
     <string name="note">备注</string>
     <string name="save_upload">保存上传</string>
 
+    <!-- Validation -->
+    <string name="validation_amount_empty">请输入大于 0 的有效金额</string>
+    <string name="validation_merchant_empty">请输入商户名称</string>
+    <string name="validation_address_empty">请输入地址</string>
+    <string name="validation_date_empty">请选择日期</string>
+    <string name="validation_card_empty">请输入银行卡号</string>
+
     <!-- Receipts Fragment -->
     <string name="receipts_title">收据</string>
     <string name="all_receipts">所有收据</string>

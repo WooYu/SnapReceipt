@@ -204,34 +204,65 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun saveReceipt(imagePath: String) {
+        // 0. Amount
         val amountText = binding.inputAmount.text.toString().trim()
         val amountValue = amountText.toDoubleOrNull()
+        if (amountValue == null || amountValue <= 0) {
+            Toast.makeText(this, getString(R.string.validation_amount_empty), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 1. Merchant
         val merchantValue = binding.inputMerchant.text.toString().trim()
-            .ifEmpty { getString(R.string.receipt_default_name) }
-        val invoiceCategoryInput = binding.inputInvoiceCategory.text.toString().trim()
-        if (invoiceCategoryInput.isBlank()) {
-            Toast.makeText(this, getString(R.string.select_invoice_category), Toast.LENGTH_SHORT)
-                .show()
+        if (merchantValue.isBlank()) {
+            Toast.makeText(this, getString(R.string.validation_merchant_empty), Toast.LENGTH_SHORT).show()
             return
         }
-        val titleTypeDisplayValue = binding.inputInvoiceType.text.toString().trim()
-        val titleTypeValue = receiptTypeHelper.toPayloadValue(titleTypeDisplayValue)
-        if (titleTypeValue.isBlank()) {
-            Toast.makeText(this, getString(R.string.select_invoice_type), Toast.LENGTH_SHORT).show()
+
+        // 2. Address
+        val addressValue = binding.inputAddress.text.toString().trim()
+        if (addressValue.isBlank()) {
+            Toast.makeText(this, getString(R.string.validation_address_empty), Toast.LENGTH_SHORT).show()
             return
         }
+
+        // 3. Date
+        if (receiptDate.isBlank()) {
+            Toast.makeText(this, getString(R.string.validation_date_empty), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 4. Bank Card
         val cardValue = binding.inputCard.text.toString().trim()
+        if (cardValue.isBlank()) {
+            Toast.makeText(this, getString(R.string.validation_card_empty), Toast.LENGTH_SHORT).show()
+            return
+        }
         val cardError = cardValidationErrorResId(cardValue)
         if (cardError != null) {
             updateCardHelper(cardValue)
             Toast.makeText(this, getString(cardError), Toast.LENGTH_SHORT).show()
             return
         }
+
+        // 5. Invoice Category
+        val invoiceCategoryInput = binding.inputInvoiceCategory.text.toString().trim()
+        if (invoiceCategoryInput.isBlank()) {
+            Toast.makeText(this, getString(R.string.select_invoice_category), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 6. Invoice Type
+        val titleTypeDisplayValue = binding.inputInvoiceType.text.toString().trim()
+        val titleTypeValue = receiptTypeHelper.toPayloadValue(titleTypeDisplayValue)
+        if (titleTypeValue.isBlank()) {
+            Toast.makeText(this, getString(R.string.select_invoice_type), Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val noteValue = binding.inputNote.text.toString().trim()
         val receiptUrl = receiptImageUrl.ifEmpty { imagePath }.takeIf { it.isNotBlank() }
-        val safeDate = receiptDate.ifEmpty { currentDate() }
         val safeTime = receiptTime.ifEmpty { "00:00:00" }
-        val addressValue = binding.inputAddress.text.toString().trim()
         val fallbackCategoryId = initialCategoryId?.takeIf {
             invoiceCategoryInput.equals(initialCategoryLabel, ignoreCase = true)
         }
@@ -239,7 +270,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         val receipt = ReceiptEntity(
             receiptId = receiptId,
             merchant = merchantValue,
-            receiptDate = safeDate,
+            receiptDate = receiptDate,
             receiptTime = safeTime,
             totalAmount = amountValue,
             tipAmount = scanTipAmount,

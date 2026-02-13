@@ -77,6 +77,13 @@
     <string name="note">Note</string>
     <string name="save_upload">Save Upload</string>
 
+    <!-- Validation -->
+    <string name="validation_amount_empty">Please enter a valid amount greater than 0</string>
+    <string name="validation_merchant_empty">Please enter merchant name</string>
+    <string name="validation_address_empty">Please enter address</string>
+    <string name="validation_date_empty">Please select date</string>
+    <string name="validation_card_empty">Please enter bank card number</string>
+
     <!-- Receipts Fragment -->
     <string name="receipts_title">Receipts</string>
     <string name="all_receipts">All Receipts</string>
