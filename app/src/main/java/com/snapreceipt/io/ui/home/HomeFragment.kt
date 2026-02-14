@@ -32,6 +32,7 @@ import com.skybound.space.core.util.LogHelper
 import com.yalantis.ucrop.UCrop
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
+import kotlinx.coroutines.Job
 
 @AndroidEntryPoint
 class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
@@ -45,6 +46,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     private lateinit var adapter: HomeReceiptAdapter
     private var pendingCameraUri: Uri? = null
     private var shouldScrollToTopOnNextRender = false
+    private var refreshEventsJob: Job? = null
 
     private lateinit var permissionHelper: FragmentPermissionHelper
 
@@ -137,12 +139,13 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
 
     override fun onResume() {
         super.onResume()
+        refreshEventsJob?.cancel()
         // 监听来自 ListRefreshViewModel 的刷新事件
         // - ItemAdded: 扫描成功新增，本地已插入，这里处理后台增量刷新
         // - ItemUpdated: 编辑后更新，本地已更新，这里处理后台增量刷新
         // - ItemDeleted: 删除后，本地已移除，这里处理后台增量刷新
         // - FullRefresh: 全量刷新，重新加载整个列表
-        lifecycleScope.launchWhenResumed {
+        refreshEventsJob = lifecycleScope.launchWhenResumed {
             refreshViewModel.refreshHomeEvent.collect { event ->
                 val currentState = viewModel.uiState.value
                 // 只有在不处于加载状态时才触发刷新，避免并发加载
@@ -172,6 +175,12 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
                 }
             }
         }
+    }
+
+    override fun onPause() {
+        refreshEventsJob?.cancel()
+        refreshEventsJob = null
+        super.onPause()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

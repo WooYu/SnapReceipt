@@ -30,11 +30,17 @@ class AuthInterceptor(
             authorization = "Bearer $token"
             builder.header("Authorization", authorization)
         }
-        if (authorization.isNullOrBlank()) {
-            LogHelper.d("Auth", "Authorization: <empty>")
-        } else {
-            LogHelper.d("Auth", "Authorization: $authorization")
-        }
+        val maskedAuthorization = authorization
+            ?.takeIf { it.isNotBlank() }
+            ?.let { header ->
+                val tokenPart = header.removePrefix("Bearer ").trim()
+                if (tokenPart.isBlank()) {
+                    "<redacted>"
+                } else {
+                    "Bearer ***${tokenPart.takeLast(6)}"
+                }
+            } ?: "<empty>"
+        LogHelper.d("Auth", "Authorization: $maskedAuthorization")
         return chain.proceed(builder.build())
     }
 }

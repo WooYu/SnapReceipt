@@ -245,6 +245,15 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
                 })
                 finish()
             }
+            InvoiceDetailsEventKeys.DELETE_SUCCESS -> {
+                val id = receiptId ?: return
+                setResult(RESULT_OK, Intent().apply {
+                    putExtra(InvoiceDetailsArgsCodec.EXTRA_OPERATION_TYPE, InvoiceDetailsArgsCodec.OPERATION_TYPE_DELETE)
+                    putExtra(InvoiceDetailsArgsCodec.EXTRA_RECEIPT_ID, id)
+                    putExtra(InvoiceDetailsArgsCodec.EXTRA_SOURCE_SCENE, sourceScene)
+                })
+                finish()
+            }
         }
     }
 
@@ -444,13 +453,6 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             .setPositiveButton(R.string.confirm) { _, _ ->
                 val id = receiptId ?: return@setPositiveButton
                 viewModel.deleteReceipt(id)
-                // 删除成功后，返回删除操作信息给 Fragment
-                setResult(RESULT_OK, Intent().apply {
-                    putExtra(InvoiceDetailsArgsCodec.EXTRA_OPERATION_TYPE, InvoiceDetailsArgsCodec.OPERATION_TYPE_DELETE)
-                    putExtra(InvoiceDetailsArgsCodec.EXTRA_RECEIPT_ID, id)
-                    putExtra(InvoiceDetailsArgsCodec.EXTRA_SOURCE_SCENE, sourceScene)
-                })
-                finish()
             }
             .setNegativeButton(R.string.cancel, null)
             .show()

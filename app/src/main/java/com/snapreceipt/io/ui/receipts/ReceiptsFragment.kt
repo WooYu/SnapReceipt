@@ -28,6 +28,7 @@ import com.snapreceipt.io.ui.receipts.dialogs.ExportSuccessDialog
 import com.snapreceipt.io.ui.widget.datepicker.DateRangeBottomSheet
 import com.snapreceipt.io.ui.widget.statefullist.StatefulListLayout
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
 
 @AndroidEntryPoint
 class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_receipts) {
@@ -48,6 +49,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     private var filterCategoryLabel: String? = null
     private var currentState: ReceiptsUiState = ReceiptsUiState()
     private var shouldScrollToTopOnNextRender = false
+    private var refreshEventsJob: Job? = null
 
     // 用于启动 InvoiceDetailsActivity 并处理返回结果
     private val invoiceDetailsLauncher = registerForActivityResult(
@@ -109,7 +111,8 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
 
     override fun onResume() {
         super.onResume()
-        lifecycleScope.launchWhenResumed {
+        refreshEventsJob?.cancel()
+        refreshEventsJob = lifecycleScope.launchWhenResumed {
             refreshViewModel.refreshReceiptsEvent.collect { event ->
                 val currentState = viewModel.uiState.value
                 if (!currentState.loading && !currentState.refreshing) {
@@ -135,6 +138,12 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                 }
             }
         }
+    }
+
+    override fun onPause() {
+        refreshEventsJob?.cancel()
+        refreshEventsJob = null
+        super.onPause()
     }
 
     /**

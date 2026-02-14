@@ -155,13 +155,18 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch(dispatchers.io) {
             loginUseCase(target, code, timezone)
                 .onSuccess {
-                    fetchUserProfileUseCase()
-                        .onSuccess { user ->
-                            insertUserUseCase(user).onFailure { updateError(it) }
+                    val user = fetchUserProfileUseCase().getOrElse { throwable ->
+                        updateError(throwable)
+                        return@launch
+                    }
+                    insertUserUseCase(user)
+                        .onSuccess {
+                            _uiState.update { state -> state.copy(loading = false) }
+                            emitEvent(UiEvent.Custom(LoginEventKeys.NAVIGATE_MAIN))
                         }
-                        .onFailure { updateError(it) }
-                    _uiState.update { it.copy(loading = false) }
-                    emitEvent(UiEvent.Custom(LoginEventKeys.NAVIGATE_MAIN))
+                        .onFailure { throwable ->
+                            updateError(throwable)
+                        }
                 }
                 .onFailure { updateError(it) }
         }

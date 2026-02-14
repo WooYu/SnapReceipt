@@ -61,7 +61,7 @@ class InvoiceDetailsViewModel @Inject constructor(
             onSuccess = {
                 _uiState.update { it.copy(loading = false) }
                 emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.SHOW_SUCCESS))
-                emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.NAVIGATE_TO_MAIN))
+                emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.DELETE_SUCCESS))
             },
             onFailure = { updateError(it) }
         )
