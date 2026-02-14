@@ -17,6 +17,7 @@ import com.skybound.space.base.presentation.observeState
 import com.skybound.space.core.network.auth.SessionEvent
 import com.skybound.space.core.network.auth.SessionManager
 import com.skybound.space.core.util.DateFormatUtil
+import com.snapreceipt.io.MainActivity
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityInvoiceDetailsBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
@@ -334,13 +335,8 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         }
     }
 
-    private fun navigateToList() {
-        val intent = Intent(this@InvoiceDetailsActivity, MainActivity::class.java)
-        startActivity(intent)
-        finish()
-    }
-
     private fun setupPickers() {
+        bindPickerRow(
             container = binding.containerInputInvoiceCategory,
             input = binding.inputInvoiceCategory,
             onClick = ::openInvoiceCategoryPicker
