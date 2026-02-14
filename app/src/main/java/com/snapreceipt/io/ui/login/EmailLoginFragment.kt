@@ -25,7 +25,11 @@ class EmailLoginFragment : BaseLoginFragment(R.layout.fragment_email_login) {
         binding.tabEmail.setOnClickListener { viewModel.switchToEmail() }
         binding.backBtnHotZone.setOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
 
-        bindAgreementViews(binding.root)
+        bindAgreementViews(
+            checkView = binding.agreementCheck,
+            textView = binding.agreementText,
+            containerView = binding.agreementContainer
+        )
 
         val state = viewModel.uiState.value
         if (binding.emailInput.text.toString() != state.email) {

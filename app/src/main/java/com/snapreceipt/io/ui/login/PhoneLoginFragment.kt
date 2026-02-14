@@ -25,7 +25,11 @@ class PhoneLoginFragment : BaseLoginFragment(R.layout.fragment_phone_login) {
         binding.tabPhone.setOnClickListener { viewModel.switchToPhone() }
         binding.backBtnHotZone.setOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
 
-        bindAgreementViews(binding.root)
+        bindAgreementViews(
+            checkView = binding.agreementCheck,
+            textView = binding.agreementText,
+            containerView = binding.agreementContainer
+        )
 
         val state = viewModel.uiState.value
         if (binding.phoneInput.text.toString() != state.phone) {

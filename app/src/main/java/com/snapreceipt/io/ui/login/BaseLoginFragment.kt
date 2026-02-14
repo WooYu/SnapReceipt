@@ -22,35 +22,40 @@ import androidx.core.content.ContextCompat
 import com.skybound.space.base.presentation.BaseFragment
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.DialogAgreementConfirmBinding
-import com.snapreceipt.io.ui.widget.PrimaryActionButton
 
 abstract class BaseLoginFragment(@LayoutRes layoutId: Int) : BaseFragment<LoginViewModel>(layoutId) {
 
-    protected lateinit var agreementCheck: ImageView
-    protected lateinit var agreementText: TextView
-    protected lateinit var agreementContainer: View
+    private var agreementCheck: ImageView? = null
+    private var agreementText: TextView? = null
+    private var agreementContainer: View? = null
 
-    protected fun bindAgreementViews(root: View) {
-        agreementCheck = root.findViewById(R.id.agreement_check)
-        agreementText = root.findViewById(R.id.agreement_text)
-        agreementContainer = root.findViewById(R.id.agreement_container)
+    protected fun bindAgreementViews(
+        checkView: ImageView,
+        textView: TextView,
+        containerView: View
+    ) {
+        agreementCheck = checkView
+        agreementText = textView
+        agreementContainer = containerView
 
-        agreementCheck.setOnClickListener { toggleAgreement() }
-        agreementText.movementMethod = LinkMovementMethod.getInstance()
-        agreementText.highlightColor = android.graphics.Color.TRANSPARENT
-        agreementContainer.setOnClickListener { toggleAgreement() }
-        agreementText.setOnTouchListener { _, event -> handleAgreementTextTouch(event) }
-        expandTouchArea(agreementCheck, 16)
+        checkView.setOnClickListener { toggleAgreement() }
+        textView.movementMethod = LinkMovementMethod.getInstance()
+        textView.highlightColor = android.graphics.Color.TRANSPARENT
+        containerView.setOnClickListener { toggleAgreement() }
+        textView.setOnTouchListener { _, event -> handleAgreementTextTouch(event) }
+        expandTouchArea(checkView, 16)
     }
 
     protected fun updateAgreementState(accepted: Boolean) {
+        val checkView = agreementCheck ?: return
+        val textView = agreementText ?: return
         val drawable = if (accepted) {
             R.drawable.ic_login_checkbox_checked
         } else {
             R.drawable.ic_login_checkbox_unchecked
         }
-        agreementCheck.setImageResource(drawable)
-        agreementText.text = buildAgreementText()
+        checkView.setImageResource(drawable)
+        textView.text = buildAgreementText()
     }
 
     protected fun updateCodeRequestLoading(show: Boolean) {
@@ -93,6 +98,16 @@ abstract class BaseLoginFragment(@LayoutRes layoutId: Int) : BaseFragment<LoginV
     protected fun toggleAgreement() {
         val newChecked = !viewModel.uiState.value.agreementAccepted
         viewModel.setAgreementAccepted(newChecked)
+    }
+
+    override fun onDestroyView() {
+        agreementCheck?.setOnClickListener(null)
+        agreementText?.setOnTouchListener(null)
+        agreementContainer?.setOnClickListener(null)
+        agreementCheck = null
+        agreementText = null
+        agreementContainer = null
+        super.onDestroyView()
     }
 
     private fun buildAgreementText(): CharSequence {
@@ -151,17 +166,18 @@ abstract class BaseLoginFragment(@LayoutRes layoutId: Int) : BaseFragment<LoginV
     }
 
     private fun handleAgreementTextTouch(event: MotionEvent): Boolean {
-        val text = agreementText.text
+        val textView = agreementText ?: return false
+        val text = textView.text
         if (text is Spannable) {
-            val x = (event.x - agreementText.totalPaddingLeft + agreementText.scrollX).toInt()
-            val y = (event.y - agreementText.totalPaddingTop + agreementText.scrollY).toInt()
-            val layout = agreementText.layout
+            val x = (event.x - textView.totalPaddingLeft + textView.scrollX).toInt()
+            val y = (event.y - textView.totalPaddingTop + textView.scrollY).toInt()
+            val layout = textView.layout
             if (layout != null) {
                 val line = layout.getLineForVertical(y)
                 val off = layout.getOffsetForHorizontal(line, x.toFloat())
                 val links = text.getSpans(off, off, ClickableSpan::class.java)
                 if (links.isNotEmpty()) {
-                    agreementText.movementMethod?.onTouchEvent(agreementText, text, event)
+                    textView.movementMethod?.onTouchEvent(textView, text, event)
                     return true
                 }
             }
