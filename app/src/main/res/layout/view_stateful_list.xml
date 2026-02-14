@@ -20,6 +20,15 @@
             <com.skybound.space.base.presentation.widget.BrandLoadingView
                 android:layout_width="48dp"
                 android:layout_height="48dp" />
+
+            <TextView
+                android:id="@+id/sll_loading_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/loading_please_wait_dynamic"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/text_size_secondary" />
         </LinearLayout>
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout

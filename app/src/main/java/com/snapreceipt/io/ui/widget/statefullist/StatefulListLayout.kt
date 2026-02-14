@@ -72,6 +72,7 @@ class StatefulListLayout @JvmOverloads constructor(
     private val emptyTextView: TextView
     private val errorTextView: TextView
     private val errorRetryView: View
+    private val loadingTextView: TextView
 
     private val footerStateAdapter = FooterStateAdapter()
     private val concatAdapter = ConcatAdapter(
@@ -92,6 +93,19 @@ class StatefulListLayout @JvmOverloads constructor(
     private var currentState: State = State()
     private var refreshEnabled: Boolean = true
     private var loadingEnabled: Boolean = true
+    private var loadingTextAnimationRunning: Boolean = false
+    private var loadingTextDots: Int = 1
+    private val loadingTextBase: String by lazy {
+        context.getString(R.string.loading_please_wait)
+    }
+    private val loadingTextTicker = object : Runnable {
+        override fun run() {
+            if (!loadingTextAnimationRunning) return
+            loadingTextView.text = "$loadingTextBase${".".repeat(loadingTextDots)}"
+            loadingTextDots = if (loadingTextDots == 3) 1 else loadingTextDots + 1
+            loadingTextView.postDelayed(this, 500)
+        }
+    }
 
     init {
         LayoutInflater.from(context).inflate(R.layout.view_stateful_list, this, true)
@@ -107,6 +121,7 @@ class StatefulListLayout @JvmOverloads constructor(
         emptyTextView = findViewById(R.id.sll_empty_text)
         errorTextView = findViewById(R.id.sll_error_text)
         errorRetryView = findViewById(R.id.sll_error_retry)
+        loadingTextView = findViewById(R.id.sll_loading_text)
 
         // SwipeRefreshLayout wraps content, so it acts as the content view for MultiStateLayout
         multiStateLayout.bindStateViews(
@@ -210,6 +225,7 @@ class StatefulListLayout @JvmOverloads constructor(
 
     private fun renderContainerState(contentState: ContentState) {
         val effective = resolveContentState(contentState)
+        updateLoadingTextAnimation(effective == ContentState.LOADING)
         when (effective) {
             ContentState.LOADING -> multiStateLayout.showLoading()
             ContentState.CONTENT -> multiStateLayout.showContent()
@@ -290,6 +306,11 @@ class StatefulListLayout @JvmOverloads constructor(
         render(state)
     }
 
+    override fun onDetachedFromWindow() {
+        stopLoadingTextAnimation()
+        super.onDetachedFromWindow()
+    }
+
     private fun render(state: State) {
         if (!state.errorText.isNullOrBlank()) {
             errorTextView.text = state.errorText
@@ -308,6 +329,32 @@ class StatefulListLayout @JvmOverloads constructor(
         if (!loadingMoreVisible && !noMoreVisible) {
             hasPendingLoadMoreRequest = false
         }
+    }
+
+    private fun updateLoadingTextAnimation(shouldAnimate: Boolean) {
+        if (shouldAnimate) {
+            startLoadingTextAnimation()
+        } else {
+            stopLoadingTextAnimation()
+        }
+    }
+
+    private fun startLoadingTextAnimation() {
+        if (loadingTextAnimationRunning) return
+        loadingTextAnimationRunning = true
+        loadingTextDots = 1
+        loadingTextView.removeCallbacks(loadingTextTicker)
+        loadingTextView.post(loadingTextTicker)
+    }
+
+    private fun stopLoadingTextAnimation() {
+        if (!loadingTextAnimationRunning) {
+            loadingTextView.text = "$loadingTextBase..."
+            return
+        }
+        loadingTextAnimationRunning = false
+        loadingTextView.removeCallbacks(loadingTextTicker)
+        loadingTextView.text = "$loadingTextBase..."
     }
 
     fun setEmptyImage(@DrawableRes resId: Int) {

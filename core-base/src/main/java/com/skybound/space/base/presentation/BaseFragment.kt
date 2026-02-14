@@ -13,6 +13,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.skybound.space.base.R
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
@@ -26,6 +29,7 @@ abstract class BaseFragment<VM : com.skybound.space.base.presentation.viewmodel.
 
     private var loadingDialog: Dialog? = null
     private var hostLoadingShown: Boolean = false
+    private var loadingMessageAnimationJob: Job? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -112,6 +116,7 @@ abstract class BaseFragment<VM : com.skybound.space.base.presentation.viewmodel.
     }
 
     private fun dismissLoading() {
+        stopDialogMessageAnimation()
         loadingDialog?.dismiss()
         loadingDialog = null
     }
@@ -125,12 +130,38 @@ abstract class BaseFragment<VM : com.skybound.space.base.presentation.viewmodel.
     private fun updateLoadingMessage(dialog: Dialog, message: CharSequence?) {
         val messageView = dialog.findViewById<TextView>(R.id.loading_message) ?: return
         if (message.isNullOrBlank()) {
+            stopDialogMessageAnimation()
             messageView.text = ""
             messageView.visibility = View.GONE
             return
         }
-        messageView.text = message
         messageView.visibility = View.VISIBLE
+        val text = message.toString()
+        if (text.endsWith(ANIMATED_DOTS_SUFFIX)) {
+            startDialogMessageAnimation(dialog, text.removeSuffix(ANIMATED_DOTS_SUFFIX).trimEnd())
+        } else {
+            stopDialogMessageAnimation()
+            messageView.text = text
+        }
+    }
+
+    private fun startDialogMessageAnimation(dialog: Dialog, baseText: String) {
+        stopDialogMessageAnimation()
+        loadingMessageAnimationJob = lifecycleScope.launch {
+            var dots = 1
+            while (isActive) {
+                val messageView = dialog.findViewById<TextView>(R.id.loading_message) ?: break
+                if (!dialog.isShowing) break
+                messageView.text = "$baseText${".".repeat(dots)}"
+                dots = if (dots == 3) 1 else dots + 1
+                delay(500)
+            }
+        }
+    }
+
+    private fun stopDialogMessageAnimation() {
+        loadingMessageAnimationJob?.cancel()
+        loadingMessageAnimationJob = null
     }
 
     private fun createLoadingDialog(): Dialog {
@@ -140,5 +171,9 @@ abstract class BaseFragment<VM : com.skybound.space.base.presentation.viewmodel.
             setCanceledOnTouchOutside(false)
             window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         }
+    }
+
+    companion object {
+        private const val ANIMATED_DOTS_SUFFIX = "..."
     }
 }

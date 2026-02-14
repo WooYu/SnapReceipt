@@ -345,6 +345,8 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     private fun updateLoadingDialog(state: ReceiptsUiState) {
         if (state.exporting) {
             showLoading(true, getString(R.string.exporting_receipts))
+        } else if (state.loading && state.hasLoaded) {
+            showLoading(true, getString(R.string.loading_please_wait_dynamic))
         } else {
             showLoading(false)
         }

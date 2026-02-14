@@ -11,7 +11,12 @@ import android.view.WindowManager
 import android.widget.TextView
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
 import com.skybound.space.base.R
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 /**
  * Fullscreen loading dialog that renders a scrim above app content.
@@ -21,6 +26,7 @@ internal class FullscreenLoadingDialogFragment : DialogFragment() {
 
     private var loadingMessageView: TextView? = null
     private var pendingMessage: CharSequence? = null
+    private var messageAnimationJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +61,7 @@ internal class FullscreenLoadingDialogFragment : DialogFragment() {
     }
 
     override fun onDestroyView() {
+        stopMessageAnimation()
         loadingMessageView = null
         super.onDestroyView()
     }
@@ -67,12 +74,37 @@ internal class FullscreenLoadingDialogFragment : DialogFragment() {
     private fun renderMessage(message: CharSequence?) {
         val messageView = loadingMessageView ?: return
         if (message.isNullOrBlank()) {
+            stopMessageAnimation()
             messageView.text = ""
             messageView.visibility = View.GONE
             return
         }
-        messageView.text = message
         messageView.visibility = View.VISIBLE
+        val text = message.toString()
+        if (text.endsWith(ANIMATED_DOTS_SUFFIX)) {
+            startMessageAnimation(text.removeSuffix(ANIMATED_DOTS_SUFFIX).trimEnd())
+        } else {
+            stopMessageAnimation()
+            messageView.text = text
+        }
+    }
+
+    private fun startMessageAnimation(baseText: String) {
+        stopMessageAnimation()
+        messageAnimationJob = viewLifecycleOwner.lifecycleScope.launch {
+            var dots = 1
+            while (isActive) {
+                val messageView = loadingMessageView ?: break
+                messageView.text = "$baseText${".".repeat(dots)}"
+                dots = if (dots == 3) 1 else dots + 1
+                delay(500)
+            }
+        }
+    }
+
+    private fun stopMessageAnimation() {
+        messageAnimationJob?.cancel()
+        messageAnimationJob = null
     }
 
     private fun configureWindow() {
@@ -102,6 +134,7 @@ internal class FullscreenLoadingDialogFragment : DialogFragment() {
 
     companion object {
         private const val ARG_MESSAGE = "arg_message"
+        private const val ANIMATED_DOTS_SUFFIX = "..."
 
         fun newInstance(message: CharSequence?): FullscreenLoadingDialogFragment {
             return FullscreenLoadingDialogFragment().apply {

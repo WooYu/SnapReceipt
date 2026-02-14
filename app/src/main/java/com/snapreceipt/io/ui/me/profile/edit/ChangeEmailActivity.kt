@@ -45,7 +45,7 @@ class ChangeEmailActivity : BaseActivity<ChangeEmailViewModel>() {
 
     private fun renderState(state: ChangeEmailUiState) {
         if (state.loading || state.requestingCode) {
-            showGlobalLoading(null)
+            showGlobalLoading(getString(R.string.loading_please_wait_dynamic))
         } else {
             hideGlobalLoading()
         }

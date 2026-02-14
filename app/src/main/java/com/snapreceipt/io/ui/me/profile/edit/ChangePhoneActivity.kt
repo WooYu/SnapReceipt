@@ -45,7 +45,7 @@ class ChangePhoneActivity : BaseActivity<ChangePhoneViewModel>() {
 
     private fun renderState(state: ChangePhoneUiState) {
         if (state.loading || state.requestingCode) {
-            showGlobalLoading(null)
+            showGlobalLoading(getString(R.string.loading_please_wait_dynamic))
         } else {
             hideGlobalLoading()
         }

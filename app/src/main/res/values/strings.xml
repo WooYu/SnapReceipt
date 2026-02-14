@@ -206,4 +206,6 @@
     <string name="uploading_receipt">Uploading receipt, please wait…</string>
     <string name="scanning_receipt">Scanning receipt, please wait…</string>
 
+    <string name="loading_please_wait">Please wait</string>
+    <string name="loading_please_wait_dynamic">Please wait...</string>
 </resources>

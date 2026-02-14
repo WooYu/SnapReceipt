@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.core.widget.doAfterTextChanged
 import com.skybound.space.base.presentation.BaseActivity
 import com.skybound.space.base.presentation.observeState
+import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityChangeNameBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -42,7 +43,7 @@ class ChangeNameActivity : BaseActivity<ChangeNameViewModel>() {
 
     private fun renderState(state: ChangeNameUiState) {
         if (state.loading) {
-            showGlobalLoading(null)
+            showGlobalLoading(getString(R.string.loading_please_wait_dynamic))
         } else {
             hideGlobalLoading()
         }

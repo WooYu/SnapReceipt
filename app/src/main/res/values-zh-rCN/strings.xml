@@ -197,4 +197,6 @@
     <string name="return_home">返回首页</string>
     <string name="uploading_receipt">正在上传收据，请稍候…</string>
     <string name="scanning_receipt">正在识别收据，请稍候…</string>
+    <string name="loading_please_wait">请稍后</string>
+    <string name="loading_please_wait_dynamic">请稍后...</string>
 </resources>
