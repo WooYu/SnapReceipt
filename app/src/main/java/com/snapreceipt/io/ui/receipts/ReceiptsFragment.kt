@@ -212,6 +212,14 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     private fun setupListeners() {
         binding.filterDateBtn.setOnClickListener {
             DateRangeBottomSheet(filterStartMillis, filterEndMillis) { start, end ->
+                if (start == null || end == null) {
+                    filterStartMillis = null
+                    filterEndMillis = null
+                    binding.filterDateBtn.text = getString(R.string.filter_date)
+                    LogHelper.d(LOG_TAG, "Date filter reset")
+                    viewModel.loadReceipts()
+                    return@DateRangeBottomSheet
+                }
                 filterStartMillis = start
                 filterEndMillis = end
                 binding.filterDateBtn.text = formatDateRange(start, end)
@@ -260,7 +268,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
             LOG_TAG,
             "Title filter selected='$normalized', applied='${filterCategoryLabel ?: getString(R.string.filter_category)}'"
         )
-        viewModel.filterByInvoiceCategory(filterTypeLabel.orEmpty())
+        viewModel.filterByInvoiceCategory(filterCategoryLabel.orEmpty())
     }
 
     private fun applyTypeFilterSelection(rawSelected: String) {
@@ -271,7 +279,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
             LOG_TAG,
             "Type filter selected='$normalized', applied='${filterTypeLabel ?: getString(R.string.filter_type)}'"
         )
-        viewModel.filterByReceiptType(filterCategoryLabel)
+        viewModel.filterByReceiptType(filterTypeLabel)
     }
 
     private fun openReceiptDetails(receipt: ReceiptEntity) {

@@ -36,7 +36,7 @@ import java.util.Calendar
 class DateRangeBottomSheet(
     initialStart: Long?,
     initialEnd: Long?,
-    private val onSelected: (start: Long, end: Long) -> Unit
+    private val onSelected: (start: Long?, end: Long?) -> Unit
 ) : BottomSheetDialogFragment() {
 
     companion object {
@@ -189,7 +189,10 @@ class DateRangeBottomSheet(
         binding.pickerDay.setOnValueChangedListener(onPickerValueChanged)
 
         // Action buttons
-        binding.cancelBtn.setOnClickListener { dismiss() }
+        binding.cancelBtn.setOnClickListener {
+            onSelected(null, null)
+            dismiss()
+        }
         binding.confirmBtn.setOnClickListener { onConfirmClicked() }
     }
 
@@ -214,6 +217,7 @@ class DateRangeBottomSheet(
         // Re-sync day picker value if it was clamped
         binding.pickerDay.value = clampedDay
 
+        enforceValidRange()
         updateDateChips()
     }
 
@@ -221,13 +225,22 @@ class DateRangeBottomSheet(
         val startMillis = startCalendar.timeInMillis
         val endMillis = endCalendar.timeInMillis
 
-        // Auto-swap if user picks end < start
-        if (startMillis <= endMillis) {
-            onSelected(startMillis, endMillis)
-        } else {
-            onSelected(endMillis, startMillis)
-        }
+        onSelected(startMillis, endMillis)
         dismiss()
+    }
+
+    private fun enforceValidRange() {
+        val startMillis = startCalendar.timeInMillis
+        val endMillis = endCalendar.timeInMillis
+        if (startMillis <= endMillis) return
+
+        if (editingStart) {
+            endCalendar.timeInMillis = startMillis
+            endCalendar.resetTimeToMidnight()
+        } else {
+            startCalendar.timeInMillis = endMillis
+            startCalendar.resetTimeToMidnight()
+        }
     }
 
     // ── UI updates ─────────────────────────────────────────

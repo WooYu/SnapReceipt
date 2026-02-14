@@ -44,7 +44,11 @@ class TitleTypeBottomSheet(
             }
         }
 
-        binding.cancelBtn.setOnClickListener { dismiss() }
+        binding.cancelBtn.setOnClickListener {
+            selectedLabel = ""
+            onSelected(selectedLabel)
+            dismiss()
+        }
         binding.confirmBtn.setOnClickListener {
             onSelected(selectedLabel)
             dismiss()
