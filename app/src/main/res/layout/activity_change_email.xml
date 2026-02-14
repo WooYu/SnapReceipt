@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/bound_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="@dimen/page_start_margin" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/bound_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="@dimen/page_end_margin" />
+
+    <com.snapreceipt.io.ui.widget.PageTitleBar
+        android:id="@+id/page_header"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:ptbTitleText="@string/change_email" />
+
+    <LinearLayout
+        android:id="@+id/email_input_container"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/input_box_height"
+        android:layout_marginTop="28dp"
+        android:background="@drawable/bg_surface_card_small"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        app:layout_constraintEnd_toEndOf="@id/bound_right"
+        app:layout_constraintStart_toStartOf="@id/bound_left"
+        app:layout_constraintTop_toBottomOf="@id/page_header">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/email_label"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/text_size_secondary" />
+
+        <EditText
+            android:id="@+id/email_input"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:autofillHints="emailAddress"
+            android:background="@null"
+            android:gravity="end"
+            android:hint="@string/login_email_hint"
+            android:inputType="textEmailAddress"
+            android:maxLines="1"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_muted"
+            android:textCursorDrawable="@drawable/cursor_primary"
+            android:textSize="@dimen/text_size_secondary"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/code_input_container"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/input_box_height"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_surface_card_small"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        app:layout_constraintEnd_toEndOf="@id/bound_right"
+        app:layout_constraintStart_toStartOf="@id/bound_left"
+        app:layout_constraintTop_toBottomOf="@id/email_input_container">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/login_code_label"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/text_size_secondary" />
+
+        <EditText
+            android:id="@+id/code_input"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:background="@null"
+            android:gravity="end"
+            android:hint="@string/login_code_hint"
+            android:inputType="textVisiblePassword|textNoSuggestions"
+            android:maxLines="1"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_muted"
+            android:textCursorDrawable="@drawable/cursor_primary"
+            android:textSize="@dimen/text_size_secondary"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/get_code_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:gravity="center"
+            android:text="@string/login_captcha"
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/text_size_secondary" />
+    </LinearLayout>
+
+    <com.snapreceipt.io.ui.widget.PrimaryActionButton
+        android:id="@+id/confirm_btn"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/button_height"
+        android:layout_marginTop="40dp"
+        android:enabled="false"
+        android:text="@string/confirm"
+        app:layout_constraintEnd_toEndOf="@id/bound_right"
+        app:layout_constraintStart_toStartOf="@id/bound_left"
+        app:layout_constraintTop_toBottomOf="@id/code_input_container"
+        app:pabCornerRadius="80dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

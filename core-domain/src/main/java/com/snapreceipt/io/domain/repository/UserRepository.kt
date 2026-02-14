@@ -8,4 +8,8 @@ interface UserRepository {
     suspend fun getUserSync(): UserEntity?
     suspend fun updateUser(user: UserEntity)
     suspend fun insertUser(user: UserEntity)
+    suspend fun requestProfileUpdateCode(target: String)
+    suspend fun updateNickName(nickName: String)
+    suspend fun updateEmail(email: String, code: String)
+    suspend fun updatePhone(phoneNumber: String, code: String)
 }

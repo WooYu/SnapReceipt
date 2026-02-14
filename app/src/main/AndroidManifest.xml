@@ -54,6 +54,18 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.me.profile.edit.ChangeNameActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.me.profile.edit.ChangeEmailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.me.profile.edit.ChangePhoneActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.me.settings.SettingsActivity"
             android:exported="false" />
 

@@ -152,6 +152,12 @@
     <string name="name_label">Name</string>
     <string name="email_label">Email</string>
     <string name="mobile_number">Mobile Number</string>
+    <string name="change_name">Change Name</string>
+    <string name="change_email">Change Email</string>
+    <string name="change_mobile_number">Change Mobile Number</string>
+    <string name="name_hint">Enter name</string>
+    <string name="name_empty">Please enter name</string>
+    <string name="profile_update_success">Updated successfully</string>
 
     <string name="switch_account">Switch Account</string>
 

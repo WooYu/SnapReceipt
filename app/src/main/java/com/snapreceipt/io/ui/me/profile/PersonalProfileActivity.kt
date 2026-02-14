@@ -11,6 +11,9 @@ import com.snapreceipt.io.databinding.ActivityPersonalProfileBinding
 import com.snapreceipt.io.domain.usecase.auth.AuthFetchUserProfileUseCase
 import com.snapreceipt.io.domain.usecase.user.GetUserUseCase
 import com.snapreceipt.io.domain.usecase.user.InsertUserUseCase
+import com.snapreceipt.io.ui.me.profile.edit.ChangeEmailActivity
+import com.snapreceipt.io.ui.me.profile.edit.ChangeNameActivity
+import com.snapreceipt.io.ui.me.profile.edit.ChangePhoneActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,6 +32,9 @@ class PersonalProfileActivity : BaseActivity<BaseViewModel>() {
 
     private var _binding: ActivityPersonalProfileBinding? = null
     private val binding get() = _binding!!
+    private var currentName: String = ""
+    private var currentEmail: String = ""
+    private var currentPhone: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,9 +42,21 @@ class PersonalProfileActivity : BaseActivity<BaseViewModel>() {
         setContentView(binding.root)
 
         binding.pageHeader.setOnLeftIconClickListener { finish() }
+        binding.profileName.setOnClickListener {
+            startActivity(ChangeNameActivity.createIntent(this, currentName))
+        }
+        binding.profileEmail.setOnClickListener {
+            startActivity(ChangeEmailActivity.createIntent(this, currentEmail))
+        }
+        binding.profilePhone.setOnClickListener {
+            startActivity(ChangePhoneActivity.createIntent(this, currentPhone))
+        }
 
         observeState(getUserUseCase()) { result ->
             val user = result.getOrNull()
+            currentName = user?.username.orEmpty()
+            currentEmail = user?.email.orEmpty()
+            currentPhone = user?.phone.orEmpty()
             binding.profileName.setValueText(user?.username?.ifBlank { placeholder() } ?: placeholder())
             binding.profileEmail.setValueText(user?.email?.ifBlank { placeholder() } ?: placeholder())
             binding.profilePhone.setValueText(user?.phone?.ifBlank { placeholder() } ?: placeholder())

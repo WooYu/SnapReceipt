@@ -18,10 +18,12 @@ import com.snapreceipt.io.data.network.datasource.ConfigRemoteDataSource
 import com.snapreceipt.io.data.network.datasource.FileRemoteDataSource
 import com.snapreceipt.io.data.network.datasource.ReceiptRemoteDataSource
 import com.snapreceipt.io.data.network.datasource.UploadRemoteDataSource
+import com.snapreceipt.io.data.network.datasource.UserRemoteDataSource
 import com.snapreceipt.io.data.network.service.AuthApi
 import com.snapreceipt.io.data.network.service.ConfigApi
 import com.snapreceipt.io.data.network.service.FileApi
 import com.snapreceipt.io.data.network.service.ReceiptApi
+import com.snapreceipt.io.data.network.service.UserApi
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
@@ -144,6 +146,10 @@ object SnapReceiptNetworkModule {
 
     @Provides
     @Singleton
+    fun provideUserApi(retrofit: Retrofit): UserApi = retrofit.create(UserApi::class.java)
+
+    @Provides
+    @Singleton
     fun provideAuthRemoteDataSource(
         api: AuthApi,
         dispatchers: CoroutineDispatchersProvider
@@ -176,4 +182,11 @@ object SnapReceiptNetworkModule {
         @UploadClient okHttpClient: OkHttpClient,
         dispatchers: CoroutineDispatchersProvider
     ): UploadRemoteDataSource = UploadRemoteDataSource(okHttpClient, dispatchers)
+
+    @Provides
+    @Singleton
+    fun provideUserRemoteDataSource(
+        api: UserApi,
+        dispatchers: CoroutineDispatchersProvider
+    ): UserRemoteDataSource = UserRemoteDataSource(api, dispatchers)
 }
