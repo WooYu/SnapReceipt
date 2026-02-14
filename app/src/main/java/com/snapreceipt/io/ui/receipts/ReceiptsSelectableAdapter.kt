@@ -32,6 +32,49 @@ class ReceiptsSelectableAdapter(
         submitList(newReceipts, commitCallback)
     }
 
+    /**
+     * 添加项到列表头部，带入场动画
+     */
+    fun addItemWithAnimation(receipt: ReceiptEntity) {
+        val newList = listOf(receipt) + currentList
+        submitList(newList) {
+            notifyItemInserted(0)
+            notifyItemRangeChanged(0, 1)
+        }
+    }
+
+    /**
+     * 删除项，带出场动画
+     */
+    fun removeItemWithAnimation(receiptId: Long) {
+        val index = currentList.indexOfFirst { it.receiptId == receiptId }
+        if (index >= 0) {
+            val newList = currentList.filterIndexed { idx, _ -> idx != index }
+            val wasSelected = selectedIds.contains(receiptId)
+            if (wasSelected) {
+                selectedIds = selectedIds.minus(receiptId)
+            }
+            submitList(newList) {
+                notifyItemRemoved(index)
+            }
+        }
+    }
+
+    /**
+     * 更新项，带淡入淡出动画
+     */
+    fun updateItemWithAnimation(receipt: ReceiptEntity) {
+        val index = currentList.indexOfFirst { it.receiptId == receipt.receiptId }
+        if (index >= 0) {
+            val newList = currentList.toMutableList().apply {
+                set(index, receipt)
+            }
+            submitList(newList) {
+                notifyItemChanged(index)
+            }
+        }
+    }
+
     fun updateSelection(selected: Set<Long>) {
         if (selectedIds == selected) return
         val previous = selectedIds

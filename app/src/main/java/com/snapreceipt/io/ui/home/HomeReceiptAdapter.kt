@@ -30,6 +30,50 @@ class HomeReceiptAdapter(
         submitList(newReceipts, commitCallback)
     }
 
+    /**
+     * 添加项到列表头部，带入场动画
+     * 用于扫描成功场景，无缝插入新项
+     */
+    fun addItemWithAnimation(receipt: ReceiptEntity) {
+        val newList = listOf(receipt) + currentList
+        submitList(newList) {
+            notifyItemInserted(0)
+            // 对新插入的项目执行入场动画
+            notifyItemRangeChanged(0, 1)
+        }
+    }
+
+    /**
+     * 删除项，带出场动画
+     * 用于删除操作后，带动画消除列表项
+     */
+    fun removeItemWithAnimation(receiptId: Long) {
+        val index = currentList.indexOfFirst { it.receiptId == receiptId }
+        if (index >= 0) {
+            val newList = currentList.filterIndexed { idx, _ -> idx != index }
+            submitList(newList) {
+                notifyItemRemoved(index)
+            }
+        }
+    }
+
+    /**
+     * 更新项，找到则更新，带淡入淡出动画
+     * 用于编辑保存场景，平滑更新列表项
+     */
+    fun updateItemWithAnimation(receipt: ReceiptEntity) {
+        val index = currentList.indexOfFirst { it.receiptId == receipt.receiptId }
+        if (index >= 0) {
+            val newList = currentList.toMutableList().apply {
+                set(index, receipt)
+            }
+            submitList(newList) {
+                // 使用 notifyItemChanged 触发 bind，动画由 ItemAnimator 处理
+                notifyItemChanged(index)
+            }
+        }
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReceiptViewHolder {
         val binding = ItemReceiptBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ReceiptViewHolder(binding, onEditClick)

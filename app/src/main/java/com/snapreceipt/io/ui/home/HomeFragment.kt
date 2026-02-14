@@ -10,13 +10,15 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.core.content.ContextCompat
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentHomeBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.home.dialogs.ScanFailedDialog
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
-import com.snapreceipt.io.ui.receipts.ReceiptsRefreshSignal
+import com.snapreceipt.io.ui.main.HomeRefreshEvent
+import com.snapreceipt.io.ui.main.ListRefreshViewModel
 import com.snapreceipt.io.ui.widget.CurvedGradientDrawable
 import com.snapreceipt.io.ui.widget.statefullist.StatefulListLayout
 import com.skybound.space.base.presentation.BaseFragment
@@ -33,6 +35,8 @@ import java.io.File
 @AndroidEntryPoint
 class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     override val viewModel: HomeViewModel by viewModels()
+    
+    private val refreshViewModel: ListRefreshViewModel by viewModels()
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -41,6 +45,54 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     private var pendingCameraUri: Uri? = null
 
     private lateinit var permissionHelper: FragmentPermissionHelper
+
+    // 用于启动 InvoiceDetailsActivity 并处理返回结果
+    // 采用 ActivityResultContract 替代回调，实现现代化的结果传递
+    private val invoiceDetailsLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Activity 返回成功，获取操作类型和数据
+            val operationType = result.data?.getStringExtra(InvoiceDetailsActivity.EXTRA_OPERATION_TYPE)
+            val receipt = result.data?.getParcelableExtra<ReceiptEntity>(InvoiceDetailsActivity.EXTRA_RECEIPT)
+            val receiptId = result.data?.getLongExtra(InvoiceDetailsActivity.EXTRA_RECEIPT_ID, -1L)
+            
+            // 根据操作类型，选择本地快速更新或全量刷新
+            lifecycleScope.launchWhenResumed {
+                when (operationType) {
+                    InvoiceDetailsActivity.OPERATION_TYPE_ADD -> {
+                        // 新增：插入列表头部
+                        if (receipt != null) {
+                            viewModel.addReceiptLocally(receipt)
+                            adapter.addItemWithAnimation(receipt)
+                            refreshViewModel.requestHomeItemAdded(receipt)
+                        }
+                    }
+                    InvoiceDetailsActivity.OPERATION_TYPE_UPDATE -> {
+                        // 编辑：更新列表中的项
+                        if (receipt != null) {
+                            viewModel.updateReceiptLocally(receipt)
+                            adapter.updateItemWithAnimation(receipt)
+                            // 后台增量刷新，确保服务端数据一致
+                            refreshViewModel.requestHomeItemUpdated(receipt)
+                        }
+                    }
+                    InvoiceDetailsActivity.OPERATION_TYPE_DELETE -> {
+                        // 删除：移除列表中的项
+                        if (receiptId != null && receiptId > 0) {
+                            viewModel.deleteReceiptLocally(receiptId)
+                            adapter.removeItemWithAnimation(receiptId)
+                            refreshViewModel.requestHomeItemDeleted(receiptId)
+                        }
+                    }
+                    else -> {
+                        // 未知操作或来自其他来源，执行全量刷新
+                        refreshViewModel.requestHomeFullRefresh()
+                    }
+                }
+            }
+        }
+    }
 
     private val takePictureLauncher = registerForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -81,6 +133,45 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         permissionHelper = FragmentPermissionHelper(this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 监听来自 ListRefreshViewModel 的刷新事件
+        // - ItemAdded: 扫描成功新增，本地已插入，这里处理后台增量刷新
+        // - ItemUpdated: 编辑后更新，本地已更新，这里处理后台增量刷新
+        // - ItemDeleted: 删除后，本地已移除，这里处理后台增量刷新
+        // - FullRefresh: 全量刷新，重新加载整个列表
+        lifecycleScope.launchWhenResumed {
+            refreshViewModel.refreshHomeEvent.collect { event ->
+                val currentState = viewModel.uiState.value
+                // 只有在不处于加载状态时才触发刷新，避免并发加载
+                if (!currentState.loading && !currentState.refreshing) {
+                    when (event) {
+                        is HomeRefreshEvent.ItemAdded -> {
+                            // 新增后不需要加载，本地已显示，但可选择后台同步数据
+                            // 当前选择仅事件记录，不额外加载
+                        }
+                        is HomeRefreshEvent.ItemUpdated -> {
+                            // 编辑后不需要加载，本地已更新，但可选择后台同步数据
+                            // 当前选择仅事件记录，不额外加载
+                        }
+                        is HomeRefreshEvent.ItemDeleted -> {
+                            // 删除后不需要加载，本地已移除，但可选择后台同步数据
+                            // 当前选择仅事件记录，不额外加载
+                        }
+                        is HomeRefreshEvent.FullRefresh -> {
+                            // 全量刷新，重新加载数据
+                            if (currentState.hasLoaded) {
+                                viewModel.refresh()
+                            } else {
+                                viewModel.loadReceipts()
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -141,7 +232,14 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     }
 
     private fun openReceiptForEdit(receipt: ReceiptEntity) {
-        startActivity(InvoiceDetailsActivity.createIntent(requireContext(), receipt))
+        // 从列表点击打开已保存的收据进行编辑
+        // 标记来源为 SOURCE_RECEIPTS_LIST，用于判断初始状态（预览或编辑）
+        val intent = InvoiceDetailsActivity.createIntent(
+            requireContext(),
+            receipt,
+            InvoiceDetailsActivity.SOURCE_RECEIPTS_LIST
+        )
+        invoiceDetailsLauncher.launch(intent)
     }
 
     private fun openCameraWithPermission() {
@@ -223,7 +321,6 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
             HomeEventKeys.PREFILL_READY -> {
                 val receipt = event.payload?.getParcelable(HomeEventKeys.EXTRA_ARGS) as? ReceiptEntity
                 if (receipt != null) {
-                    ReceiptsRefreshSignal.requestRefresh()
                     openInvoiceDetails(receipt)
                 }
             }
@@ -234,7 +331,14 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     }
 
     private fun openInvoiceDetails(receipt: ReceiptEntity) {
-        startActivity(InvoiceDetailsActivity.createIntent(requireContext(), receipt))
+        // 扫描成功后打开新增的收据填写详情
+        // 标记来源为 SOURCE_SCAN，用于直接进入编辑状态（不经过预览）
+        val intent = InvoiceDetailsActivity.createIntent(
+            requireContext(),
+            receipt,
+            InvoiceDetailsActivity.SOURCE_SCAN
+        )
+        invoiceDetailsLauncher.launch(intent)
     }
 
     private fun buildListState(state: HomeUiState): StatefulListLayout.State {

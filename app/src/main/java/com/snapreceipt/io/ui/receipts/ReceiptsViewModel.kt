@@ -69,6 +69,55 @@ class ReceiptsViewModel @Inject constructor(
         fetchPage(page = nextPage, reset = false, loadingMore = true)
     }
 
+    /**
+     * 本地快速添加：新项直接插入到列表开头
+     * 用于扫描成功写入发票列表场景
+     */
+    fun addReceiptLocally(receipt: ReceiptEntity) {
+        lastFetchedReceipts = listOf(receipt) + lastFetchedReceipts
+        _uiState.update { current ->
+            val newList = listOf(receipt) + current.receipts
+            current.copy(
+                receipts = newList,
+                empty = false,
+                hasLoaded = true
+            )
+        }
+    }
+
+    /**
+     * 本地快速更新：找到对应项直接更新
+     * 用于发票详情编辑保存场景
+     */
+    fun updateReceiptLocally(receipt: ReceiptEntity) {
+        lastFetchedReceipts = lastFetchedReceipts.map {
+            if (it.receiptId == receipt.receiptId) receipt else it
+        }
+        _uiState.update { current ->
+            val updated = current.receipts.map {
+                if (it.receiptId == receipt.receiptId) receipt else it
+            }
+            current.copy(receipts = updated)
+        }
+    }
+
+    /**
+     * 本地快速删除：直接移除列表中的项
+     * 用于删除操作后，清除本地显示
+     */
+    fun deleteReceiptLocally(receiptId: Long) {
+        lastFetchedReceipts = lastFetchedReceipts.filter { it.receiptId != receiptId }
+        _uiState.update { current ->
+            val updated = current.receipts.filter { it.receiptId != receiptId }
+            val validIds = updated.mapNotNull { it.receiptId }.toSet()
+            current.copy(
+                receipts = updated,
+                selectedIds = current.selectedIds.intersect(validIds),
+                empty = updated.isEmpty()
+            )
+        }
+    }
+
     fun filterByDateRange(startDate: Long, endDate: Long) {
         val start = DateFormatUtil.formatApiDate(startDate)
         val end = DateFormatUtil.formatApiDate(endDate)

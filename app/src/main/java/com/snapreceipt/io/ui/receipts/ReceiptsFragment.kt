@@ -1,12 +1,15 @@
 package com.snapreceipt.io.ui.receipts
 
+import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.skybound.space.base.presentation.BaseFragment
 import com.skybound.space.base.presentation.observeState
 import com.skybound.space.core.config.AppConfig
@@ -15,8 +18,11 @@ import com.skybound.space.core.util.LogHelper
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentReceiptsBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
+import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
 import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceCategoryBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
+import com.snapreceipt.io.ui.main.ListRefreshViewModel
+import com.snapreceipt.io.ui.main.ReceiptsRefreshEvent
 import com.snapreceipt.io.ui.receipts.dialogs.ExportSuccessDialog
 import com.snapreceipt.io.ui.widget.datepicker.DateRangeBottomSheet
 import com.snapreceipt.io.ui.widget.statefullist.StatefulListLayout
@@ -29,6 +35,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     }
 
     override val viewModel: ReceiptsViewModel by viewModels()
+    private val refreshViewModel: ListRefreshViewModel by viewModels()
 
     private var _binding: FragmentReceiptsBinding? = null
     private val binding get() = _binding!!
@@ -39,6 +46,53 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     private var filterTypeLabel: String? = null
     private var filterCategoryLabel: String? = null
     private var currentState: ReceiptsUiState = ReceiptsUiState()
+
+    // 用于启动 InvoiceDetailsActivity 并处理返回结果
+    private val invoiceDetailsLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Activity 返回成功，获取操作类型和数据
+            val operationType = result.data?.getStringExtra(InvoiceDetailsActivity.EXTRA_OPERATION_TYPE)
+            val receipt = result.data?.getParcelableExtra<ReceiptEntity>(InvoiceDetailsActivity.EXTRA_RECEIPT)
+            val receiptId = result.data?.getLongExtra(InvoiceDetailsActivity.EXTRA_RECEIPT_ID, -1L)
+            
+            // 根据操作类型，选择本地快速更新或全量刷新
+            lifecycleScope.launchWhenResumed {
+                when (operationType) {
+                    InvoiceDetailsActivity.OPERATION_TYPE_ADD -> {
+                        // 新增：插入列表头部
+                        if (receipt != null) {
+                            viewModel.addReceiptLocally(receipt)
+                            adapter.addItemWithAnimation(receipt)
+                            refreshViewModel.requestReceiptsItemAdded(receipt)
+                        }
+                    }
+                    InvoiceDetailsActivity.OPERATION_TYPE_UPDATE -> {
+                        // 编辑：更新列表中的项
+                        if (receipt != null) {
+                            viewModel.updateReceiptLocally(receipt)
+                            adapter.updateItemWithAnimation(receipt)
+                            // 后台增量刷新，确保服务端数据一致
+                            refreshViewModel.requestReceiptsItemUpdated(receipt)
+                        }
+                    }
+                    InvoiceDetailsActivity.OPERATION_TYPE_DELETE -> {
+                        // 删除：移除列表中的项
+                        if (receiptId != null && receiptId > 0) {
+                            viewModel.deleteReceiptLocally(receiptId)
+                            adapter.removeItemWithAnimation(receiptId)
+                            refreshViewModel.requestReceiptsItemDeleted(receiptId)
+                        }
+                    }
+                    else -> {
+                        // 未知操作或来自其他来源，执行全量刷新
+                        refreshViewModel.requestReceiptsFullRefresh()
+                    }
+                }
+            }
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentReceiptsBinding.bind(view)
@@ -55,12 +109,31 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
 
     override fun onResume() {
         super.onResume()
-        if (!ReceiptsRefreshSignal.consumeRefresh()) return
-        if (currentState.loading || currentState.refreshing) return
-        if (currentState.hasLoaded) {
-            viewModel.refresh()
-        } else {
-            viewModel.loadReceipts()
+        lifecycleScope.launchWhenResumed {
+            refreshViewModel.refreshReceiptsEvent.collect { event ->
+                val currentState = viewModel.uiState.value
+                if (!currentState.loading && !currentState.refreshing) {
+                    when (event) {
+                        is ReceiptsRefreshEvent.ItemAdded -> {
+                            // 新增后不需要加载，本地已显示
+                        }
+                        is ReceiptsRefreshEvent.ItemUpdated -> {
+                            // 编辑后不需要加载，本地已更新
+                        }
+                        is ReceiptsRefreshEvent.ItemDeleted -> {
+                            // 删除后不需要加载，本地已移除
+                        }
+                        is ReceiptsRefreshEvent.FullRefresh -> {
+                            // 全量刷新，重新加载数据
+                            if (currentState.hasLoaded) {
+                                viewModel.refresh()
+                            } else {
+                                viewModel.loadReceipts()
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -198,12 +271,12 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     }
 
     private fun openReceiptDetails(receipt: ReceiptEntity) {
-        startActivity(
-            com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.createIntent(
-                requireContext(),
-                receipt
-            )
+        val intent = com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.createIntent(
+            requireContext(),
+            receipt,
+            com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.SOURCE_INVOICES_LIST
         )
+        invoiceDetailsLauncher.launch(intent)
     }
 
     private fun formatDateRange(start: Long, end: Long): String {

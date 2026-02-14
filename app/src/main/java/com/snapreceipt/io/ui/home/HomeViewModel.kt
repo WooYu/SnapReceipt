@@ -55,6 +55,52 @@ class HomeViewModel @Inject constructor(
         fetchPage(page = nextPage, reset = false, loadingMore = true)
     }
 
+    /**
+     * 本地快速添加：新项直接插入到列表头部，无网络请求
+     * 用于扫描成功场景，立即显示新增项
+     * 分页逻辑：nextPage 和 hasMore 不变，下次加载更多时正确获取后续页面
+     */
+    fun addReceiptLocally(receipt: ReceiptEntity) {
+        _uiState.update { current ->
+            val newList = listOf(receipt) + current.receipts
+            current.copy(
+                receipts = newList,
+                empty = false,
+                hasLoaded = true
+            )
+        }
+    }
+
+    /**
+     * 本地快速更新：找到对应项直接更新，无网络请求
+     * 用于编辑保存场景，实时反映修改
+     * 注意：返回后在后台补充刷新列表，确保服务端数据一致性
+     */
+    fun updateReceiptLocally(receipt: ReceiptEntity) {
+        _uiState.update { current ->
+            val updated = current.receipts.map {
+                if (it.receiptId == receipt.receiptId) receipt else it
+            }
+            current.copy(receipts = updated)
+        }
+    }
+
+    /**
+     * 本地快速删除：直接移除列表中的项，无网络请求
+     * 用于删除操作后，立即从列表消失
+     * 分页逻辑：删除时不改变 nextPage/hasMore，但移除项数 < pageSize，
+     *         下次加载更多会自动补齐，保证列表在线下拉时不出现空白
+     */
+    fun deleteReceiptLocally(receiptId: Long) {
+        _uiState.update { current ->
+            val updated = current.receipts.filter { it.receiptId != receiptId }
+            current.copy(
+                receipts = updated,
+                empty = updated.isEmpty()
+            )
+        }
+    }
+
     private fun fetchPage(
         page: Int,
         reset: Boolean,
