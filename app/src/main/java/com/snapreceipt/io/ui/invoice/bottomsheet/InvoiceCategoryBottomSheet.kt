@@ -181,6 +181,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun setupActions() {
+        binding.cancelBtn.text = getString(R.string.reset)
         binding.cancelBtn.setOnClickListener {
             selectedLabel = ""
             onSelected?.invoke(selectedLabel)

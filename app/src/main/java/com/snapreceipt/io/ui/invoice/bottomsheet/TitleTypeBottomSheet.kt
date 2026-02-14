@@ -10,6 +10,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.BottomSheetTitleTypeBinding
 
 class TitleTypeBottomSheet(
@@ -44,6 +45,7 @@ class TitleTypeBottomSheet(
             }
         }
 
+        binding.cancelBtn.text = getString(R.string.reset)
         binding.cancelBtn.setOnClickListener {
             selectedLabel = ""
             onSelected(selectedLabel)

@@ -58,6 +58,7 @@
     <string name="description">Note</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
+    <string name="reset">Reset</string>
     <string name="delete">Delete</string>
     <string name="crop_image">Crop image</string>
     <string name="image_crop_failed">Crop failed</string>

@@ -66,6 +66,7 @@ class DateRangeBottomSheet(
         endCalendar.timeInMillis = initialEnd ?: now
         startCalendar.resetTimeToMidnight()
         endCalendar.resetTimeToMidnight()
+        enforceValidRange()
     }
 
     // ── Dialog lifecycle ──────────────────────────────────
@@ -189,6 +190,7 @@ class DateRangeBottomSheet(
         binding.pickerDay.setOnValueChangedListener(onPickerValueChanged)
 
         // Action buttons
+        binding.cancelBtn.text = getString(R.string.reset)
         binding.cancelBtn.setOnClickListener {
             onSelected(null, null)
             dismiss()
@@ -222,6 +224,7 @@ class DateRangeBottomSheet(
     }
 
     private fun onConfirmClicked() {
+        enforceValidRange()
         val startMillis = startCalendar.timeInMillis
         val endMillis = endCalendar.timeInMillis
 

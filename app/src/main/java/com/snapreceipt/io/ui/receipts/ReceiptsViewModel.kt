@@ -44,7 +44,6 @@ class ReceiptsViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ReceiptsUiState())
     val uiState: StateFlow<ReceiptsUiState> = _uiState.asStateFlow()
-    private var titleTypeFilter: String? = null
     private var lastFetchedReceipts: List<ReceiptEntity> = emptyList()
     private var nextPage = 1
     private val pageSize = 20
@@ -133,9 +132,18 @@ class ReceiptsViewModel @Inject constructor(
         val start = DateFormatUtil.formatApiDate(startDate)
         val end = DateFormatUtil.formatApiDate(endDate)
         LogHelper.d(LOG_TAG, "filterByDateRange start=$start end=$end")
-        currentQuery = ReceiptListQueryEntity(
+        currentQuery = currentQuery.copy(
             receiptDateStart = start,
             receiptDateEnd = end
+        )
+        fetchPage(page = 1, reset = true, showLoading = true)
+    }
+
+    fun clearDateRangeFilter() {
+        LogHelper.d(LOG_TAG, "clearDateRangeFilter")
+        currentQuery = currentQuery.copy(
+            receiptDateStart = null,
+            receiptDateEnd = null
         )
         fetchPage(page = 1, reset = true, showLoading = true)
     }
@@ -144,27 +152,20 @@ class ReceiptsViewModel @Inject constructor(
         val normalizedType = type.trim()
         val categoryId = categoryCache.idForLabel(normalizedType).takeIf { it > 0L }
         LogHelper.d(LOG_TAG, "filterByType label='$normalizedType' categoryId=$categoryId")
-        currentQuery = ReceiptListQueryEntity(categoryId = categoryId)
+        currentQuery = currentQuery.copy(categoryId = categoryId)
         fetchPage(page = 1, reset = true, showLoading = true)
     }
 
     fun filterByReceiptType(type: String?) {
         val normalized = type?.trim().orEmpty()
         val payloadType = receiptTypeHelper.toPayloadValue(normalized)
-        titleTypeFilter = payloadType.takeIf { it.isNotBlank() }
+        val receiptType = payloadType.takeIf { it.isNotBlank() }
         LogHelper.d(
             LOG_TAG,
-            "filterByTitleType input='$normalized' payload='${titleTypeFilter.orEmpty()}'"
+            "filterByTitleType input='$normalized' payload='${receiptType.orEmpty()}'"
         )
-        val filtered = applyTitleFilter(lastFetchedReceipts)
-        _uiState.update { current ->
-            val validIds = filtered.mapNotNull { it.receiptId }.toSet()
-            current.copy(
-                receipts = filtered,
-                selectedIds = current.selectedIds.intersect(validIds),
-                empty = filtered.isEmpty()
-            )
-        }
+        currentQuery = currentQuery.copy(receiptType = receiptType)
+        fetchPage(page = 1, reset = true, showLoading = true)
     }
 
     fun toggleSelection(id: Long) {
@@ -275,7 +276,7 @@ class ReceiptsViewModel @Inject constructor(
         val query = applyDefaultDateFilter(currentQuery.copy(pageNum = page, pageSize = pageSize))
         LogHelper.d(
             LOG_TAG,
-            "fetchPage page=$page reset=$reset showLoading=$showLoading refreshing=$refreshing loadingMore=$loadingMore query=$query titleTypeFilter='${titleTypeFilter.orEmpty()}'"
+            "fetchPage page=$page reset=$reset showLoading=$showLoading refreshing=$refreshing loadingMore=$loadingMore query=$query"
         )
         viewModelScope.launch(dispatchers.io) {
             fetchReceiptsUseCase(query)
@@ -284,22 +285,21 @@ class ReceiptsViewModel @Inject constructor(
                     lastFetchedReceipts = rawMerged
                     hasMore = receipts.size >= pageSize
                     nextPage = if (hasMore) page + 1 else page
-                    val filtered = applyTitleFilter(rawMerged)
                     LogHelper.d(
                         LOG_TAG,
-                        "fetchPage success page=$page received=${receipts.size} merged=${rawMerged.size} filtered=${filtered.size} hasMore=$hasMore nextPage=$nextPage"
+                        "fetchPage success page=$page received=${receipts.size} merged=${rawMerged.size} hasMore=$hasMore nextPage=$nextPage"
                     )
                     _uiState.update { current ->
-                        val validIds = filtered.mapNotNull { it.receiptId }.toSet()
+                        val validIds = rawMerged.mapNotNull { it.receiptId }.toSet()
                         val nextSelected = current.selectedIds.intersect(validIds)
                         current.copy(
-                            receipts = filtered,
+                            receipts = rawMerged,
                             selectedIds = nextSelected,
                             loading = false,
                             refreshing = false,
                             loadingMore = false,
                             error = null,
-                            empty = filtered.isEmpty(),
+                            empty = rawMerged.isEmpty(),
                             hasLoaded = true,
                             hasMore = hasMore
                         )
@@ -333,12 +333,4 @@ class ReceiptsViewModel @Inject constructor(
         handleError(throwable)
     }
 
-    private fun applyTitleFilter(receipts: List<ReceiptEntity> = _uiState.value.receipts): List<ReceiptEntity> {
-        val payloadType = titleTypeFilter?.trim().orEmpty()
-        if (payloadType.isBlank()) return receipts
-        return receipts.filter { receipt ->
-            val receiptPayload = receiptTypeHelper.toPayloadValue(receipt.receiptType.orEmpty())
-            receiptPayload.equals(payloadType, ignoreCase = true)
-        }
-    }
 }

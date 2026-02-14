@@ -217,7 +217,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                     filterEndMillis = null
                     binding.filterDateBtn.text = getString(R.string.filter_date)
                     LogHelper.d(LOG_TAG, "Date filter reset")
-                    viewModel.loadReceipts()
+                    viewModel.clearDateRangeFilter()
                     return@DateRangeBottomSheet
                 }
                 filterStartMillis = start
