@@ -4,6 +4,9 @@ import android.app.Dialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.LayoutRes
@@ -152,7 +155,7 @@ abstract class BaseFragment<VM : com.skybound.space.base.presentation.viewmodel.
             while (isActive) {
                 val messageView = dialog.findViewById<TextView>(R.id.loading_message) ?: break
                 if (!dialog.isShowing) break
-                messageView.text = "$baseText${".".repeat(dots)}"
+                messageView.text = animatedDotsText(baseText, dots)
                 dots = if (dots == 3) 1 else dots + 1
                 delay(500)
             }
@@ -170,6 +173,21 @@ abstract class BaseFragment<VM : com.skybound.space.base.presentation.viewmodel.
             setCancelable(false)
             setCanceledOnTouchOutside(false)
             window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        }
+    }
+
+    private fun animatedDotsText(baseText: String, dots: Int): CharSequence {
+        val visibleDots = dots.coerceIn(1, 3)
+        val fullText = "$baseText..."
+        if (visibleDots == 3) return fullText
+        val hiddenStart = baseText.length + visibleDots
+        return SpannableString(fullText).apply {
+            setSpan(
+                ForegroundColorSpan(Color.TRANSPARENT),
+                hiddenStart,
+                fullText.length,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
         }
     }
 

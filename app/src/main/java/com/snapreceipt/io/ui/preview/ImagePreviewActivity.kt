@@ -43,8 +43,10 @@ class ImagePreviewActivity : BaseActivity<BaseViewModel>() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
+        _binding?.btnClose?.setOnClickListener(null)
+        _binding?.previewImage?.setOnClickListener(null)
         _binding = null
+        super.onDestroy()
     }
 
     private fun imageModel(imagePath: String, imageUrl: String): Any? {

@@ -71,8 +71,13 @@ class TitleTypeBottomSheet(
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
+        _binding?.cancelBtn?.setOnClickListener(null)
+        _binding?.confirmBtn?.setOnClickListener(null)
+        _binding?.titleIndividual?.setOnClickListener(null)
+        _binding?.titleCompany?.setOnClickListener(null)
+        _binding?.rootContainer?.let { ViewCompat.setOnApplyWindowInsetsListener(it, null) }
         _binding = null
+        super.onDestroyView()
     }
 
     private fun updateSelection(optionViews: List<android.widget.TextView>) {

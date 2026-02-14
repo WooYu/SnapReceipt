@@ -44,8 +44,13 @@ class AboutUsActivity : BaseActivity<BaseViewModel>() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
+        policyPrefetchJob?.cancel()
+        policyPrefetchJob = null
+        _binding?.pageHeader?.setOnLeftIconClickListener(null)
+        _binding?.menuUserAgreement?.setOnClickListener(null)
+        _binding?.menuPrivacyPolicy?.setOnClickListener(null)
         _binding = null
+        super.onDestroy()
     }
 
     private fun openPolicyUrl(isUserAgreement: Boolean) {

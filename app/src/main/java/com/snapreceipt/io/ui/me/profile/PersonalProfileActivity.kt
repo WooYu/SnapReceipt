@@ -65,8 +65,12 @@ class PersonalProfileActivity : BaseActivity<BaseViewModel>() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
+        _binding?.pageHeader?.setOnLeftIconClickListener(null)
+        _binding?.profileName?.setOnClickListener(null)
+        _binding?.profileEmail?.setOnClickListener(null)
+        _binding?.profilePhone?.setOnClickListener(null)
         _binding = null
+        super.onDestroy()
     }
 
     private fun refreshUserProfile() {

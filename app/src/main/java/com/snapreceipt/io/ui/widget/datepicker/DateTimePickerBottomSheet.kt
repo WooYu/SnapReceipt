@@ -84,8 +84,16 @@ class DateTimePickerBottomSheet(
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
+        _binding?.cancelBtn?.setOnClickListener(null)
+        _binding?.confirmBtn?.setOnClickListener(null)
+        _binding?.pickerYear?.setOnValueChangedListener(null)
+        _binding?.pickerMonth?.setOnValueChangedListener(null)
+        _binding?.pickerDay?.setOnValueChangedListener(null)
+        _binding?.pickerHour?.setOnValueChangedListener(null)
+        _binding?.pickerMinute?.setOnValueChangedListener(null)
+        _binding?.rootContainer?.let { ViewCompat.setOnApplyWindowInsetsListener(it, null) }
         _binding = null
+        super.onDestroyView()
     }
 
     // ── NumberPicker setup ────────────────────────────────

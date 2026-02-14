@@ -35,7 +35,9 @@ class ExportSuccessDialog(
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
+        _binding?.closeBtn?.setOnClickListener(null)
+        _binding?.viewRecordsBtn?.setOnClickListener(null)
         _binding = null
+        super.onDestroyView()
     }
 }

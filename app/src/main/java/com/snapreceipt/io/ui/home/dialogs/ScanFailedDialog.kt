@@ -22,7 +22,9 @@ class ScanFailedDialog : DialogFragment() {
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
+        _binding?.closeBtn?.setOnClickListener(null)
+        _binding?.returnBtn?.setOnClickListener(null)
         _binding = null
+        super.onDestroyView()
     }
 }

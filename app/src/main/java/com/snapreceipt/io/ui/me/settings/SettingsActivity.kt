@@ -59,8 +59,11 @@ class SettingsActivity : BaseActivity<BaseViewModel>() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
+        _binding?.pageHeader?.setOnLeftIconClickListener(null)
+        _binding?.menuClearCache?.setOnClickListener(null)
+        _binding?.logoutBtn?.setOnClickListener(null)
         _binding = null
+        super.onDestroy()
     }
 
     private fun updateCacheSize() {

@@ -23,15 +23,16 @@ class ExportRecordsActivity : BaseActivity<ExportRecordsViewModel>() {
     override val viewModel: ExportRecordsViewModel by viewModels()
     private var _binding: ActivityExportRecordsBinding? = null
     private val binding get() = _binding!!
-    private lateinit var adapter: ExportRecordsAdapter
+    private var adapter: ExportRecordsAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityExportRecordsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        adapter = ExportRecordsAdapter { record -> openExportFile(record) }
-        binding.statefulList.setAdapter(adapter)
+        val recordsAdapter = ExportRecordsAdapter { record -> openExportFile(record) }
+        adapter = recordsAdapter
+        binding.statefulList.setAdapter(recordsAdapter)
         binding.statefulList.setOnLoadMoreListener { viewModel.loadMore() }
         binding.statefulList.setOnRetryListener { viewModel.loadRecords() }
         
@@ -48,8 +49,12 @@ class ExportRecordsActivity : BaseActivity<ExportRecordsViewModel>() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
+        _binding?.pageHeader?.setOnLeftIconClickListener(null)
+        _binding?.statefulList?.setOnLoadMoreListener(null)
+        _binding?.statefulList?.setOnRetryListener(null)
+        adapter = null
         _binding = null
+        super.onDestroy()
     }
 
     /**
@@ -58,10 +63,11 @@ class ExportRecordsActivity : BaseActivity<ExportRecordsViewModel>() {
      * completes before footer state changes (prevents auto-scroll).
      */
     private fun renderState(state: ExportRecordsUiState) {
+        val recordsAdapter = adapter ?: return
         // Submit data first (ListAdapter's submitList is async)
-        adapter.submitList(state.records) {
+        recordsAdapter.submitList(state.records) {
             // After data is committed, update footer state
-            binding.statefulList.submit(buildListState(state))
+            _binding?.statefulList?.submit(buildListState(state))
         }
     }
 

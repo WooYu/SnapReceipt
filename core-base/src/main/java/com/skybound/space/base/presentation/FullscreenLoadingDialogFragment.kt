@@ -4,6 +4,9 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Build
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -95,7 +98,7 @@ internal class FullscreenLoadingDialogFragment : DialogFragment() {
             var dots = 1
             while (isActive) {
                 val messageView = loadingMessageView ?: break
-                messageView.text = "$baseText${".".repeat(dots)}"
+                messageView.text = animatedDotsText(baseText, dots)
                 dots = if (dots == 3) 1 else dots + 1
                 delay(500)
             }
@@ -129,6 +132,21 @@ internal class FullscreenLoadingDialogFragment : DialogFragment() {
         window.navigationBarColor = Color.TRANSPARENT
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.isNavigationBarContrastEnforced = false
+        }
+    }
+
+    private fun animatedDotsText(baseText: String, dots: Int): CharSequence {
+        val visibleDots = dots.coerceIn(1, 3)
+        val fullText = "$baseText..."
+        if (visibleDots == 3) return fullText
+        val hiddenStart = baseText.length + visibleDots
+        return SpannableString(fullText).apply {
+            setSpan(
+                ForegroundColorSpan(Color.TRANSPARENT),
+                hiddenStart,
+                fullText.length,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
         }
     }
 

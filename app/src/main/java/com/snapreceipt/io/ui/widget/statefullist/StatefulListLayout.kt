@@ -1,6 +1,10 @@
 package com.snapreceipt.io.ui.widget.statefullist
 
 import android.content.Context
+import android.graphics.Color
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -101,7 +105,7 @@ class StatefulListLayout @JvmOverloads constructor(
     private val loadingTextTicker = object : Runnable {
         override fun run() {
             if (!loadingTextAnimationRunning) return
-            loadingTextView.text = "$loadingTextBase${".".repeat(loadingTextDots)}"
+            loadingTextView.text = animatedDotsText(loadingTextBase, loadingTextDots)
             loadingTextDots = if (loadingTextDots == 3) 1 else loadingTextDots + 1
             loadingTextView.postDelayed(this, 500)
         }
@@ -349,12 +353,27 @@ class StatefulListLayout @JvmOverloads constructor(
 
     private fun stopLoadingTextAnimation() {
         if (!loadingTextAnimationRunning) {
-            loadingTextView.text = "$loadingTextBase..."
+            loadingTextView.text = animatedDotsText(loadingTextBase, 3)
             return
         }
         loadingTextAnimationRunning = false
         loadingTextView.removeCallbacks(loadingTextTicker)
-        loadingTextView.text = "$loadingTextBase..."
+        loadingTextView.text = animatedDotsText(loadingTextBase, 3)
+    }
+
+    private fun animatedDotsText(baseText: String, dots: Int): CharSequence {
+        val visibleDots = dots.coerceIn(1, 3)
+        val fullText = "$baseText..."
+        if (visibleDots == 3) return fullText
+        val hiddenStart = baseText.length + visibleDots
+        return SpannableString(fullText).apply {
+            setSpan(
+                ForegroundColorSpan(Color.TRANSPARENT),
+                hiddenStart,
+                fullText.length,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
     }
 
     fun setEmptyImage(@DrawableRes resId: Int) {

@@ -144,8 +144,12 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
+        _binding?.pageTitle?.setOnLeftIconClickListener(null)
+        _binding?.pageTitle?.setOnRightIconClickListener(null)
+        _binding?.invoiceImage?.setOnClickListener(null)
+        _binding?.saveBtn?.setOnClickListener(null)
         _binding = null
+        super.onDestroy()
     }
 
     private fun renderState(state: InvoiceDetailsUiState) {

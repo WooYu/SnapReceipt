@@ -48,7 +48,9 @@ class CustomTypeDialog(
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
+        _binding?.cancelBtn?.setOnClickListener(null)
+        _binding?.confirmBtn?.setOnClickListener(null)
         _binding = null
+        super.onDestroyView()
     }
 }

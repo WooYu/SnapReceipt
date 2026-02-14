@@ -39,8 +39,11 @@ class ChangePhoneActivity : BaseActivity<ChangePhoneViewModel>() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
+        _binding?.pageHeader?.setOnLeftIconClickListener(null)
+        _binding?.getCodeBtn?.setOnClickListener(null)
+        _binding?.confirmBtn?.setOnClickListener(null)
         _binding = null
+        super.onDestroy()
     }
 
     private fun renderState(state: ChangePhoneUiState) {
