@@ -124,7 +124,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         binding.inputNote.setText(noteText)
         binding.valueNote.text = readonlyText(noteText)
 
-        binding.pageTitle.setOnLeftIconClickListener { finish() }
+        binding.pageTitle.setOnLeftIconClickListener { handleBackNavigation() }
         binding.pageTitle.setOnRightIconClickListener { onTopRightActionClick() }
         binding.invoiceImage.setOnClickListener { openImagePreview() }
 
@@ -137,15 +137,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         // 使用现代 OnBackPressedCallback 替代过时的 onBackPressed()
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (isEditing && sourceScene != InvoiceDetailsArgsCodec.SOURCE_SCAN) {
-                    // 编辑状态返回到预览状态
-                    isEditing = false
-                    renderModeUi()
-                } else {
-                    // 预览状态或扫描场景返回到列表（不刷新）
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
-                }
+                handleBackNavigation()
             }
         })
     }
@@ -161,6 +153,17 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             showGlobalLoading(null)
         } else {
             hideGlobalLoading()
+        }
+    }
+
+    private fun handleBackNavigation() {
+        if (isEditing && sourceScene != InvoiceDetailsArgsCodec.SOURCE_SCAN) {
+            // 编辑状态返回到预览状态
+            isEditing = false
+            renderModeUi()
+        } else {
+            // 预览状态或扫描场景返回到列表（不刷新）
+            finish()
         }
     }
 
