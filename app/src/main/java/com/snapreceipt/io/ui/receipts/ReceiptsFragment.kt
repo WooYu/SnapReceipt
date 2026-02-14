@@ -19,7 +19,7 @@ import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentReceiptsBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
-import com.snapreceipt.io.ui.invoice.InvoiceDetailsConstants
+import com.snapreceipt.io.ui.invoice.InvoiceDetailsArgsCodec
 import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceCategoryBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
 import com.snapreceipt.io.ui.main.ListRefreshViewModel
@@ -54,14 +54,14 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             // Activity 返回成功，获取操作类型和数据
-            val operationType = result.data?.getStringExtra(InvoiceDetailsConstants.EXTRA_OPERATION_TYPE)
-            val receipt = result.data?.getParcelableExtra<ReceiptEntity>(InvoiceDetailsConstants.EXTRA_RECEIPT)
-            val receiptId = result.data?.getLongExtra(InvoiceDetailsConstants.EXTRA_RECEIPT_ID, -1L)
+            val operationType = result.data?.getStringExtra(InvoiceDetailsArgsCodec.EXTRA_OPERATION_TYPE)
+            val receipt = result.data?.getParcelableExtra<ReceiptEntity>(InvoiceDetailsArgsCodec.EXTRA_RECEIPT)
+            val receiptId = result.data?.getLongExtra(InvoiceDetailsArgsCodec.EXTRA_RECEIPT_ID, -1L)
             
             // 根据操作类型，选择本地快速更新或全量刷新
             lifecycleScope.launchWhenResumed {
                 when (operationType) {
-                    InvoiceDetailsConstants.OPERATION_TYPE_ADD -> {
+                    InvoiceDetailsArgsCodec.OPERATION_TYPE_ADD -> {
                         // 新增：插入列表头部
                         if (receipt != null) {
                             viewModel.addReceiptLocally(receipt)
@@ -69,7 +69,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                             refreshViewModel.requestReceiptsItemAdded(receipt)
                         }
                     }
-                    InvoiceDetailsConstants.OPERATION_TYPE_UPDATE -> {
+                    InvoiceDetailsArgsCodec.OPERATION_TYPE_UPDATE -> {
                         // 编辑：更新列表中的项
                         if (receipt != null) {
                             viewModel.updateReceiptLocally(receipt)
@@ -78,7 +78,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                             refreshViewModel.requestReceiptsItemUpdated(receipt)
                         }
                     }
-                    InvoiceDetailsConstants.OPERATION_TYPE_DELETE -> {
+                    InvoiceDetailsArgsCodec.OPERATION_TYPE_DELETE -> {
                         // 删除：移除列表中的项
                         if (receiptId != null && receiptId > 0) {
                             viewModel.deleteReceiptLocally(receiptId)
@@ -275,7 +275,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         val intent = com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.createIntent(
             requireContext(),
             receipt,
-            com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity.SOURCE_INVOICES_LIST
+            com.snapreceipt.io.ui.invoice.InvoiceDetailsArgsCodec.SOURCE_INVOICES_LIST
         )
         invoiceDetailsLauncher.launch(intent)
     }

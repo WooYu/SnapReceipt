@@ -40,11 +40,11 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         fun createIntent(
             context: Context, 
             receipt: ReceiptEntity, 
-            source: String = InvoiceDetailsConstants.SOURCE_RECEIPTS_LIST
+            source: String = InvoiceDetailsArgsCodec.SOURCE_RECEIPTS_LIST
         ): Intent {
             return Intent(context, InvoiceDetailsActivity::class.java).apply {
                 InvoiceDetailsArgsCodec.writeReceipt(this, receipt)
-                putExtra(InvoiceDetailsConstants.EXTRA_SOURCE_SCENE, source)
+                putExtra(InvoiceDetailsArgsCodec.EXTRA_SOURCE_SCENE, source)
             }
         }
     }
@@ -64,7 +64,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private val binding get() = _binding!!
 
     // 来源场景：扫描或列表
-    private var sourceScene: String = SOURCE_RECEIPTS_LIST
+    private var sourceScene: String = InvoiceDetailsArgsCodec.SOURCE_RECEIPTS_LIST
 
     private var receiptImagePath: String = ""
     private var receiptImageUrl: String = ""
@@ -75,9 +75,6 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private var receiptId: Long? = null
     private var isEditing: Boolean = false
     
-    // 根据 receiptId 判断是否已保存（计算属性，避免冗余状态）
-    private val isSavedReceipt: Boolean
-        get() = (receiptId ?: 0L) > 0L
     private var initialCategoryId: Long? = null
     private var initialCategoryLabel: String = ""
 
@@ -88,7 +85,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         applyWindowInsets()
 
         // 读取来源场景参数
-        sourceScene = intent.getStringExtra(InvoiceDetailsConstants.EXTRA_SOURCE_SCENE) ?: InvoiceDetailsConstants.SOURCE_RECEIPTS_LIST
+        sourceScene = intent.getStringExtra(InvoiceDetailsArgsCodec.EXTRA_SOURCE_SCENE) ?: InvoiceDetailsArgsCodec.SOURCE_RECEIPTS_LIST
 
         val receipt = InvoiceDetailsArgsCodec.readReceipt(intent)
         val rawImage = receipt.receiptUrl.orEmpty().trim()
@@ -97,11 +94,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         // 根据来源场景决定初始状态：
         // - 扫描来源: 直接进入编辑状态
         // - 列表来源: 根据是否已保存决定（已保存为预览，未保存为编辑）
-        isEditing = if (sourceScene == InvoiceDetailsConstants.SOURCE_SCAN) {
-            true
-        } else {
-            !isSavedReceipt
-        }
+        isEditing = sourceScene == InvoiceDetailsArgsCodec.SOURCE_SCAN
         initialCategoryId = receipt.categoryId?.takeIf { it > 0L }
         initialCategoryLabel = receipt.categoryName.orEmpty().trim()
         loadInvoiceImage()
@@ -144,7 +137,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         // 使用现代 OnBackPressedCallback 替代过时的 onBackPressed()
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (isEditing && isSavedReceipt) {
+                if (isEditing && sourceScene != InvoiceDetailsArgsCodec.SOURCE_SCAN) {
                     // 编辑状态返回到预览状态
                     isEditing = false
                     renderModeUi()
@@ -181,8 +174,9 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         binding.valueNote.visibility = if (showEdit) View.GONE else View.VISIBLE
         binding.bottomActionContainer.visibility = if (showEdit) View.VISIBLE else View.GONE
 
-        binding.pageTitle.setRightIconVisible(isSavedReceipt)
-        if (isSavedReceipt) {
+        val isSaved = sourceScene != InvoiceDetailsArgsCodec.SOURCE_SCAN
+        binding.pageTitle.setRightIconVisible(isSaved)
+        if (isSaved) {
             if (showEdit) {
                 binding.pageTitle.setRightIcon(R.drawable.ic_trash_white)
             } else {
@@ -213,7 +207,8 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun onTopRightActionClick() {
-        if (!isSavedReceipt) return
+        val isSaved = sourceScene != InvoiceDetailsArgsCodec.SOURCE_SCAN
+        if (!isSaved) return
         if (isEditing) {
             // 编辑状态下点击删除
             deleteReceiptIfNeeded()
@@ -233,16 +228,16 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
 
             InvoiceDetailsEventKeys.NAVIGATE_TO_MAIN -> {
                 // 保存成功，返回列表并告知操作类型（新增或编辑）
-                val isNewReceipt = !isSavedReceipt
-                val operationType = if (isNewReceipt) InvoiceDetailsConstants.OPERATION_TYPE_ADD else InvoiceDetailsConstants.OPERATION_TYPE_UPDATE
+                val isNewReceipt = sourceScene == InvoiceDetailsArgsCodec.SOURCE_SCAN
+                val operationType = if (isNewReceipt) InvoiceDetailsArgsCodec.OPERATION_TYPE_ADD else InvoiceDetailsArgsCodec.OPERATION_TYPE_UPDATE
                 
                 // 读取编辑后的数据，返回给 Fragment 用于本地更新
                 val editedReceipt = collectEditedReceipt()
                 
                 setResult(RESULT_OK, Intent().apply {
-                    putExtra(InvoiceDetailsConstants.EXTRA_OPERATION_TYPE, operationType)
-                    putExtra(InvoiceDetailsConstants.EXTRA_RECEIPT, editedReceipt)
-                    putExtra(InvoiceDetailsConstants.EXTRA_SOURCE_SCENE, sourceScene)
+                    putExtra(InvoiceDetailsArgsCodec.EXTRA_OPERATION_TYPE, operationType)
+                    putExtra(InvoiceDetailsArgsCodec.EXTRA_RECEIPT, editedReceipt)
+                    putExtra(InvoiceDetailsArgsCodec.EXTRA_SOURCE_SCENE, sourceScene)
                 })
                 finish()
             }
@@ -329,7 +324,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             receiptType = titleTypeValue,
             address = addressValue
         )
-        if (isSavedReceipt) {
+        if (sourceScene != InvoiceDetailsArgsCodec.SOURCE_SCAN) {
             viewModel.updateReceipt(receipt)
         } else {
             viewModel.saveReceipt(receipt)
@@ -443,7 +438,8 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun deleteReceiptIfNeeded() {
-        if (!isSavedReceipt) return
+        val isSaved = sourceScene != InvoiceDetailsArgsCodec.SOURCE_SCAN
+        if (!isSaved) return
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setMessage(getString(R.string.delete_receipt_confirm))
             .setPositiveButton(R.string.confirm) { _, _ ->
@@ -451,9 +447,9 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
                 viewModel.deleteReceipt(id)
                 // 删除成功后，返回删除操作信息给 Fragment
                 setResult(RESULT_OK, Intent().apply {
-                    putExtra(InvoiceDetailsConstants.EXTRA_OPERATION_TYPE, InvoiceDetailsConstants.OPERATION_TYPE_DELETE)
-                    putExtra(InvoiceDetailsConstants.EXTRA_RECEIPT_ID, id)
-                    putExtra(InvoiceDetailsConstants.EXTRA_SOURCE_SCENE, sourceScene)
+                    putExtra(InvoiceDetailsArgsCodec.EXTRA_OPERATION_TYPE, InvoiceDetailsArgsCodec.OPERATION_TYPE_DELETE)
+                    putExtra(InvoiceDetailsArgsCodec.EXTRA_RECEIPT_ID, id)
+                    putExtra(InvoiceDetailsArgsCodec.EXTRA_SOURCE_SCENE, sourceScene)
                 })
                 finish()
             }

@@ -7,7 +7,7 @@ import androidx.activity.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.snapreceipt.io.databinding.ActivityMainBinding
-import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
+import com.snapreceipt.io.ui.invoice.InvoiceDetailsArgsCodec
 import com.snapreceipt.io.ui.main.MainViewModel
 import com.snapreceipt.io.ui.login.LoginActivity
 import com.skybound.space.base.presentation.BaseActivity
@@ -41,8 +41,8 @@ class MainActivity : BaseActivity<MainViewModel>() {
         binding.bottomNav.itemIconTintList = null
 
         if (savedInstanceState == null) {
-            val startTab = intent.getStringExtra(InvoiceDetailsActivity.EXTRA_START_TAB)
-            if (startTab == InvoiceDetailsActivity.TAB_RECEIPTS) {
+            val startTab = intent.getStringExtra(InvoiceDetailsArgsCodec.EXTRA_START_TAB)
+            if (startTab == InvoiceDetailsArgsCodec.TAB_RECEIPTS) {
                 navController.navigate(
                     R.id.nav_receipts,
                     null,
