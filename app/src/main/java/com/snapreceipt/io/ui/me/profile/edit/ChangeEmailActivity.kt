@@ -44,6 +44,11 @@ class ChangeEmailActivity : BaseActivity<ChangeEmailViewModel>() {
     }
 
     private fun renderState(state: ChangeEmailUiState) {
+        if (state.loading || state.requestingCode) {
+            showGlobalLoading(null)
+        } else {
+            hideGlobalLoading()
+        }
         val countdownSeconds = state.codeCountdownSeconds
         val canRequestCode = !state.loading && !state.requestingCode && countdownSeconds == 0
         binding.getCodeBtn.isEnabled = canRequestCode

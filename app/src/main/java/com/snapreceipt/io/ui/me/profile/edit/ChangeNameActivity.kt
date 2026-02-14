@@ -41,6 +41,11 @@ class ChangeNameActivity : BaseActivity<ChangeNameViewModel>() {
     }
 
     private fun renderState(state: ChangeNameUiState) {
+        if (state.loading) {
+            showGlobalLoading(null)
+        } else {
+            hideGlobalLoading()
+        }
         binding.confirmBtn.isEnabled = !state.loading && state.name.trim().isNotBlank()
     }
 

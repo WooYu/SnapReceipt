@@ -76,6 +76,7 @@
         app:layout_constraintEnd_toEndOf="@id/bound_right"
         app:layout_constraintStart_toStartOf="@id/bound_left"
         app:layout_constraintTop_toBottomOf="@id/name_input_container"
-        app:pabCornerRadius="80dp" />
+        app:pabCornerRadius="80dp"
+        app:pabEnableShadow="false" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

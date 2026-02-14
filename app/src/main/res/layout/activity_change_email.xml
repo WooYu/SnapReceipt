@@ -107,9 +107,11 @@
         <TextView
             android:id="@+id/get_code_btn"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginStart="12dp"
+            android:minWidth="72dp"
             android:gravity="center"
+            android:paddingHorizontal="8dp"
             android:text="@string/login_captcha"
             android:textColor="@color/colorPrimary"
             android:textSize="@dimen/text_size_secondary" />
@@ -125,6 +127,7 @@
         app:layout_constraintEnd_toEndOf="@id/bound_right"
         app:layout_constraintStart_toStartOf="@id/bound_left"
         app:layout_constraintTop_toBottomOf="@id/code_input_container"
-        app:pabCornerRadius="80dp" />
+        app:pabCornerRadius="80dp"
+        app:pabEnableShadow="false" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

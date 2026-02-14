@@ -44,6 +44,11 @@ class ChangePhoneActivity : BaseActivity<ChangePhoneViewModel>() {
     }
 
     private fun renderState(state: ChangePhoneUiState) {
+        if (state.loading || state.requestingCode) {
+            showGlobalLoading(null)
+        } else {
+            hideGlobalLoading()
+        }
         val countdownSeconds = state.codeCountdownSeconds
         val canRequestCode = !state.loading && !state.requestingCode && countdownSeconds == 0
         binding.getCodeBtn.isEnabled = canRequestCode
