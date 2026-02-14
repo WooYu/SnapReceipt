@@ -107,6 +107,7 @@
     <string name="select_invoice_category">选择发票分类</string>
     <string name="select_date_time">选择日期和时间</string>
     <string name="select_date_title">选择日期</string>
+    <string name="date_range_invalid">开始时间不能大于结束时间</string>
     <string name="year_label">年</string>
     <string name="month_label">月</string>
     <string name="day_label">日</string>

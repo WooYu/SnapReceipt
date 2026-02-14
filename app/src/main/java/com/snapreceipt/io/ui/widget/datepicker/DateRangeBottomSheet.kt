@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.NumberPicker
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -66,7 +67,6 @@ class DateRangeBottomSheet(
         endCalendar.timeInMillis = initialEnd ?: now
         startCalendar.resetTimeToMidnight()
         endCalendar.resetTimeToMidnight()
-        enforceValidRange()
     }
 
     // ── Dialog lifecycle ──────────────────────────────────
@@ -219,31 +219,19 @@ class DateRangeBottomSheet(
         // Re-sync day picker value if it was clamped
         binding.pickerDay.value = clampedDay
 
-        enforceValidRange()
         updateDateChips()
     }
 
     private fun onConfirmClicked() {
-        enforceValidRange()
         val startMillis = startCalendar.timeInMillis
         val endMillis = endCalendar.timeInMillis
+        if (startMillis > endMillis) {
+            Toast.makeText(requireContext(), getString(R.string.date_range_invalid), Toast.LENGTH_SHORT).show()
+            return
+        }
 
         onSelected(startMillis, endMillis)
         dismiss()
-    }
-
-    private fun enforceValidRange() {
-        val startMillis = startCalendar.timeInMillis
-        val endMillis = endCalendar.timeInMillis
-        if (startMillis <= endMillis) return
-
-        if (editingStart) {
-            endCalendar.timeInMillis = startMillis
-            endCalendar.resetTimeToMidnight()
-        } else {
-            startCalendar.timeInMillis = endMillis
-            startCalendar.resetTimeToMidnight()
-        }
     }
 
     // ── UI updates ─────────────────────────────────────────

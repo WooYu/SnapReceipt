@@ -107,6 +107,7 @@
     <string name="select_invoice_category">Select Invoice Category</string>
     <string name="select_date_time">Select date and time</string>
     <string name="select_date_title">Select Date</string>
+    <string name="date_range_invalid">Start date cannot be later than end date</string>
     <string name="year_label">Year</string>
     <string name="month_label">Month</string>
     <string name="day_label">Day</string>
