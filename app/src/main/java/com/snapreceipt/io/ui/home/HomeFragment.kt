@@ -44,6 +44,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
 
     private lateinit var adapter: HomeReceiptAdapter
     private var pendingCameraUri: Uri? = null
+    private var shouldScrollToTopOnNextRender = false
 
     private lateinit var permissionHelper: FragmentPermissionHelper
 
@@ -65,7 +66,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
                         // 新增：插入列表头部
                         if (receipt != null) {
                             viewModel.addReceiptLocally(receipt)
-                            adapter.addItemWithAnimation(receipt)
+                            shouldScrollToTopOnNextRender = true
                             refreshViewModel.requestHomeItemAdded(receipt)
                         }
                     }
@@ -73,7 +74,6 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
                         // 编辑：更新列表中的项
                         if (receipt != null) {
                             viewModel.updateReceiptLocally(receipt)
-                            adapter.updateItemWithAnimation(receipt)
                             // 后台增量刷新，确保服务端数据一致
                             refreshViewModel.requestHomeItemUpdated(receipt)
                         }
@@ -82,7 +82,6 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
                         // 删除：移除列表中的项
                         if (receiptId != null && receiptId > 0) {
                             viewModel.deleteReceiptLocally(receiptId)
-                            adapter.removeItemWithAnimation(receiptId)
                             refreshViewModel.requestHomeItemDeleted(receiptId)
                         }
                     }
@@ -203,6 +202,10 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     private fun renderState(state: HomeUiState) {
         // Submit data first (async), then update footer state in callback
         adapter.setReceipts(state.receipts) {
+            if (shouldScrollToTopOnNextRender && state.receipts.isNotEmpty()) {
+                binding.statefulList.recyclerView.scrollToPosition(0)
+                shouldScrollToTopOnNextRender = false
+            }
             binding.statefulList.submit(buildListState(state))
         }
 

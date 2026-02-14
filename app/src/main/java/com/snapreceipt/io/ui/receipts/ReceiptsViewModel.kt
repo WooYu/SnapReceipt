@@ -74,9 +74,20 @@ class ReceiptsViewModel @Inject constructor(
      * 用于扫描成功写入发票列表场景
      */
     fun addReceiptLocally(receipt: ReceiptEntity) {
-        lastFetchedReceipts = listOf(receipt) + lastFetchedReceipts
+        val receiptId = receipt.receiptId
+        val dedupedFetched = if (receiptId != null) {
+            lastFetchedReceipts.filterNot { it.receiptId == receiptId }
+        } else {
+            lastFetchedReceipts
+        }
+        lastFetchedReceipts = listOf(receipt) + dedupedFetched
         _uiState.update { current ->
-            val newList = listOf(receipt) + current.receipts
+            val dedupedCurrent = if (receiptId != null) {
+                current.receipts.filterNot { it.receiptId == receiptId }
+            } else {
+                current.receipts
+            }
+            val newList = listOf(receipt) + dedupedCurrent
             current.copy(
                 receipts = newList,
                 empty = false,

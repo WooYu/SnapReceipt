@@ -47,6 +47,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     private var filterTypeLabel: String? = null
     private var filterCategoryLabel: String? = null
     private var currentState: ReceiptsUiState = ReceiptsUiState()
+    private var shouldScrollToTopOnNextRender = false
 
     // 用于启动 InvoiceDetailsActivity 并处理返回结果
     private val invoiceDetailsLauncher = registerForActivityResult(
@@ -65,7 +66,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                         // 新增：插入列表头部
                         if (receipt != null) {
                             viewModel.addReceiptLocally(receipt)
-                            adapter.addItemWithAnimation(receipt)
+                            shouldScrollToTopOnNextRender = true
                             refreshViewModel.requestReceiptsItemAdded(receipt)
                         }
                     }
@@ -73,7 +74,6 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                         // 编辑：更新列表中的项
                         if (receipt != null) {
                             viewModel.updateReceiptLocally(receipt)
-                            adapter.updateItemWithAnimation(receipt)
                             // 后台增量刷新，确保服务端数据一致
                             refreshViewModel.requestReceiptsItemUpdated(receipt)
                         }
@@ -82,7 +82,6 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                         // 删除：移除列表中的项
                         if (receiptId != null && receiptId > 0) {
                             viewModel.deleteReceiptLocally(receiptId)
-                            adapter.removeItemWithAnimation(receiptId)
                             refreshViewModel.requestReceiptsItemDeleted(receiptId)
                         }
                     }
@@ -150,6 +149,10 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
 
         // Submit data first (async), then update footer state in callback
         adapter.setReceipts(receiptsToShow) {
+            if (shouldScrollToTopOnNextRender && receiptsToShow.isNotEmpty()) {
+                binding.statefulList.recyclerView.scrollToPosition(0)
+                shouldScrollToTopOnNextRender = false
+            }
             binding.statefulList.submit(buildListState(state))
         }
 

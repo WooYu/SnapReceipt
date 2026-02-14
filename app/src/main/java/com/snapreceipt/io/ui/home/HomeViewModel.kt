@@ -62,7 +62,13 @@ class HomeViewModel @Inject constructor(
      */
     fun addReceiptLocally(receipt: ReceiptEntity) {
         _uiState.update { current ->
-            val newList = listOf(receipt) + current.receipts
+            val receiptId = receipt.receiptId
+            val deduped = if (receiptId != null) {
+                current.receipts.filterNot { it.receiptId == receiptId }
+            } else {
+                current.receipts
+            }
+            val newList = listOf(receipt) + deduped
             current.copy(
                 receipts = newList,
                 empty = false,
