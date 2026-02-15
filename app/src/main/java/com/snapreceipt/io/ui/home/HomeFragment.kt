@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.core.content.ContextCompat
@@ -38,7 +39,7 @@ import kotlinx.coroutines.Job
 class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     override val viewModel: HomeViewModel by viewModels()
     
-    private val refreshViewModel: ListRefreshViewModel by viewModels()
+    private val refreshViewModel: ListRefreshViewModel by activityViewModels()
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -70,6 +71,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
                             viewModel.addReceiptLocally(receipt)
                             shouldScrollToTopOnNextRender = true
                             refreshViewModel.requestHomeItemAdded(receipt)
+                            refreshViewModel.requestReceiptsItemAdded(receipt)
                         }
                     }
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_UPDATE -> {
@@ -78,6 +80,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
                             viewModel.updateReceiptLocally(receipt)
                             // 后台增量刷新，确保服务端数据一致
                             refreshViewModel.requestHomeItemUpdated(receipt)
+                            refreshViewModel.requestReceiptsItemUpdated(receipt)
                         }
                     }
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_DELETE -> {
@@ -85,11 +88,13 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
                         if (receiptId != null && receiptId > 0) {
                             viewModel.deleteReceiptLocally(receiptId)
                             refreshViewModel.requestHomeItemDeleted(receiptId)
+                            refreshViewModel.requestReceiptsItemDeleted(receiptId)
                         }
                     }
                     else -> {
                         // 未知操作或来自其他来源，执行全量刷新
                         refreshViewModel.requestHomeFullRefresh()
+                        refreshViewModel.requestReceiptsFullRefresh()
                     }
                 }
             }

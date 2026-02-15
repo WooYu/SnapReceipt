@@ -66,7 +66,9 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                 when (operationType) {
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_ADD -> {
                         // 新增：插入列表头部
-                        if (receipt != null) {
+                        if (hasActiveFilters()) {
+                            viewModel.refresh()
+                        } else if (receipt != null) {
                             viewModel.addReceiptLocally(receipt)
                             shouldScrollToTopOnNextRender = true
                             refreshViewModel.requestReceiptsItemAdded(receipt)
@@ -74,7 +76,9 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                     }
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_UPDATE -> {
                         // 编辑：更新列表中的项
-                        if (receipt != null) {
+                        if (hasActiveFilters()) {
+                            viewModel.refresh()
+                        } else if (receipt != null) {
                             viewModel.updateReceiptLocally(receipt)
                             // 后台增量刷新，确保服务端数据一致
                             refreshViewModel.requestReceiptsItemUpdated(receipt)
@@ -82,7 +86,9 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                     }
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_DELETE -> {
                         // 删除：移除列表中的项
-                        if (receiptId != null && receiptId > 0) {
+                        if (hasActiveFilters()) {
+                            viewModel.refresh()
+                        } else if (receiptId != null && receiptId > 0) {
                             viewModel.deleteReceiptLocally(receiptId)
                             refreshViewModel.requestReceiptsItemDeleted(receiptId)
                         }
@@ -144,6 +150,13 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         refreshEventsJob?.cancel()
         refreshEventsJob = null
         super.onPause()
+    }
+
+    private fun hasActiveFilters(): Boolean {
+        return filterStartMillis != null ||
+                filterEndMillis != null ||
+                !filterTypeLabel.isNullOrBlank() ||
+                !filterCategoryLabel.isNullOrBlank()
     }
 
     /**
