@@ -68,20 +68,26 @@ class SnapReceiptApp : Application() {
      * @param baselineDebug 编译期基线配置（来自 DiEnvironment）
      */
     private fun subscribeToSettingsChanges(baselineDebug: Boolean) {
+        val allowRuntimeDebugOverride = BuildConfig.DEBUG
         ProcessLifecycleOwner.get().lifecycleScope.launch {
             settingsManager.settings.collectLatest { settings ->
                 // 计算最终的调试模式状态
-                val finalDebugMode = settings.enableDebugLogging ?: baselineDebug
+                val runtimeOverride = if (allowRuntimeDebugOverride) {
+                    settings.enableDebugLogging
+                } else {
+                    null
+                }
+                val finalDebugMode = runtimeOverride ?: baselineDebug
                 
                 // 动态更新 LogHelper 和 AppConfig
                 LogHelper.updateDebugMode(finalDebugMode)
                 AppConfig.updateDebugMode(finalDebugMode)
                 
                 // 记录覆盖状态（便于排查）
-                if (settings.enableDebugLogging != null) {
+                if (runtimeOverride != null) {
                     LogHelper.i(
                         "AppSettings",
-                        "Debug logging overridden: baseline=$baselineDebug override=${settings.enableDebugLogging} final=$finalDebugMode"
+                        "Debug logging overridden: baseline=$baselineDebug override=$runtimeOverride final=$finalDebugMode"
                     )
                 }
             }

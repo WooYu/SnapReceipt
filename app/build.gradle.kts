@@ -28,6 +28,34 @@ android {
     val versionCodeValue = (project.property("app.versionCode") as String).toInt()
     val versionNameValue = project.property("app.versionName") as String
     val javaVersionValue = JavaVersion.toVersion(project.property("java.version") as String)
+    val releaseStoreFilePath = providers.gradleProperty("SNAPRECEIPT_RELEASE_STORE_FILE")
+        .orElse(providers.environmentVariable("SNAPRECEIPT_RELEASE_STORE_FILE"))
+        .orNull
+    val releaseStorePassword = providers.gradleProperty("SNAPRECEIPT_RELEASE_STORE_PASSWORD")
+        .orElse(providers.environmentVariable("SNAPRECEIPT_RELEASE_STORE_PASSWORD"))
+        .orNull
+    val releaseKeyAlias = providers.gradleProperty("SNAPRECEIPT_RELEASE_KEY_ALIAS")
+        .orElse(providers.environmentVariable("SNAPRECEIPT_RELEASE_KEY_ALIAS"))
+        .orNull
+    val releaseKeyPassword = providers.gradleProperty("SNAPRECEIPT_RELEASE_KEY_PASSWORD")
+        .orElse(providers.environmentVariable("SNAPRECEIPT_RELEASE_KEY_PASSWORD"))
+        .orNull
+    val releaseSigningReady = listOf(
+        releaseStoreFilePath,
+        releaseStorePassword,
+        releaseKeyAlias,
+        releaseKeyPassword
+    ).all { !it.isNullOrBlank() }
+    val isReleaseTaskRequested = gradle.startParameter.taskNames.any {
+        it.contains("Release", ignoreCase = true)
+    }
+    if (isReleaseTaskRequested && !releaseSigningReady) {
+        throw GradleException(
+            "Missing release signing configuration. Set SNAPRECEIPT_RELEASE_STORE_FILE, " +
+                "SNAPRECEIPT_RELEASE_STORE_PASSWORD, SNAPRECEIPT_RELEASE_KEY_ALIAS, " +
+                "SNAPRECEIPT_RELEASE_KEY_PASSWORD (via Gradle properties or environment variables)."
+        )
+    }
 
     namespace = appId
     compileSdk = compileSdkVersion
@@ -42,10 +70,25 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            if (releaseSigningReady) {
+                storeFile = file(releaseStoreFilePath!!)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            if (releaseSigningReady) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
         debug {
             isDebuggable = true
