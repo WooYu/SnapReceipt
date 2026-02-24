@@ -17,7 +17,9 @@
     <string name="login_agreement_html">I have read and agree to the User Agreement and Privacy Policy</string>
     <string name="login">Log In</string>
     <string name="phone_empty">Please enter phone number</string>
+    <string name="phone_invalid">Please enter a valid phone number</string>
     <string name="email_empty">Please enter email address</string>
+    <string name="email_invalid">Please enter a valid email address</string>
     <string name="code_empty">Please enter verification code</string>
     <string name="code_sent">Verification code sent to %s</string>
     <string name="input_required">Please complete all required fields</string>

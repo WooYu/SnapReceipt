@@ -52,6 +52,7 @@ class PhoneLoginFragment : BaseLoginFragment(R.layout.fragment_phone_login) {
 
     private fun renderState(state: LoginUiState) {
         val countdownSeconds = state.phoneCodeCountdownSeconds
+        val phoneLengthValid = isPhoneLengthValid(state.phone)
         val canRequestCode = !state.loading && countdownSeconds == 0
         binding.getCodeBtn.isEnabled = canRequestCode
         binding.getCodeBtn.text = if (countdownSeconds > 0) {
@@ -60,13 +61,17 @@ class PhoneLoginFragment : BaseLoginFragment(R.layout.fragment_phone_login) {
             getString(R.string.login_captcha)
         }
         updateCodeRequestLoading(state.requestingCode)
-        binding.loginBtn.isEnabled = !state.loading && state.phone.isNotBlank() && state.phoneCode.isNotBlank()
+        binding.loginBtn.isEnabled = !state.loading && phoneLengthValid && state.phoneCode.isNotBlank()
         updateTabStyle(state.mode == LoginMode.PHONE)
         updateAgreementState(state.agreementAccepted)
     }
 
     private fun onGetCodeClick() {
         val phone = binding.phoneInput.text.toString().trim()
+        if (!isPhoneLengthValid(phone)) {
+            viewModel.showToast(getString(R.string.phone_invalid))
+            return
+        }
         viewModel.requestCode(phone)
     }
 
@@ -77,6 +82,7 @@ class PhoneLoginFragment : BaseLoginFragment(R.layout.fragment_phone_login) {
             "Login",
             "Phone login click phoneLength=${phone.length} codeLength=${code.length}"
         )
+        if (!isPhoneLengthValid(phone) || code.isBlank()) return
         if (!viewModel.uiState.value.agreementAccepted) {
             showAgreementDialog { confirmed ->
                 if (confirmed) {
@@ -91,6 +97,10 @@ class PhoneLoginFragment : BaseLoginFragment(R.layout.fragment_phone_login) {
 
     private fun onSwitchLogin() {
         viewModel.switchToEmail()
+    }
+
+    private fun isPhoneLengthValid(phone: String): Boolean {
+        return phone.length in 5..13
     }
 
     private fun updateTabStyle(isPhoneSelected: Boolean) {

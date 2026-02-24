@@ -1,6 +1,7 @@
 package com.snapreceipt.io.ui.login
 
 import android.os.Bundle
+import android.util.Patterns
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
@@ -52,6 +53,7 @@ class EmailLoginFragment : BaseLoginFragment(R.layout.fragment_email_login) {
 
     private fun renderState(state: LoginUiState) {
         val countdownSeconds = state.emailCodeCountdownSeconds
+        val emailFormatValid = isEmailFormatValid(state.email)
         val canRequestCode = !state.loading && countdownSeconds == 0
         binding.getCodeBtn.isEnabled = canRequestCode
         binding.getCodeBtn.text = if (countdownSeconds > 0) {
@@ -60,13 +62,17 @@ class EmailLoginFragment : BaseLoginFragment(R.layout.fragment_email_login) {
             getString(R.string.login_captcha)
         }
         updateCodeRequestLoading(state.requestingCode)
-        binding.loginBtn.isEnabled = !state.loading && state.email.isNotBlank() && state.emailCode.isNotBlank()
+        binding.loginBtn.isEnabled = !state.loading && emailFormatValid && state.emailCode.isNotBlank()
         updateTabStyle(state.mode == LoginMode.PHONE)
         updateAgreementState(state.agreementAccepted)
     }
 
     private fun onGetCodeClick() {
         val email = binding.emailInput.text.toString().trim()
+        if (!isEmailFormatValid(email)) {
+            viewModel.showToast(getString(R.string.email_invalid))
+            return
+        }
         viewModel.requestCode(email)
     }
 
@@ -77,6 +83,7 @@ class EmailLoginFragment : BaseLoginFragment(R.layout.fragment_email_login) {
             "Login",
             "Email login click emailLength=${email.length} codeLength=${code.length}"
         )
+        if (!isEmailFormatValid(email) || code.isBlank()) return
         if (!viewModel.uiState.value.agreementAccepted) {
             showAgreementDialog { confirmed ->
                 if (confirmed) {
@@ -91,6 +98,10 @@ class EmailLoginFragment : BaseLoginFragment(R.layout.fragment_email_login) {
 
     private fun onSwitchLogin() {
         viewModel.switchToPhone()
+    }
+
+    private fun isEmailFormatValid(email: String): Boolean {
+        return email.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
     private fun updateTabStyle(isPhoneSelected: Boolean) {
