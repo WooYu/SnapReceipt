@@ -1,14 +1,15 @@
 package com.snapreceipt.io.ui.login
 
 import android.os.Bundle
-import android.util.Patterns
 import android.view.View
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import com.skybound.space.base.presentation.observeState
 import com.skybound.space.core.util.LogHelper
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentEmailLoginBinding
+import com.snapreceipt.io.util.ContactInputValidator
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -53,7 +54,7 @@ class EmailLoginFragment : BaseLoginFragment(R.layout.fragment_email_login) {
 
     private fun renderState(state: LoginUiState) {
         val countdownSeconds = state.emailCodeCountdownSeconds
-        val emailFormatValid = isEmailFormatValid(state.email)
+        val emailFormatValid = ContactInputValidator.isEmailValid(state.email)
         val canRequestCode = !state.loading && countdownSeconds == 0
         binding.getCodeBtn.isEnabled = canRequestCode
         binding.getCodeBtn.text = if (countdownSeconds > 0) {
@@ -69,8 +70,8 @@ class EmailLoginFragment : BaseLoginFragment(R.layout.fragment_email_login) {
 
     private fun onGetCodeClick() {
         val email = binding.emailInput.text.toString().trim()
-        if (!isEmailFormatValid(email)) {
-            viewModel.showToast(getString(R.string.email_invalid))
+        if (!ContactInputValidator.isEmailValid(email)) {
+            Toast.makeText(requireContext(), getString(R.string.email_invalid), Toast.LENGTH_SHORT).show()
             return
         }
         viewModel.requestCode(email)
@@ -83,7 +84,7 @@ class EmailLoginFragment : BaseLoginFragment(R.layout.fragment_email_login) {
             "Login",
             "Email login click emailLength=${email.length} codeLength=${code.length}"
         )
-        if (!isEmailFormatValid(email) || code.isBlank()) return
+        if (!ContactInputValidator.isEmailValid(email) || code.isBlank()) return
         if (!viewModel.uiState.value.agreementAccepted) {
             showAgreementDialog { confirmed ->
                 if (confirmed) {
@@ -98,10 +99,6 @@ class EmailLoginFragment : BaseLoginFragment(R.layout.fragment_email_login) {
 
     private fun onSwitchLogin() {
         viewModel.switchToPhone()
-    }
-
-    private fun isEmailFormatValid(email: String): Boolean {
-        return email.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
     private fun updateTabStyle(isPhoneSelected: Boolean) {

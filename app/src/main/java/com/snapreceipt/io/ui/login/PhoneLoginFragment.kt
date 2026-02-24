@@ -2,12 +2,14 @@ package com.snapreceipt.io.ui.login
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import com.skybound.space.base.presentation.observeState
 import com.skybound.space.core.util.LogHelper
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentPhoneLoginBinding
+import com.snapreceipt.io.util.ContactInputValidator
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -52,7 +54,7 @@ class PhoneLoginFragment : BaseLoginFragment(R.layout.fragment_phone_login) {
 
     private fun renderState(state: LoginUiState) {
         val countdownSeconds = state.phoneCodeCountdownSeconds
-        val phoneLengthValid = isPhoneLengthValid(state.phone)
+        val phoneLengthValid = ContactInputValidator.isPhoneLengthValid(state.phone)
         val canRequestCode = !state.loading && countdownSeconds == 0
         binding.getCodeBtn.isEnabled = canRequestCode
         binding.getCodeBtn.text = if (countdownSeconds > 0) {
@@ -68,8 +70,8 @@ class PhoneLoginFragment : BaseLoginFragment(R.layout.fragment_phone_login) {
 
     private fun onGetCodeClick() {
         val phone = binding.phoneInput.text.toString().trim()
-        if (!isPhoneLengthValid(phone)) {
-            viewModel.showToast(getString(R.string.phone_invalid))
+        if (!ContactInputValidator.isPhoneLengthValid(phone)) {
+            Toast.makeText(requireContext(), getString(R.string.phone_invalid), Toast.LENGTH_SHORT).show()
             return
         }
         viewModel.requestCode(phone)
@@ -82,7 +84,7 @@ class PhoneLoginFragment : BaseLoginFragment(R.layout.fragment_phone_login) {
             "Login",
             "Phone login click phoneLength=${phone.length} codeLength=${code.length}"
         )
-        if (!isPhoneLengthValid(phone) || code.isBlank()) return
+        if (!ContactInputValidator.isPhoneLengthValid(phone) || code.isBlank()) return
         if (!viewModel.uiState.value.agreementAccepted) {
             showAgreementDialog { confirmed ->
                 if (confirmed) {
@@ -97,10 +99,6 @@ class PhoneLoginFragment : BaseLoginFragment(R.layout.fragment_phone_login) {
 
     private fun onSwitchLogin() {
         viewModel.switchToEmail()
-    }
-
-    private fun isPhoneLengthValid(phone: String): Boolean {
-        return phone.length in 5..13
     }
 
     private fun updateTabStyle(isPhoneSelected: Boolean) {

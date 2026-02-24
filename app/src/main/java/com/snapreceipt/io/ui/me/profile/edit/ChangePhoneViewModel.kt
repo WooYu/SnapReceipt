@@ -8,6 +8,7 @@ import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.usecase.user.RequestProfileUpdateCodeUseCase
 import com.snapreceipt.io.domain.usecase.user.UpdatePhoneUseCase
+import com.snapreceipt.io.util.ContactInputValidator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
@@ -48,6 +49,10 @@ class ChangePhoneViewModel @Inject constructor(
             emitEvent(UiEvent.Toast(message = "", resId = R.string.phone_empty))
             return
         }
+        if (!ContactInputValidator.isPhoneLengthValid(phone)) {
+            emitEvent(UiEvent.Toast(message = "", resId = R.string.phone_invalid))
+            return
+        }
         _uiState.update { it.copy(requestingCode = true) }
         viewModelScope.launch(dispatchers.io) {
             requestProfileUpdateCodeUseCase(phone)
@@ -69,6 +74,10 @@ class ChangePhoneViewModel @Inject constructor(
         val code = state.code.trim()
         if (phone.isBlank()) {
             emitEvent(UiEvent.Toast(message = "", resId = R.string.phone_empty))
+            return
+        }
+        if (!ContactInputValidator.isPhoneLengthValid(phone)) {
+            emitEvent(UiEvent.Toast(message = "", resId = R.string.phone_invalid))
             return
         }
         if (code.isBlank()) {

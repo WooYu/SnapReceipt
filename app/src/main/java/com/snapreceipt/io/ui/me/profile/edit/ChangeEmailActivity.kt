@@ -3,12 +3,14 @@ package com.snapreceipt.io.ui.me.profile.edit
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.widget.doAfterTextChanged
 import com.skybound.space.base.presentation.BaseActivity
 import com.skybound.space.base.presentation.observeState
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityChangeEmailBinding
+import com.snapreceipt.io.util.ContactInputValidator
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -25,7 +27,7 @@ class ChangeEmailActivity : BaseActivity<ChangeEmailViewModel>() {
         setContentView(binding.root)
 
         binding.pageHeader.setOnLeftIconClickListener { finish() }
-        binding.getCodeBtn.setOnClickListener { viewModel.requestCode() }
+        binding.getCodeBtn.setOnClickListener { onGetCodeClick() }
         binding.confirmBtn.setOnClickListener { viewModel.submit() }
         binding.emailInput.doAfterTextChanged { viewModel.updateEmail(it?.toString().orEmpty()) }
         binding.codeInput.doAfterTextChanged { viewModel.updateCode(it?.toString().orEmpty()) }
@@ -60,9 +62,19 @@ class ChangeEmailActivity : BaseActivity<ChangeEmailViewModel>() {
         } else {
             getString(R.string.login_captcha)
         }
+        val emailFormatValid = ContactInputValidator.isEmailValid(state.email)
         binding.confirmBtn.isEnabled = !state.loading &&
-            state.email.trim().isNotBlank() &&
+            emailFormatValid &&
             state.code.trim().isNotBlank()
+    }
+
+    private fun onGetCodeClick() {
+        val email = binding.emailInput.text.toString().trim()
+        if (!ContactInputValidator.isEmailValid(email)) {
+            Toast.makeText(this, getString(R.string.email_invalid), Toast.LENGTH_SHORT).show()
+            return
+        }
+        viewModel.requestCode()
     }
 
     companion object {

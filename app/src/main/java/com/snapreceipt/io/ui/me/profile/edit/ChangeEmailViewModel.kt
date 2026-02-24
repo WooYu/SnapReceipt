@@ -9,6 +9,7 @@ import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.usecase.user.RequestProfileUpdateCodeUseCase
 import com.snapreceipt.io.domain.usecase.user.UpdateEmailUseCase
+import com.snapreceipt.io.util.ContactInputValidator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -48,6 +49,10 @@ class ChangeEmailViewModel @Inject constructor(
             emitEvent(UiEvent.Toast(message = "", resId = R.string.email_empty))
             return
         }
+        if (!ContactInputValidator.isEmailValid(email)) {
+            emitEvent(UiEvent.Toast(message = "", resId = R.string.email_invalid))
+            return
+        }
         _uiState.update { it.copy(requestingCode = true) }
         viewModelScope.launch(dispatchers.io) {
             requestProfileUpdateCodeUseCase(email)
@@ -69,6 +74,10 @@ class ChangeEmailViewModel @Inject constructor(
         val code = state.code.trim()
         if (email.isBlank()) {
             emitEvent(UiEvent.Toast(message = "", resId = R.string.email_empty))
+            return
+        }
+        if (!ContactInputValidator.isEmailValid(email)) {
+            emitEvent(UiEvent.Toast(message = "", resId = R.string.email_invalid))
             return
         }
         if (code.isBlank()) {
