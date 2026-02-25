@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.skybound.space.base.presentation.BaseFragment
@@ -37,7 +38,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     }
 
     override val viewModel: ReceiptsViewModel by viewModels()
-    private val refreshViewModel: ListRefreshViewModel by viewModels()
+    private val refreshViewModel: ListRefreshViewModel by activityViewModels()
 
     private var _binding: FragmentReceiptsBinding? = null
     private val binding get() = _binding!!
@@ -49,6 +50,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     private var filterCategoryLabel: String? = null
     private var currentState: ReceiptsUiState = ReceiptsUiState()
     private var shouldScrollToTopOnNextRender = false
+    private var pendingReceiptsRefreshAfterLoad = false
     private var refreshEventsJob: Job? = null
 
     // 用于启动 InvoiceDetailsActivity 并处理返回结果
@@ -65,37 +67,42 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
             lifecycleScope.launchWhenResumed {
                 when (operationType) {
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_ADD -> {
+                        refreshViewModel.markHomeDirty()
                         // 新增：插入列表头部
                         if (hasActiveFilters()) {
-                            viewModel.refresh()
+                            requestReceiptsRefreshOrDefer()
                         } else if (receipt != null) {
                             viewModel.addReceiptLocally(receipt)
                             shouldScrollToTopOnNextRender = true
-                            refreshViewModel.requestReceiptsItemAdded(receipt)
+                            refreshViewModel.requestHomeItemAdded(receipt)
                         }
                     }
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_UPDATE -> {
+                        refreshViewModel.markHomeDirty()
                         // 编辑：更新列表中的项
                         if (hasActiveFilters()) {
-                            viewModel.refresh()
+                            requestReceiptsRefreshOrDefer()
                         } else if (receipt != null) {
                             viewModel.updateReceiptLocally(receipt)
                             // 后台增量刷新，确保服务端数据一致
-                            refreshViewModel.requestReceiptsItemUpdated(receipt)
+                            refreshViewModel.requestHomeItemUpdated(receipt)
                         }
                     }
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_DELETE -> {
+                        refreshViewModel.markHomeDirty()
                         // 删除：移除列表中的项
                         if (hasActiveFilters()) {
-                            viewModel.refresh()
+                            requestReceiptsRefreshOrDefer()
                         } else if (receiptId != null && receiptId > 0) {
                             viewModel.deleteReceiptLocally(receiptId)
-                            refreshViewModel.requestReceiptsItemDeleted(receiptId)
+                            refreshViewModel.requestHomeItemDeleted(receiptId)
                         }
                     }
                     else -> {
                         // 未知操作或来自其他来源，执行全量刷新
-                        refreshViewModel.requestReceiptsFullRefresh()
+                        requestReceiptsRefreshOrDefer()
+                        refreshViewModel.requestHomeFullRefresh()
+                        refreshViewModel.markHomeDirty()
                     }
                 }
             }
@@ -118,28 +125,38 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     override fun onResume() {
         super.onResume()
         refreshEventsJob?.cancel()
+
+        if (refreshViewModel.consumeReceiptsDirty()) {
+            requestReceiptsRefreshOrDefer()
+        }
+
         refreshEventsJob = lifecycleScope.launchWhenResumed {
             refreshViewModel.refreshReceiptsEvent.collect { event ->
-                val currentState = viewModel.uiState.value
-                if (!currentState.loading && !currentState.refreshing) {
-                    when (event) {
-                        is ReceiptsRefreshEvent.ItemAdded -> {
-                            // 新增后不需要加载，本地已显示
+                when (event) {
+                    is ReceiptsRefreshEvent.ItemAdded -> {
+                        if (hasActiveFilters()) {
+                            requestReceiptsRefreshOrDefer()
+                        } else {
+                            viewModel.addReceiptLocally(event.receipt)
+                            shouldScrollToTopOnNextRender = true
                         }
-                        is ReceiptsRefreshEvent.ItemUpdated -> {
-                            // 编辑后不需要加载，本地已更新
+                    }
+                    is ReceiptsRefreshEvent.ItemUpdated -> {
+                        if (hasActiveFilters()) {
+                            requestReceiptsRefreshOrDefer()
+                        } else {
+                            viewModel.updateReceiptLocally(event.receipt)
                         }
-                        is ReceiptsRefreshEvent.ItemDeleted -> {
-                            // 删除后不需要加载，本地已移除
+                    }
+                    is ReceiptsRefreshEvent.ItemDeleted -> {
+                        if (hasActiveFilters()) {
+                            requestReceiptsRefreshOrDefer()
+                        } else {
+                            viewModel.deleteReceiptLocally(event.receiptId)
                         }
-                        is ReceiptsRefreshEvent.FullRefresh -> {
-                            // 全量刷新，重新加载数据
-                            if (currentState.hasLoaded) {
-                                viewModel.refresh()
-                            } else {
-                                viewModel.loadReceipts()
-                            }
-                        }
+                    }
+                    is ReceiptsRefreshEvent.FullRefresh -> {
+                        requestReceiptsRefreshOrDefer()
                     }
                 }
             }
@@ -164,6 +181,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
      * Data is submitted before footer state to prevent auto-scroll when footer appears.
      */
     private fun renderState(state: ReceiptsUiState) {
+        tryConsumePendingReceiptsRefresh(state)
         currentState = state
 
         // Determine which data to show
@@ -213,6 +231,31 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         binding.exportActionBtn.isEnabled = !state.exporting
         binding.exportActionBtn.alpha = if (state.exporting) 0.6f else 1f
         binding.selectAllBtn.isEnabled = !state.exporting
+    }
+
+    private fun requestReceiptsRefreshOrDefer() {
+        val state = viewModel.uiState.value
+        if (!state.loading && !state.refreshing) {
+            pendingReceiptsRefreshAfterLoad = false
+            if (state.hasLoaded) {
+                viewModel.refresh()
+            } else {
+                viewModel.loadReceipts()
+            }
+        } else {
+            pendingReceiptsRefreshAfterLoad = true
+        }
+    }
+
+    private fun tryConsumePendingReceiptsRefresh(state: ReceiptsUiState) {
+        if (!pendingReceiptsRefreshAfterLoad) return
+        if (state.loading || state.refreshing) return
+        pendingReceiptsRefreshAfterLoad = false
+        if (state.hasLoaded) {
+            viewModel.refresh()
+        } else {
+            viewModel.loadReceipts()
+        }
     }
 
     private fun setupAdapter() {

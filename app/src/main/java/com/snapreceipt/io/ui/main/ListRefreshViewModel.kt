@@ -5,6 +5,7 @@ import com.snapreceipt.io.domain.model.ReceiptEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 /**
@@ -34,6 +35,9 @@ class ListRefreshViewModel @Inject constructor() : ViewModel() {
 
     private val _refreshReceiptsEvent = MutableSharedFlow<ReceiptsRefreshEvent>(replay = 0)
     val refreshReceiptsEvent = _refreshReceiptsEvent.asSharedFlow()
+
+    private val homeDirty = AtomicBoolean(false)
+    private val receiptsDirty = AtomicBoolean(false)
 
     suspend fun requestHomeItemAdded(receipt: ReceiptEntity) {
         _refreshHomeEvent.emit(HomeRefreshEvent.ItemAdded(receipt))
@@ -65,5 +69,21 @@ class ListRefreshViewModel @Inject constructor() : ViewModel() {
 
     suspend fun requestReceiptsFullRefresh() {
         _refreshReceiptsEvent.emit(ReceiptsRefreshEvent.FullRefresh)
+    }
+
+    fun markHomeDirty() {
+        homeDirty.set(true)
+    }
+
+    fun markReceiptsDirty() {
+        receiptsDirty.set(true)
+    }
+
+    fun consumeHomeDirty(): Boolean {
+        return homeDirty.getAndSet(false)
+    }
+
+    fun consumeReceiptsDirty(): Boolean {
+        return receiptsDirty.getAndSet(false)
     }
 }

@@ -47,6 +47,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     private lateinit var adapter: HomeReceiptAdapter
     private var pendingCameraUri: Uri? = null
     private var shouldScrollToTopOnNextRender = false
+    private var pendingHomeRefreshAfterLoad = false
     private var refreshEventsJob: Job? = null
 
     private lateinit var permissionHelper: FragmentPermissionHelper
@@ -66,35 +67,36 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
             lifecycleScope.launchWhenResumed {
                 when (operationType) {
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_ADD -> {
+                        refreshViewModel.markReceiptsDirty()
                         // 新增：插入列表头部
                         if (receipt != null) {
                             viewModel.addReceiptLocally(receipt)
                             shouldScrollToTopOnNextRender = true
-                            refreshViewModel.requestHomeItemAdded(receipt)
                             refreshViewModel.requestReceiptsItemAdded(receipt)
                         }
                     }
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_UPDATE -> {
+                        refreshViewModel.markReceiptsDirty()
                         // 编辑：更新列表中的项
                         if (receipt != null) {
                             viewModel.updateReceiptLocally(receipt)
                             // 后台增量刷新，确保服务端数据一致
-                            refreshViewModel.requestHomeItemUpdated(receipt)
                             refreshViewModel.requestReceiptsItemUpdated(receipt)
                         }
                     }
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_DELETE -> {
+                        refreshViewModel.markReceiptsDirty()
                         // 删除：移除列表中的项
                         if (receiptId != null && receiptId > 0) {
                             viewModel.deleteReceiptLocally(receiptId)
-                            refreshViewModel.requestHomeItemDeleted(receiptId)
                             refreshViewModel.requestReceiptsItemDeleted(receiptId)
                         }
                     }
                     else -> {
                         // 未知操作或来自其他来源，执行全量刷新
-                        refreshViewModel.requestHomeFullRefresh()
+                        requestHomeRefreshOrDefer()
                         refreshViewModel.requestReceiptsFullRefresh()
+                        refreshViewModel.markReceiptsDirty()
                     }
                 }
             }
@@ -145,6 +147,11 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     override fun onResume() {
         super.onResume()
         refreshEventsJob?.cancel()
+
+        if (refreshViewModel.consumeHomeDirty()) {
+            requestHomeRefreshOrDefer()
+        }
+
         // 监听来自 ListRefreshViewModel 的刷新事件
         // - ItemAdded: 扫描成功新增，本地已插入，这里处理后台增量刷新
         // - ItemUpdated: 编辑后更新，本地已更新，这里处理后台增量刷新
@@ -152,30 +159,18 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         // - FullRefresh: 全量刷新，重新加载整个列表
         refreshEventsJob = lifecycleScope.launchWhenResumed {
             refreshViewModel.refreshHomeEvent.collect { event ->
-                val currentState = viewModel.uiState.value
-                // 只有在不处于加载状态时才触发刷新，避免并发加载
-                if (!currentState.loading && !currentState.refreshing) {
-                    when (event) {
-                        is HomeRefreshEvent.ItemAdded -> {
-                            // 新增后不需要加载，本地已显示，但可选择后台同步数据
-                            // 当前选择仅事件记录，不额外加载
-                        }
-                        is HomeRefreshEvent.ItemUpdated -> {
-                            // 编辑后不需要加载，本地已更新，但可选择后台同步数据
-                            // 当前选择仅事件记录，不额外加载
-                        }
-                        is HomeRefreshEvent.ItemDeleted -> {
-                            // 删除后不需要加载，本地已移除，但可选择后台同步数据
-                            // 当前选择仅事件记录，不额外加载
-                        }
-                        is HomeRefreshEvent.FullRefresh -> {
-                            // 全量刷新，重新加载数据
-                            if (currentState.hasLoaded) {
-                                viewModel.refresh()
-                            } else {
-                                viewModel.loadReceipts()
-                            }
-                        }
+                when (event) {
+                    is HomeRefreshEvent.ItemAdded -> {
+                        viewModel.addReceiptLocally(event.receipt)
+                    }
+                    is HomeRefreshEvent.ItemUpdated -> {
+                        viewModel.updateReceiptLocally(event.receipt)
+                    }
+                    is HomeRefreshEvent.ItemDeleted -> {
+                        viewModel.deleteReceiptLocally(event.receiptId)
+                    }
+                    is HomeRefreshEvent.FullRefresh -> {
+                        requestHomeRefreshOrDefer()
                     }
                 }
             }
@@ -214,6 +209,8 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
      * Data is submitted before state to prevent auto-scroll when footer appears.
      */
     private fun renderState(state: HomeUiState) {
+        tryConsumePendingHomeRefresh(state)
+
         // Submit data first (async), then update footer state in callback
         adapter.setReceipts(state.receipts) {
             if (shouldScrollToTopOnNextRender && state.receipts.isNotEmpty()) {
@@ -232,6 +229,31 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         val isRecognizing = state.recognitionStatusResId != null
         binding.cardScan.isEnabled = !isRecognizing
         binding.cardUpload.isEnabled = !isRecognizing
+    }
+
+    private fun requestHomeRefreshOrDefer() {
+        val currentState = viewModel.uiState.value
+        if (!currentState.loading && !currentState.refreshing) {
+            pendingHomeRefreshAfterLoad = false
+            if (currentState.hasLoaded) {
+                viewModel.refresh()
+            } else {
+                viewModel.loadReceipts()
+            }
+        } else {
+            pendingHomeRefreshAfterLoad = true
+        }
+    }
+
+    private fun tryConsumePendingHomeRefresh(state: HomeUiState) {
+        if (!pendingHomeRefreshAfterLoad) return
+        if (state.loading || state.refreshing) return
+        pendingHomeRefreshAfterLoad = false
+        if (state.hasLoaded) {
+            viewModel.refresh()
+        } else {
+            viewModel.loadReceipts()
+        }
     }
 
     private fun setupAdapter() {
