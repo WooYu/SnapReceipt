@@ -82,7 +82,6 @@
     <string name="invoice_type">Invoice Type</string>
     <string name="bank_card">Bank Card</string>
     <string name="bank_card_hint">Card number</string>
-    <string name="invoice_details_hint_amount">e.g. 0.00</string>
     <string name="invoice_details_hint_merchant">Enter merchant name</string>
     <string name="invoice_details_hint_address">Enter address</string>
     <string name="invoice_details_hint_date">Select date and time</string>
