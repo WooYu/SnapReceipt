@@ -71,7 +71,12 @@ abstract class BaseFragment<VM : com.skybound.space.base.presentation.viewmodel.
         }
     }
 
-    private fun observeEvents() {
+    /**
+     * 观察 ViewModel 事件流并分发到对应处理方法。
+     * 当 Fragment 通过 activityViewModels() 与 Activity 共享同一 ViewModel 时，
+     * 子类可覆写为空实现，避免 Activity 和 Fragment 重复处理同一事件。
+     */
+    protected open fun observeEvents() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.events.collect { event ->
@@ -103,19 +108,15 @@ abstract class BaseFragment<VM : com.skybound.space.base.presentation.viewmodel.
     }
 
     open fun onNavigate(command: NavigationCommand) {
-        // 子类根据实际导航实现处理
     }
 
     open fun onDialog(dialog: UiEvent.Dialog) {
-        // 默认空实现
     }
 
     open fun onSnackbarAction(actionId: String) {
-        // 默认空实现
     }
 
     open fun onCustomEvent(event: UiEvent.Custom) {
-        // 默认空实现
     }
 
     private fun dismissLoading() {

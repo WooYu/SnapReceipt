@@ -2,6 +2,7 @@ package com.skybound.space.core.network.interceptor
 
 import okhttp3.Interceptor
 import okhttp3.Response
+import java.util.Locale
 import java.util.UUID
 
 /**
@@ -21,6 +22,11 @@ class DefaultHeadersInterceptor(
         }
         if (original.header("X-Request-Id") == null) {
             builder.header("X-Request-Id", UUID.randomUUID().toString())
+        }
+        if (original.header("Accept-Language") == null) {
+            val locale = Locale.getDefault()
+            val tag = if (locale.country.isNotEmpty()) "${locale.language}-${locale.country}" else locale.language
+            builder.header("Accept-Language", tag)
         }
         return chain.proceed(builder.build())
     }

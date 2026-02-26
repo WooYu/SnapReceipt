@@ -25,6 +25,10 @@ import com.snapreceipt.io.databinding.DialogAgreementConfirmBinding
 
 abstract class BaseLoginFragment(@LayoutRes layoutId: Int) : BaseFragment<LoginViewModel>(layoutId) {
 
+    // 登录页的 Fragment 通过 activityViewModels() 与 LoginActivity 共享同一 ViewModel，
+    // 所有事件已由 LoginActivity (BaseActivity) 统一处理，此处覆写为空以避免重复。
+    override fun observeEvents() { /* 由 Activity 统一处理 */ }
+
     private var agreementCheck: ImageView? = null
     private var agreementText: TextView? = null
     private var agreementContainer: View? = null
