@@ -251,9 +251,9 @@
 
                         <TextView
                             android:id="@+id/value_merchant"
-                            android:gravity="end"
-                            android:ellipsize="end"
                             android:layout_marginStart="16dp"
+                            android:ellipsize="end"
+                            android:gravity="end"
                             android:maxLines="2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
@@ -269,9 +269,9 @@
 
                         <TextView
                             android:id="@+id/value_address"
-                            android:gravity="end"
-                            android:ellipsize="end"
                             android:layout_marginStart="16dp"
+                            android:ellipsize="end"
+                            android:gravity="end"
                             android:maxLines="2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
@@ -287,9 +287,9 @@
 
                         <TextView
                             android:id="@+id/value_date"
-                            android:gravity="end"
-                            android:ellipsize="end"
                             android:layout_marginStart="16dp"
+                            android:ellipsize="end"
+                            android:gravity="end"
                             android:maxLines="2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
@@ -305,9 +305,9 @@
 
                         <TextView
                             android:id="@+id/value_card"
-                            android:gravity="end"
-                            android:ellipsize="end"
                             android:layout_marginStart="16dp"
+                            android:ellipsize="end"
+                            android:gravity="end"
                             android:maxLines="2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
@@ -323,9 +323,9 @@
 
                         <TextView
                             android:id="@+id/value_invoice_category"
-                            android:gravity="end"
-                            android:ellipsize="end"
                             android:layout_marginStart="16dp"
+                            android:ellipsize="end"
+                            android:gravity="end"
                             android:maxLines="2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
@@ -341,9 +341,9 @@
 
                         <TextView
                             android:id="@+id/value_invoice_type"
-                            android:gravity="end"
-                            android:ellipsize="end"
                             android:layout_marginStart="16dp"
+                            android:ellipsize="end"
+                            android:gravity="end"
                             android:maxLines="2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
@@ -615,6 +615,7 @@
                         android:paddingHorizontal="16dp"
                         android:paddingVertical="10dp"
                         android:textColor="@color/text_primary"
+                        android:textColorHint="@color/text_secondary"
                         android:textSize="@dimen/text_size_secondary" />
                 </LinearLayout>
             </LinearLayout>
