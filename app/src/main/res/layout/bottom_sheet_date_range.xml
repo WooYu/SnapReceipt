@@ -8,8 +8,7 @@
     android:background="@drawable/bg_surface_bottom_sheet"
     android:orientation="vertical"
     android:paddingHorizontal="16dp"
-    android:paddingTop="20dp"
-    android:paddingBottom="16dp">
+    android:paddingTop="20dp">
 
     <!--标题-->
     <LinearLayout

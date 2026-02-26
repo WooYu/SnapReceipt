@@ -82,6 +82,14 @@
     <string name="invoice_type">Invoice Type</string>
     <string name="bank_card">Bank Card</string>
     <string name="bank_card_hint">Card number</string>
+    <string name="invoice_details_hint_amount">e.g. 0.00</string>
+    <string name="invoice_details_hint_merchant">Enter merchant name</string>
+    <string name="invoice_details_hint_address">Enter address</string>
+    <string name="invoice_details_hint_date">Select date and time</string>
+    <string name="invoice_details_hint_bank_card">Enter card number</string>
+    <string name="invoice_details_hint_category">Select invoice category</string>
+    <string name="invoice_details_hint_type">Select invoice type</string>
+    <string name="invoice_details_hint_note">Add a note (optional)</string>
     <string name="card_number_invalid_chars">Only digits, spaces, or - are allowed</string>
     <string name="card_number_length">Card number should be 12–19 digits</string>
     <string name="note">Note</string>

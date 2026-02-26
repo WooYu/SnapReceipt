@@ -82,6 +82,14 @@
     <string name="invoice_type">发票类型</string>
     <string name="bank_card">银行卡</string>
     <string name="bank_card_hint">卡号</string>
+    <string name="invoice_details_hint_amount">例如 0.00</string>
+    <string name="invoice_details_hint_merchant">请输入商户名称</string>
+    <string name="invoice_details_hint_address">请输入地址</string>
+    <string name="invoice_details_hint_date">请选择日期和时间</string>
+    <string name="invoice_details_hint_bank_card">请输入卡号</string>
+    <string name="invoice_details_hint_category">请选择发票分类</string>
+    <string name="invoice_details_hint_type">请选择发票类型</string>
+    <string name="invoice_details_hint_note">添加备注（选填）</string>
     <string name="card_number_invalid_chars">只允许输入数字、空格或 -</string>
     <string name="card_number_length">卡号应为 12–19 位数字</string>
     <string name="note">备注</string>
