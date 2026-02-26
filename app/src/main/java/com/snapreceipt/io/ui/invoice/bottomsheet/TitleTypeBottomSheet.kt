@@ -1,10 +1,8 @@
 package com.snapreceipt.io.ui.invoice.bottomsheet
 
 import android.app.Dialog
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
@@ -17,6 +15,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.BottomSheetTitleTypeBinding
+import com.snapreceipt.io.ui.widget.bottomsheet.applyHorizontalMargins
 
 class TitleTypeBottomSheet : BottomSheetDialogFragment() {
 
@@ -54,10 +53,7 @@ class TitleTypeBottomSheet : BottomSheetDialogFragment() {
         val dialog = BottomSheetDialog(requireContext())
         _binding = BottomSheetTitleTypeBinding.inflate(LayoutInflater.from(context))
         dialog.setContentView(binding.root)
-        dialog.setOnShowListener {
-            val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-            bottomSheet?.setBackgroundColor(Color.TRANSPARENT)
-        }
+        dialog.applyHorizontalMargins(resources.getDimensionPixelSize(R.dimen.page_start_margin))
         applyBottomInsets()
 
         options = listOf(

@@ -1,7 +1,6 @@
 package com.snapreceipt.io.ui.invoice.bottomsheet
 
 import android.app.Dialog
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -31,6 +30,7 @@ import com.snapreceipt.io.domain.usecase.category.DeleteCategoryUseCase
 import com.snapreceipt.io.domain.usecase.category.FetchCategoriesUseCase
 import com.snapreceipt.io.ui.invoice.dialogs.CustomTypeDialog
 import com.snapreceipt.io.ui.main.ListRefreshViewModel
+import com.snapreceipt.io.ui.widget.bottomsheet.applyHorizontalMargins
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -138,16 +138,11 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun setupBottomSheet(dialog: BottomSheetDialog) {
-        dialog.setOnShowListener {
-            val bottomSheet =
-                dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-            if (bottomSheet != null) {
-                bottomSheet.setBackgroundColor(Color.TRANSPARENT)
-                val behavior = BottomSheetBehavior.from(bottomSheet)
-                behavior.skipCollapsed = true
-                behavior.state = BottomSheetBehavior.STATE_EXPANDED
-                behavior.isDraggable = false
-            }
+        dialog.applyHorizontalMargins(resources.getDimensionPixelSize(R.dimen.page_start_margin)) { bottomSheet ->
+            val behavior = BottomSheetBehavior.from(bottomSheet)
+            behavior.skipCollapsed = true
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            behavior.isDraggable = false
         }
     }
 

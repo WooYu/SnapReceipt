@@ -1,10 +1,8 @@
 package com.snapreceipt.io.ui.widget.datepicker
 
 import android.app.Dialog
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.NumberPicker
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -17,6 +15,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.skybound.space.core.util.DateFormatUtil
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.BottomSheetDateRangeBinding
+import com.snapreceipt.io.ui.widget.bottomsheet.applyHorizontalMargins
 import java.util.Calendar
 
 class DateRangeBottomSheet : BottomSheetDialogFragment() {
@@ -94,10 +93,7 @@ class DateRangeBottomSheet : BottomSheetDialogFragment() {
         val dialog = BottomSheetDialog(requireContext())
         _binding = BottomSheetDateRangeBinding.inflate(LayoutInflater.from(context))
         dialog.setContentView(binding.root)
-        dialog.setOnShowListener {
-            val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-            bottomSheet?.setBackgroundColor(Color.TRANSPARENT)
-        }
+        dialog.applyHorizontalMargins(resources.getDimensionPixelSize(R.dimen.page_start_margin))
         applyBottomInsets()
 
         setupPickers()
