@@ -261,29 +261,31 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         beginOperation(CategoryOperation.DELETING)
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val result = try {
-                withContext(dispatchers.io) { deleteCategoryUseCase(listOf(item.id)) }
-            } catch (throwable: Throwable) {
-                Result.failure(throwable)
-            }
-            result.onSuccess {
-                if (selectedLabel.equals(item.label, ignoreCase = true)) {
-                    selectedLabel = ""
+            try {
+                val result = try {
+                    withContext(dispatchers.io) { deleteCategoryUseCase(listOf(item.id)) }
+                } catch (throwable: Throwable) {
+                    Result.failure(throwable)
                 }
-                val updatedList = (currentRecommendItems + currentCustomItems)
-                    .filterNot { it.id == item.id }
-                categoryCache.update(updatedList)
-                applyCategories(updatedList, reconcileSelection = true)
-                refreshViewModel.notifyHomeFullRefresh()
-                refreshViewModel.notifyReceiptsFullRefresh()
-                refreshCategoriesFromRemote { refreshSuccess ->
-                    if (!refreshSuccess) {
-                        showToast(R.string.refresh_category_failed)
+                result.onSuccess {
+                    if (selectedLabel.equals(item.label, ignoreCase = true)) {
+                        selectedLabel = ""
                     }
-                    endOperation()
+                    val updatedList = (currentRecommendItems + currentCustomItems)
+                        .filterNot { it.id == item.id }
+                    categoryCache.update(updatedList)
+                    applyCategories(updatedList, reconcileSelection = true)
+                    refreshViewModel.notifyHomeFullRefresh()
+                    refreshViewModel.notifyReceiptsFullRefresh()
+                    refreshCategoriesFromRemote { refreshSuccess ->
+                        if (!refreshSuccess) {
+                            showToast(R.string.refresh_category_failed)
+                        }
+                    }
+                }.onFailure {
+                    showToast(R.string.delete_category_failed)
                 }
-            }.onFailure {
-                showToast(R.string.delete_category_failed)
+            } finally {
                 endOperation()
             }
         }
