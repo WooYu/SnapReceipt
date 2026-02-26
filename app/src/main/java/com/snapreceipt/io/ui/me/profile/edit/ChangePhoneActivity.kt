@@ -32,10 +32,6 @@ class ChangePhoneActivity : BaseActivity<ChangePhoneViewModel>() {
         binding.phoneInput.doAfterTextChanged { viewModel.updatePhone(it?.toString().orEmpty()) }
         binding.codeInput.doAfterTextChanged { viewModel.updateCode(it?.toString().orEmpty()) }
 
-        val initialPhone = intent.getStringExtra(EXTRA_PHONE).orEmpty()
-        binding.phoneInput.setText(initialPhone)
-        binding.phoneInput.setSelection(initialPhone.length)
-        viewModel.updatePhone(initialPhone)
 
         observeState(viewModel.uiState) { renderState(it) }
     }

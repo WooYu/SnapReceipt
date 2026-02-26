@@ -32,10 +32,6 @@ class ChangeEmailActivity : BaseActivity<ChangeEmailViewModel>() {
         binding.emailInput.doAfterTextChanged { viewModel.updateEmail(it?.toString().orEmpty()) }
         binding.codeInput.doAfterTextChanged { viewModel.updateCode(it?.toString().orEmpty()) }
 
-        val initialEmail = intent.getStringExtra(EXTRA_EMAIL).orEmpty()
-        binding.emailInput.setText(initialEmail)
-        binding.emailInput.setSelection(initialEmail.length)
-        viewModel.updateEmail(initialEmail)
 
         observeState(viewModel.uiState) { renderState(it) }
     }
