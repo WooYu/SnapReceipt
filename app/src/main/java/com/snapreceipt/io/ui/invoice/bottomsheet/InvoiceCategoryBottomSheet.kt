@@ -162,7 +162,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun openAddCategoryDialog() {
-        CustomTypeDialog { customType -> addCustomType(customType) }
+        CustomTypeDialog { customType, onCompleted -> addCustomType(customType, onCompleted) }
             .show(parentFragmentManager, CUSTOM_TYPE_DIALOG_TAG)
     }
 
@@ -194,13 +194,17 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         }
     }
 
-    private fun addCustomType(rawLabel: String) {
+    private fun addCustomType(rawLabel: String, onCompleted: (Boolean) -> Unit) {
         val sanitized = rawLabel.trim()
-        if (sanitized.isBlank() || isOperationInProgress) return
+        if (sanitized.isBlank() || isOperationInProgress) {
+            onCompleted(false)
+            return
+        }
         isOperationInProgress = true
 
         viewLifecycleOwner.lifecycleScope.launch {
             val result = withContext(dispatchers.io) { addCategoryUseCase(sanitized) }
+            val isSuccess = result.isSuccess
             result.onSuccess {
                 selectedLabel = sanitized
                 refreshCategoriesFromRemote()
@@ -208,6 +212,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
                 showToast(R.string.add_category_failed)
             }
             isOperationInProgress = false
+            onCompleted(isSuccess)
         }
     }
 
