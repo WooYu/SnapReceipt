@@ -3,6 +3,7 @@ package com.snapreceipt.io.ui.receipts
 import android.content.Context
 import android.os.Bundle
 import androidx.lifecycle.viewModelScope
+import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import com.skybound.space.core.util.DateFormatUtil
@@ -11,6 +12,7 @@ import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.manager.CategoryCacheManager
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.domain.model.query.ReceiptListQueryEntity
+import com.snapreceipt.io.domain.usecase.category.ResolveCategoryIdUseCase
 import com.snapreceipt.io.domain.usecase.receipt.DeleteReceiptRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.ExportReceiptsRemoteUseCase
 import com.snapreceipt.io.domain.usecase.receipt.FetchReceiptsUseCase
@@ -33,7 +35,7 @@ class ReceiptsViewModel @Inject constructor(
     private val deleteReceiptRemoteUseCase: DeleteReceiptRemoteUseCase,
     private val updateReceiptRemoteUseCase: UpdateReceiptRemoteUseCase,
     private val exportReceiptsRemoteUseCase: ExportReceiptsRemoteUseCase,
-    
+    private val resolveCategoryIdUseCase: ResolveCategoryIdUseCase,
     private val receiptTypeHelper: ReceiptTypeHelper,
     private val categoryCache: CategoryCacheManager,
     private val dispatchers: CoroutineDispatchersProvider
@@ -51,6 +53,7 @@ class ReceiptsViewModel @Inject constructor(
     private var hasMore = true
     private var currentQuery = ReceiptListQueryEntity()
     private var fetchJob: Job? = null
+    private var categoryFilterJob: Job? = null
 
     init {
         loadReceipts()
@@ -154,11 +157,31 @@ class ReceiptsViewModel @Inject constructor(
 
     fun filterByInvoiceCategory(type: String) {
         val normalizedType = type.trim()
-        val categoryId = categoryCache.idForLabel(normalizedType).takeIf { it > 0L }
-        LogHelper.d(LOG_TAG, "filterByType label='$normalizedType' categoryId=$categoryId")
-        currentQuery = currentQuery.copy(categoryId = categoryId)
-        _uiState.update { it.copy(selectedIds = emptySet()) }
-        fetchPage(page = 1, reset = true, showLoading = true)
+        categoryFilterJob?.cancel()
+        categoryFilterJob = viewModelScope.launch(dispatchers.io) {
+            val categoryId = if (normalizedType.isBlank()) {
+                null
+            } else {
+                categoryCache.idForLabel(normalizedType).takeIf { it > 0L }
+                    ?: resolveCategoryIdUseCase(normalizedType).takeIf { it > 0L }
+            }
+            LogHelper.d(LOG_TAG, "filterByType label='$normalizedType' categoryId=$categoryId")
+
+            if (normalizedType.isNotBlank() && categoryId == null) {
+                emitEvent(
+                    UiEvent.Custom(
+                        ReceiptsEventKeys.CATEGORY_FILTER_INVALID,
+                        Bundle().apply {
+                            putString(ReceiptsEventKeys.CATEGORY_LABEL, normalizedType)
+                        }
+                    )
+                )
+            }
+
+            currentQuery = currentQuery.copy(categoryId = categoryId)
+            _uiState.update { it.copy(selectedIds = emptySet()) }
+            fetchPage(page = 1, reset = true, showLoading = true)
+        }
     }
 
     fun filterByReceiptType(type: String?) {
@@ -182,21 +205,44 @@ class ReceiptsViewModel @Inject constructor(
     ) {
         val dateStartStr = dateStart?.let { DateFormatUtil.formatApiDate(it) }
         val dateEndStr = dateEnd?.let { DateFormatUtil.formatApiDate(it) }
-        val catId = categoryLabel?.trim()
-            ?.takeIf { it.isNotBlank() }
-            ?.let { categoryCache.idForLabel(it).takeIf { id -> id > 0L } }
+        val normalizedCategory = categoryLabel?.trim().orEmpty()
         val recType = typeLabel?.trim()
             ?.takeIf { it.isNotBlank() }
             ?.let { receiptTypeHelper.toPayloadValue(it).takeIf { t -> t.isNotBlank() } }
-
-        currentQuery = currentQuery.copy(
-            receiptDateStart = dateStartStr,
-            receiptDateEnd = dateEndStr,
-            categoryId = catId,
-            receiptType = recType
+        LogHelper.d(
+            LOG_TAG,
+            "restoreQuery dateStart=$dateStartStr dateEnd=$dateEndStr categoryLabel='$normalizedCategory' receiptType='${recType.orEmpty()}'"
         )
-        _uiState.update { it.copy(selectedIds = emptySet()) }
-        fetchPage(page = 1, reset = true, showLoading = true)
+
+        categoryFilterJob?.cancel()
+        categoryFilterJob = viewModelScope.launch(dispatchers.io) {
+            val catId = if (normalizedCategory.isBlank()) {
+                null
+            } else {
+                resolveCategoryIdUseCase(normalizedCategory).takeIf { it > 0L }
+            }
+            LogHelper.d(LOG_TAG, "restoreQuery resolved categoryLabel='$normalizedCategory' categoryId=$catId")
+
+            if (normalizedCategory.isNotBlank() && catId == null) {
+                emitEvent(
+                    UiEvent.Custom(
+                        ReceiptsEventKeys.CATEGORY_FILTER_INVALID,
+                        Bundle().apply {
+                            putString(ReceiptsEventKeys.CATEGORY_LABEL, normalizedCategory)
+                        }
+                    )
+                )
+            }
+
+            currentQuery = currentQuery.copy(
+                receiptDateStart = dateStartStr,
+                receiptDateEnd = dateEndStr,
+                categoryId = catId,
+                receiptType = recType
+            )
+            _uiState.update { it.copy(selectedIds = emptySet()) }
+            fetchPage(page = 1, reset = true, showLoading = true)
+        }
     }
 
     fun toggleSelection(id: Long) {

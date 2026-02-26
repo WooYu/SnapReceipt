@@ -56,6 +56,11 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         }
     }
 
+    private enum class CategoryOperation(@StringRes val loadingMessageRes: Int) {
+        ADDING(R.string.category_operation_adding),
+        DELETING(R.string.category_operation_deleting)
+    }
+
     @Inject
     lateinit var fetchCategoriesUseCase: FetchCategoriesUseCase
 
@@ -83,6 +88,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
     private var selectedLabel: String = ""
     private var refreshJob: Job? = null
     private var isOperationInProgress = false
+    private var currentOperation: CategoryOperation? = null
 
     private var currentRecommendItems: List<CategoryItem> = emptyList()
     private var currentCustomItems: List<CategoryItem> = emptyList()
@@ -112,6 +118,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         applyBottomInsets()
         setupActions()
+        renderOperationUi()
 
         viewLifecycleOwner.lifecycleScope.launch {
             val cached = categoryCache.getCategories()
@@ -128,6 +135,9 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
     override fun onDestroyView() {
         refreshJob?.cancel()
         refreshJob = null
+        isOperationInProgress = false
+        currentOperation = null
+        isCancelable = true
         _binding = null
         super.onDestroyView()
     }
@@ -152,10 +162,12 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         }
 
         binding.cancelBtn.setOnClickListener {
+            if (isOperationInProgress) return@setOnClickListener
             selectedLabel = ""
             updateSelectionUI()
         }
         binding.confirmBtn.setOnClickListener {
+            if (isOperationInProgress) return@setOnClickListener
             onSelected?.invoke(selectedLabel)
             dismiss()
         }
@@ -176,20 +188,30 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         ViewCompat.requestApplyInsets(binding.rootContainer)
     }
 
-    private fun refreshCategoriesFromRemote() {
+    private fun refreshCategoriesFromRemote(onCompleted: ((Boolean) -> Unit)? = null) {
         refreshJob?.cancel()
         refreshJob = viewLifecycleOwner.lifecycleScope.launch {
-            val result = withContext(dispatchers.io) { fetchCategoriesUseCase() }
-            result.onSuccess { list ->
-                categoryCache.update(list)
-                applyCategories(list, reconcileSelection = true)
-            }.onFailure {
-                if (currentRecommendItems.isEmpty() && currentCustomItems.isEmpty()) {
-                    val cached = categoryCache.getCategories()
-                    if (cached.isNotEmpty()) {
-                        applyCategories(cached, reconcileSelection = false)
+            var refreshSuccess = false
+            try {
+                val result = try {
+                    withContext(dispatchers.io) { fetchCategoriesUseCase() }
+                } catch (throwable: Throwable) {
+                    Result.failure(throwable)
+                }
+                result.onSuccess { list ->
+                    categoryCache.update(list)
+                    applyCategories(list, reconcileSelection = true)
+                    refreshSuccess = true
+                }.onFailure {
+                    if (currentRecommendItems.isEmpty() && currentCustomItems.isEmpty()) {
+                        val cached = categoryCache.getCategories()
+                        if (cached.isNotEmpty()) {
+                            applyCategories(cached, reconcileSelection = false)
+                        }
                     }
                 }
+            } finally {
+                onCompleted?.invoke(refreshSuccess)
             }
         }
     }
@@ -200,19 +222,28 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
             onCompleted(false)
             return
         }
-        isOperationInProgress = true
+        beginOperation(CategoryOperation.ADDING)
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val result = withContext(dispatchers.io) { addCategoryUseCase(sanitized) }
-            val isSuccess = result.isSuccess
+            val result = try {
+                withContext(dispatchers.io) { addCategoryUseCase(sanitized) }
+            } catch (throwable: Throwable) {
+                Result.failure(throwable)
+            }
             result.onSuccess {
                 selectedLabel = sanitized
-                refreshCategoriesFromRemote()
+                refreshCategoriesFromRemote { refreshSuccess ->
+                    if (!refreshSuccess) {
+                        showToast(R.string.refresh_category_failed)
+                    }
+                    endOperation()
+                    onCompleted(true)
+                }
             }.onFailure {
                 showToast(R.string.add_category_failed)
+                endOperation()
+                onCompleted(false)
             }
-            isOperationInProgress = false
-            onCompleted(isSuccess)
         }
     }
 
@@ -227,21 +258,34 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
 
     private fun deleteCategory(item: CategoryItem) {
         if (isOperationInProgress) return
-        isOperationInProgress = true
+        beginOperation(CategoryOperation.DELETING)
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val result = withContext(dispatchers.io) { deleteCategoryUseCase(listOf(item.id)) }
+            val result = try {
+                withContext(dispatchers.io) { deleteCategoryUseCase(listOf(item.id)) }
+            } catch (throwable: Throwable) {
+                Result.failure(throwable)
+            }
             result.onSuccess {
                 if (selectedLabel.equals(item.label, ignoreCase = true)) {
                     selectedLabel = ""
                 }
-                refreshCategoriesFromRemote()
-                refreshViewModel.markHomeDirty()
-                refreshViewModel.markReceiptsDirty()
+                val updatedList = (currentRecommendItems + currentCustomItems)
+                    .filterNot { it.id == item.id }
+                categoryCache.update(updatedList)
+                applyCategories(updatedList, reconcileSelection = true)
+                refreshViewModel.notifyHomeFullRefresh()
+                refreshViewModel.notifyReceiptsFullRefresh()
+                refreshCategoriesFromRemote { refreshSuccess ->
+                    if (!refreshSuccess) {
+                        showToast(R.string.refresh_category_failed)
+                    }
+                    endOperation()
+                }
             }.onFailure {
                 showToast(R.string.delete_category_failed)
+                endOperation()
             }
-            isOperationInProgress = false
         }
     }
 
@@ -304,12 +348,40 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun toggleSelection(label: String) {
+        if (isOperationInProgress) return
         selectedLabel = if (label.equals(selectedLabel, ignoreCase = true)) {
             ""
         } else {
             label
         }
         updateSelectionUI()
+    }
+
+    private fun beginOperation(operation: CategoryOperation) {
+        isOperationInProgress = true
+        currentOperation = operation
+        renderOperationUi()
+    }
+
+    private fun endOperation() {
+        isOperationInProgress = false
+        currentOperation = null
+        renderOperationUi()
+    }
+
+    private fun renderOperationUi() {
+        val currentBinding = _binding ?: return
+        val inProgress = isOperationInProgress
+        val loadingMessageRes =
+            currentOperation?.loadingMessageRes ?: R.string.loading_please_wait_dynamic
+
+        currentBinding.operationLoadingContainer.isVisible = inProgress
+        currentBinding.operationLoadingText.text = getString(loadingMessageRes)
+        currentBinding.addCategoryBtn.isEnabled = !inProgress
+        currentBinding.cancelBtn.isEnabled = !inProgress
+        currentBinding.confirmBtn.isEnabled = !inProgress
+        currentBinding.addCategoryBtn.alpha = if (inProgress) 0.6f else 1f
+        isCancelable = !inProgress
     }
 
     private fun updateSelectionUI() {

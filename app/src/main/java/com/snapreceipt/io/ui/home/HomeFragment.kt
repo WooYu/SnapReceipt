@@ -37,6 +37,10 @@ import kotlinx.coroutines.Job
 
 @AndroidEntryPoint
 class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
+    companion object {
+        private const val LOG_TAG = "HomeListRefresh"
+    }
+
     override val viewModel: HomeViewModel by viewModels()
     
     private val refreshViewModel: ListRefreshViewModel by activityViewModels()
@@ -48,6 +52,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     private var pendingCameraUri: Uri? = null
     private var shouldScrollToTopOnNextRender = false
     private var pendingHomeRefreshAfterLoad = false
+    private var pendingHomeRefreshReason: String? = null
     private var refreshEventsJob: Job? = null
 
     private lateinit var permissionHelper: FragmentPermissionHelper
@@ -67,36 +72,41 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
             lifecycleScope.launchWhenResumed {
                 when (operationType) {
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_ADD -> {
-                        refreshViewModel.markReceiptsDirty()
                         // 新增：插入列表头部
                         if (receipt != null) {
+                            LogHelper.d(LOG_TAG, "invoice result add -> local insert + markReceiptsDirty")
                             viewModel.addReceiptLocally(receipt)
                             shouldScrollToTopOnNextRender = true
-                            refreshViewModel.requestReceiptsItemAdded(receipt)
+                            refreshViewModel.notifyReceiptsItemAdded(receipt)
+                        } else {
+                            refreshViewModel.notifyReceiptsFullRefresh()
                         }
                     }
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_UPDATE -> {
-                        refreshViewModel.markReceiptsDirty()
                         // 编辑：更新列表中的项
                         if (receipt != null) {
+                            LogHelper.d(LOG_TAG, "invoice result update -> local update + markReceiptsDirty")
                             viewModel.updateReceiptLocally(receipt)
                             // 后台增量刷新，确保服务端数据一致
-                            refreshViewModel.requestReceiptsItemUpdated(receipt)
+                            refreshViewModel.notifyReceiptsItemUpdated(receipt)
+                        } else {
+                            refreshViewModel.notifyReceiptsFullRefresh()
                         }
                     }
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_DELETE -> {
-                        refreshViewModel.markReceiptsDirty()
                         // 删除：移除列表中的项
                         if (receiptId != null && receiptId > 0) {
+                            LogHelper.d(LOG_TAG, "invoice result delete -> local delete + markReceiptsDirty")
                             viewModel.deleteReceiptLocally(receiptId)
-                            refreshViewModel.requestReceiptsItemDeleted(receiptId)
+                            refreshViewModel.notifyReceiptsItemDeleted(receiptId)
+                        } else {
+                            refreshViewModel.notifyReceiptsFullRefresh()
                         }
                     }
                     else -> {
                         // 未知操作或来自其他来源，执行全量刷新
-                        requestHomeRefreshOrDefer()
-                        refreshViewModel.requestReceiptsFullRefresh()
-                        refreshViewModel.markReceiptsDirty()
+                        requestHomeRefreshOrDefer("invoice_details_result_unknown_operation")
+                        refreshViewModel.notifyReceiptsFullRefresh()
                     }
                 }
             }
@@ -149,7 +159,7 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         refreshEventsJob?.cancel()
 
         if (refreshViewModel.consumeHomeDirty()) {
-            requestHomeRefreshOrDefer()
+            requestHomeRefreshOrDefer("on_resume_consume_home_dirty")
         }
 
         // 监听来自 ListRefreshViewModel 的刷新事件
@@ -161,16 +171,20 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
             refreshViewModel.refreshHomeEvent.collect { event ->
                 when (event) {
                     is HomeRefreshEvent.ItemAdded -> {
+                        LogHelper.d(LOG_TAG, "event item_added -> local insert")
                         viewModel.addReceiptLocally(event.receipt)
                     }
                     is HomeRefreshEvent.ItemUpdated -> {
+                        LogHelper.d(LOG_TAG, "event item_updated -> local update")
                         viewModel.updateReceiptLocally(event.receipt)
                     }
                     is HomeRefreshEvent.ItemDeleted -> {
+                        LogHelper.d(LOG_TAG, "event item_deleted -> local delete")
                         viewModel.deleteReceiptLocally(event.receiptId)
                     }
                     is HomeRefreshEvent.FullRefresh -> {
-                        requestHomeRefreshOrDefer()
+                        refreshViewModel.consumeHomeDirty()
+                        requestHomeRefreshOrDefer("home_refresh_event_full_refresh")
                     }
                 }
             }
@@ -231,27 +245,40 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         binding.cardUpload.isEnabled = !isRecognizing
     }
 
-    private fun requestHomeRefreshOrDefer() {
+    private fun requestHomeRefreshOrDefer(trigger: String) {
         val currentState = viewModel.uiState.value
+        LogHelper.d(
+            LOG_TAG,
+            "request trigger=$trigger loading=${currentState.loading} refreshing=${currentState.refreshing} hasLoaded=${currentState.hasLoaded}"
+        )
         if (!currentState.loading && !currentState.refreshing) {
             pendingHomeRefreshAfterLoad = false
+            pendingHomeRefreshReason = null
             if (currentState.hasLoaded) {
+                LogHelper.d(LOG_TAG, "execute trigger=$trigger action=refresh")
                 viewModel.refresh()
             } else {
+                LogHelper.d(LOG_TAG, "execute trigger=$trigger action=load")
                 viewModel.loadReceipts()
             }
         } else {
             pendingHomeRefreshAfterLoad = true
+            pendingHomeRefreshReason = trigger
+            LogHelper.d(LOG_TAG, "defer trigger=$trigger")
         }
     }
 
     private fun tryConsumePendingHomeRefresh(state: HomeUiState) {
         if (!pendingHomeRefreshAfterLoad) return
         if (state.loading || state.refreshing) return
+        val deferredReason = pendingHomeRefreshReason ?: "unknown"
         pendingHomeRefreshAfterLoad = false
+        pendingHomeRefreshReason = null
         if (state.hasLoaded) {
+            LogHelper.d(LOG_TAG, "consume deferred=$deferredReason action=refresh")
             viewModel.refresh()
         } else {
+            LogHelper.d(LOG_TAG, "consume deferred=$deferredReason action=load")
             viewModel.loadReceipts()
         }
     }
@@ -261,9 +288,18 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
             openReceiptForEdit(receipt)
         }
         binding.statefulList.setAdapter(adapter)
-        binding.statefulList.setOnRefreshListener { viewModel.refresh() }
-        binding.statefulList.setOnLoadMoreListener { viewModel.loadMore() }
-        binding.statefulList.setOnRetryListener { viewModel.loadReceipts() }
+        binding.statefulList.setOnRefreshListener {
+            LogHelper.d(LOG_TAG, "ui pull_to_refresh")
+            viewModel.refresh()
+        }
+        binding.statefulList.setOnLoadMoreListener {
+            LogHelper.d(LOG_TAG, "ui load_more")
+            viewModel.loadMore()
+        }
+        binding.statefulList.setOnRetryListener {
+            LogHelper.d(LOG_TAG, "ui retry_load")
+            viewModel.loadReceipts()
+        }
     }
 
     private fun setupListeners() {

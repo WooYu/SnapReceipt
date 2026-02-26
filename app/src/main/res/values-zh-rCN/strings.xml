@@ -130,7 +130,10 @@
     <string name="custom_type_empty">请输入自定义类型名称</string>
     <string name="add_category_failed">添加分类失败</string>
     <string name="delete_category_failed">删除分类失败</string>
+    <string name="refresh_category_failed">分类列表刷新失败</string>
     <string name="delete_category_confirm">确认删除"%s"？</string>
+    <string name="category_operation_adding">正在添加分类…</string>
+    <string name="category_operation_deleting">正在删除分类…</string>
     <string name="category_delete_hint">长按自定义类型可删除</string>
     <string name="type_other">其他</string>
     <string name="type_add">+ 类型</string>

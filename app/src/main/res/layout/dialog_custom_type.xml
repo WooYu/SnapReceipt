@@ -69,7 +69,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="@string/loading_please_wait_dynamic"
+            android:text="@string/category_operation_adding"
             android:textColor="@color/text_secondary"
             android:textSize="@dimen/text_size_small" />
     </LinearLayout>

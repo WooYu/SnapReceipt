@@ -18,6 +18,7 @@ import com.skybound.space.core.util.DateFormatUtil
 import com.skybound.space.core.util.LogHelper
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentReceiptsBinding
+import com.snapreceipt.io.domain.manager.CategoryCacheManager
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsArgsCodec
@@ -30,6 +31,7 @@ import com.snapreceipt.io.ui.widget.datepicker.DateRangeBottomSheet
 import com.snapreceipt.io.ui.widget.statefullist.StatefulListLayout
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_receipts) {
@@ -43,6 +45,9 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
 
     override val viewModel: ReceiptsViewModel by viewModels()
     private val refreshViewModel: ListRefreshViewModel by activityViewModels()
+    
+    @Inject
+    lateinit var categoryCache: CategoryCacheManager
 
     private var _binding: FragmentReceiptsBinding? = null
     private val binding get() = _binding!!
@@ -55,6 +60,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     private var currentState: ReceiptsUiState = ReceiptsUiState()
     private var shouldScrollToTopOnNextRender = false
     private var pendingReceiptsRefreshAfterLoad = false
+    private var pendingReceiptsRefreshReason: String? = null
     private var refreshEventsJob: Job? = null
 
     // 用于启动 InvoiceDetailsActivity 并处理返回结果
@@ -71,42 +77,53 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
             lifecycleScope.launchWhenResumed {
                 when (operationType) {
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_ADD -> {
-                        refreshViewModel.markHomeDirty()
                         // 新增：插入列表头部
                         if (hasActiveFilters()) {
-                            requestReceiptsRefreshOrDefer()
+                            requestReceiptsRefreshOrDefer("invoice_details_result_add_with_filters")
+                            refreshViewModel.notifyHomeFullRefresh()
                         } else if (receipt != null) {
+                            LogHelper.d(LOG_TAG, "invoice result add -> local insert + markHomeDirty")
                             viewModel.addReceiptLocally(receipt)
                             shouldScrollToTopOnNextRender = true
-                            refreshViewModel.requestHomeItemAdded(receipt)
+                            refreshViewModel.notifyHomeItemAdded(receipt)
+                        } else {
+                            requestReceiptsRefreshOrDefer("invoice_details_result_add_missing_payload")
+                            refreshViewModel.notifyHomeFullRefresh()
                         }
                     }
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_UPDATE -> {
-                        refreshViewModel.markHomeDirty()
                         // 编辑：更新列表中的项
                         if (hasActiveFilters()) {
-                            requestReceiptsRefreshOrDefer()
+                            requestReceiptsRefreshOrDefer("invoice_details_result_update_with_filters")
+                            refreshViewModel.notifyHomeFullRefresh()
                         } else if (receipt != null) {
+                            LogHelper.d(LOG_TAG, "invoice result update -> local update + markHomeDirty")
                             viewModel.updateReceiptLocally(receipt)
                             // 后台增量刷新，确保服务端数据一致
-                            refreshViewModel.requestHomeItemUpdated(receipt)
+                            refreshViewModel.notifyHomeItemUpdated(receipt)
+                        } else {
+                            requestReceiptsRefreshOrDefer("invoice_details_result_update_missing_payload")
+                            refreshViewModel.notifyHomeFullRefresh()
                         }
                     }
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_DELETE -> {
-                        refreshViewModel.markHomeDirty()
                         // 删除：移除列表中的项
                         if (hasActiveFilters()) {
-                            requestReceiptsRefreshOrDefer()
+                            requestReceiptsRefreshOrDefer("invoice_details_result_delete_with_filters")
+                            refreshViewModel.notifyHomeFullRefresh()
                         } else if (receiptId != null && receiptId > 0) {
+                            LogHelper.d(LOG_TAG, "invoice result delete -> local delete + markHomeDirty")
                             viewModel.deleteReceiptLocally(receiptId)
-                            refreshViewModel.requestHomeItemDeleted(receiptId)
+                            refreshViewModel.notifyHomeItemDeleted(receiptId)
+                        } else {
+                            requestReceiptsRefreshOrDefer("invoice_details_result_delete_missing_payload")
+                            refreshViewModel.notifyHomeFullRefresh()
                         }
                     }
                     else -> {
                         // 未知操作或来自其他来源，执行全量刷新
-                        requestReceiptsRefreshOrDefer()
-                        refreshViewModel.requestHomeFullRefresh()
-                        refreshViewModel.markHomeDirty()
+                        requestReceiptsRefreshOrDefer("invoice_details_result_unknown_operation")
+                        refreshViewModel.notifyHomeFullRefresh()
                     }
                 }
             }
@@ -140,7 +157,9 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         refreshEventsJob?.cancel()
 
         if (refreshViewModel.consumeReceiptsDirty()) {
-            requestReceiptsRefreshOrDefer()
+            if (!syncCategoryFilterDisplayIfInvalid("on_resume_consume_receipts_dirty")) {
+                requestReceiptsRefreshOrDefer("on_resume_consume_receipts_dirty")
+            }
         }
 
         refreshEventsJob = lifecycleScope.launchWhenResumed {
@@ -148,28 +167,34 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                 when (event) {
                     is ReceiptsRefreshEvent.ItemAdded -> {
                         if (hasActiveFilters()) {
-                            requestReceiptsRefreshOrDefer()
+                            requestReceiptsRefreshOrDefer("receipts_refresh_event_item_added_with_filters")
                         } else {
+                            LogHelper.d(LOG_TAG, "event item_added -> local insert")
                             viewModel.addReceiptLocally(event.receipt)
                             shouldScrollToTopOnNextRender = true
                         }
                     }
                     is ReceiptsRefreshEvent.ItemUpdated -> {
                         if (hasActiveFilters()) {
-                            requestReceiptsRefreshOrDefer()
+                            requestReceiptsRefreshOrDefer("receipts_refresh_event_item_updated_with_filters")
                         } else {
+                            LogHelper.d(LOG_TAG, "event item_updated -> local update")
                             viewModel.updateReceiptLocally(event.receipt)
                         }
                     }
                     is ReceiptsRefreshEvent.ItemDeleted -> {
                         if (hasActiveFilters()) {
-                            requestReceiptsRefreshOrDefer()
+                            requestReceiptsRefreshOrDefer("receipts_refresh_event_item_deleted_with_filters")
                         } else {
+                            LogHelper.d(LOG_TAG, "event item_deleted -> local delete")
                             viewModel.deleteReceiptLocally(event.receiptId)
                         }
                     }
                     is ReceiptsRefreshEvent.FullRefresh -> {
-                        requestReceiptsRefreshOrDefer()
+                        refreshViewModel.consumeReceiptsDirty()
+                        if (!syncCategoryFilterDisplayIfInvalid("receipts_refresh_event_full_refresh")) {
+                            requestReceiptsRefreshOrDefer("receipts_refresh_event_full_refresh")
+                        }
                     }
                 }
             }
@@ -271,27 +296,40 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         binding.selectAllBtn.isEnabled = !state.exporting
     }
 
-    private fun requestReceiptsRefreshOrDefer() {
+    private fun requestReceiptsRefreshOrDefer(trigger: String) {
         val state = viewModel.uiState.value
+        LogHelper.d(
+            LOG_TAG,
+            "request trigger=$trigger loading=${state.loading} refreshing=${state.refreshing} hasLoaded=${state.hasLoaded} hasActiveFilters=${hasActiveFilters()}"
+        )
         if (!state.loading && !state.refreshing) {
             pendingReceiptsRefreshAfterLoad = false
+            pendingReceiptsRefreshReason = null
             if (state.hasLoaded) {
+                LogHelper.d(LOG_TAG, "execute trigger=$trigger action=refresh")
                 viewModel.refresh()
             } else {
+                LogHelper.d(LOG_TAG, "execute trigger=$trigger action=load")
                 viewModel.loadReceipts()
             }
         } else {
             pendingReceiptsRefreshAfterLoad = true
+            pendingReceiptsRefreshReason = trigger
+            LogHelper.d(LOG_TAG, "defer trigger=$trigger")
         }
     }
 
     private fun tryConsumePendingReceiptsRefresh(state: ReceiptsUiState) {
         if (!pendingReceiptsRefreshAfterLoad) return
         if (state.loading || state.refreshing) return
+        val deferredReason = pendingReceiptsRefreshReason ?: "unknown"
         pendingReceiptsRefreshAfterLoad = false
+        pendingReceiptsRefreshReason = null
         if (state.hasLoaded) {
+            LogHelper.d(LOG_TAG, "consume deferred=$deferredReason action=refresh")
             viewModel.refresh()
         } else {
+            LogHelper.d(LOG_TAG, "consume deferred=$deferredReason action=load")
             viewModel.loadReceipts()
         }
     }
@@ -307,9 +345,18 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
             }
         )
         binding.statefulList.setAdapter(adapter)
-        binding.statefulList.setOnRefreshListener { viewModel.refresh() }
-        binding.statefulList.setOnLoadMoreListener { viewModel.loadMore() }
-        binding.statefulList.setOnRetryListener { viewModel.refresh() }
+        binding.statefulList.setOnRefreshListener {
+            LogHelper.d(LOG_TAG, "ui pull_to_refresh")
+            viewModel.refresh()
+        }
+        binding.statefulList.setOnLoadMoreListener {
+            LogHelper.d(LOG_TAG, "ui load_more")
+            viewModel.loadMore()
+        }
+        binding.statefulList.setOnRetryListener {
+            LogHelper.d(LOG_TAG, "ui retry_load")
+            viewModel.refresh()
+        }
     }
 
     private fun setupListeners() {
@@ -374,6 +421,29 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         viewModel.filterByInvoiceCategory(filterCategoryLabel.orEmpty())
     }
 
+    private fun syncCategoryFilterDisplayIfInvalid(trigger: String): Boolean {
+        val currentLabel = filterCategoryLabel?.trim().orEmpty()
+        if (currentLabel.isBlank()) return false
+        if (categoryCache.getCategories().isEmpty()) {
+            LogHelper.d(
+                LOG_TAG,
+                "Defer category filter validation to ViewModel trigger=$trigger reason=empty_cache label='$currentLabel'"
+            )
+            viewModel.filterByInvoiceCategory(currentLabel)
+            return true
+        }
+        if (categoryCache.idForLabel(currentLabel) > 0L) return false
+
+        filterCategoryLabel = null
+        binding.filterCategoryBtn.text = getString(R.string.filter_category)
+        LogHelper.d(
+            LOG_TAG,
+            "Category filter '$currentLabel' no longer exists, reset filter state trigger=$trigger"
+        )
+        viewModel.filterByInvoiceCategory("")
+        return true
+    }
+
     private fun applyTypeFilterSelection(rawSelected: String) {
         val normalized = rawSelected.trim()
         filterTypeLabel = normalized.ifBlank { null }
@@ -403,11 +473,25 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     }
 
     override fun onCustomEvent(event: com.skybound.space.base.presentation.UiEvent.Custom) {
-        if (event.type == ReceiptsEventKeys.SHOW_EXPORT_SUCCESS) {
-            val exportUrl = event.payload?.getString(ReceiptsEventKeys.EXPORT_URL).orEmpty()
-            ExportSuccessDialog {
-                openExportUrl(exportUrl)
-            }.show(parentFragmentManager, "export_success")
+        when (event.type) {
+            ReceiptsEventKeys.SHOW_EXPORT_SUCCESS -> {
+                val exportUrl = event.payload?.getString(ReceiptsEventKeys.EXPORT_URL).orEmpty()
+                ExportSuccessDialog {
+                    openExportUrl(exportUrl)
+                }.show(parentFragmentManager, "export_success")
+            }
+            ReceiptsEventKeys.CATEGORY_FILTER_INVALID -> {
+                if (_binding == null) return
+                val invalidLabel = event.payload?.getString(ReceiptsEventKeys.CATEGORY_LABEL).orEmpty()
+                if (filterCategoryLabel.equals(invalidLabel, ignoreCase = true)) {
+                    filterCategoryLabel = null
+                    binding.filterCategoryBtn.text = getString(R.string.filter_category)
+                    LogHelper.d(
+                        LOG_TAG,
+                        "Category filter '$invalidLabel' cleared by ViewModel invalid event"
+                    )
+                }
+            }
         }
     }
 

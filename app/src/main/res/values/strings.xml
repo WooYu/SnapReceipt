@@ -130,7 +130,10 @@
     <string name="custom_type_empty">Please enter a custom type</string>
     <string name="add_category_failed">Failed to add category</string>
     <string name="delete_category_failed">Failed to delete category</string>
+    <string name="refresh_category_failed">Category list refresh failed</string>
     <string name="delete_category_confirm">Delete \"%s\"?</string>
+    <string name="category_operation_adding">Adding category…</string>
+    <string name="category_operation_deleting">Deleting category…</string>
     <string name="category_delete_hint">Long press a custom type to delete</string>
     <string name="type_other">Other</string>
     <string name="type_add">+ Type</string>

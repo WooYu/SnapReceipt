@@ -39,43 +39,83 @@ class ListRefreshViewModel @Inject constructor() : ViewModel() {
     private val homeDirty = AtomicBoolean(false)
     private val receiptsDirty = AtomicBoolean(false)
 
-    suspend fun requestHomeItemAdded(receipt: ReceiptEntity) {
+    private suspend fun requestHomeItemAdded(receipt: ReceiptEntity) {
         _refreshHomeEvent.emit(HomeRefreshEvent.ItemAdded(receipt))
     }
 
-    suspend fun requestHomeItemUpdated(receipt: ReceiptEntity) {
+    suspend fun notifyHomeItemAdded(receipt: ReceiptEntity) {
+        markHomeDirty()
+        requestHomeItemAdded(receipt)
+    }
+
+    private suspend fun requestHomeItemUpdated(receipt: ReceiptEntity) {
         _refreshHomeEvent.emit(HomeRefreshEvent.ItemUpdated(receipt))
     }
 
-    suspend fun requestHomeItemDeleted(receiptId: Long) {
+    suspend fun notifyHomeItemUpdated(receipt: ReceiptEntity) {
+        markHomeDirty()
+        requestHomeItemUpdated(receipt)
+    }
+
+    private suspend fun requestHomeItemDeleted(receiptId: Long) {
         _refreshHomeEvent.emit(HomeRefreshEvent.ItemDeleted(receiptId))
     }
 
-    suspend fun requestHomeFullRefresh() {
+    suspend fun notifyHomeItemDeleted(receiptId: Long) {
+        markHomeDirty()
+        requestHomeItemDeleted(receiptId)
+    }
+
+    private suspend fun requestHomeFullRefresh() {
         _refreshHomeEvent.emit(HomeRefreshEvent.FullRefresh)
     }
 
-    suspend fun requestReceiptsItemAdded(receipt: ReceiptEntity) {
+    suspend fun notifyHomeFullRefresh() {
+        markHomeDirty()
+        requestHomeFullRefresh()
+    }
+
+    private suspend fun requestReceiptsItemAdded(receipt: ReceiptEntity) {
         _refreshReceiptsEvent.emit(ReceiptsRefreshEvent.ItemAdded(receipt))
     }
 
-    suspend fun requestReceiptsItemUpdated(receipt: ReceiptEntity) {
+    suspend fun notifyReceiptsItemAdded(receipt: ReceiptEntity) {
+        markReceiptsDirty()
+        requestReceiptsItemAdded(receipt)
+    }
+
+    private suspend fun requestReceiptsItemUpdated(receipt: ReceiptEntity) {
         _refreshReceiptsEvent.emit(ReceiptsRefreshEvent.ItemUpdated(receipt))
     }
 
-    suspend fun requestReceiptsItemDeleted(receiptId: Long) {
+    suspend fun notifyReceiptsItemUpdated(receipt: ReceiptEntity) {
+        markReceiptsDirty()
+        requestReceiptsItemUpdated(receipt)
+    }
+
+    private suspend fun requestReceiptsItemDeleted(receiptId: Long) {
         _refreshReceiptsEvent.emit(ReceiptsRefreshEvent.ItemDeleted(receiptId))
     }
 
-    suspend fun requestReceiptsFullRefresh() {
+    suspend fun notifyReceiptsItemDeleted(receiptId: Long) {
+        markReceiptsDirty()
+        requestReceiptsItemDeleted(receiptId)
+    }
+
+    private suspend fun requestReceiptsFullRefresh() {
         _refreshReceiptsEvent.emit(ReceiptsRefreshEvent.FullRefresh)
     }
 
-    fun markHomeDirty() {
+    suspend fun notifyReceiptsFullRefresh() {
+        markReceiptsDirty()
+        requestReceiptsFullRefresh()
+    }
+
+    private fun markHomeDirty() {
         homeDirty.set(true)
     }
 
-    fun markReceiptsDirty() {
+    private fun markReceiptsDirty() {
         receiptsDirty.set(true)
     }
 
