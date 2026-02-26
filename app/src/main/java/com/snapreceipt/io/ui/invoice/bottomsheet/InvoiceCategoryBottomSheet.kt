@@ -275,8 +275,14 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
                         .filterNot { it.id == item.id }
                     categoryCache.update(updatedList)
                     applyCategories(updatedList, reconcileSelection = true)
-                    refreshViewModel.notifyHomeFullRefresh()
-                    refreshViewModel.notifyReceiptsFullRefresh()
+                    // SharedFlow emit can suspend; dispatch refresh notifications asynchronously
+                    // so the delete operation UI state can always be released promptly.
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        refreshViewModel.notifyHomeFullRefresh()
+                    }
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        refreshViewModel.notifyReceiptsFullRefresh()
+                    }
                     refreshCategoriesFromRemote { refreshSuccess ->
                         if (!refreshSuccess) {
                             showToast(R.string.refresh_category_failed)

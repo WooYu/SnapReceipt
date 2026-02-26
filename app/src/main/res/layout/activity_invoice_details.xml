@@ -235,122 +235,204 @@
                 android:paddingBottom="16dp">
 
                 <!--预览模式-->
-                <TableLayout
+                <LinearLayout
                     android:id="@+id/section_view_mode"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:shrinkColumns="0"
-                    android:stretchColumns="1">
+                    android:orientation="vertical">
                     <!--预览模式：表格-->
-                    <TableRow>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:baselineAligned="false"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="100dp"
                             android:text="@string/merchant"
                             android:textColor="@color/text_secondary"
                             android:textSize="@dimen/text_size_secondary" />
 
                         <TextView
                             android:id="@+id/value_merchant"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
+                            android:layout_weight="1"
+                            android:breakStrategy="simple"
                             android:ellipsize="end"
                             android:gravity="end"
+                            android:hyphenationFrequency="none"
                             android:maxLines="2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
                             tools:text="Starbucks Coffee" />
-                    </TableRow>
+                    </LinearLayout>
 
-                    <TableRow android:layout_marginTop="34dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="34dp"
+                        android:baselineAligned="false"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="100dp"
                             android:text="@string/address"
                             android:textColor="@color/text_secondary"
                             android:textSize="@dimen/text_size_secondary" />
 
                         <TextView
                             android:id="@+id/value_address"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
+                            android:layout_weight="1"
+                            android:breakStrategy="simple"
                             android:ellipsize="end"
                             android:gravity="end"
+                            android:hyphenationFrequency="none"
                             android:maxLines="2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
                             tools:text="San Francisco" />
-                    </TableRow>
+                    </LinearLayout>
 
-                    <TableRow android:layout_marginTop="34dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="34dp"
+                        android:baselineAligned="false"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="100dp"
                             android:text="@string/date"
                             android:textColor="@color/text_secondary"
                             android:textSize="@dimen/text_size_secondary" />
 
                         <TextView
                             android:id="@+id/value_date"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
+                            android:layout_weight="1"
+                            android:breakStrategy="simple"
                             android:ellipsize="end"
                             android:gravity="end"
+                            android:hyphenationFrequency="none"
                             android:maxLines="2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
                             tools:text="2025/12/30 10:20AM" />
-                    </TableRow>
+                    </LinearLayout>
 
-                    <TableRow android:layout_marginTop="34dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="34dp"
+                        android:baselineAligned="false"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="100dp"
                             android:text="@string/bank_card"
                             android:textColor="@color/text_secondary"
                             android:textSize="@dimen/text_size_secondary" />
 
                         <TextView
                             android:id="@+id/value_card"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
+                            android:layout_weight="1"
+                            android:breakStrategy="simple"
                             android:ellipsize="end"
                             android:gravity="end"
+                            android:hyphenationFrequency="none"
                             android:maxLines="2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
                             tools:text="**** **** **** 6809" />
-                    </TableRow>
+                    </LinearLayout>
 
-                    <TableRow android:layout_marginTop="34dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="34dp"
+                        android:baselineAligned="false"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="100dp"
                             android:text="@string/invoice_category"
                             android:textColor="@color/text_secondary"
                             android:textSize="@dimen/text_size_secondary" />
 
                         <TextView
                             android:id="@+id/value_invoice_category"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
+                            android:layout_weight="1"
+                            android:breakStrategy="simple"
                             android:ellipsize="end"
                             android:gravity="end"
+                            android:hyphenationFrequency="none"
                             android:maxLines="2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
                             tools:text="Food" />
-                    </TableRow>
+                    </LinearLayout>
 
-                    <TableRow android:layout_marginTop="34dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="34dp"
+                        android:baselineAligned="false"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="100dp"
                             android:text="@string/invoice_type"
                             android:textColor="@color/text_secondary"
                             android:textSize="@dimen/text_size_secondary" />
 
                         <TextView
                             android:id="@+id/value_invoice_type"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
+                            android:layout_weight="1"
+                            android:breakStrategy="simple"
                             android:ellipsize="end"
                             android:gravity="end"
+                            android:hyphenationFrequency="none"
                             android:maxLines="2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
                             tools:text="Individual" />
-                    </TableRow>
+                    </LinearLayout>
 
-                </TableLayout>
+                </LinearLayout>
 
                 <!--预览模式：备注-->
                 <TextView
