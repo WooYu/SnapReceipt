@@ -52,7 +52,8 @@
         <!-- 第一行：Category + Type -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -60,10 +61,11 @@
             <TextView
                 android:id="@+id/filter_category_btn"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:drawableEnd="@drawable/ic_chevron_down_solid"
                 android:drawablePadding="4dp"
                 android:gravity="center_vertical"
+                android:paddingVertical="10dp"
                 android:paddingStart="@dimen/page_start_margin"
                 android:paddingEnd="10dp"
                 android:text="@string/filter_category"
@@ -80,10 +82,11 @@
             <TextView
                 android:id="@+id/filter_type_btn"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:drawableEnd="@drawable/ic_chevron_down_solid"
                 android:drawablePadding="4dp"
                 android:gravity="center_vertical"
+                android:paddingVertical="10dp"
                 android:paddingStart="10dp"
                 android:paddingEnd="@dimen/page_end_margin"
                 android:text="@string/filter_type"
@@ -96,12 +99,13 @@
         <TextView
             android:id="@+id/filter_date_btn"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
             android:drawableEnd="@drawable/ic_chevron_down_solid"
             android:drawablePadding="4dp"
             android:ellipsize="end"
             android:gravity="center_vertical"
             android:maxLines="1"
+            android:paddingVertical="10dp"
             android:paddingStart="@dimen/page_start_margin"
             android:paddingEnd="@dimen/page_end_margin"
             android:text="@string/select_date"
@@ -115,7 +119,6 @@
         android:id="@+id/stateful_list"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="4dp"
         app:layout_constraintBottom_toTopOf="@id/action_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
