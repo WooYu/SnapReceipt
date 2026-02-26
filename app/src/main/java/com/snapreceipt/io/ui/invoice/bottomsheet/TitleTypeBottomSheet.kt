@@ -125,7 +125,7 @@ class TitleTypeBottomSheet : BottomSheetDialogFragment() {
                 )
                 option.check.isVisible = true
             } else {
-                option.container.setBackgroundResource(R.drawable.bg_surface_card_small)
+                option.container.setBackgroundResource(R.drawable.bg_chip_default)
                 option.text.setTextColor(
                     resources.getColor(R.color.text_primary, requireContext().theme)
                 )

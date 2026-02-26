@@ -338,7 +338,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
             )
             rowBinding.rowCheck.isVisible = true
         } else {
-            rowBinding.rowContent.background = null
+            rowBinding.rowContent.setBackgroundResource(R.drawable.bg_chip_default)
             rowBinding.rowText.setTextColor(
                 resources.getColor(R.color.text_primary, requireContext().theme)
             )
@@ -356,7 +356,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
                 resources.getColor(R.color.colorPrimary, requireContext().theme)
             )
         } else {
-            rowBinding.customRowRoot.background = null
+            rowBinding.customRowRoot.setBackgroundResource(R.drawable.bg_chip_default)
             rowBinding.customRowText.setTextColor(
                 resources.getColor(R.color.text_primary, requireContext().theme)
             )
