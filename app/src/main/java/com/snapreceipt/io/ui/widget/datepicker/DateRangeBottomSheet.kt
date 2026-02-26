@@ -27,6 +27,7 @@ class DateRangeBottomSheet : BottomSheetDialogFragment() {
         private const val STATE_END_MILLIS = "state_end_millis"
         private const val STATE_IS_RESET = "state_is_reset"
         private const val RECENT_YEAR_COUNT = 50
+        private const val DEFAULT_RANGE_DAYS = 7
 
         fun newInstance(
             initialStart: Long?,
@@ -50,42 +51,29 @@ class DateRangeBottomSheet : BottomSheetDialogFragment() {
     private var isDateReset = false
     private var onSelected: ((start: Long?, end: Long?) -> Unit)? = null
 
-    private var initialStartMillis: Long = -1L
-    private var initialEndMillis: Long = -1L
-    private var initialHasNoFilter: Boolean = false
-
     private var _binding: BottomSheetDateRangeBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val now = System.currentTimeMillis()
+        val argStart = arguments?.getLong(ARG_INITIAL_START, -1L) ?: -1L
+        val argEnd = arguments?.getLong(ARG_INITIAL_END, -1L) ?: -1L
 
         if (savedInstanceState != null) {
             val savedStart = savedInstanceState.getLong(STATE_START_MILLIS, -1L)
             val savedEnd = savedInstanceState.getLong(STATE_END_MILLIS, -1L)
             isDateReset = savedInstanceState.getBoolean(STATE_IS_RESET, false)
-            initialStartMillis = savedInstanceState.getLong("initial_start", -1L)
-            initialEndMillis = savedInstanceState.getLong("initial_end", -1L)
-            initialHasNoFilter = savedInstanceState.getBoolean("initial_no_filter", false)
-            startCalendar.timeInMillis = if (savedStart > 0) savedStart else now - 7 * 24 * 60 * 60 * 1000L
-            endCalendar.timeInMillis = if (savedEnd > 0) savedEnd else now
+            if (savedStart > 0 && savedEnd > 0) {
+                startCalendar.timeInMillis = savedStart
+                endCalendar.timeInMillis = savedEnd
+                startCalendar.resetTimeToMidnight()
+                endCalendar.resetTimeToMidnight()
+            } else {
+                initializeRange(argStart, argEnd, now)
+            }
         } else {
-            val argStart = arguments?.getLong(ARG_INITIAL_START, -1L) ?: -1L
-            val argEnd = arguments?.getLong(ARG_INITIAL_END, -1L) ?: -1L
-            startCalendar.timeInMillis = if (argStart > 0) argStart else now - 7 * 24 * 60 * 60 * 1000L
-            endCalendar.timeInMillis = if (argEnd > 0) argEnd else now
-        }
-
-        startCalendar.resetTimeToMidnight()
-        endCalendar.resetTimeToMidnight()
-
-        if (savedInstanceState == null) {
-            initialStartMillis = startCalendar.timeInMillis
-            initialEndMillis = endCalendar.timeInMillis
-            val argStart = arguments?.getLong(ARG_INITIAL_START, -1L) ?: -1L
-            val argEnd = arguments?.getLong(ARG_INITIAL_END, -1L) ?: -1L
-            initialHasNoFilter = argStart <= 0L && argEnd <= 0L
+            initializeRange(argStart, argEnd, now)
         }
     }
 
@@ -108,9 +96,6 @@ class DateRangeBottomSheet : BottomSheetDialogFragment() {
         outState.putLong(STATE_START_MILLIS, startCalendar.timeInMillis)
         outState.putLong(STATE_END_MILLIS, endCalendar.timeInMillis)
         outState.putBoolean(STATE_IS_RESET, isDateReset)
-        outState.putLong("initial_start", initialStartMillis)
-        outState.putLong("initial_end", initialEndMillis)
-        outState.putBoolean("initial_no_filter", initialHasNoFilter)
         super.onSaveInstanceState(outState)
     }
 
@@ -187,13 +172,11 @@ class DateRangeBottomSheet : BottomSheetDialogFragment() {
 
     private fun setupListeners() {
         binding.startDate.setOnClickListener {
-            isDateReset = false
             editingStart = true
             syncPickersToCalendar(startCalendar)
             updateChipSelection()
         }
         binding.endDate.setOnClickListener {
-            isDateReset = false
             editingStart = false
             syncPickersToCalendar(endCalendar)
             updateChipSelection()
@@ -209,17 +192,39 @@ class DateRangeBottomSheet : BottomSheetDialogFragment() {
 
         binding.cancelBtn.text = getString(R.string.reset)
         binding.cancelBtn.setOnClickListener {
-            isDateReset = initialHasNoFilter
-            startCalendar.timeInMillis = initialStartMillis
-            endCalendar.timeInMillis = initialEndMillis
-            startCalendar.resetTimeToMidnight()
-            endCalendar.resetTimeToMidnight()
+            isDateReset = true
+            applyDefaultRange()
             editingStart = true
             syncPickersToCalendar(startCalendar)
             updateDateChips()
             updateChipSelection()
         }
         binding.confirmBtn.setOnClickListener { onConfirmClicked() }
+    }
+
+    private fun initializeRange(argStart: Long, argEnd: Long, now: Long) {
+        if (argStart <= 0L && argEnd <= 0L) {
+            applyDefaultRange(now)
+            return
+        }
+
+        endCalendar.timeInMillis = if (argEnd > 0L) argEnd else now
+        endCalendar.resetTimeToMidnight()
+
+        if (argStart > 0L) {
+            startCalendar.timeInMillis = argStart
+            startCalendar.resetTimeToMidnight()
+        } else {
+            startCalendar.timeInMillis = endCalendar.timeInMillis
+            startCalendar.add(Calendar.DAY_OF_MONTH, -DEFAULT_RANGE_DAYS)
+        }
+    }
+
+    private fun applyDefaultRange(referenceNowMillis: Long = System.currentTimeMillis()) {
+        endCalendar.timeInMillis = referenceNowMillis
+        endCalendar.resetTimeToMidnight()
+        startCalendar.timeInMillis = endCalendar.timeInMillis
+        startCalendar.add(Calendar.DAY_OF_MONTH, -DEFAULT_RANGE_DAYS)
     }
 
     private fun onPickerChanged() {
