@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/custom_row_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:background="@drawable/bg_custom_category_row"
     android:gravity="center_vertical"
-    android:minHeight="48dp"
+    android:minHeight="40dp"
     android:orientation="horizontal"
     android:paddingHorizontal="16dp"
-    android:paddingVertical="12dp">
+    android:paddingVertical="13dp">
 
     <TextView
         android:id="@+id/custom_row_text"
@@ -21,14 +20,16 @@
         android:maxLines="1"
         android:textColor="@color/text_primary"
         android:textSize="@dimen/text_size_secondary"
+        android:textStyle="bold"
         tools:text="Food" />
 
     <ImageView
         android:id="@+id/custom_row_delete"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
+        android:layout_width="@dimen/check_box_size"
+        android:layout_height="@dimen/check_box_size"
         android:layout_marginStart="8dp"
         android:contentDescription="@string/delete"
-        android:src="@drawable/ic_close_circle" />
+        android:src="@drawable/ic_close_circle"
+        app:tint="#7D899C" />
 
 </LinearLayout>

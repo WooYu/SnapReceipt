@@ -5,10 +5,9 @@
     android:id="@+id/root_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="16dp"
     android:background="@drawable/bg_surface_bottom_sheet"
     android:orientation="vertical"
-    android:paddingHorizontal="20dp"
+    android:paddingHorizontal="16dp"
     android:paddingTop="20dp"
     android:paddingBottom="16dp">
 

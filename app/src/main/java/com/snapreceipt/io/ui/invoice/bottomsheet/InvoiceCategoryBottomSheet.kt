@@ -151,7 +151,6 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
             if (!isOperationInProgress) openAddCategoryDialog()
         }
 
-        binding.cancelBtn.text = getString(R.string.reset)
         binding.cancelBtn.setOnClickListener {
             selectedLabel = ""
             updateSelectionUI()
@@ -333,7 +332,7 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         isSelected: Boolean
     ) {
         if (isSelected) {
-            rowBinding.rowContent.setBackgroundResource(R.drawable.bg_category_row_selected)
+            rowBinding.rowContent.setBackgroundResource(R.drawable.bg_chip_selected)
             rowBinding.rowText.setTextColor(
                 resources.getColor(R.color.colorPrimary, requireContext().theme)
             )
@@ -352,12 +351,12 @@ class InvoiceCategoryBottomSheet : BottomSheetDialogFragment() {
         isSelected: Boolean
     ) {
         if (isSelected) {
-            rowBinding.customRowRoot.setBackgroundResource(R.drawable.bg_option_row_selected)
+            rowBinding.customRowRoot.setBackgroundResource(R.drawable.bg_chip_selected)
             rowBinding.customRowText.setTextColor(
                 resources.getColor(R.color.colorPrimary, requireContext().theme)
             )
         } else {
-            rowBinding.customRowRoot.setBackgroundResource(R.drawable.bg_custom_category_row)
+            rowBinding.customRowRoot.background = null
             rowBinding.customRowText.setTextColor(
                 resources.getColor(R.color.text_primary, requireContext().theme)
             )

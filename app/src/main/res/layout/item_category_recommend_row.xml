@@ -3,19 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/row_root"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingHorizontal="12dp"
-    android:paddingVertical="2dp">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:id="@+id/row_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:minHeight="44dp"
+        android:minHeight="40dp"
         android:orientation="horizontal"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="10dp">
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="13dp">
 
         <TextView
             android:id="@+id/row_text"
@@ -26,12 +24,13 @@
             android:maxLines="1"
             android:textColor="@color/text_primary"
             android:textSize="@dimen/text_size_secondary"
+            android:textStyle="bold"
             tools:text="Business Cards" />
 
         <ImageView
             android:id="@+id/row_check"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
+            android:layout_width="@dimen/check_box_size"
+            android:layout_height="@dimen/check_box_size"
             android:layout_marginStart="8dp"
             android:contentDescription="@null"
             android:src="@drawable/ic_check_circle_filled"

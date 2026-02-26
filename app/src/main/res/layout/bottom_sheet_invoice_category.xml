@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="16dp"
     android:background="@drawable/bg_surface_bottom_sheet_filter"
     android:orientation="vertical"
-    android:paddingHorizontal="20dp"
-    android:paddingTop="24dp"
-    android:paddingBottom="20dp">
+    android:padding="16dp">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -28,7 +26,7 @@
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="6dp"
             android:text="@string/select_invoice_category"
             android:textColor="@color/text_primary"
             android:textSize="@dimen/text_size_secondary"
@@ -38,7 +36,7 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="350dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="16dp"
         android:fillViewport="true"
         android:overScrollMode="never">
 
@@ -52,7 +50,7 @@
                 android:id="@+id/recommend_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="12dp"
                 android:text="@string/category_section_recommend"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_small" />
@@ -62,27 +60,28 @@
                 android:id="@+id/recommend_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_category_recommend_container"
-                android:orientation="vertical"
-                android:paddingVertical="4dp" />
+                android:background="@drawable/bg_surface_card_small"
+                android:orientation="vertical" />
 
             <!-- Customize section header -->
             <TextView
                 android:id="@+id/customize_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="12dp"
                 android:text="@string/category_section_customize"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_small"
-                android:visibility="gone" />
+                android:visibility="gone"
+                tools:visibility="visible" />
 
             <!-- Custom items container -->
             <LinearLayout
                 android:id="@+id/custom_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/bg_surface_card_small"
                 android:orientation="vertical" />
 
             <!-- Add category button -->
@@ -90,14 +89,15 @@
                 android:id="@+id/add_category_btn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:background="@drawable/bg_chip_dashed"
                 android:gravity="center"
-                android:minHeight="48dp"
+                android:minHeight="40dp"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="13dp"
                 android:text="@string/category_add"
                 android:textColor="@color/colorPrimary"
-                android:textSize="@dimen/text_size_secondary"
-                android:textStyle="bold" />
+                android:textSize="@dimen/text_size_secondary" />
 
         </LinearLayout>
 
@@ -107,7 +107,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="4dp"
-        android:layout_marginTop="22dp"
+        android:layout_marginTop="30dp"
         android:orientation="horizontal">
 
         <com.snapreceipt.io.ui.widget.PrimaryActionButton
@@ -116,7 +116,7 @@
             android:layout_height="@dimen/button_height_small"
             android:layout_marginEnd="27dp"
             android:layout_weight="1"
-            android:text="@string/cancel"
+            android:text="@string/reset"
             app:pabBackgroundStyle="solid"
             app:pabEnableShadow="false"
             app:pabPressedDarkenFactor="0.92"

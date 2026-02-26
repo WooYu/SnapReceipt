@@ -69,7 +69,6 @@ class TitleTypeBottomSheet : BottomSheetDialogFragment() {
             }
         }
 
-        binding.cancelBtn.text = getString(R.string.reset)
         binding.cancelBtn.setOnClickListener {
             selectedLabel = ""
             updateSelection()
@@ -120,13 +119,13 @@ class TitleTypeBottomSheet : BottomSheetDialogFragment() {
                 .equals(selectedLabel, ignoreCase = true)
 
             if (isSelected) {
-                option.container.setBackgroundResource(R.drawable.bg_option_row_selected)
+                option.container.setBackgroundResource(R.drawable.bg_chip_selected)
                 option.text.setTextColor(
                     resources.getColor(R.color.colorPrimary, requireContext().theme)
                 )
                 option.check.isVisible = true
             } else {
-                option.container.setBackgroundResource(R.drawable.bg_option_row_default)
+                option.container.setBackgroundResource(R.drawable.bg_surface_card_small)
                 option.text.setTextColor(
                     resources.getColor(R.color.text_primary, requireContext().theme)
                 )

@@ -252,7 +252,11 @@ class DateRangeBottomSheet : BottomSheetDialogFragment() {
         val startMillis = startCalendar.timeInMillis
         val endMillis = endCalendar.timeInMillis
         if (startMillis > endMillis) {
-            Toast.makeText(requireContext(), getString(R.string.date_range_invalid), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.date_range_invalid),
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
 
@@ -270,14 +274,14 @@ class DateRangeBottomSheet : BottomSheetDialogFragment() {
         val defaultColor = ContextCompat.getColor(requireContext(), R.color.text_secondary)
 
         if (editingStart) {
-            binding.startDate.setBackgroundResource(R.drawable.bg_chip_selected)
+            binding.startDate.setBackgroundResource(R.drawable.bg_date_chip_selected)
             binding.startDate.setTextColor(selectedColor)
-            binding.endDate.setBackgroundResource(R.drawable.bg_chip_default)
+            binding.endDate.setBackgroundResource(R.drawable.bg_date_chip_default)
             binding.endDate.setTextColor(defaultColor)
         } else {
-            binding.endDate.setBackgroundResource(R.drawable.bg_chip_selected)
+            binding.endDate.setBackgroundResource(R.drawable.bg_date_chip_selected)
             binding.endDate.setTextColor(selectedColor)
-            binding.startDate.setBackgroundResource(R.drawable.bg_chip_default)
+            binding.startDate.setBackgroundResource(R.drawable.bg_date_chip_default)
             binding.startDate.setTextColor(defaultColor)
         }
     }
