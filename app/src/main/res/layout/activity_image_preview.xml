@@ -12,12 +12,11 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_begin="@dimen/status_bar_height" />
 
-    <ImageView
+    <com.snapreceipt.io.ui.preview.ZoomableImageView
         android:id="@+id/preview_image"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:contentDescription="@string/preview"
-        android:scaleType="fitCenter"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
