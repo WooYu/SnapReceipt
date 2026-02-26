@@ -1,9 +1,9 @@
 package com.snapreceipt.io.data.network.model.category
 
-import com.snapreceipt.io.domain.model.ReceiptCategory
+import com.snapreceipt.io.domain.model.CategoryItem
 
 /**
- * CategoryItemDto → ReceiptCategory.Item 映射器
+ * CategoryItemDto → CategoryItem 映射器
  * 
  * 职责：
  * - 从网络 DTO（12 个字段）提取领域模型需要的 3 个核心字段
@@ -17,8 +17,8 @@ import com.snapreceipt.io.domain.model.ReceiptCategory
  * 使用位置：
  * - ReceiptRemoteRepositoryImpl.listCategories()
  */
-fun CategoryItemDto.toItem(): ReceiptCategory.Item =
-    ReceiptCategory.Item(
+fun CategoryItemDto.toItem(): CategoryItem =
+    CategoryItem(
         id = categoryId,
         label = categoryName,
         isCustom = (userId ?: 0L) != 0L

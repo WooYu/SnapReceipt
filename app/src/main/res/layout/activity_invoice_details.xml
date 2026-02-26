@@ -239,6 +239,7 @@
                     android:id="@+id/section_view_mode"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:shrinkColumns="0"
                     android:stretchColumns="1">
                     <!--预览模式：表格-->
                     <TableRow>
@@ -251,6 +252,9 @@
                         <TextView
                             android:id="@+id/value_merchant"
                             android:gravity="end"
+                            android:ellipsize="end"
+                            android:layout_marginStart="16dp"
+                            android:maxLines="2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
                             tools:text="Starbucks Coffee" />
@@ -266,6 +270,9 @@
                         <TextView
                             android:id="@+id/value_address"
                             android:gravity="end"
+                            android:ellipsize="end"
+                            android:layout_marginStart="16dp"
+                            android:maxLines="2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
                             tools:text="San Francisco" />
@@ -281,6 +288,9 @@
                         <TextView
                             android:id="@+id/value_date"
                             android:gravity="end"
+                            android:ellipsize="end"
+                            android:layout_marginStart="16dp"
+                            android:maxLines="2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
                             tools:text="2025/12/30 10:20AM" />
@@ -296,6 +306,9 @@
                         <TextView
                             android:id="@+id/value_card"
                             android:gravity="end"
+                            android:ellipsize="end"
+                            android:layout_marginStart="16dp"
+                            android:maxLines="2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
                             tools:text="**** **** **** 6809" />
@@ -311,6 +324,9 @@
                         <TextView
                             android:id="@+id/value_invoice_category"
                             android:gravity="end"
+                            android:ellipsize="end"
+                            android:layout_marginStart="16dp"
+                            android:maxLines="2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
                             tools:text="Food" />
@@ -326,6 +342,9 @@
                         <TextView
                             android:id="@+id/value_invoice_type"
                             android:gravity="end"
+                            android:ellipsize="end"
+                            android:layout_marginStart="16dp"
+                            android:maxLines="2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_secondary"
                             tools:text="Individual" />

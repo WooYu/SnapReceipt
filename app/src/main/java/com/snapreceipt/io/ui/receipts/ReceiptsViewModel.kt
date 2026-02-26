@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -49,6 +50,7 @@ class ReceiptsViewModel @Inject constructor(
     private val pageSize = 20
     private var hasMore = true
     private var currentQuery = ReceiptListQueryEntity()
+    private var fetchJob: Job? = null
 
     init {
         loadReceipts()
@@ -136,6 +138,7 @@ class ReceiptsViewModel @Inject constructor(
             receiptDateStart = start,
             receiptDateEnd = end
         )
+        _uiState.update { it.copy(selectedIds = emptySet()) }
         fetchPage(page = 1, reset = true, showLoading = true)
     }
 
@@ -145,6 +148,7 @@ class ReceiptsViewModel @Inject constructor(
             receiptDateStart = null,
             receiptDateEnd = null
         )
+        _uiState.update { it.copy(selectedIds = emptySet()) }
         fetchPage(page = 1, reset = true, showLoading = true)
     }
 
@@ -153,6 +157,7 @@ class ReceiptsViewModel @Inject constructor(
         val categoryId = categoryCache.idForLabel(normalizedType).takeIf { it > 0L }
         LogHelper.d(LOG_TAG, "filterByType label='$normalizedType' categoryId=$categoryId")
         currentQuery = currentQuery.copy(categoryId = categoryId)
+        _uiState.update { it.copy(selectedIds = emptySet()) }
         fetchPage(page = 1, reset = true, showLoading = true)
     }
 
@@ -165,6 +170,32 @@ class ReceiptsViewModel @Inject constructor(
             "filterByTitleType input='$normalized' payload='${receiptType.orEmpty()}'"
         )
         currentQuery = currentQuery.copy(receiptType = receiptType)
+        _uiState.update { it.copy(selectedIds = emptySet()) }
+        fetchPage(page = 1, reset = true, showLoading = true)
+    }
+
+    fun restoreQuery(
+        dateStart: Long?,
+        dateEnd: Long?,
+        categoryLabel: String?,
+        typeLabel: String?
+    ) {
+        val dateStartStr = dateStart?.let { DateFormatUtil.formatApiDate(it) }
+        val dateEndStr = dateEnd?.let { DateFormatUtil.formatApiDate(it) }
+        val catId = categoryLabel?.trim()
+            ?.takeIf { it.isNotBlank() }
+            ?.let { categoryCache.idForLabel(it).takeIf { id -> id > 0L } }
+        val recType = typeLabel?.trim()
+            ?.takeIf { it.isNotBlank() }
+            ?.let { receiptTypeHelper.toPayloadValue(it).takeIf { t -> t.isNotBlank() } }
+
+        currentQuery = currentQuery.copy(
+            receiptDateStart = dateStartStr,
+            receiptDateEnd = dateEndStr,
+            categoryId = catId,
+            receiptType = recType
+        )
+        _uiState.update { it.copy(selectedIds = emptySet()) }
         fetchPage(page = 1, reset = true, showLoading = true)
     }
 
@@ -278,7 +309,8 @@ class ReceiptsViewModel @Inject constructor(
             LOG_TAG,
             "fetchPage page=$page reset=$reset showLoading=$showLoading refreshing=$refreshing loadingMore=$loadingMore query=$query"
         )
-        viewModelScope.launch(dispatchers.io) {
+        fetchJob?.cancel()
+        fetchJob = viewModelScope.launch(dispatchers.io) {
             fetchReceiptsUseCase(query)
                 .onSuccess { receipts ->
                     val rawMerged = if (reset) receipts else lastFetchedReceipts + receipts

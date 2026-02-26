@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.NumberPicker
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -18,58 +19,76 @@ import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.BottomSheetDateRangeBinding
 import java.util.Calendar
 
-/**
- * Date-range picker bottom sheet (start date → end date).
- *
- * Features:
- * - Dual calendars: user toggles between start/end via chip buttons
- * - Three NumberPickers: Year / Month / Day
- * - Auto-adjusts day range based on selected month (e.g., Feb 28/29, Apr 30)
- * - Result callback returns Unix timestamps (millis) with time set to 00:00:00
- *
- * Usage:
- * ```
- * DateRangeBottomSheet(startMillis, endMillis) { start, end ->
- *     // Handle selected range
- * }.show(fragmentManager, "date_range")
- * ```
- */
-class DateRangeBottomSheet(
-    initialStart: Long?,
-    initialEnd: Long?,
-    private val onSelected: (start: Long?, end: Long?) -> Unit
-) : BottomSheetDialogFragment() {
+class DateRangeBottomSheet : BottomSheetDialogFragment() {
 
     companion object {
-        /**
-         * Year range: (current - 49) ~ current.
-         * Covers 50 recent years for receipt date filtering.
-         */
+        private const val ARG_INITIAL_START = "arg_initial_start"
+        private const val ARG_INITIAL_END = "arg_initial_end"
+        private const val STATE_START_MILLIS = "state_start_millis"
+        private const val STATE_END_MILLIS = "state_end_millis"
+        private const val STATE_IS_RESET = "state_is_reset"
         private const val RECENT_YEAR_COUNT = 50
+
+        fun newInstance(
+            initialStart: Long?,
+            initialEnd: Long?,
+            onSelected: (start: Long?, end: Long?) -> Unit
+        ): DateRangeBottomSheet {
+            return DateRangeBottomSheet().apply {
+                arguments = bundleOf(
+                    ARG_INITIAL_START to (initialStart ?: -1L),
+                    ARG_INITIAL_END to (initialEnd ?: -1L)
+                )
+                this.onSelected = onSelected
+            }
+        }
     }
 
-    // ── Dual calendars ────────────────────────────────────
     private val startCalendar: Calendar = Calendar.getInstance()
     private val endCalendar: Calendar = Calendar.getInstance()
 
-    /**
-     * Which calendar is currently being edited via the pickers.
-     * Toggled by clicking start/end date chips.
-     */
     private var editingStart = true
+    private var isDateReset = false
+    private var onSelected: ((start: Long?, end: Long?) -> Unit)? = null
+
+    private var initialStartMillis: Long = -1L
+    private var initialEndMillis: Long = -1L
+    private var initialHasNoFilter: Boolean = false
 
     private var _binding: BottomSheetDateRangeBinding? = null
     private val binding get() = _binding!!
 
-    init {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         val now = System.currentTimeMillis()
-        startCalendar.timeInMillis = initialStart ?: (now - 7 * 24 * 60 * 60 * 1000L)
-        endCalendar.timeInMillis = initialEnd ?: now
+
+        if (savedInstanceState != null) {
+            val savedStart = savedInstanceState.getLong(STATE_START_MILLIS, -1L)
+            val savedEnd = savedInstanceState.getLong(STATE_END_MILLIS, -1L)
+            isDateReset = savedInstanceState.getBoolean(STATE_IS_RESET, false)
+            initialStartMillis = savedInstanceState.getLong("initial_start", -1L)
+            initialEndMillis = savedInstanceState.getLong("initial_end", -1L)
+            initialHasNoFilter = savedInstanceState.getBoolean("initial_no_filter", false)
+            startCalendar.timeInMillis = if (savedStart > 0) savedStart else now - 7 * 24 * 60 * 60 * 1000L
+            endCalendar.timeInMillis = if (savedEnd > 0) savedEnd else now
+        } else {
+            val argStart = arguments?.getLong(ARG_INITIAL_START, -1L) ?: -1L
+            val argEnd = arguments?.getLong(ARG_INITIAL_END, -1L) ?: -1L
+            startCalendar.timeInMillis = if (argStart > 0) argStart else now - 7 * 24 * 60 * 60 * 1000L
+            endCalendar.timeInMillis = if (argEnd > 0) argEnd else now
+        }
+
         startCalendar.resetTimeToMidnight()
         endCalendar.resetTimeToMidnight()
-    }
 
-    // ── Dialog lifecycle ──────────────────────────────────
+        if (savedInstanceState == null) {
+            initialStartMillis = startCalendar.timeInMillis
+            initialEndMillis = endCalendar.timeInMillis
+            val argStart = arguments?.getLong(ARG_INITIAL_START, -1L) ?: -1L
+            val argEnd = arguments?.getLong(ARG_INITIAL_END, -1L) ?: -1L
+            initialHasNoFilter = argStart <= 0L && argEnd <= 0L
+        }
+    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = BottomSheetDialog(requireContext())
@@ -87,6 +106,16 @@ class DateRangeBottomSheet(
         setupListeners()
 
         return dialog
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putLong(STATE_START_MILLIS, startCalendar.timeInMillis)
+        outState.putLong(STATE_END_MILLIS, endCalendar.timeInMillis)
+        outState.putBoolean(STATE_IS_RESET, isDateReset)
+        outState.putLong("initial_start", initialStartMillis)
+        outState.putLong("initial_end", initialEndMillis)
+        outState.putBoolean("initial_no_filter", initialHasNoFilter)
+        super.onSaveInstanceState(outState)
     }
 
     private fun applyBottomInsets() {
@@ -112,22 +141,19 @@ class DateRangeBottomSheet(
         super.onDestroyView()
     }
 
-    // ── NumberPicker setup ────────────────────────────────
+    override fun onDestroy() {
+        onSelected = null
+        super.onDestroy()
+    }
 
-    /**
-     * Configures the three pickers (year, month, day) with app-standard style.
-     * Sets initial value from [startCalendar].
-     */
     private fun setupPickers() {
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
         val minYear = currentYear - (RECENT_YEAR_COUNT - 1)
         val maxYear = currentYear
 
-        // Clamp both calendars' years to valid range
         startCalendar.clampYear(minYear, maxYear)
         endCalendar.clampYear(minYear, maxYear)
 
-        // Apply config to all pickers in batch
         listOf(
             binding.pickerYear to NumberPickerConfig(
                 minValue = minYear,
@@ -140,24 +166,16 @@ class DateRangeBottomSheet(
             ),
             binding.pickerDay to NumberPickerConfig(
                 minValue = 1,
-                maxValue = 31,  // will be updated dynamically
+                maxValue = 31,
                 formatter = { it.toString().padStart(2, '0') }
             )
         ).applyConfigs(requireContext())
 
-        // Sync picker values with startCalendar
         syncPickersToCalendar(startCalendar)
     }
 
-    /**
-     * Updates [binding.pickerDay]'s range to match the max day of the given [calendar]'s
-     * current year/month (handles leap years, 30-day months, etc.).
-     *
-     * Also clamps the day value from calendar if it exceeds the new max.
-     */
     private fun updateDayPickerRange(calendar: Calendar) {
         val maxDay = calendar.getMaxDayOfMonth()
-        // Read from calendar, not from pickerDay.value (which may be uninitialized)
         val currentDay = calendar.get(Calendar.DAY_OF_MONTH).coerceIn(1, maxDay)
 
         binding.pickerDay.minValue = 1
@@ -165,72 +183,71 @@ class DateRangeBottomSheet(
         binding.pickerDay.value = currentDay
     }
 
-    /**
-     * Syncs the three pickers (year/month/day) to display the given [calendar]'s date.
-     */
     private fun syncPickersToCalendar(calendar: Calendar) {
         binding.pickerYear.value = calendar.get(Calendar.YEAR)
-        binding.pickerMonth.value = calendar.get(Calendar.MONTH) + 1  // Calendar.MONTH is 0-based
+        binding.pickerMonth.value = calendar.get(Calendar.MONTH) + 1
         updateDayPickerRange(calendar)
     }
 
-    // ── Listeners ──────────────────────────────────────────
-
     private fun setupListeners() {
-        // Chip toggles
         binding.startDate.setOnClickListener {
+            isDateReset = false
             editingStart = true
             syncPickersToCalendar(startCalendar)
             updateChipSelection()
         }
         binding.endDate.setOnClickListener {
+            isDateReset = false
             editingStart = false
             syncPickersToCalendar(endCalendar)
             updateChipSelection()
         }
 
-        // Picker value changes
         val onPickerValueChanged = NumberPicker.OnValueChangeListener { _, _, _ ->
+            isDateReset = false
             onPickerChanged()
         }
         binding.pickerYear.setOnValueChangedListener(onPickerValueChanged)
         binding.pickerMonth.setOnValueChangedListener(onPickerValueChanged)
         binding.pickerDay.setOnValueChangedListener(onPickerValueChanged)
 
-        // Action buttons
         binding.cancelBtn.text = getString(R.string.reset)
         binding.cancelBtn.setOnClickListener {
-            onSelected(null, null)
-            dismiss()
+            isDateReset = initialHasNoFilter
+            startCalendar.timeInMillis = initialStartMillis
+            endCalendar.timeInMillis = initialEndMillis
+            startCalendar.resetTimeToMidnight()
+            endCalendar.resetTimeToMidnight()
+            editingStart = true
+            syncPickersToCalendar(startCalendar)
+            updateDateChips()
+            updateChipSelection()
         }
         binding.confirmBtn.setOnClickListener { onConfirmClicked() }
     }
 
-    /**
-     * Handles any picker value change.
-     * Writes picker values into the active calendar (start or end),
-     * then refreshes the day picker and chip display.
-     */
     private fun onPickerChanged() {
         val targetCalendar = if (editingStart) startCalendar else endCalendar
 
-        // Safely update calendar from pickers (handles invalid days like Feb 30)
         val clampedDay = targetCalendar.setDateSafely(
             year = binding.pickerYear.value,
             monthOneBased = binding.pickerMonth.value,
             dayOneBased = binding.pickerDay.value
         )
 
-        // Update day picker range (e.g., switching from Jan 31 → Feb 28/29)
         updateDayPickerRange(targetCalendar)
-
-        // Re-sync day picker value if it was clamped
         binding.pickerDay.value = clampedDay
 
         updateDateChips()
     }
 
     private fun onConfirmClicked() {
+        if (isDateReset) {
+            onSelected?.invoke(null, null)
+            dismiss()
+            return
+        }
+
         val startMillis = startCalendar.timeInMillis
         val endMillis = endCalendar.timeInMillis
         if (startMillis > endMillis) {
@@ -238,23 +255,15 @@ class DateRangeBottomSheet(
             return
         }
 
-        onSelected(startMillis, endMillis)
+        onSelected?.invoke(startMillis, endMillis)
         dismiss()
     }
 
-    // ── UI updates ─────────────────────────────────────────
-
-    /**
-     * Updates the two date chips (start/end) to display formatted dates.
-     */
     private fun updateDateChips() {
         binding.startDate.text = DateFormatUtil.formatDisplayDate(startCalendar.timeInMillis)
         binding.endDate.text = DateFormatUtil.formatDisplayDate(endCalendar.timeInMillis)
     }
 
-    /**
-     * Updates chip visual states (selected chip = highlighted background + colorSecondary text).
-     */
     private fun updateChipSelection() {
         val selectedColor = ContextCompat.getColor(requireContext(), R.color.colorSecondary)
         val defaultColor = ContextCompat.getColor(requireContext(), R.color.text_secondary)

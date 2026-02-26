@@ -35,6 +35,10 @@ import kotlinx.coroutines.Job
 class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_receipts) {
     companion object {
         private const val LOG_TAG = "ReceiptsFilter"
+        private const val KEY_FILTER_START = "filter_start_millis"
+        private const val KEY_FILTER_END = "filter_end_millis"
+        private const val KEY_FILTER_TYPE = "filter_type_label"
+        private const val KEY_FILTER_CATEGORY = "filter_category_label"
     }
 
     override val viewModel: ReceiptsViewModel by viewModels()
@@ -113,6 +117,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         _binding = FragmentReceiptsBinding.bind(view)
         setupAdapter()
         setupListeners()
+        restoreFilterState(savedInstanceState)
         observeState(viewModel.uiState) { renderState(it) }
         super.onViewCreated(view, savedInstanceState)
     }
@@ -120,6 +125,14 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putLong(KEY_FILTER_START, filterStartMillis ?: -1L)
+        outState.putLong(KEY_FILTER_END, filterEndMillis ?: -1L)
+        outState.putString(KEY_FILTER_TYPE, filterTypeLabel)
+        outState.putString(KEY_FILTER_CATEGORY, filterCategoryLabel)
     }
 
     override fun onResume() {
@@ -167,6 +180,31 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         refreshEventsJob?.cancel()
         refreshEventsJob = null
         super.onPause()
+    }
+
+    private fun restoreFilterState(savedInstanceState: Bundle?) {
+        if (savedInstanceState == null) return
+
+        val savedStart = savedInstanceState.getLong(KEY_FILTER_START, -1L)
+        val savedEnd = savedInstanceState.getLong(KEY_FILTER_END, -1L)
+        filterStartMillis = savedStart.takeIf { it > 0L }
+        filterEndMillis = savedEnd.takeIf { it > 0L }
+        filterTypeLabel = savedInstanceState.getString(KEY_FILTER_TYPE)
+        filterCategoryLabel = savedInstanceState.getString(KEY_FILTER_CATEGORY)
+
+        if (filterStartMillis != null && filterEndMillis != null) {
+            binding.filterDateBtn.text = formatDateRange(filterStartMillis!!, filterEndMillis!!)
+        }
+        if (!filterCategoryLabel.isNullOrBlank()) {
+            binding.filterCategoryBtn.text = filterCategoryLabel
+        }
+        if (!filterTypeLabel.isNullOrBlank()) {
+            binding.filterTypeBtn.text = filterTypeLabel
+        }
+
+        if (hasActiveFilters()) {
+            viewModel.restoreQuery(filterStartMillis, filterEndMillis, filterCategoryLabel, filterTypeLabel)
+        }
     }
 
     private fun hasActiveFilters(): Boolean {
@@ -276,14 +314,14 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
 
     private fun setupListeners() {
         binding.filterDateBtn.setOnClickListener {
-            DateRangeBottomSheet(filterStartMillis, filterEndMillis) { start, end ->
+            DateRangeBottomSheet.newInstance(filterStartMillis, filterEndMillis) { start, end ->
                 if (start == null || end == null) {
                     filterStartMillis = null
                     filterEndMillis = null
-                    binding.filterDateBtn.text = getString(R.string.filter_date)
+                    binding.filterDateBtn.text = getString(R.string.select_date)
                     LogHelper.d(LOG_TAG, "Date filter reset")
                     viewModel.clearDateRangeFilter()
-                    return@DateRangeBottomSheet
+                    return@newInstance
                 }
                 filterStartMillis = start
                 filterEndMillis = end
@@ -307,7 +345,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
         }
         binding.filterTypeBtn.setOnClickListener {
             val initial = filterTypeLabel.orEmpty()
-            TitleTypeBottomSheet(initial) { selected ->
+            TitleTypeBottomSheet.newInstance(initial) { selected ->
                 applyTypeFilterSelection(selected)
             }.show(parentFragmentManager, "type_filter_picker")
         }

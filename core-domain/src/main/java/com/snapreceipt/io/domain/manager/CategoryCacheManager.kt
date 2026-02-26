@@ -1,6 +1,6 @@
 package com.snapreceipt.io.domain.manager
 
-import com.snapreceipt.io.domain.model.ReceiptCategory
+import com.snapreceipt.io.domain.model.CategoryItem
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -49,7 +49,7 @@ class CategoryCacheManager @Inject constructor() {
     // ── 内存缓存 ──────────────────────────────────────────
     
     @Volatile
-    private var categories: List<ReceiptCategory.Item> = emptyList()
+    private var categories: List<CategoryItem> = emptyList()
     
     @Volatile
     private var lastUpdatedAt: Long = 0L
@@ -61,7 +61,7 @@ class CategoryCacheManager @Inject constructor() {
      * 
      * @return 分类列表（可能为空）
      */
-    fun getCategories(): List<ReceiptCategory.Item> = categories
+    fun getCategories(): List<CategoryItem> = categories
     
     /**
      * 更新分类缓存（覆盖写入）。
@@ -72,7 +72,7 @@ class CategoryCacheManager @Inject constructor() {
      * 
      * @param items 分类列表（来自远程 API）
      */
-    fun update(items: List<ReceiptCategory.Item>) {
+    fun update(items: List<CategoryItem>) {
         categories = items
         lastUpdatedAt = System.currentTimeMillis()
     }

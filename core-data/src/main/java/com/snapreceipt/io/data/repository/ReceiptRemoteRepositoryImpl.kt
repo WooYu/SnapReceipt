@@ -5,7 +5,7 @@ import com.snapreceipt.io.data.network.datasource.ReceiptRemoteDataSource
 import com.snapreceipt.io.data.network.model.category.toItem
 import com.snapreceipt.io.data.network.model.receipt.toRequestPayload
 import com.snapreceipt.io.domain.model.ExportRecordEntity
-import com.snapreceipt.io.domain.model.ReceiptCategory
+import com.snapreceipt.io.domain.model.CategoryItem
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.domain.model.query.ExportRecordListQueryEntity
 import com.snapreceipt.io.domain.model.query.ReceiptListQueryEntity
@@ -40,10 +40,16 @@ class ReceiptRemoteRepositoryImpl @Inject constructor(
     override suspend fun listExportRecords(query: ExportRecordListQueryEntity): List<ExportRecordEntity> =
         remoteDataSource.exportRecords(query).getOrThrow().rows
 
-    override suspend fun listCategories(): List<ReceiptCategory.Item> =
-        remoteDataSource.listCategories().getOrThrow()
+    override suspend fun listCategories(): List<CategoryItem> {
+        val response = remoteDataSource.listCategories().getOrThrow()
+        val recommend = response.recommend
             .sortedWith(compareBy({ it.orderNum ?: Int.MAX_VALUE }, { it.categoryId }))
             .map { it.toItem() }
+        val customize = response.customize
+            .sortedWith(compareBy({ it.orderNum ?: Int.MAX_VALUE }, { it.categoryId }))
+            .map { it.toItem() }
+        return recommend + customize
+    }
 
     override suspend fun addCategory(name: String) {
         remoteDataSource.addCategory(name).getOrThrow()

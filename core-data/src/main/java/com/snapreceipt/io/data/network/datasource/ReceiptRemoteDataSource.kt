@@ -7,6 +7,7 @@ import com.skybound.space.core.network.BasePagedResponse
 import com.snapreceipt.io.data.network.model.category.CategoryCreateRequestDto
 import com.snapreceipt.io.data.network.model.category.CategoryDeleteRequestDto
 import com.snapreceipt.io.data.network.model.category.CategoryItemDto
+import com.snapreceipt.io.data.network.model.category.CategoryListResponseDto
 import com.snapreceipt.io.data.network.model.category.CategoryListRequestDto
 import com.snapreceipt.io.data.network.model.receipt.ReceiptDeleteRequestDto
 import com.snapreceipt.io.data.network.model.receipt.ReceiptExportRequestDto
@@ -49,7 +50,7 @@ class ReceiptRemoteDataSource(
         return requestEnvelope({ api.exportRecords(request) }) { it }
     }
 
-    suspend fun listCategories(): NetworkResult<List<CategoryItemDto>> {
+    suspend fun listCategories(): NetworkResult<CategoryListResponseDto> {
         return request { api.listCategories(CategoryListRequestDto()) }
     }
 

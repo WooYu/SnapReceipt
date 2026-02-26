@@ -40,70 +40,76 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <!-- 筛选栏 -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:id="@+id/filter_bar"
         android:layout_width="0dp"
-        android:layout_height="45dp"
-        android:gravity="center_vertical"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/header_bg">
 
-        <!--日期-->
+        <!-- 第一行：Category + Type -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!--分类-->
+            <TextView
+                android:id="@+id/filter_category_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:drawableEnd="@drawable/ic_chevron_down_solid"
+                android:drawablePadding="4dp"
+                android:gravity="center_vertical"
+                android:paddingStart="@dimen/page_start_margin"
+                android:paddingEnd="10dp"
+                android:text="@string/filter_category"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/text_size_secondary"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <!--类型-->
+            <TextView
+                android:id="@+id/filter_type_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:drawableEnd="@drawable/ic_chevron_down_solid"
+                android:drawablePadding="4dp"
+                android:gravity="center_vertical"
+                android:paddingStart="10dp"
+                android:paddingEnd="@dimen/page_end_margin"
+                android:text="@string/filter_type"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/text_size_secondary"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- 第二行：Select Date -->
         <TextView
             android:id="@+id/filter_date_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
             android:drawableEnd="@drawable/ic_chevron_down_solid"
             android:drawablePadding="4dp"
             android:ellipsize="end"
-            android:gravity="center"
-            android:maxWidth="150dp"
+            android:gravity="center_vertical"
             android:maxLines="1"
             android:paddingStart="@dimen/page_start_margin"
-            android:text="@string/filter_date"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/text_size_secondary"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <!--分类-->
-        <TextView
-            android:id="@+id/filter_category_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:drawableEnd="@drawable/ic_chevron_down_solid"
-            android:drawablePadding="4dp"
-            android:gravity="center"
-            android:paddingHorizontal="10dp"
-            android:text="@string/filter_category"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/text_size_secondary"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <!--类型-->
-        <TextView
-            android:id="@+id/filter_type_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:drawableEnd="@drawable/ic_chevron_down_solid"
-            android:drawablePadding="4dp"
-            android:gravity="center"
             android:paddingEnd="@dimen/page_end_margin"
-            android:text="@string/filter_type"
+            android:text="@string/select_date"
             android:textColor="@color/text_primary"
             android:textSize="@dimen/text_size_secondary"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            android:textStyle="bold" />
+
+    </LinearLayout>
 
     <com.snapreceipt.io.ui.widget.statefullist.StatefulListLayout
         android:id="@+id/stateful_list"

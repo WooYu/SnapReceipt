@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Login -->
+
+    <!-- ══════════════ Common ══════════════ -->
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="reset">Reset</string>
+    <string name="delete">Delete</string>
+    <string name="save">Save</string>
+    <string name="submit">Submit</string>
+    <string name="retry">Retry</string>
+    <string name="back">Back</string>
+    <string name="preview">Preview</string>
+    <string name="error">Error</string>
+    <string name="unexpected_error">Unexpected error</string>
+    <string name="no_content">No content</string>
+
+    <!-- ══════════════ Login ══════════════ -->
+    <string name="login">Log In</string>
     <string name="login_welcome_title">Welcome to Invoice Assistant</string>
     <string name="login_welcome_subtitle">Track your daily expenses effortlessly</string>
     <string name="login_tab_email">Email</string>
@@ -15,7 +31,6 @@
     <string name="login_captcha">CAPTCHA</string>
     <string name="login_requesting_code">Requesting code…</string>
     <string name="login_agreement_html">I have read and agree to the User Agreement and Privacy Policy</string>
-    <string name="login">Log In</string>
     <string name="phone_empty">Please enter phone number</string>
     <string name="phone_invalid">Please enter a valid phone number</string>
     <string name="email_empty">Please enter email address</string>
@@ -30,18 +45,17 @@
     <string name="agree_terms">Agree to terms</string>
     <string name="toggle_visibility">Toggle visibility</string>
 
-    <!-- Main Navigation -->
+    <!-- ══════════════ Main Navigation ══════════════ -->
     <string name="nav_home">Home</string>
     <string name="nav_receipts">Receipts</string>
     <string name="nav_me">Me</string>
 
-    <!-- Home Fragment -->
+    <!-- ══════════════ Home ══════════════ -->
     <string name="welcome_back">Welcome back</string>
     <string name="scan_receipt">Scan Receipt</string>
     <string name="upload_receipt">Upload Receipt</string>
     <string name="scan_receipt_title">Scan Receipt</string>
     <string name="scan_receipt_subtitle">Use Camera</string>
-    <string name="image_missing">Image not available</string>
     <string name="upload_title">Upload</string>
     <string name="upload_subtitle">From Gallery</string>
     <string name="recently_imported">Recently imported</string>
@@ -49,37 +63,36 @@
     <string name="choose_from_album">Choose from Album</string>
     <string name="no_receipts">No receipts yet</string>
     <string name="tap_to_scan">Tap to scan your first receipt</string>
+    <string name="image_missing">Image not available</string>
+
+    <!-- ══════════════ Invoice Details ══════════════ -->
+    <string name="invoice_details">Invoice Details</string>
     <string name="edit_receipt">Edit Receipt</string>
     <string name="receipt_details">Receipt Details</string>
+    <string name="invoice_photo">Invoice Photo</string>
+    <string name="invoice_photo_hint">Click on the photo to enlarge and view</string>
     <string name="merchant_name">Merchant Name</string>
+    <string name="merchant">Merchant</string>
+    <string name="address">Address</string>
     <string name="amount">Amount</string>
+    <string name="total_amount">Total Amount</string>
     <string name="date">Date</string>
     <string name="category">Category</string>
     <string name="invoice_category">Invoice Category</string>
     <string name="invoice_type">Invoice Type</string>
-    <string name="description">Note</string>
-    <string name="save">Save</string>
-    <string name="cancel">Cancel</string>
-    <string name="reset">Reset</string>
-    <string name="delete">Delete</string>
-    <string name="crop_image">Crop image</string>
-    <string name="image_crop_failed">Crop failed</string>
-    <string name="camera_permission_denied">Camera permission denied</string>
-    <string name="preview">Preview</string>
-    <string name="back">Back</string>
-    <string name="invoice_details">Invoice Details</string>
-    <string name="invoice_photo">Invoice Photo</string>
-    <string name="invoice_photo_hint">Click on the photo to enlarge and view</string>
-    <string name="total_amount">Total Amount</string>
-    <string name="merchant">Merchant</string>
-    <string name="address">Address</string>
     <string name="bank_card">Bank Card</string>
     <string name="bank_card_hint">Card number</string>
     <string name="card_number_invalid_chars">Only digits, spaces, or - are allowed</string>
-    <string name="card_number_length">Card number should be 12-19 digits</string>
+    <string name="card_number_length">Card number should be 12–19 digits</string>
     <string name="note">Note</string>
+    <string name="description">Note</string>
     <string name="save_upload">Save Upload</string>
-
+    <string name="crop_image">Crop image</string>
+    <string name="image_crop_failed">Crop failed</string>
+    <string name="camera_permission_denied">Camera permission denied</string>
+    <string name="receipt_default_name">Receipt</string>
+    <string name="delete_receipt_confirm">Delete this receipt?</string>
+    <string name="receipt_save_success">Saved successfully!</string>
     <!-- Validation -->
     <string name="validation_amount_empty">Please enter a valid amount greater than 0</string>
     <string name="validation_merchant_empty">Please enter merchant name</string>
@@ -87,127 +100,125 @@
     <string name="validation_date_empty">Please select date</string>
     <string name="validation_card_empty">Please enter bank card number</string>
 
-    <!-- Receipts Fragment -->
+    <!-- ══════════════ Receipts List & Filter ══════════════ -->
     <string name="receipts_title">Receipts</string>
     <string name="all_receipts">All Receipts</string>
-    <string name="select_date">Select Date</string>
-    <string name="select_type">Select Type</string>
-    <string name="export">Export</string>
-    <string name="select_all">Select All</string>
-    <string name="delete_selected">Delete Selected</string>
-    <string name="export_pdf">Export as PDF</string>
-    <string name="export_excel">Export as Excel</string>
-    <string name="export_csv">Export as CSV</string>
+    <string name="receipt_meta_format">%1$s · %2$s · %3$s</string>
+    <string name="receipt_count">Invoice Count</string>
     <string name="filter_date">Date</string>
     <string name="filter_category">Category</string>
     <string name="filter_type">Type</string>
-    <string name="no_content">No content</string>
     <string name="selected_count">Selected: %d</string>
     <string name="total_label">Total</string>
-    <string name="receipt_meta_format">%1$s • %2$s • %3$s</string>
-    <string name="select_invoice_type">Select Invoice Type</string>
+    <string name="select_all">Select All</string>
+    <string name="delete_selected">Delete Selected</string>
+
+    <!-- ══════════════ Category Bottom Sheet ══════════════ -->
     <string name="select_invoice_category">Select Invoice Category</string>
-    <string name="select_date_time">Select date and time</string>
-    <string name="select_date_title">Select Date</string>
-    <string name="date_range_invalid">Start date cannot be later than end date</string>
-    <string name="year_label">Year</string>
-    <string name="month_label">Month</string>
-    <string name="day_label">Day</string>
-    <string name="hour_label">Hour</string>
-    <string name="min_label">Min</string>
-    <string name="date_prefix">Date: %s</string>
-    <string name="type_other">Other</string>
-    <string name="type_add">+ Type</string>
-    <string name="type_individual">Individual</string>
-    <string name="type_company">Business</string>
+    <string name="category_section_recommend">Recommend</string>
+    <string name="category_section_customize">Customize</string>
+    <string name="category_add">+ Category</string>
     <string name="custom_type_title">Custom Invoice Category</string>
     <string name="custom_type_hint">Enter custom invoice category</string>
     <string name="custom_type_empty">Please enter a custom type</string>
     <string name="add_category_failed">Failed to add category</string>
     <string name="delete_category_failed">Failed to delete category</string>
-    <string name="delete_category_confirm">Delete "%s"?</string>
+    <string name="delete_category_confirm">Delete \"%s\"?</string>
     <string name="category_delete_hint">Long press a custom type to delete</string>
-    <string name="delete_receipt_confirm">Delete this receipt?</string>
-    <string name="receipt_default_name">Receipt</string>
+    <string name="type_other">Other</string>
+    <string name="type_add">+ Type</string>
 
-    <!-- Me Fragment -->
-    <string name="profile">Profile</string>
-    <string name="settings">Settings</string>
-    <string name="feedback">Feedback</string>
-    <string name="about">About Us</string>
-    <string name="logout">Log Out</string>
-    <string name="edit_profile">Edit Profile</string>
-    <string name="username">Username</string>
-    <string name="email">Email</string>
-    <string name="phone">Phone</string>
-    <string name="avatar">Avatar</string>
-    <string name="change_avatar">Change Avatar</string>
+    <!-- ══════════════ Type Bottom Sheet ══════════════ -->
+    <string name="select_invoice_type">Select Invoice Type</string>
+    <string name="type_individual">Individual</string>
+    <string name="type_company">Business</string>
 
+    <!-- ══════════════ Date Picker ══════════════ -->
+    <string name="select_date">Select Date</string>
+    <string name="select_date_title">Select Date</string>
+    <string name="select_date_time">Select date and time</string>
+    <string name="select_type">Select Type</string>
+    <string name="date_range_invalid">Start date cannot be later than end date</string>
+    <string name="date_prefix">Date: %s</string>
+    <string name="year_label">Year</string>
+    <string name="month_label">Month</string>
+    <string name="day_label">Day</string>
+    <string name="hour_label">Hour</string>
+    <string name="min_label">Min</string>
+
+    <!-- ══════════════ Export ══════════════ -->
+    <string name="export">Export</string>
+    <string name="export_pdf">Export as PDF</string>
+    <string name="export_excel">Export as Excel</string>
+    <string name="export_csv">Export as CSV</string>
     <string name="export_records">Export Records</string>
-    <string name="about_us">About Us</string>
-    <string name="app_version_label">Version</string>
-    <string name="user_agreement">User Agreement</string>
-    <string name="privacy_policy_label">Privacy Policy</string>
-    <string name="feedback_message">If you have any comments or suggestions regarding the software, please contact the email address below to provide feedback.</string>
-
-    <string name="personal_profile">Personal Profile</string>
-    <string name="name_label">Name</string>
-    <string name="email_label">Email</string>
-    <string name="mobile_number">Mobile Number</string>
-    <string name="change_name">Change Name</string>
-    <string name="change_email">Change Email</string>
-    <string name="change_mobile_number">Change Mobile Number</string>
-    <string name="name_hint">Enter name</string>
-    <string name="name_empty">Please enter name</string>
-    <string name="profile_update_success">Updated successfully</string>
-
-    <string name="switch_account">Switch Account</string>
-
-    <string name="receipt_count">Invoice Count</string>
     <string name="export_success_title">Export Successful!</string>
     <string name="export_success_message">You can view the export records in your personal center</string>
     <string name="view_export_records">View Export Records</string>
     <string name="exporting_receipts">Exporting receipts…</string>
-    <string name="loading_more_records">Loading more…</string>
-    <string name="no_more_records">That\'s all~</string>
     <string name="opening_export_file">Opening export file…</string>
     <string name="export_file_unavailable">Export file not ready</string>
     <string name="no_app_to_open">No app available to open this file</string>
 
-    <!-- Settings -->
+    <!-- ══════════════ Me / Profile ══════════════ -->
+    <string name="profile">Profile</string>
+    <string name="personal_profile">Personal Profile</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="username">Username</string>
+    <string name="avatar">Avatar</string>
+    <string name="change_avatar">Change Avatar</string>
+    <string name="name_label">Name</string>
+    <string name="name_hint">Enter name</string>
+    <string name="name_empty">Please enter name</string>
+    <string name="change_name">Change Name</string>
+    <string name="email">Email</string>
+    <string name="email_label">Email</string>
+    <string name="change_email">Change Email</string>
+    <string name="phone">Phone</string>
+    <string name="mobile_number">Mobile Number</string>
+    <string name="change_mobile_number">Change Mobile Number</string>
+    <string name="profile_update_success">Updated successfully</string>
+    <string name="switch_account">Switch Account</string>
+    <string name="logout">Log Out</string>
+
+    <!-- ══════════════ Settings ══════════════ -->
+    <string name="settings">Settings</string>
     <string name="notification">Notifications</string>
     <string name="dark_mode">Dark Mode</string>
     <string name="language">Language</string>
     <string name="storage">Storage</string>
     <string name="clear_cache">Clear Cache</string>
 
-    <!-- Feedback -->
+    <!-- ══════════════ Feedback ══════════════ -->
+    <string name="feedback">Feedback</string>
     <string name="feedback_type">Feedback Type</string>
     <string name="feedback_content">Enter your feedback</string>
     <string name="feedback_image">Upload screenshot (optional)</string>
-    <string name="submit">Submit</string>
+    <string name="feedback_message">If you have any comments or suggestions regarding the software, please contact the email address below to provide feedback.</string>
 
-    <!-- About -->
+    <!-- ══════════════ About ══════════════ -->
+    <string name="about">About Us</string>
+    <string name="about_us">About Us</string>
+    <string name="app_version_label">Version</string>
     <string name="version">Version</string>
     <string name="company">Company</string>
     <string name="website">Website</string>
+    <string name="user_agreement">User Agreement</string>
     <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_policy_label">Privacy Policy</string>
     <string name="terms_of_service">Terms of Service</string>
 
-    <!-- Messages -->
-    <string name="receipt_save_success">Saved successfully!</string>
-    <string name="error">Error</string>
-    <string name="unexpected_error">Unexpected error</string>
+    <!-- ══════════════ Messages & Loading ══════════════ -->
     <string name="loading">Loading…</string>
-    <string name="retry">Retry</string>
-    <string name="confirm">Confirm</string>
+    <string name="loading_please_wait">Please wait</string>
+    <string name="loading_please_wait_dynamic">Please wait…</string>
+    <string name="loading_more_records">Loading more…</string>
+    <string name="no_more_records">That\'s all~</string>
+    <string name="uploading_receipt">Uploading receipt, please wait…</string>
+    <string name="scanning_receipt">Scanning receipt, please wait…</string>
     <string name="recognition_failed">Recognition failed, please retry</string>
     <string name="recognition_failed_title">Image recognition failed</string>
     <string name="recognition_failed_message">Return to the homepage to continue taking photos and recognizing them</string>
     <string name="return_home">Return to Home</string>
-    <string name="uploading_receipt">Uploading receipt, please wait…</string>
-    <string name="scanning_receipt">Scanning receipt, please wait…</string>
 
-    <string name="loading_please_wait">Please wait</string>
-    <string name="loading_please_wait_dynamic">Please wait...</string>
 </resources>

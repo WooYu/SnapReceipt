@@ -422,7 +422,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     }
 
     private fun openTitleTypePicker() {
-        TitleTypeBottomSheet(binding.inputInvoiceType.text.toString()) { selected ->
+        TitleTypeBottomSheet.newInstance(binding.inputInvoiceType.text.toString()) { selected ->
             setTitleTypeSelection(selected)
         }.show(supportFragmentManager, "title_type_picker")
     }

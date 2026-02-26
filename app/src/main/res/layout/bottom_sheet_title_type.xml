@@ -4,10 +4,12 @@
     android:id="@+id/root_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_surface_bottom_sheet"
+    android:layout_marginHorizontal="16dp"
+    android:background="@drawable/bg_surface_bottom_sheet_filter"
     android:orientation="vertical"
-    android:padding="20dp"
-    android:paddingBottom="16dp">
+    android:paddingHorizontal="20dp"
+    android:paddingTop="24dp"
+    android:paddingBottom="20dp">
 
     <!--标题-->
     <LinearLayout
@@ -34,44 +36,76 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!--选择发票类型-->
+    <!--选项列表-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:gravity="center"
-        android:orientation="horizontal">
+        android:layout_marginTop="24dp"
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/title_individual"
-            android:layout_width="wrap_content"
+        <!-- Individual 选项 -->
+        <LinearLayout
+            android:id="@+id/option_individual"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="30dp"
-            android:background="@drawable/bg_chip_selector"
-            android:gravity="center"
-            android:minWidth="90dp"
-            android:minHeight="40dp"
-            android:paddingHorizontal="11dp"
-            android:paddingVertical="13dp"
-            android:text="@string/type_individual"
-            android:textColor="@color/chip_text_selector"
-            android:textSize="@dimen/text_size_secondary"
-            android:textStyle="bold" />
+            android:background="@drawable/bg_option_row_default"
+            android:gravity="center_vertical"
+            android:minHeight="50dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="14dp">
 
-        <TextView
-            android:id="@+id/title_company"
-            android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/title_individual"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/type_individual"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/text_size_secondary"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/check_individual"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_check_circle_filled"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Business 选项 -->
+        <LinearLayout
+            android:id="@+id/option_business"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_chip_selector"
-            android:gravity="center"
-            android:minWidth="90dp"
-            android:minHeight="40dp"
-            android:paddingHorizontal="11dp"
-            android:paddingVertical="13dp"
-            android:text="@string/type_company"
-            android:textColor="@color/chip_text_selector"
-            android:textSize="@dimen/text_size_secondary"
-            android:textStyle="bold" />
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_option_row_default"
+            android:gravity="center_vertical"
+            android:minHeight="50dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="14dp">
+
+            <TextView
+                android:id="@+id/title_company"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/type_company"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/text_size_secondary"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/check_business"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_check_circle_filled"
+                android:visibility="gone" />
+        </LinearLayout>
+
     </LinearLayout>
 
     <LinearLayout
@@ -80,7 +114,6 @@
         android:layout_marginTop="30dp"
         android:orientation="horizontal">
 
-        <!--取消-->
         <com.snapreceipt.io.ui.widget.PrimaryActionButton
             android:id="@+id/cancel_btn"
             android:layout_width="0dp"
@@ -96,7 +129,6 @@
             app:pabStrokeWidth="1dp"
             app:pabTextColor="@color/text_primary" />
 
-        <!--确认-->
         <com.snapreceipt.io.ui.widget.PrimaryActionButton
             android:id="@+id/confirm_btn"
             android:layout_width="0dp"

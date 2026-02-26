@@ -24,6 +24,17 @@ data class CategoryDeleteRequestDto(
 )
 
 /**
+ * 分类列表响应（api/category/list 返回的 data 字段）。
+ *
+ * @property recommend 系统推荐分类列表
+ * @property customize 用户自定义分类列表
+ */
+data class CategoryListResponseDto(
+    val recommend: List<CategoryItemDto> = emptyList(),
+    val customize: List<CategoryItemDto> = emptyList()
+)
+
+/**
  * 分类条目（/api/category/list 返回的 data 列表项）。
  *
  * @property createBy 创建人
