@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "686180878045",
+    "project_id": "snap-receipts-64e73",
+    "storage_bucket": "snap-receipts-64e73.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:686180878045:android:cd837bf42c14e76b1bfd34",
+        "android_client_info": {
+          "package_name": "com.snapreceipt.io"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZPDfLyD4k0tsYlf5DDCP-Aqk5c_5SDtM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
