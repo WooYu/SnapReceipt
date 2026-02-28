@@ -281,10 +281,10 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
 
         // 2. Address
         val addressValue = binding.inputAddress.text.toString().trim()
-        if (addressValue.isBlank()) {
-            Toast.makeText(this, getString(R.string.validation_address_empty), Toast.LENGTH_SHORT).show()
-            return
-        }
+//        if (addressValue.isBlank()) {
+//            Toast.makeText(this, getString(R.string.validation_address_empty), Toast.LENGTH_SHORT).show()
+//            return
+//        }
 
         // 3. Date
         if (receiptDate.isBlank()) {
@@ -294,12 +294,12 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
 
         // 4. Bank Card
         val cardValue = binding.inputCard.text.toString().trim()
-        if (cardValue.isBlank()) {
-            Toast.makeText(this, getString(R.string.validation_card_empty), Toast.LENGTH_SHORT).show()
-            return
-        }
+//        if (cardValue.isBlank()) {
+//            Toast.makeText(this, getString(R.string.validation_card_empty), Toast.LENGTH_SHORT).show()
+//            return
+//        }
         val cardError = cardValidationErrorResId(cardValue)
-        if (cardError != null) {
+        if (cardError != null && cardValue.isNotBlank()) {
             updateCardHelper(cardValue)
             Toast.makeText(this, getString(cardError), Toast.LENGTH_SHORT).show()
             return

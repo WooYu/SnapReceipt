@@ -1,708 +1,164 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorBackground">
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/colorBackground">
 
     <!--上边界-->
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/bound_top"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_begin="@dimen/status_bar_height" />
+    <androidx.constraintlayout.widget.Guideline android:id="@+id/bound_top" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal" app:layout_constraintGuide_begin="@dimen/status_bar_height" />
 
     <!--背景-->
-    <View
-        android:id="@+id/header_glow"
-        android:layout_width="0dp"
-        android:layout_height="200dp"
-        android:background="@drawable/bg_me_header_gradient"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <View android:id="@+id/header_glow" android:layout_width="0dp" android:layout_height="200dp" android:background="@drawable/bg_me_header_gradient" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" />
 
     <!--标题-->
-    <com.snapreceipt.io.ui.widget.PageTitleBar
-        android:id="@+id/page_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:ptbBackground="@android:color/transparent"
-        app:ptbRightIcon="@drawable/ic_edit_white"
-        app:ptbTitleText="@string/invoice_details" />
+    <com.snapreceipt.io.ui.widget.PageTitleBar android:id="@+id/page_title" android:layout_width="0dp" android:layout_height="wrap_content" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" app:ptbBackground="@android:color/transparent" app:ptbRightIcon="@drawable/ic_edit_white" app:ptbTitleText="@string/invoice_details" />
 
     <!--图片预览-->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/container_invoice_photo"
-        android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:layout_marginStart="@dimen/page_start_margin"
-        android:layout_marginEnd="@dimen/page_end_margin"
-        android:background="@drawable/bg_surface_card_large"
-        android:padding="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/page_title">
+    <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/container_invoice_photo" android:layout_width="match_parent" android:layout_height="120dp" android:layout_marginStart="@dimen/page_start_margin" android:layout_marginEnd="@dimen/page_end_margin" android:background="@drawable/bg_surface_card_large" android:padding="16dp" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/page_title">
 
-        <TextView
-            android:id="@+id/invoice_photo_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/invoice_photo"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/text_size_title"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        <TextView android:id="@+id/invoice_photo_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/invoice_photo" android:textColor="@color/text_primary" android:textSize="@dimen/text_size_title" android:textStyle="bold" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="6dp"
-            android:text="@string/invoice_photo_hint"
-            android:textColor="@color/text_muted"
-            android:textSize="11sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/container_image"
-            app:layout_constraintStart_toStartOf="parent" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginBottom="6dp" android:text="@string/invoice_photo_hint" android:textColor="@color/text_muted" android:textSize="11sp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toStartOf="@id/container_image" app:layout_constraintStart_toStartOf="parent" />
 
         <!--预览图片-->
-        <FrameLayout
-            android:id="@+id/container_image"
-            android:layout_width="60dp"
-            android:layout_height="80dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+        <FrameLayout android:id="@+id/container_image" android:layout_width="60dp" android:layout_height="80dp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
-                android:id="@+id/invoice_image"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/invoice_photo"
-                android:scaleType="centerCrop" />
+            <ImageView android:id="@+id/invoice_image" android:layout_width="match_parent" android:layout_height="match_parent" android:contentDescription="@string/invoice_photo" android:scaleType="centerCrop" />
         </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/content_scroll"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="@dimen/page_start_margin"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="@dimen/page_end_margin"
-        android:layout_marginBottom="20dp"
-        android:background="@drawable/bg_surface_card_large"
-        android:clipToPadding="false"
-        android:fillViewport="true"
-        android:overScrollMode="never"
-        android:paddingTop="20dp"
-        android:paddingBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@id/bottom_action_container"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/container_invoice_photo">
+    <androidx.core.widget.NestedScrollView android:id="@+id/content_scroll" android:layout_width="0dp" android:layout_height="0dp" android:layout_marginStart="@dimen/page_start_margin" android:layout_marginTop="10dp" android:layout_marginEnd="@dimen/page_end_margin" android:layout_marginBottom="20dp" android:background="@drawable/bg_surface_card_large" android:clipToPadding="false" android:fillViewport="true" android:overScrollMode="never" android:paddingTop="20dp" android:paddingBottom="16dp" app:layout_constraintBottom_toTopOf="@id/bottom_action_container" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/container_invoice_photo">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
 
             <!--金额汇总-->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingBottom="13dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="16dp" android:paddingBottom="13dp">
                 <!--汇总标题-->
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/total_amount"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="@dimen/text_size_secondary" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="@string/total_amount" android:textColor="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
                 <!--预览金额-->
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/amount_readonly_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="15dp"
-                    android:orientation="horizontal">
+                <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/amount_readonly_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="15dp" android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/amount_prefix_view"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="12dp"
-                        android:layout_marginBottom="10dp"
-                        android:text="@string/currency_symbol_usd"
-                        android:textColor="@color/text_primary"
-                        android:textSize="@dimen/text_size_title"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/amount_readonly_value"
-                        app:layout_constraintHorizontal_chainStyle="packed"
-                        app:layout_constraintStart_toStartOf="parent" />
+                    <TextView android:id="@+id/amount_prefix_view" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="12dp" android:layout_marginBottom="10dp" android:text="@string/currency_symbol_usd" android:textColor="@color/text_primary" android:textSize="@dimen/text_size_title" android:textStyle="bold" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toStartOf="@id/amount_readonly_value" app:layout_constraintHorizontal_chainStyle="packed" app:layout_constraintStart_toStartOf="parent" />
 
-                    <TextView
-                        android:id="@+id/amount_readonly_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/text_primary"
-                        android:textSize="40sp"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/amount_prefix_view"
-                        tools:text="0.00" />
+                    <TextView android:id="@+id/amount_readonly_value" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_primary" android:textSize="40sp" android:textStyle="bold" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toEndOf="@id/amount_prefix_view" tools:text="0.00" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <!--编辑金额-->
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/amount_edit_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:background="@drawable/bg_invoice_field_block"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="5dp"
-                    android:visibility="gone"
-                    tools:visibility="visible">
+                <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/amount_edit_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:background="@drawable/bg_invoice_field_block" android:paddingHorizontal="16dp" android:paddingVertical="5dp" android:visibility="gone" tools:visibility="visible">
 
-                    <TextView
-                        android:id="@+id/amount_prefix"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="12dp"
-                        android:layout_marginBottom="10dp"
-                        android:text="@string/currency_symbol_usd"
-                        android:textColor="@color/text_primary"
-                        android:textSize="@dimen/text_size_title"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/input_amount"
-                        app:layout_constraintHorizontal_chainStyle="packed"
-                        app:layout_constraintStart_toStartOf="parent" />
+                    <TextView android:id="@+id/amount_prefix" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="12dp" android:layout_marginBottom="10dp" android:text="@string/currency_symbol_usd" android:textColor="@color/text_primary" android:textSize="@dimen/text_size_title" android:textStyle="bold" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toStartOf="@id/input_amount" app:layout_constraintHorizontal_chainStyle="packed" app:layout_constraintStart_toStartOf="parent" />
 
-                    <EditText
-                        android:id="@+id/input_amount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@android:color/transparent"
-                        android:digits="0123456789."
-                        android:hint="0.00"
-                        android:imeOptions="actionNext"
-                        android:importantForAutofill="no"
-                        android:inputType="numberDecimal"
-                        android:maxWidth="200dp"
-                        android:maxLength="12"
-                        android:maxLines="1"
-                        android:singleLine="true"
-                        android:textColor="@color/text_primary"
-                        android:textColorHint="@color/text_secondary"
-                        android:textSize="40sp"
-                        android:textStyle="bold"
-                        app:layout_constrainedWidth="true"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/amount_prefix" />
+                    <EditText android:id="@+id/input_amount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@android:color/transparent" android:digits="0123456789." android:hint="0.00" android:imeOptions="actionNext" android:importantForAutofill="no" android:inputType="numberDecimal" android:maxWidth="200dp" android:maxLength="12" android:maxLines="1" android:singleLine="true" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:textSize="40sp" android:textStyle="bold" app:layout_constrainedWidth="true" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toEndOf="@id/amount_prefix" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </LinearLayout>
 
             <!--详情分割线-->
-            <com.snapreceipt.io.ui.widget.CouponDividerView
-                android:layout_width="match_parent"
-                android:layout_height="26dp"
-                android:background="@android:color/white" />
+            <com.snapreceipt.io.ui.widget.CouponDividerView android:layout_width="match_parent" android:layout_height="26dp" android:background="@android:color/white" />
 
             <!--底部详情-->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingTop="27dp"
-                android:paddingBottom="16dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="16dp" android:paddingTop="27dp" android:paddingBottom="16dp">
 
                 <!--预览模式-->
-                <LinearLayout
-                    android:id="@+id/section_view_mode"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                <LinearLayout android:id="@+id/section_view_mode" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
                     <!--预览模式：表格-->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:baselineAligned="false"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:baselineAligned="false" android:gravity="center_vertical" android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:minWidth="100dp"
-                            android:text="@string/merchant"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="@dimen/text_size_secondary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="100dp" android:text="@string/merchant" android:textColor="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
-                        <TextView
-                            android:id="@+id/value_merchant"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_weight="1"
-                            android:breakStrategy="simple"
-                            android:ellipsize="end"
-                            android:gravity="end"
-                            android:hyphenationFrequency="none"
-                            android:maxLines="2"
-                            android:textColor="@color/text_primary"
-                            android:textSize="@dimen/text_size_secondary"
-                            tools:text="Starbucks Coffee" />
+                        <TextView android:id="@+id/value_merchant" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_weight="1" android:breakStrategy="simple" android:ellipsize="end" android:gravity="end" android:hyphenationFrequency="none" android:maxLines="2" android:textColor="@color/text_primary" android:textSize="@dimen/text_size_secondary" tools:text="Starbucks Coffee" />
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="34dp"
-                        android:baselineAligned="false"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="34dp" android:baselineAligned="false" android:gravity="center_vertical" android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:minWidth="100dp"
-                            android:text="@string/address"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="@dimen/text_size_secondary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="100dp" android:text="@string/address" android:textColor="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
-                        <TextView
-                            android:id="@+id/value_address"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_weight="1"
-                            android:breakStrategy="simple"
-                            android:ellipsize="end"
-                            android:gravity="end"
-                            android:hyphenationFrequency="none"
-                            android:maxLines="2"
-                            android:textColor="@color/text_primary"
-                            android:textSize="@dimen/text_size_secondary"
-                            tools:text="San Francisco" />
+                        <TextView android:id="@+id/value_address" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_weight="1" android:breakStrategy="simple" android:ellipsize="end" android:gravity="end" android:hyphenationFrequency="none" android:maxLines="2" android:textColor="@color/text_primary" android:textSize="@dimen/text_size_secondary" tools:text="San Francisco" />
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="34dp"
-                        android:baselineAligned="false"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="34dp" android:baselineAligned="false" android:gravity="center_vertical" android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:minWidth="100dp"
-                            android:text="@string/date"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="@dimen/text_size_secondary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="100dp" android:text="@string/date" android:textColor="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
-                        <TextView
-                            android:id="@+id/value_date"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_weight="1"
-                            android:breakStrategy="simple"
-                            android:ellipsize="end"
-                            android:gravity="end"
-                            android:hyphenationFrequency="none"
-                            android:maxLines="2"
-                            android:textColor="@color/text_primary"
-                            android:textSize="@dimen/text_size_secondary"
-                            tools:text="2025/12/30 10:20AM" />
+                        <TextView android:id="@+id/value_date" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_weight="1" android:breakStrategy="simple" android:ellipsize="end" android:gravity="end" android:hyphenationFrequency="none" android:maxLines="2" android:textColor="@color/text_primary" android:textSize="@dimen/text_size_secondary" tools:text="2025/12/30 10:20AM" />
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="34dp"
-                        android:baselineAligned="false"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="34dp" android:baselineAligned="false" android:gravity="center_vertical" android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:minWidth="100dp"
-                            android:text="@string/bank_card"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="@dimen/text_size_secondary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="100dp" android:text="@string/bank_card" android:textColor="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
-                        <TextView
-                            android:id="@+id/value_card"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_weight="1"
-                            android:breakStrategy="simple"
-                            android:ellipsize="end"
-                            android:gravity="end"
-                            android:hyphenationFrequency="none"
-                            android:maxLines="2"
-                            android:textColor="@color/text_primary"
-                            android:textSize="@dimen/text_size_secondary"
-                            tools:text="**** **** **** 6809" />
+                        <TextView android:id="@+id/value_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_weight="1" android:breakStrategy="simple" android:ellipsize="end" android:gravity="end" android:hyphenationFrequency="none" android:maxLines="2" android:textColor="@color/text_primary" android:textSize="@dimen/text_size_secondary" tools:text="**** **** **** 6809" />
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="34dp"
-                        android:baselineAligned="false"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="34dp" android:baselineAligned="false" android:gravity="center_vertical" android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:minWidth="100dp"
-                            android:text="@string/invoice_category"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="@dimen/text_size_secondary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="100dp" android:text="@string/invoice_category" android:textColor="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
-                        <TextView
-                            android:id="@+id/value_invoice_category"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_weight="1"
-                            android:breakStrategy="simple"
-                            android:ellipsize="end"
-                            android:gravity="end"
-                            android:hyphenationFrequency="none"
-                            android:maxLines="2"
-                            android:textColor="@color/text_primary"
-                            android:textSize="@dimen/text_size_secondary"
-                            tools:text="Food" />
+                        <TextView android:id="@+id/value_invoice_category" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_weight="1" android:breakStrategy="simple" android:ellipsize="end" android:gravity="end" android:hyphenationFrequency="none" android:maxLines="2" android:textColor="@color/text_primary" android:textSize="@dimen/text_size_secondary" tools:text="Food" />
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="34dp"
-                        android:baselineAligned="false"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="34dp" android:baselineAligned="false" android:gravity="center_vertical" android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:minWidth="100dp"
-                            android:text="@string/invoice_type"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="@dimen/text_size_secondary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="100dp" android:text="@string/invoice_type" android:textColor="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
-                        <TextView
-                            android:id="@+id/value_invoice_type"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_weight="1"
-                            android:breakStrategy="simple"
-                            android:ellipsize="end"
-                            android:gravity="end"
-                            android:hyphenationFrequency="none"
-                            android:maxLines="2"
-                            android:textColor="@color/text_primary"
-                            android:textSize="@dimen/text_size_secondary"
-                            tools:text="Individual" />
+                        <TextView android:id="@+id/value_invoice_type" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_weight="1" android:breakStrategy="simple" android:ellipsize="end" android:gravity="end" android:hyphenationFrequency="none" android:maxLines="2" android:textColor="@color/text_primary" android:textSize="@dimen/text_size_secondary" tools:text="Individual" />
                     </LinearLayout>
 
                 </LinearLayout>
 
                 <!--预览模式：备注-->
-                <TextView
-                    android:id="@+id/view_note_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="34dp"
-                    android:text="@string/note"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="@dimen/text_size_secondary" />
+                <TextView android:id="@+id/view_note_label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="34dp" android:text="@string/note" android:textColor="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
-                <TextView
-                    android:id="@+id/value_note"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:textColor="@color/text_primary"
-                    android:textSize="@dimen/text_size_secondary"
-                    tools:text="Coffee with client" />
+                <TextView android:id="@+id/value_note" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:textColor="@color/text_primary" android:textSize="@dimen/text_size_secondary" tools:text="Coffee with client" />
 
                 <!--编辑模式-->
-                <LinearLayout
-                    android:id="@+id/section_edit_mode"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="gone"
-                    tools:visibility="visible">
+                <LinearLayout android:id="@+id/section_edit_mode" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone" tools:visibility="visible">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/merchant"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/text_size_secondary" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/merchant" android:textColor="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
-                    <EditText
-                        android:id="@+id/input_merchant"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:background="@drawable/bg_invoice_field_block"
-                        android:gravity="top|start"
-                        android:hint="@string/invoice_details_hint_merchant"
-                        android:imeOptions="actionNext"
-                        android:inputType="textCapWords|textMultiLine"
-                        android:maxLength="150"
-                        android:minHeight="@dimen/input_box_height"
-                        android:padding="16dp"
-                        android:scrollHorizontally="false"
-                        android:textColor="@color/text_primary"
-                        android:textSize="@dimen/text_size_secondary" />
+                    <EditText android:id="@+id/input_merchant" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/bg_invoice_field_block" android:gravity="top|start" android:hint="@string/invoice_details_hint_merchant" android:imeOptions="actionNext" android:inputType="textCapWords|textMultiLine" android:maxLength="150" android:minHeight="@dimen/input_box_height" android:padding="16dp" android:scrollHorizontally="false" android:textColor="@color/text_primary" android:textSize="@dimen/text_size_secondary" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/address"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/text_size_secondary" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/address" android:textColor="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
-                    <EditText
-                        android:id="@+id/input_address"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:background="@drawable/bg_invoice_field_block"
-                        android:gravity="top|start"
-                        android:hint="@string/invoice_details_hint_address"
-                        android:imeOptions="actionNext"
-                        android:inputType="textCapWords|textMultiLine"
-                        android:maxLength="300"
-                        android:minHeight="@dimen/input_box_height"
-                        android:padding="16dp"
-                        android:scrollHorizontally="false"
-                        android:textColor="@color/text_primary"
-                        android:textSize="@dimen/text_size_secondary" />
+                    <EditText android:id="@+id/input_address" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/bg_invoice_field_block" android:gravity="top|start" android:hint="@string/invoice_details_hint_address" android:imeOptions="actionNext" android:inputType="textCapWords|textMultiLine" android:maxLength="100" android:minHeight="@dimen/input_box_height" android:padding="16dp" android:scrollHorizontally="false" android:textColor="@color/text_primary" android:textSize="@dimen/text_size_secondary" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/date"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/text_size_secondary" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/date" android:textColor="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
-                    <LinearLayout
-                        android:id="@+id/container_input_date"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:background="@drawable/bg_invoice_field_block"
-                        android:gravity="center_vertical"
-                        android:minHeight="@dimen/input_box_height">
+                    <LinearLayout android:id="@+id/container_input_date" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/bg_invoice_field_block" android:gravity="center_vertical" android:minHeight="@dimen/input_box_height">
 
-                        <EditText
-                            android:id="@+id/input_date"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="40dp"
-                            android:layout_weight="1"
-                            android:background="@android:color/transparent"
-                            android:cursorVisible="false"
-                            android:focusable="false"
-                            android:focusableInTouchMode="false"
-                            android:hint="@string/invoice_details_hint_date"
-                            android:importantForAutofill="no"
-                            android:inputType="datetime"
-                            android:longClickable="false"
-                            android:padding="16dp"
-                            android:textColor="@color/text_primary"
-                            android:textColorHint="@color/text_secondary"
-                            android:textSize="@dimen/text_size_secondary" />
+                        <EditText android:id="@+id/input_date" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginEnd="40dp" android:layout_weight="1" android:background="@android:color/transparent" android:cursorVisible="false" android:focusable="false" android:focusableInTouchMode="false" android:hint="@string/invoice_details_hint_date" android:importantForAutofill="no" android:inputType="datetime" android:longClickable="false" android:padding="16dp" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
-                        <ImageView
-                            android:layout_width="15dp"
-                            android:layout_height="15dp"
-                            android:layout_marginEnd="16dp"
-                            android:contentDescription="@string/date"
-                            android:src="@drawable/ic_calendar_gray" />
+                        <ImageView android:layout_width="15dp" android:layout_height="15dp" android:layout_marginEnd="16dp" android:contentDescription="@string/date" android:src="@drawable/ic_calendar_gray" />
                     </LinearLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/bank_card"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/text_size_secondary" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/bank_card" android:textColor="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
-                    <EditText
-                        android:id="@+id/input_card"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:background="@drawable/bg_invoice_field_block"
-                        android:digits="0123456789 -"
-                        android:gravity="center_vertical"
-                        android:hint="@string/invoice_details_hint_bank_card"
-                        android:imeOptions="actionNext"
-                        android:importantForAutofill="no"
-                        android:inputType="phone"
-                        android:maxLength="23"
-                        android:maxLines="1"
-                        android:minHeight="@dimen/input_box_height"
-                        android:padding="16dp"
-                        android:singleLine="true"
-                        android:textColor="@color/text_primary"
-                        android:textColorHint="@color/text_secondary"
-                        android:textSize="@dimen/text_size_secondary" />
+                    <EditText android:id="@+id/input_card" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/bg_invoice_field_block" android:digits="0123456789 -" android:gravity="center_vertical" android:hint="@string/invoice_details_hint_bank_card" android:imeOptions="actionNext" android:importantForAutofill="no" android:inputType="phone" android:maxLength="23" android:maxLines="1" android:minHeight="@dimen/input_box_height" android:padding="16dp" android:singleLine="true" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
-                    <TextView
-                        android:id="@+id/card_helper"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textColor="@color/colorError"
-                        android:textSize="@dimen/text_size_small"
-                        android:visibility="gone" />
+                    <TextView android:id="@+id/card_helper" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textColor="@color/colorError" android:textSize="@dimen/text_size_small" android:visibility="gone" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/invoice_category"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/text_size_secondary" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/invoice_category" android:textColor="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
-                    <LinearLayout
-                        android:id="@+id/container_input_invoice_category"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:background="@drawable/bg_invoice_field_block"
-                        android:gravity="center_vertical"
-                        android:minHeight="@dimen/input_box_height">
+                    <LinearLayout android:id="@+id/container_input_invoice_category" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/bg_invoice_field_block" android:gravity="center_vertical" android:minHeight="@dimen/input_box_height">
 
-                        <EditText
-                            android:id="@+id/input_invoice_category"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:background="@android:color/transparent"
-                            android:cursorVisible="false"
-                            android:focusable="false"
-                            android:focusableInTouchMode="false"
-                            android:hint="@string/invoice_details_hint_category"
-                            android:importantForAutofill="no"
-                            android:longClickable="false"
-                            android:padding="16dp"
-                            android:textColor="@color/text_primary"
-                            android:textColorHint="@color/text_secondary"
-                            android:textSize="@dimen/text_size_secondary" />
+                        <EditText android:id="@+id/input_invoice_category" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@android:color/transparent" android:cursorVisible="false" android:focusable="false" android:focusableInTouchMode="false" android:hint="@string/invoice_details_hint_category" android:importantForAutofill="no" android:longClickable="false" android:padding="16dp" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="16dp"
-                            android:contentDescription="@string/invoice_category"
-                            android:src="@drawable/ic_chevron_down" />
+                        <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="16dp" android:contentDescription="@string/invoice_category" android:src="@drawable/ic_chevron_down" />
                     </LinearLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/invoice_type"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/text_size_secondary" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/invoice_type" android:textColor="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
-                    <LinearLayout
-                        android:id="@+id/container_input_invoice_type"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:background="@drawable/bg_invoice_field_block"
-                        android:gravity="center_vertical"
-                        android:minHeight="@dimen/input_box_height">
+                    <LinearLayout android:id="@+id/container_input_invoice_type" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/bg_invoice_field_block" android:gravity="center_vertical" android:minHeight="@dimen/input_box_height">
 
-                        <EditText
-                            android:id="@+id/input_invoice_type"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:background="@android:color/transparent"
-                            android:cursorVisible="false"
-                            android:focusable="false"
-                            android:focusableInTouchMode="false"
-                            android:hint="@string/invoice_details_hint_type"
-                            android:importantForAutofill="no"
-                            android:longClickable="false"
-                            android:padding="16dp"
-                            android:textColor="@color/text_primary"
-                            android:textColorHint="@color/text_secondary"
-                            android:textSize="@dimen/text_size_secondary" />
+                        <EditText android:id="@+id/input_invoice_type" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@android:color/transparent" android:cursorVisible="false" android:focusable="false" android:focusableInTouchMode="false" android:hint="@string/invoice_details_hint_type" android:importantForAutofill="no" android:longClickable="false" android:padding="16dp" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="16dp"
-                            android:contentDescription="@string/invoice_type"
-                            android:src="@drawable/ic_chevron_down" />
+                        <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="16dp" android:contentDescription="@string/invoice_type" android:src="@drawable/ic_chevron_down" />
                     </LinearLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/note"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/text_size_secondary" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/note" android:textColor="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
 
-                    <EditText
-                        android:id="@+id/input_note"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:background="@drawable/bg_invoice_field_block"
-                        android:gravity="top|start"
-                        android:hint="@string/invoice_details_hint_note"
-                        android:imeOptions="actionDone"
-                        android:inputType="textCapSentences|textMultiLine"
-                        android:maxLength="300"
-                        android:maxLines="6"
-                        android:minHeight="120dp"
-                        android:paddingHorizontal="16dp"
-                        android:paddingVertical="10dp"
-                        android:textColor="@color/text_primary"
-                        android:textColorHint="@color/text_secondary"
-                        android:textSize="@dimen/text_size_secondary" />
+                    <EditText android:id="@+id/input_note" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/bg_invoice_field_block" android:gravity="top|start" android:hint="@string/invoice_details_hint_note" android:imeOptions="actionDone" android:inputType="textCapSentences|textMultiLine" android:maxLength="300" android:maxLines="6" android:minHeight="120dp" android:paddingHorizontal="16dp" android:paddingVertical="10dp" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:textSize="@dimen/text_size_secondary" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -710,26 +166,9 @@
     </androidx.core.widget.NestedScrollView>
 
     <!--保存-->
-    <LinearLayout
-        android:id="@+id/bottom_action_container"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@android:color/white"
-        android:orientation="vertical"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="12dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="visible">
+    <LinearLayout android:id="@+id/bottom_action_container" android:layout_width="0dp" android:layout_height="wrap_content" android:background="@android:color/white" android:orientation="vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp" android:visibility="gone" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" tools:visibility="visible">
 
-        <com.snapreceipt.io.ui.widget.PrimaryActionButton
-            android:id="@+id/save_btn"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/button_height"
-            android:text="@string/save_upload"
-            app:pabEnableShadow="false" />
+        <com.snapreceipt.io.ui.widget.PrimaryActionButton android:id="@+id/save_btn" android:layout_width="match_parent" android:layout_height="@dimen/button_height" android:text="@string/save_upload" app:pabEnableShadow="false" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
