@@ -54,7 +54,7 @@ class PhoneLoginFragment : BaseLoginFragment(R.layout.fragment_phone_login) {
 
     private fun renderState(state: LoginUiState) {
         val countdownSeconds = state.phoneCodeCountdownSeconds
-        val phoneLengthValid = ContactInputValidator.isPhoneLengthValid(state.phone)
+        val phoneLengthValid = ContactInputValidator.isPhoneValid(state.phone)
         val canRequestCode = !state.loading && countdownSeconds == 0
         binding.getCodeBtn.isEnabled = canRequestCode
         binding.getCodeBtn.text = if (countdownSeconds > 0) {
@@ -63,14 +63,14 @@ class PhoneLoginFragment : BaseLoginFragment(R.layout.fragment_phone_login) {
             getString(R.string.login_captcha)
         }
         updateCodeRequestLoading(state.requestingCode)
-        binding.loginBtn.isEnabled = !state.loading && phoneLengthValid && state.phoneCode.isNotBlank()
+        binding.loginBtn.isEnabled = !state.loading && phoneLengthValid && ContactInputValidator.isVerificationCodeValid(state.phoneCode)
         updateTabStyle(state.mode == LoginMode.PHONE)
         updateAgreementState(state.agreementAccepted)
     }
 
     private fun onGetCodeClick() {
         val phone = binding.phoneInput.text.toString().trim()
-        if (!ContactInputValidator.isPhoneLengthValid(phone)) {
+        if (!ContactInputValidator.isPhoneValid(phone)) {
             Toast.makeText(requireContext(), getString(R.string.phone_invalid), Toast.LENGTH_SHORT).show()
             return
         }
@@ -84,7 +84,7 @@ class PhoneLoginFragment : BaseLoginFragment(R.layout.fragment_phone_login) {
             "Login",
             "Phone login click phoneLength=${phone.length} codeLength=${code.length}"
         )
-        if (!ContactInputValidator.isPhoneLengthValid(phone) || code.isBlank()) return
+        if (!ContactInputValidator.isPhoneValid(phone) || !ContactInputValidator.isVerificationCodeValid(code)) return
         if (!viewModel.uiState.value.agreementAccepted) {
             showAgreementDialog { confirmed ->
                 if (confirmed) {

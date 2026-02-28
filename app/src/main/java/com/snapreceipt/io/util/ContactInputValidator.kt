@@ -1,21 +1,28 @@
 package com.snapreceipt.io.util
 
-import android.util.Patterns
-
 object ContactInputValidator {
 
     fun isEmailValid(email: String): Boolean {
-        val normalized = email.trim()
-        return normalized.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(normalized).matches()
+        if (email.isBlank()) return false
+        val pattern = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+        return email.matches(Regex(pattern))
     }
 
     /**
-     * 宽松校验手机号：去除非数字字符和自动填充可能携带的国际区号后，
-     * 只检查位数是否在 7-15 位的合理范围内，兼容全球主流号码格式。
+     * 校验手机号格式：支持 5-15 位数字
      */
-    fun isPhoneLengthValid(phone: String): Boolean {
-        val digits = phone.trim().replace(Regex("[^\\d]"), "")
-        val stripped = if (digits.length > 11 && digits.startsWith("86")) digits.substring(2) else digits
-        return stripped.length in 7..15
+    fun isPhoneValid(phone: String): Boolean {
+        if (phone.isBlank()) return false
+        val pattern = "^\\d{5,15}$"
+        return phone.matches(Regex(pattern))
+    }
+
+    /**
+     * 校验验证码格式：6位数字
+     */
+    fun isVerificationCodeValid(code: String): Boolean {
+        if (code.isBlank()) return false
+        val pattern = "^\\d{6}$"
+        return code.matches(Regex(pattern))
     }
 }

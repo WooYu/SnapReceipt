@@ -61,7 +61,7 @@ class ChangeEmailActivity : BaseActivity<ChangeEmailViewModel>() {
         val emailFormatValid = ContactInputValidator.isEmailValid(state.email)
         binding.confirmBtn.isEnabled = !state.loading &&
             emailFormatValid &&
-            state.code.trim().isNotBlank()
+            ContactInputValidator.isVerificationCodeValid(state.code.trim())
     }
 
     private fun onGetCodeClick() {

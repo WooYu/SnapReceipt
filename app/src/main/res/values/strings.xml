@@ -36,6 +36,7 @@
     <string name="email_empty">Please enter email address</string>
     <string name="email_invalid">Please enter a valid email address</string>
     <string name="code_empty">Please enter verification code</string>
+    <string name="code_invalid">Please enter a valid verification code</string>
     <string name="code_sent">Verification code sent to %s</string>
     <string name="input_required">Please complete all required fields</string>
     <string name="agreement_required">Please accept the User Agreement and Privacy Policy</string>

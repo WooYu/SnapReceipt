@@ -84,6 +84,10 @@ class ChangeEmailViewModel @Inject constructor(
             emitEvent(UiEvent.Toast(message = "", resId = R.string.code_empty))
             return
         }
+        if (!ContactInputValidator.isVerificationCodeValid(code)) {
+            emitEvent(UiEvent.Toast(message = "", resId = R.string.code_invalid))
+            return
+        }
         _uiState.update { it.copy(loading = true) }
         viewModelScope.launch(dispatchers.io) {
             updateEmailUseCase(email, code)

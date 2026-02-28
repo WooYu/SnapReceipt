@@ -58,15 +58,15 @@ class ChangePhoneActivity : BaseActivity<ChangePhoneViewModel>() {
         } else {
             getString(R.string.login_captcha)
         }
-        val phoneLengthValid = ContactInputValidator.isPhoneLengthValid(state.phone)
+        val phoneValid = ContactInputValidator.isPhoneValid(state.phone)
         binding.confirmBtn.isEnabled = !state.loading &&
-            phoneLengthValid &&
-            state.code.trim().isNotBlank()
+            phoneValid &&
+            ContactInputValidator.isVerificationCodeValid(state.code.trim())
     }
 
     private fun onGetCodeClick() {
         val phone = binding.phoneInput.text.toString().trim()
-        if (!ContactInputValidator.isPhoneLengthValid(phone)) {
+        if (!ContactInputValidator.isPhoneValid(phone)) {
             Toast.makeText(this, getString(R.string.phone_invalid), Toast.LENGTH_SHORT).show()
             return
         }

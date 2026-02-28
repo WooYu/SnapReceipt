@@ -63,7 +63,7 @@ class EmailLoginFragment : BaseLoginFragment(R.layout.fragment_email_login) {
             getString(R.string.login_captcha)
         }
         updateCodeRequestLoading(state.requestingCode)
-        binding.loginBtn.isEnabled = !state.loading && emailFormatValid && state.emailCode.isNotBlank()
+        binding.loginBtn.isEnabled = !state.loading && emailFormatValid && ContactInputValidator.isVerificationCodeValid(state.emailCode)
         updateTabStyle(state.mode == LoginMode.PHONE)
         updateAgreementState(state.agreementAccepted)
     }
@@ -84,7 +84,7 @@ class EmailLoginFragment : BaseLoginFragment(R.layout.fragment_email_login) {
             "Login",
             "Email login click emailLength=${email.length} codeLength=${code.length}"
         )
-        if (!ContactInputValidator.isEmailValid(email) || code.isBlank()) return
+        if (!ContactInputValidator.isEmailValid(email) || !ContactInputValidator.isVerificationCodeValid(code)) return
         if (!viewModel.uiState.value.agreementAccepted) {
             showAgreementDialog { confirmed ->
                 if (confirmed) {

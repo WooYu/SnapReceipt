@@ -49,7 +49,7 @@ class ChangePhoneViewModel @Inject constructor(
             emitEvent(UiEvent.Toast(message = "", resId = R.string.phone_empty))
             return
         }
-        if (!ContactInputValidator.isPhoneLengthValid(phone)) {
+        if (!ContactInputValidator.isPhoneValid(phone)) {
             emitEvent(UiEvent.Toast(message = "", resId = R.string.phone_invalid))
             return
         }
@@ -76,12 +76,16 @@ class ChangePhoneViewModel @Inject constructor(
             emitEvent(UiEvent.Toast(message = "", resId = R.string.phone_empty))
             return
         }
-        if (!ContactInputValidator.isPhoneLengthValid(phone)) {
+        if (!ContactInputValidator.isPhoneValid(phone)) {
             emitEvent(UiEvent.Toast(message = "", resId = R.string.phone_invalid))
             return
         }
         if (code.isBlank()) {
             emitEvent(UiEvent.Toast(message = "", resId = R.string.code_empty))
+            return
+        }
+        if (!ContactInputValidator.isVerificationCodeValid(code)) {
+            emitEvent(UiEvent.Toast(message = "", resId = R.string.code_invalid))
             return
         }
         _uiState.update { it.copy(loading = true) }

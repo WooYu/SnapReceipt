@@ -9,6 +9,7 @@ import com.snapreceipt.io.domain.usecase.auth.AuthLoginUseCase
 import com.snapreceipt.io.domain.usecase.auth.AuthRequestCodeUseCase
 import com.snapreceipt.io.domain.usecase.config.FetchPolicyUseCase
 import com.snapreceipt.io.domain.usecase.user.InsertUserUseCase
+import com.snapreceipt.io.util.ContactInputValidator
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
@@ -90,6 +91,20 @@ class LoginViewModel @Inject constructor(
             emitEvent(UiEvent.Toast(message = "", resId = resId))
             return
         }
+        val isValid = if (mode == LoginMode.EMAIL) {
+            ContactInputValidator.isEmailValid(target)
+        } else {
+            ContactInputValidator.isPhoneValid(target)
+        }
+        if (!isValid) {
+            val resId = if (mode == LoginMode.EMAIL) {
+                R.string.email_invalid
+            } else {
+                R.string.phone_invalid
+            }
+            emitEvent(UiEvent.Toast(message = "", resId = resId))
+            return
+        }
         _uiState.update { it.copy(loading = true, requestingCode = true, error = null) }
         viewModelScope.launch(dispatchers.io) {
             requestCodeUseCase(target)
@@ -114,8 +129,16 @@ class LoginViewModel @Inject constructor(
             emitEvent(UiEvent.Toast(message = "", resId = R.string.phone_empty))
             return
         }
+        if (!ContactInputValidator.isPhoneValid(phone)) {
+            emitEvent(UiEvent.Toast(message = "", resId = R.string.phone_invalid))
+            return
+        }
         if (code.isBlank()) {
             emitEvent(UiEvent.Toast(message = "", resId = R.string.code_empty))
+            return
+        }
+        if (!ContactInputValidator.isVerificationCodeValid(code)) {
+            emitEvent(UiEvent.Toast(message = "", resId = R.string.code_invalid))
             return
         }
         login(phone, code)
@@ -126,8 +149,16 @@ class LoginViewModel @Inject constructor(
             emitEvent(UiEvent.Toast(message = "", resId = R.string.email_empty))
             return
         }
+        if (!ContactInputValidator.isEmailValid(email)) {
+            emitEvent(UiEvent.Toast(message = "", resId = R.string.email_invalid))
+            return
+        }
         if (code.isBlank()) {
             emitEvent(UiEvent.Toast(message = "", resId = R.string.code_empty))
+            return
+        }
+        if (!ContactInputValidator.isVerificationCodeValid(code)) {
+            emitEvent(UiEvent.Toast(message = "", resId = R.string.code_invalid))
             return
         }
         login(email, code)
