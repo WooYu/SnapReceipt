@@ -7,7 +7,16 @@ import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 object EncryptUtil {
-    fun md5(input: String): String = digest("MD5", input)
+
+    /**
+     * Non-cryptographic MD5 hex digest. Use only for checksums or cache keys,
+     * NEVER for passwords or security-sensitive data.
+     */
+    fun md5Hex(input: String): String = digest("MD5", input)
+
+    @Deprecated("Use md5Hex() instead. MD5 is not cryptographically secure.", ReplaceWith("md5Hex(input)"))
+    fun md5(input: String): String = md5Hex(input)
+
     fun sha256(input: String): String = digest("SHA-256", input)
 
     fun aesEncrypt(plainText: String, key: ByteArray, iv: ByteArray): String {

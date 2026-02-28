@@ -1,23 +1,23 @@
 package com.snapreceipt.io.domain.model
 
+import java.math.BigDecimal
+
 /**
- * 导出记录项（对应 /api/record/list 返回 rows）。
- *
- * @property exportId 导出记录ID
- * @property beginDate 开始日期
- * @property endDate 结束日期
- * @property receiptCount 发票数量
- * @property exportType 发票类型（Business/Individual）
- * @property totalAmount 总金额
- * @property fileUrl 导出文件地址/文件名
- * @property createTime 创建时间
- * @property createBy 创建人
- * @property updateBy 更新人
- * @property updateTime 更新时间
- * @property remark 备注
- * @property userId 用户ID
- * @property status 状态
- * @property delFlag 删除标记
+ * @property exportId Export record ID
+ * @property beginDate Start date
+ * @property endDate End date
+ * @property receiptCount Receipt count
+ * @property exportType Receipt type (Business/Individual)
+ * @property totalAmount Total amount
+ * @property fileUrl Export file URL
+ * @property createTime Create time
+ * @property createBy Creator
+ * @property updateBy Updater
+ * @property updateTime Update time
+ * @property remark Remark
+ * @property userId User ID
+ * @property status Status
+ * @property delFlag Delete flag
  */
 data class ExportRecordEntity(
     val exportId: Long,
@@ -25,7 +25,7 @@ data class ExportRecordEntity(
     val endDate: String,
     val receiptCount: Int,
     val exportType: String,
-    val totalAmount: Double,
+    val totalAmount: BigDecimal,
     val fileUrl: String,
     val createTime: String? = null,
     val status: String? = null,

@@ -1,6 +1,6 @@
 package com.skybound.space.core.network.auth
 
-class InMemoryAuthTokenStore : AuthTokenStore {
+internal class InMemoryAuthTokenStore : AuthTokenStore {
     @Volatile
     private var access: String? = null
     @Volatile

@@ -27,7 +27,7 @@ class ReceiptRemoteRepositoryImplTest {
                 categoryId = 0L,
                 receiptUrl = "",
                 merchant = "Shop",
-                totalAmount = 0.0
+                totalAmount = java.math.BigDecimal.ZERO
             )
         )
         val response = BasePagedResponse(

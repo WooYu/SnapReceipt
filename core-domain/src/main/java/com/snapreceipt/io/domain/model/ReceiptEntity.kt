@@ -2,22 +2,23 @@ package com.snapreceipt.io.domain.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import java.math.BigDecimal
 
 /**
- * @property receiptId 发票ID（接口 receiptId）
- * @property merchant 商户名称
- * @property address 地址
- * @property receiptDate 发票日期（yyyy-MM-dd）
- * @property receiptTime 发票时间（HH:mm:ss，可选）
- * @property totalAmount 消费总额
- * @property tipAmount 小费
- * @property paymentCardNo 卡号（脱敏）
- * @property consumer 消费者
- * @property remark 备注
- * @property receiptUrl 发票图片地址
- * @property categoryId 分类ID
- * @property categoryName 分类名称（接口直接返回，无需通过 categoryId 转换）
- * @property receiptType 发票类型（Business/Individual）
+ * @property receiptId Receipt ID
+ * @property merchant Merchant name
+ * @property address Address
+ * @property receiptDate Receipt date (yyyy-MM-dd)
+ * @property receiptTime Receipt time (HH:mm:ss, optional)
+ * @property totalAmount Total amount
+ * @property tipAmount Tip amount
+ * @property paymentCardNo Card number (last 4)
+ * @property consumer Consumer name
+ * @property remark Remark
+ * @property receiptUrl Receipt image URL
+ * @property categoryId Category ID
+ * @property categoryName Category name
+ * @property receiptType Receipt type (Business/Individual)
  */
 @Parcelize
 data class ReceiptEntity(
@@ -26,8 +27,8 @@ data class ReceiptEntity(
     val address: String? = null,
     val receiptDate: String? = null,
     val receiptTime: String? = null,
-    val totalAmount: Double? = null,
-    val tipAmount: Double? = null,
+    val totalAmount: BigDecimal? = null,
+    val tipAmount: BigDecimal? = null,
     val paymentCardNo: String? = null,
     val consumer: String? = null,
     val remark: String? = null,

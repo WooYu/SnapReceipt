@@ -9,7 +9,7 @@ import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import com.skybound.space.core.util.DateFormatUtil
 import com.skybound.space.core.util.LogHelper
 import com.snapreceipt.io.R
-import com.snapreceipt.io.domain.manager.CategoryCacheManager
+import com.snapreceipt.io.data.manager.CategoryCacheManager
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.domain.model.query.ReceiptListQueryEntity
 import com.snapreceipt.io.domain.usecase.category.ResolveCategoryIdUseCase

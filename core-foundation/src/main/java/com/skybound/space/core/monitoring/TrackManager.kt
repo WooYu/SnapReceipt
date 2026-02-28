@@ -6,8 +6,18 @@ data class TrackEvent(
     val timestamp: Long = System.currentTimeMillis()
 )
 
+interface AnalyticsTracker {
+    fun track(event: TrackEvent)
+}
+
 object TrackManager {
+    var tracker: AnalyticsTracker? = null
+
     fun track(event: TrackEvent) {
-        // Hook for analytics SDKs
+        tracker?.track(event)
+    }
+
+    fun track(name: String, attributes: Map<String, String> = emptyMap()) {
+        track(TrackEvent(name, attributes))
     }
 }

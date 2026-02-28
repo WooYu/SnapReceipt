@@ -1,4 +1,4 @@
-package com.snapreceipt.io.ui.receipts
+﻿package com.snapreceipt.io.ui.receipts
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -18,7 +18,7 @@ import com.skybound.space.core.util.DateFormatUtil
 import com.skybound.space.core.util.LogHelper
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentReceiptsBinding
-import com.snapreceipt.io.domain.manager.CategoryCacheManager
+import com.snapreceipt.io.data.manager.CategoryCacheManager
 import com.snapreceipt.io.domain.model.ReceiptEntity
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsActivity
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsArgsCodec
@@ -45,7 +45,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
 
     override val viewModel: ReceiptsViewModel by viewModels()
     private val refreshViewModel: ListRefreshViewModel by activityViewModels()
-    
+
     @Inject
     lateinit var categoryCache: CategoryCacheManager
 
@@ -72,7 +72,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
             val operationType = result.data?.getStringExtra(InvoiceDetailsArgsCodec.EXTRA_OPERATION_TYPE)
             val receipt = result.data?.getParcelableExtra<ReceiptEntity>(InvoiceDetailsArgsCodec.EXTRA_RECEIPT)
             val receiptId = result.data?.getLongExtra(InvoiceDetailsArgsCodec.EXTRA_RECEIPT_ID, -1L)
-            
+
             // 根据操作类型，选择本地快速更新或全量刷新
             lifecycleScope.launchWhenResumed {
                 when (operationType) {
@@ -279,7 +279,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                 val id = receipt.receiptId ?: return@filter false
                 state.selectedIds.contains(id)
             }
-            .sumOf { it.totalAmount ?: 0.0 }
+            .fold(java.math.BigDecimal.ZERO) { acc, r -> acc + (r.totalAmount ?: java.math.BigDecimal.ZERO) }
         binding.totalAmount.text = getString(R.string.amount_currency_format, selectedTotal)
 
         // Update select-all checkbox state

@@ -122,7 +122,7 @@ class ReceiptsSelectableAdapter(
                 merchantName.text = receipt.merchant.orEmpty()
                 amount.text = context.getString(
                     R.string.amount_currency_format,
-                    receipt.totalAmount ?: 0.0
+                    receipt.totalAmount ?: java.math.BigDecimal.ZERO
                 )
 
                 val dateText = receipt.receiptDate?.replace('-', '/').orEmpty()

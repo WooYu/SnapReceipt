@@ -9,7 +9,7 @@ import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 @Deprecated(
     message = "Legacy wrapper. Prefer BaseRemoteDataSource + NetworkResult.getOrThrow()."
 )
-class ApiService(
+internal class ApiService(
     private val dispatchers: CoroutineDispatchersProvider
 ) {
     suspend fun <T> request(call: suspend () -> BaseResponse<T>): T =

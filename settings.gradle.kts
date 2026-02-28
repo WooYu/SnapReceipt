@@ -1,9 +1,6 @@
-/**
- * SnapReceipt 项目设置
- * Gradle 项目结构配置
- */
-
 pluginManagement {
+    includeBuild("build-logic")
+
     repositories {
         maven("https://maven.aliyun.com/repository/google")
         maven("https://mirrors.tencent.com/nexus/repository/maven-public")
@@ -46,7 +43,3 @@ include(":core-foundation")
 include(":core-data")
 include(":core-domain")
 
-project(":core-base").projectDir = file("core-base")
-project(":core-foundation").projectDir = file("core-foundation")
-project(":core-data").projectDir = file("core-data")
-project(":core-domain").projectDir = file("core-domain")

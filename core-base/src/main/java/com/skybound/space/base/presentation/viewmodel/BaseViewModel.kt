@@ -17,12 +17,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/**
- * 轻量化的 ViewModel 基类，负责：
- * - 统一协程派发与异常处理
- * - UiEvent 一次性事件派发
- * - 为页面提供标准的状态流处理工具
- */
 abstract class BaseViewModel(
     private val dispatchers: CoroutineDispatchersProvider = CoroutineDispatchersProvider.Default,
     private val fallbackErrorResId: Int? = null
@@ -35,9 +29,6 @@ abstract class BaseViewModel(
         handleError(throwable)
     }
 
-    /**
-     * 向 UI 发送一次性事件。
-     */
     protected fun emitEvent(event: UiEvent) {
         viewModelScope.launch(dispatchers.main) {
             _events.emit(event)
@@ -45,11 +36,13 @@ abstract class BaseViewModel(
     }
 
     /**
-     * 将通用的“加载 -> 成功/失败”流程标准化，减少各页面样板代码。
+     * @param emptyAsEmpty When true, an empty [Collection] result is mapped to [UiState.Empty]
+     *   instead of [UiState.Success]. Set to false when an empty list is a valid success state.
      */
     protected fun <T> launchOperation(
         state: MutableStateFlow<UiState<T>>,
         loadingState: UiState<T> = UiState.Loading(),
+        emptyAsEmpty: Boolean = true,
         onError: (Throwable) -> UiState<T> = { throwable ->
             UiState.Error(
                 message = throwable.message.orEmpty(),
@@ -57,25 +50,24 @@ abstract class BaseViewModel(
             )
         },
         block: suspend CoroutineScope.() -> T
-    ): Job = viewModelScope.launch(dispatchers.io + exceptionHandler) {
-        state.value = loadingState
-        val result = runCatching { block() }
-        result.onSuccess { data ->
-            state.value = if (data is Collection<*> && data.isEmpty()) {
-                @Suppress("UNCHECKED_CAST")
-                UiState.Empty as UiState<T>
-            } else {
-                UiState.Success(data)
+    ): Job = viewModelScope.launch(exceptionHandler) {
+        withContext(dispatchers.main) { state.value = loadingState }
+        val result = withContext(dispatchers.io) { runCatching { block() } }
+        withContext(dispatchers.main) {
+            result.onSuccess { data ->
+                state.value = if (emptyAsEmpty && data is Collection<*> && data.isEmpty()) {
+                    @Suppress("UNCHECKED_CAST")
+                    UiState.Empty as UiState<T>
+                } else {
+                    UiState.Success(data)
+                }
+            }.onFailure { throwable ->
+                state.value = onError(throwable)
+                handleError(throwable)
             }
-        }.onFailure { throwable ->
-            state.value = onError(throwable)
-            handleError(throwable)
         }
     }
 
-    /**
-     * 在 IO 线程执行任务并回调主线程。
-     */
     protected fun <T> launchIo(
         onSuccess: suspend (T) -> Unit = {},
         onFailure: suspend (Throwable) -> Unit = { handleError(it) },
@@ -89,10 +81,6 @@ abstract class BaseViewModel(
             }
     }
 
-    /**
-     * 统一“显示 loading → 执行 IO → 成功/失败更新状态”的流程，供使用 Result 与自定义 UiState 的页面复用。
-     * 先调用 updateLoading(true)，执行 block 后根据 Result 调用 onSuccess/onFailure，再调用 updateLoading(false)。
-     */
     protected fun <T> launchWithLoading(
         updateLoading: (Boolean) -> Unit,
         block: suspend () -> Result<T>,
@@ -115,9 +103,6 @@ abstract class BaseViewModel(
             }
     }
 
-    /**
-     * 子类可根据业务重写错误处理逻辑。
-     */
     open fun handleError(throwable: Throwable) {
         if (throwable is CancellationException) {
             LogHelper.d("BaseViewModel", "Coroutine cancelled: ${throwable.message}")
@@ -131,9 +116,6 @@ abstract class BaseViewModel(
         )
     }
 
-    /**
-     * 帮助方法：为简单页面快速创建状态流。
-     */
     protected fun <T> stateHolder(initial: UiState<T> = UiState.Idle): MutableStateFlow<UiState<T>> =
         MutableStateFlow(initial)
 }

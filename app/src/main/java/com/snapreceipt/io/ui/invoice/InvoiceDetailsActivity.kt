@@ -72,7 +72,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private var receiptDate: String = ""
     private var receiptTime: String = ""
     private var scanConsumer: String = ""
-    private var scanTipAmount: Double? = null
+    private var scanTipAmount: java.math.BigDecimal? = null
     private var receiptId: Long? = null
     private var isEditing: Boolean = false
     
@@ -266,8 +266,8 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private fun saveReceipt(imagePath: String) {
         // 0. Amount
         val amountText = binding.inputAmount.text.toString().trim()
-        val amountValue = amountText.toDoubleOrNull()
-        if (amountValue == null || amountValue <= 0) {
+        val amountValue = amountText.toBigDecimalOrNull()
+        if (amountValue == null || amountValue <= java.math.BigDecimal.ZERO) {
             Toast.makeText(this, getString(R.string.validation_amount_empty), Toast.LENGTH_SHORT).show()
             return
         }
@@ -495,7 +495,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
             merchant = merchantValue,
             receiptDate = receiptDate,
             receiptTime = safeTime,
-            totalAmount = amountText.toDoubleOrNull() ?: 0.0,
+            totalAmount = amountText.toBigDecimalOrNull() ?: java.math.BigDecimal.ZERO,
             tipAmount = scanTipAmount,
             paymentCardNo = cardValue,
             consumer = scanConsumer.ifEmpty { titleTypeValue },
@@ -508,7 +508,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
         )
     }
 
-    private fun formatAmount(amount: Double): String =
+    private fun formatAmount(amount: java.math.BigDecimal): String =
         String.format(Locale.US, "%.2f", amount)
 
     private fun bindReadonlyAmount(amountText: String) {

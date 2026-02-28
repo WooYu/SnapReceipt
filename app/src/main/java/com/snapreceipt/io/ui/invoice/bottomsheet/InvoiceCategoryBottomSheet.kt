@@ -23,7 +23,7 @@ import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.BottomSheetInvoiceCategoryBinding
 import com.snapreceipt.io.databinding.ItemCategoryCustomRowBinding
 import com.snapreceipt.io.databinding.ItemCategoryRecommendRowBinding
-import com.snapreceipt.io.domain.manager.CategoryCacheManager
+import com.snapreceipt.io.data.manager.CategoryCacheManager
 import com.snapreceipt.io.domain.model.CategoryItem
 import com.snapreceipt.io.domain.usecase.category.AddCategoryUseCase
 import com.snapreceipt.io.domain.usecase.category.DeleteCategoryUseCase

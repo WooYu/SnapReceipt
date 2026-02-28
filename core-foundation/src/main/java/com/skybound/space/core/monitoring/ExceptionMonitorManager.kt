@@ -1,7 +1,13 @@
 package com.skybound.space.core.monitoring
 
+interface ExceptionReporter {
+    fun report(throwable: Throwable, metadata: Map<String, String> = emptyMap())
+}
+
 object ExceptionMonitorManager {
+    var reporter: ExceptionReporter? = null
+
     fun report(throwable: Throwable, metadata: Map<String, String> = emptyMap()) {
-        // Hook for crash/ANR reporting SDKs
+        reporter?.report(throwable, metadata)
     }
 }

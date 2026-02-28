@@ -4,6 +4,7 @@ import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
 class OfflineSyncManager(
@@ -84,7 +85,7 @@ class OfflineSyncManager(
     }
 
     class InMemoryTaskStore : OfflineTaskStore {
-        private val tasks = mutableMapOf<Long, OfflineTask>()
+        private val tasks = ConcurrentHashMap<Long, OfflineTask>()
 
         override suspend fun save(task: OfflineTask) {
             tasks[task.id] = task

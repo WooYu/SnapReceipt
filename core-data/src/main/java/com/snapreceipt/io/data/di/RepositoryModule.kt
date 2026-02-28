@@ -1,10 +1,12 @@
 package com.snapreceipt.io.data.di
 
+import com.snapreceipt.io.data.manager.CategoryCacheManager
 import com.snapreceipt.io.data.repository.AuthRepositoryImpl
 import com.snapreceipt.io.data.repository.FileRepositoryImpl
 import com.snapreceipt.io.data.repository.PolicyRepositoryImpl
 import com.snapreceipt.io.data.repository.ReceiptRemoteRepositoryImpl
 import com.snapreceipt.io.data.repository.UserRepositoryImpl
+import com.snapreceipt.io.domain.manager.CategoryCache
 import com.snapreceipt.io.domain.repository.AuthRepository
 import com.snapreceipt.io.domain.repository.FileRepository
 import com.snapreceipt.io.domain.repository.PolicyRepository
@@ -48,4 +50,10 @@ abstract class RepositoryModule {
     abstract fun bindUserRepository(
         impl: UserRepositoryImpl
     ): UserRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCategoryCache(
+        impl: CategoryCacheManager
+    ): CategoryCache
 }

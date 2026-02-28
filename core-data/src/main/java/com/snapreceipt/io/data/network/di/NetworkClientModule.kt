@@ -1,4 +1,4 @@
-package com.snapreceipt.io.data.network.di
+﻿package com.snapreceipt.io.data.network.di
 
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import com.skybound.space.core.network.NetworkManager
@@ -13,17 +13,6 @@ import com.skybound.space.core.network.interceptor.AuthFailureInterceptor
 import com.skybound.space.core.network.interceptor.ExportTimeoutInterceptor
 import com.skybound.space.core.network.interceptor.LoggingInterceptor
 import com.snapreceipt.io.data.network.auth.TokenRefreshAuthenticator
-import com.snapreceipt.io.data.network.datasource.AuthRemoteDataSource
-import com.snapreceipt.io.data.network.datasource.ConfigRemoteDataSource
-import com.snapreceipt.io.data.network.datasource.FileRemoteDataSource
-import com.snapreceipt.io.data.network.datasource.ReceiptRemoteDataSource
-import com.snapreceipt.io.data.network.datasource.UploadRemoteDataSource
-import com.snapreceipt.io.data.network.datasource.UserRemoteDataSource
-import com.snapreceipt.io.data.network.service.AuthApi
-import com.snapreceipt.io.data.network.service.ConfigApi
-import com.snapreceipt.io.data.network.service.FileApi
-import com.snapreceipt.io.data.network.service.ReceiptApi
-import com.snapreceipt.io.data.network.service.UserApi
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
@@ -31,9 +20,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
+import okhttp3.Authenticator
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.Authenticator
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
@@ -46,7 +35,7 @@ annotation class UploadClient
 
 @Module
 @InstallIn(SingletonComponent::class)
-object SnapReceiptNetworkModule {
+object NetworkClientModule {
 
     @Provides
     @Singleton
@@ -64,10 +53,19 @@ object SnapReceiptNetworkModule {
 
     @Provides
     @Singleton
+    fun provideNetworkConfig(): NetworkConfig = NetworkConfig(
+        baseUrl = AppConfig.baseUrl,
+        enableLogging = AppConfig.isDebug,
+        defaultHeaders = mapOf("Accept" to "application/json"),
+        exportTimeoutSec = 60
+    )
+
+    @Provides
+    @Singleton
     fun provideTokenRefreshAuthenticator(
         tokenStore: AuthTokenStore,
         config: NetworkConfig,
-        gson: com.google.gson.Gson,
+        gson: Gson,
         sessionManager: SessionManager
     ): Authenticator = TokenRefreshAuthenticator(tokenStore, config, gson, sessionManager)
 
@@ -85,17 +83,6 @@ object SnapReceiptNetworkModule {
     @IntoSet
     fun provideExportTimeoutInterceptor(config: NetworkConfig): Interceptor =
         ExportTimeoutInterceptor(timeoutSec = config.exportTimeoutSec)
-
-    @Provides
-    @Singleton
-    fun provideNetworkConfig(): NetworkConfig = NetworkConfig(
-        baseUrl = AppConfig.baseUrl,
-        enableLogging = AppConfig.isDebug,
-        defaultHeaders = mapOf(
-            "Accept" to "application/json"
-        ),
-        exportTimeoutSec = 60
-    )
 
     @Provides
     @Singleton
@@ -127,66 +114,4 @@ object SnapReceiptNetworkModule {
                 }
             }
             .build()
-
-    @Provides
-    @Singleton
-    fun provideAuthApi(retrofit: Retrofit): AuthApi = retrofit.create(AuthApi::class.java)
-
-    @Provides
-    @Singleton
-    fun provideFileApi(retrofit: Retrofit): FileApi = retrofit.create(FileApi::class.java)
-
-    @Provides
-    @Singleton
-    fun provideReceiptApi(retrofit: Retrofit): ReceiptApi = retrofit.create(ReceiptApi::class.java)
-
-    @Provides
-    @Singleton
-    fun provideConfigApi(retrofit: Retrofit): ConfigApi = retrofit.create(ConfigApi::class.java)
-
-    @Provides
-    @Singleton
-    fun provideUserApi(retrofit: Retrofit): UserApi = retrofit.create(UserApi::class.java)
-
-    @Provides
-    @Singleton
-    fun provideAuthRemoteDataSource(
-        api: AuthApi,
-        dispatchers: CoroutineDispatchersProvider
-    ): AuthRemoteDataSource = AuthRemoteDataSource(api, dispatchers)
-
-    @Provides
-    @Singleton
-    fun provideConfigRemoteDataSource(
-        api: ConfigApi,
-        dispatchers: CoroutineDispatchersProvider
-    ): ConfigRemoteDataSource = ConfigRemoteDataSource(api, dispatchers)
-
-    @Provides
-    @Singleton
-    fun provideFileRemoteDataSource(
-        api: FileApi,
-        dispatchers: CoroutineDispatchersProvider
-    ): FileRemoteDataSource = FileRemoteDataSource(api, dispatchers)
-
-    @Provides
-    @Singleton
-    fun provideReceiptRemoteDataSource(
-        api: ReceiptApi,
-        dispatchers: CoroutineDispatchersProvider
-    ): ReceiptRemoteDataSource = ReceiptRemoteDataSource(api, dispatchers)
-
-    @Provides
-    @Singleton
-    fun provideUploadRemoteDataSource(
-        @UploadClient okHttpClient: OkHttpClient,
-        dispatchers: CoroutineDispatchersProvider
-    ): UploadRemoteDataSource = UploadRemoteDataSource(okHttpClient, dispatchers)
-
-    @Provides
-    @Singleton
-    fun provideUserRemoteDataSource(
-        api: UserApi,
-        dispatchers: CoroutineDispatchersProvider
-    ): UserRemoteDataSource = UserRemoteDataSource(api, dispatchers)
 }

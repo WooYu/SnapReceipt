@@ -16,6 +16,8 @@ class CacheManager(
 
     data class CacheEntry<T>(val value: T, val timestamp: Long)
 
+    private class DiskEntry(val bytes: ByteArray, val timestamp: Long)
+
     private val memoryCache = object : LruCache<String, CacheEntry<Any>>(maxMemoryEntries) {}
 
     fun <T : Any> put(key: String, value: T, serializer: CacheSerializer<T>) {
@@ -56,7 +58,7 @@ class CacheManager(
     }
 
     private fun cacheFile(key: String): File {
-        val fileName = EncryptUtil.md5(key)
+        val fileName = EncryptUtil.md5Hex(key)
         return File(cacheDir, fileName)
     }
 
@@ -81,8 +83,6 @@ class CacheManager(
     private fun isExpired(timestamp: Long, ttlMs: Long): Boolean {
         return ttlMs > 0 && clock() - timestamp > ttlMs
     }
-
-    private data class DiskEntry(val bytes: ByteArray, val timestamp: Long)
 
     companion object {
         const val DEFAULT_MAX_ENTRIES = 128
