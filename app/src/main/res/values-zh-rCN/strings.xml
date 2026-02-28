@@ -100,6 +100,7 @@
     <string name="receipt_default_name">收据</string>
     <string name="delete_receipt_confirm">确认删除此收据？</string>
     <string name="receipt_save_success">保存成功</string>
+    <string name="receipt_delete_success">删除成功</string>
     <!-- Validation -->
     <string name="validation_amount_empty">请输入大于 0 的有效金额</string>
     <string name="validation_merchant_empty">请输入商户名称</string>

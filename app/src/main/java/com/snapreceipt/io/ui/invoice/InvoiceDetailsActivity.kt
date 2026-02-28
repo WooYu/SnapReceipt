@@ -250,6 +250,8 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
                 finish()
             }
             InvoiceDetailsEventKeys.DELETE_SUCCESS -> {
+                Toast.makeText(this, getString(R.string.receipt_delete_success), Toast.LENGTH_SHORT)
+                    .show()
                 val id = receiptId ?: return
                 setResult(RESULT_OK, Intent().apply {
                     putExtra(InvoiceDetailsArgsCodec.EXTRA_OPERATION_TYPE, InvoiceDetailsArgsCodec.OPERATION_TYPE_DELETE)

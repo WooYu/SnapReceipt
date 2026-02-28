@@ -100,6 +100,7 @@
     <string name="receipt_default_name">Receipt</string>
     <string name="delete_receipt_confirm">Delete this receipt?</string>
     <string name="receipt_save_success">Saved successfully!</string>
+    <string name="receipt_delete_success">Deleted successfully</string>
     <!-- Validation -->
     <string name="validation_amount_empty">Please enter a valid amount greater than 0</string>
     <string name="validation_merchant_empty">Please enter merchant name</string>

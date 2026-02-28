@@ -60,7 +60,6 @@ class InvoiceDetailsViewModel @Inject constructor(
             block = { deleteReceiptRemoteUseCase(receiptId) },
             onSuccess = {
                 _uiState.update { it.copy(loading = false) }
-                emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.SHOW_SUCCESS))
                 emitEvent(UiEvent.Custom(InvoiceDetailsEventKeys.DELETE_SUCCESS))
             },
             onFailure = { updateError(it) }
