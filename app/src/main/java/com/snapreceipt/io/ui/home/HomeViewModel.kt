@@ -172,8 +172,6 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch(dispatchers.io) {
             _uiState.update {
                 it.copy(
-                    loading = true,
-                    error = null,
                     recognitionStatusResId = R.string.uploading_receipt
                 )
             }
@@ -190,7 +188,7 @@ class HomeViewModel @Inject constructor(
             )
                 .onSuccess { scan ->
                     _uiState.update {
-                        it.copy(loading = false, recognitionStatusResId = null)
+                        it.copy(recognitionStatusResId = null)
                     }
                     emitEvent(
                         UiEvent.Custom(
@@ -204,13 +202,9 @@ class HomeViewModel @Inject constructor(
                         )
                     )
                 }
-                .onFailure { throwable ->
+                .onFailure {
                     _uiState.update {
-                        it.copy(
-                            loading = false,
-                            error = throwable.message,
-                            recognitionStatusResId = null
-                        )
+                        it.copy(recognitionStatusResId = null)
                     }
                     emitEvent(UiEvent.Custom(HomeEventKeys.SCAN_FAILED))
                 }

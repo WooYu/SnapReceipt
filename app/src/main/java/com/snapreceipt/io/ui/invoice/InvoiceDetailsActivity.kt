@@ -454,10 +454,15 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private fun deleteReceiptIfNeeded() {
         val isSaved = sourceScene != InvoiceDetailsArgsCodec.SOURCE_SCAN
         if (!isSaved) return
+        val id = receiptId
+        if (id == null || id <= 0L) {
+            Toast.makeText(this, getString(R.string.receipt_sync_required_delete), Toast.LENGTH_SHORT)
+                .show()
+            return
+        }
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setMessage(getString(R.string.delete_receipt_confirm))
             .setPositiveButton(R.string.confirm) { _, _ ->
-                val id = receiptId ?: return@setPositiveButton
                 viewModel.deleteReceipt(id)
             }
             .setNegativeButton(R.string.cancel, null)

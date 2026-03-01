@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import com.snapreceipt.io.databinding.DialogScanFailedBinding
 
 class ScanFailedDialog : DialogFragment() {
@@ -19,6 +21,11 @@ class ScanFailedDialog : DialogFragment() {
                 .setView(binding.root)
                 .create()
         } ?: super.onCreateDialog(savedInstanceState)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
 
     override fun onDestroyView() {

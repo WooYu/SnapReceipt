@@ -81,13 +81,14 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                         if (hasActiveFilters()) {
                             requestReceiptsRefreshOrDefer("invoice_details_result_add_with_filters")
                             refreshViewModel.notifyHomeFullRefresh()
-                        } else if (receipt != null) {
+                        } else if (receipt != null && (receipt.receiptId?.let { it > 0L } == true)) {
                             LogHelper.d(LOG_TAG, "invoice result add -> local insert + markHomeDirty")
                             viewModel.addReceiptLocally(receipt)
                             shouldScrollToTopOnNextRender = true
                             refreshViewModel.notifyHomeItemAdded(receipt)
                         } else {
-                            requestReceiptsRefreshOrDefer("invoice_details_result_add_missing_payload")
+                            LogHelper.d(LOG_TAG, "invoice result add missing payload/id -> full refresh")
+                            requestReceiptsRefreshOrDefer("invoice_details_result_add_missing_payload_or_id")
                             refreshViewModel.notifyHomeFullRefresh()
                         }
                     }
@@ -96,13 +97,14 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                         if (hasActiveFilters()) {
                             requestReceiptsRefreshOrDefer("invoice_details_result_update_with_filters")
                             refreshViewModel.notifyHomeFullRefresh()
-                        } else if (receipt != null) {
+                        } else if (receipt != null && (receipt.receiptId?.let { it > 0L } == true)) {
                             LogHelper.d(LOG_TAG, "invoice result update -> local update + markHomeDirty")
                             viewModel.updateReceiptLocally(receipt)
                             // 后台增量刷新，确保服务端数据一致
                             refreshViewModel.notifyHomeItemUpdated(receipt)
                         } else {
-                            requestReceiptsRefreshOrDefer("invoice_details_result_update_missing_payload")
+                            LogHelper.d(LOG_TAG, "invoice result update missing payload/id -> full refresh")
+                            requestReceiptsRefreshOrDefer("invoice_details_result_update_missing_payload_or_id")
                             refreshViewModel.notifyHomeFullRefresh()
                         }
                     }

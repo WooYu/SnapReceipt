@@ -73,23 +73,29 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
                 when (operationType) {
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_ADD -> {
                         // 新增：插入列表头部
-                        if (receipt != null) {
+                        val hasValidId = receipt?.receiptId?.let { it > 0L } == true
+                        if (receipt != null && hasValidId) {
                             LogHelper.d(LOG_TAG, "invoice result add -> local insert + markReceiptsDirty")
                             viewModel.addReceiptLocally(receipt)
                             shouldScrollToTopOnNextRender = true
                             refreshViewModel.notifyReceiptsItemAdded(receipt)
                         } else {
+                            LogHelper.d(LOG_TAG, "invoice result add missing payload/id -> full refresh")
+                            requestHomeRefreshOrDefer("invoice_details_result_add_missing_payload_or_id")
                             refreshViewModel.notifyReceiptsFullRefresh()
                         }
                     }
                     InvoiceDetailsArgsCodec.OPERATION_TYPE_UPDATE -> {
                         // 编辑：更新列表中的项
-                        if (receipt != null) {
+                        val hasValidId = receipt?.receiptId?.let { it > 0L } == true
+                        if (receipt != null && hasValidId) {
                             LogHelper.d(LOG_TAG, "invoice result update -> local update + markReceiptsDirty")
                             viewModel.updateReceiptLocally(receipt)
                             // 后台增量刷新，确保服务端数据一致
                             refreshViewModel.notifyReceiptsItemUpdated(receipt)
                         } else {
+                            LogHelper.d(LOG_TAG, "invoice result update missing payload/id -> full refresh")
+                            requestHomeRefreshOrDefer("invoice_details_result_update_missing_payload_or_id")
                             refreshViewModel.notifyReceiptsFullRefresh()
                         }
                     }
