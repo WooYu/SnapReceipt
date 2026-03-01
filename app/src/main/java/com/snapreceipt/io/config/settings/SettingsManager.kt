@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -53,6 +54,7 @@ class SettingsManager @Inject constructor(
         private val APP_THEME_KEY = stringPreferencesKey("app_theme")
         private val LAST_SYNC_TIME_KEY = stringPreferencesKey("last_sync_time")
         private val DEBUG_LOGGING_KEY = stringPreferencesKey("debug_logging")  // "true" / "false" / null
+        private val ONBOARDING_COMPLETED_KEY = booleanPreferencesKey("onboarding_completed")
     }
     
     /**
@@ -159,6 +161,18 @@ class SettingsManager @Inject constructor(
                 preferences[DEBUG_LOGGING_KEY] = enabled.toString()
             }
         }
+    }
+
+    /** 设置是否已完成首启引导页 */
+    suspend fun setOnboardingCompleted(completed: Boolean) {
+        context.settingsDataStore.edit { preferences ->
+            preferences[ONBOARDING_COMPLETED_KEY] = completed
+        }
+    }
+
+    /** 查询是否已完成首启引导页（默认 false） */
+    suspend fun isOnboardingCompleted(): Boolean {
+        return context.settingsDataStore.data.first()[ONBOARDING_COMPLETED_KEY] ?: false
     }
     
     /** 重置所有设置为默认值（清空 DataStore） */

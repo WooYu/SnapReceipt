@@ -234,4 +234,10 @@
     <string name="recognition_failed_message">Return to the homepage to continue taking photos and recognizing them</string>
     <string name="return_home">Return to Home</string>
 
+    <!-- ══════════════ Onboarding ══════════════ -->
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_image_desc">Onboarding image %1$d</string>
+
 </resources>

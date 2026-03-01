@@ -234,4 +234,10 @@
     <string name="recognition_failed_message">返回首页继续拍照识别</string>
     <string name="return_home">返回首页</string>
 
+    <!-- ══════════════ Onboarding ══════════════ -->
+    <string name="onboarding_skip">跳过</string>
+    <string name="onboarding_next">下一步</string>
+    <string name="onboarding_get_started">立即开始</string>
+    <string name="onboarding_image_desc">引导页图片 %1$d</string>
+
 </resources>
