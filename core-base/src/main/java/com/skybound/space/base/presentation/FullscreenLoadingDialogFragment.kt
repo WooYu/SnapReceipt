@@ -84,11 +84,25 @@ internal class FullscreenLoadingDialogFragment : DialogFragment() {
         }
         messageView.visibility = View.VISIBLE
         val text = message.toString()
-        if (text.endsWith(ANIMATED_DOTS_SUFFIX)) {
-            startMessageAnimation(text.removeSuffix(ANIMATED_DOTS_SUFFIX).trimEnd())
+        val animatedBaseText = extractAnimatedMessageBase(text)
+        if (animatedBaseText != null) {
+            startMessageAnimation(animatedBaseText)
         } else {
             stopMessageAnimation()
             messageView.text = text
+        }
+    }
+
+    private fun extractAnimatedMessageBase(text: String): String? {
+        val trimmed = text.trimEnd()
+        return when {
+            trimmed.endsWith(ANIMATED_DOTS_SUFFIX_ASCII) -> {
+                trimmed.removeSuffix(ANIMATED_DOTS_SUFFIX_ASCII).trimEnd()
+            }
+            trimmed.endsWith(ANIMATED_DOTS_SUFFIX_UNICODE) -> {
+                trimmed.removeSuffix(ANIMATED_DOTS_SUFFIX_UNICODE).trimEnd()
+            }
+            else -> null
         }
     }
 
@@ -152,7 +166,8 @@ internal class FullscreenLoadingDialogFragment : DialogFragment() {
 
     companion object {
         private const val ARG_MESSAGE = "arg_message"
-        private const val ANIMATED_DOTS_SUFFIX = "..."
+        private const val ANIMATED_DOTS_SUFFIX_ASCII = "..."
+        private const val ANIMATED_DOTS_SUFFIX_UNICODE = "…"
 
         fun newInstance(message: CharSequence?): FullscreenLoadingDialogFragment {
             return FullscreenLoadingDialogFragment().apply {

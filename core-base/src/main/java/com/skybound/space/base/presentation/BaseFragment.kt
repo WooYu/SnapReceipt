@@ -112,11 +112,25 @@ abstract class BaseFragment<VM : com.skybound.space.base.presentation.viewmodel.
         }
         messageView.visibility = View.VISIBLE
         val text = message.toString()
-        if (text.endsWith(ANIMATED_DOTS_SUFFIX)) {
-            startDialogMessageAnimation(dialog, text.removeSuffix(ANIMATED_DOTS_SUFFIX).trimEnd())
+        val animatedBaseText = extractAnimatedMessageBase(text)
+        if (animatedBaseText != null) {
+            startDialogMessageAnimation(dialog, animatedBaseText)
         } else {
             stopDialogMessageAnimation()
             messageView.text = text
+        }
+    }
+
+    private fun extractAnimatedMessageBase(text: String): String? {
+        val trimmed = text.trimEnd()
+        return when {
+            trimmed.endsWith(ANIMATED_DOTS_SUFFIX_ASCII) -> {
+                trimmed.removeSuffix(ANIMATED_DOTS_SUFFIX_ASCII).trimEnd()
+            }
+            trimmed.endsWith(ANIMATED_DOTS_SUFFIX_UNICODE) -> {
+                trimmed.removeSuffix(ANIMATED_DOTS_SUFFIX_UNICODE).trimEnd()
+            }
+            else -> null
         }
     }
 
@@ -164,6 +178,7 @@ abstract class BaseFragment<VM : com.skybound.space.base.presentation.viewmodel.
     }
 
     companion object {
-        private const val ANIMATED_DOTS_SUFFIX = "..."
+        private const val ANIMATED_DOTS_SUFFIX_ASCII = "..."
+        private const val ANIMATED_DOTS_SUFFIX_UNICODE = "…"
     }
 }

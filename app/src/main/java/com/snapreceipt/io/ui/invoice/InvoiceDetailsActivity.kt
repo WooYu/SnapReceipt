@@ -155,7 +155,7 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private fun renderState(state: InvoiceDetailsUiState) {
         binding.saveBtn.isEnabled = !state.loading
         if (state.loading) {
-            showGlobalLoading(null)
+            showGlobalLoading(getString(R.string.loading_please_wait_dynamic))
         } else {
             hideGlobalLoading()
         }
