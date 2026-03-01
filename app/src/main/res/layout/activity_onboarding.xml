@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#EEF2FD">
+    android:background="#EEF2FD"
+    android:clipToPadding="false">
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/onboarding_pager"
@@ -18,7 +19,7 @@
         android:id="@+id/skip_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="16dp"
         android:background="@drawable/bg_onboarding_skip"
         android:clickable="true"
@@ -35,14 +36,14 @@
 
     <com.snapreceipt.io.ui.widget.PrimaryActionButton
         android:id="@+id/next_button"
-        android:layout_width="172dp"
-        android:layout_height="50dp"
-        android:layout_marginBottom="30dp"
+        android:layout_width="136dp"
+        android:layout_height="44dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
         android:text="@string/onboarding_next"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:pabCornerRadius="25dp"
+        app:pabCornerRadius="22dp"
         app:pabEnableShadow="false"
         app:pabTextSize="16sp" />
 

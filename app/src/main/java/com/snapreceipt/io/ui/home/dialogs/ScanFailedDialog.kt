@@ -2,6 +2,7 @@ package com.snapreceipt.io.ui.home.dialogs
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import android.graphics.Color
@@ -25,7 +26,10 @@ class ScanFailedDialog : DialogFragment() {
 
     override fun onStart() {
         super.onStart()
-        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog?.window?.apply {
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
     }
 
     override fun onDestroyView() {

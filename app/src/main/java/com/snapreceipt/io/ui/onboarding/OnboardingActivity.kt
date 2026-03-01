@@ -1,11 +1,19 @@
 package com.snapreceipt.io.ui.onboarding
 
 import android.content.Intent
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.RecyclerView
 import com.snapreceipt.io.R
 import com.snapreceipt.io.config.settings.SettingsManager
 import com.snapreceipt.io.databinding.ActivityOnboardingBinding
@@ -22,6 +30,8 @@ class OnboardingActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityOnboardingBinding
     private var isCompleting = false
+    private var baseSkipTopMargin = 0
+    private var baseNextBottomMargin = 0
 
     private val onboardingPages = listOf(
         R.drawable.img_onboarding_1,
@@ -37,10 +47,27 @@ class OnboardingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = Color.TRANSPARENT
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
+        WindowCompat.getInsetsController(window, window.decorView)?.apply {
+            isAppearanceLightStatusBars = true
+            isAppearanceLightNavigationBars = true
+        }
+
         binding = ActivityOnboardingBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        baseSkipTopMargin = (binding.skipButton.layoutParams as ViewGroup.MarginLayoutParams).topMargin
+        baseNextBottomMargin = (binding.nextButton.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
+        applySystemBarInsets()
+
         binding.onboardingPager.adapter = OnboardingPagerAdapter(onboardingPages)
+        binding.onboardingPager.offscreenPageLimit = onboardingPages.size
+        (binding.onboardingPager.getChildAt(0) as? RecyclerView)?.overScrollMode = View.OVER_SCROLL_NEVER
         binding.onboardingPager.registerOnPageChangeCallback(pageChangeCallback)
 
         binding.skipButton.setOnClickListener {
@@ -81,6 +108,20 @@ class OnboardingActivity : AppCompatActivity() {
             if (isLastPage) R.string.onboarding_get_started else R.string.onboarding_next
         )
         binding.skipButton.visibility = if (isLastPage) View.INVISIBLE else View.VISIBLE
+    }
+
+    private fun applySystemBarInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            binding.skipButton.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = baseSkipTopMargin + systemInsets.top
+            }
+            binding.nextButton.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = baseNextBottomMargin + systemInsets.bottom
+            }
+            insets
+        }
+        ViewCompat.requestApplyInsets(binding.root)
     }
 
     private fun completeOnboarding() {
