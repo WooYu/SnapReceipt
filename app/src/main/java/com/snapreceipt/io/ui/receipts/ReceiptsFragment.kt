@@ -477,6 +477,7 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
     override fun onCustomEvent(event: com.skybound.space.base.presentation.UiEvent.Custom) {
         when (event.type) {
             ReceiptsEventKeys.SHOW_EXPORT_SUCCESS -> {
+                resetAllFiltersAfterExport()
                 val exportUrl = event.payload?.getString(ReceiptsEventKeys.EXPORT_URL).orEmpty()
                 ExportSuccessDialog {
                     openExportUrl(exportUrl)
@@ -495,6 +496,24 @@ class ReceiptsFragment : BaseFragment<ReceiptsViewModel>(R.layout.fragment_recei
                 }
             }
         }
+    }
+
+    private fun resetAllFiltersAfterExport() {
+        filterStartMillis = null
+        filterEndMillis = null
+        filterTypeLabel = null
+        filterCategoryLabel = null
+
+        if (_binding != null) {
+            binding.filterDateBtn.text = getString(R.string.select_date)
+            binding.filterCategoryBtn.text = getString(R.string.filter_category)
+            binding.filterTypeBtn.text = getString(R.string.filter_type)
+        }
+
+        pendingReceiptsRefreshAfterLoad = false
+        pendingReceiptsRefreshReason = null
+        LogHelper.d(LOG_TAG, "Export success -> reset all filters and reload receipts")
+        viewModel.loadReceipts()
     }
 
     private fun openExportUrl(raw: String) {
