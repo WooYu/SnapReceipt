@@ -31,7 +31,6 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOnboardingBinding
     private var isCompleting = false
     private var baseSkipTopMargin = 0
-    private var baseNextBottomMargin = 0
 
     private val onboardingPages = listOf(
         R.drawable.img_onboarding_1,
@@ -39,11 +38,12 @@ class OnboardingActivity : AppCompatActivity() {
         R.drawable.img_onboarding_3
     )
 
-    private val pageChangeCallback = object : androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback() {
-        override fun onPageSelected(position: Int) {
-            updateControls(position)
+    private val pageChangeCallback =
+        object : androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                updateControls(position)
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,26 +61,18 @@ class OnboardingActivity : AppCompatActivity() {
         binding = ActivityOnboardingBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        baseSkipTopMargin = (binding.skipButton.layoutParams as ViewGroup.MarginLayoutParams).topMargin
-        baseNextBottomMargin = (binding.nextButton.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
+        baseSkipTopMargin =
+            (binding.skipButton.layoutParams as ViewGroup.MarginLayoutParams).topMargin
         applySystemBarInsets()
 
         binding.onboardingPager.adapter = OnboardingPagerAdapter(onboardingPages)
         binding.onboardingPager.offscreenPageLimit = onboardingPages.size
-        (binding.onboardingPager.getChildAt(0) as? RecyclerView)?.overScrollMode = View.OVER_SCROLL_NEVER
+        (binding.onboardingPager.getChildAt(0) as? RecyclerView)?.overScrollMode =
+            View.OVER_SCROLL_NEVER
         binding.onboardingPager.registerOnPageChangeCallback(pageChangeCallback)
 
         binding.skipButton.setOnClickListener {
             completeOnboarding()
-        }
-
-        binding.nextButton.setOnClickListener {
-            val current = binding.onboardingPager.currentItem
-            if (current < onboardingPages.lastIndex) {
-                binding.onboardingPager.currentItem = current + 1
-            } else {
-                completeOnboarding()
-            }
         }
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -104,10 +96,9 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun updateControls(position: Int) {
         val isLastPage = position == onboardingPages.lastIndex
-        binding.nextButton.text = getString(
-            if (isLastPage) R.string.onboarding_get_started else R.string.onboarding_next
+        binding.skipButton.text = getString(
+            if (isLastPage) R.string.onboarding_get_started else R.string.onboarding_skip
         )
-        binding.skipButton.visibility = if (isLastPage) View.INVISIBLE else View.VISIBLE
     }
 
     private fun applySystemBarInsets() {
@@ -115,9 +106,6 @@ class OnboardingActivity : AppCompatActivity() {
             val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             binding.skipButton.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = baseSkipTopMargin + systemInsets.top
-            }
-            binding.nextButton.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = baseNextBottomMargin + systemInsets.bottom
             }
             insets
         }
