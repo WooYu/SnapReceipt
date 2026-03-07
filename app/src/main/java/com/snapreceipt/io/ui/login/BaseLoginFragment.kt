@@ -62,11 +62,6 @@ abstract class BaseLoginFragment(@LayoutRes layoutId: Int) : BaseFragment<LoginV
         textView.text = buildAgreementText()
     }
 
-    protected fun updateCodeRequestLoading(show: Boolean) {
-        val message = if (show) getString(R.string.login_requesting_code) else null
-        showLoading(show, message)
-    }
-
     protected fun showAgreementDialog(onResult: (Boolean) -> Unit) {
         val dialog = Dialog(requireContext())
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)

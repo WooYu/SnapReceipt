@@ -62,7 +62,6 @@ class PhoneLoginFragment : BaseLoginFragment(R.layout.fragment_phone_login) {
         } else {
             getString(R.string.login_captcha)
         }
-        updateCodeRequestLoading(state.requestingCode)
         binding.loginBtn.isEnabled = !state.loading && phoneLengthValid && ContactInputValidator.isVerificationCodeValid(state.phoneCode)
         updateTabStyle(state.mode == LoginMode.PHONE)
         updateAgreementState(state.agreementAccepted)

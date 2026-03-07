@@ -40,6 +40,7 @@ class LoginActivity : BaseActivity<LoginViewModel>() {
     }
 
     private fun renderState(state: LoginUiState) {
+        updateLoginLoading(state)
         if (currentMode == state.mode) return
         currentMode = state.mode
         val fragment = when (state.mode) {
@@ -49,6 +50,19 @@ class LoginActivity : BaseActivity<LoginViewModel>() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .commit()
+    }
+
+    private fun updateLoginLoading(state: LoginUiState) {
+        val message = when {
+            state.requestingCode -> getString(R.string.login_requesting_code)
+            state.loading -> getString(R.string.loading_please_wait_dynamic)
+            else -> null
+        }
+        if (message.isNullOrBlank()) {
+            hideGlobalLoading()
+        } else {
+            showGlobalLoading(message)
+        }
     }
 
     override fun onCustomEvent(event: UiEvent.Custom) {
