@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
@@ -31,6 +32,7 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOnboardingBinding
     private var isCompleting = false
     private var baseSkipTopMargin = 0
+    private var baseStartBottomMargin = 0
 
     private val onboardingPages = listOf(
         R.drawable.img_onboarding_1,
@@ -63,6 +65,8 @@ class OnboardingActivity : AppCompatActivity() {
 
         baseSkipTopMargin =
             (binding.skipButton.layoutParams as ViewGroup.MarginLayoutParams).topMargin
+        baseStartBottomMargin =
+            (binding.startButton.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
         applySystemBarInsets()
 
         binding.onboardingPager.adapter = OnboardingPagerAdapter(onboardingPages)
@@ -72,6 +76,9 @@ class OnboardingActivity : AppCompatActivity() {
         binding.onboardingPager.registerOnPageChangeCallback(pageChangeCallback)
 
         binding.skipButton.setOnClickListener {
+            completeOnboarding()
+        }
+        binding.startButton.setOnClickListener {
             completeOnboarding()
         }
 
@@ -96,9 +103,9 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun updateControls(position: Int) {
         val isLastPage = position == onboardingPages.lastIndex
-        binding.skipButton.text = getString(
-            if (isLastPage) R.string.onboarding_get_started else R.string.onboarding_skip
-        )
+        binding.skipButton.isVisible = !isLastPage
+        binding.startButtonScrim.isVisible = isLastPage
+        binding.startButton.isVisible = isLastPage
     }
 
     private fun applySystemBarInsets() {
@@ -106,6 +113,9 @@ class OnboardingActivity : AppCompatActivity() {
             val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             binding.skipButton.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = baseSkipTopMargin + systemInsets.top
+            }
+            binding.startButton.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = baseStartBottomMargin + systemInsets.bottom
             }
             insets
         }

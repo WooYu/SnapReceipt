@@ -34,4 +34,30 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <View
+        android:id="@+id/start_button_scrim"
+        android:layout_width="0dp"
+        android:layout_height="220dp"
+        android:background="@drawable/bg_onboarding_bottom_scrim"
+        android:importantForAccessibility="no"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.snapreceipt.io.ui.widget.PrimaryActionButton
+        android:id="@+id/start_button"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/button_height"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="32dp"
+        android:text="@string/onboarding_get_started"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:pabCornerRadius="80dp"
+        app:pabEnableShadow="false" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
