@@ -19,6 +19,15 @@ import okhttp3.Route
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
 
+/**
+ * 处理 access token 失效后的自动刷新逻辑。
+ *
+ * 核心策略：
+ * 1. 同一个请求最多自动重试一次，避免 401 死循环。
+ * 2. 通过 [refreshLock] 串行化刷新操作，避免并发请求同时刷新 token。
+ * 3. 如果其他线程已经刷新成功，当前请求直接复用最新 token 重放。
+ * 4. 如果 refresh token 也失效，则通知 [SessionManager] 进入登出/重登录流程。
+ */
 class TokenRefreshAuthenticator(
     private val tokenStore: AuthTokenStore,
     private val config: NetworkConfig,
@@ -29,6 +38,7 @@ class TokenRefreshAuthenticator(
     private val refreshLock = Any()
     private val refreshClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
+            // 刷新 token 是兜底请求，超时要更短，避免卡住整个请求重试链路。
             .connectTimeout(5, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
             .writeTimeout(10, TimeUnit.SECONDS)
@@ -37,18 +47,22 @@ class TokenRefreshAuthenticator(
     }
 
     override fun authenticate(route: Route?, response: Response): Request? {
+        // OkHttp 会把 priorResponse 串起来，这里限制最多走两次，防止刷新失败后无限重放。
         if (responseCount(response) >= 2) return null
 
         val request = response.request
+        // 仅处理本来就带鉴权头的请求，避免把无鉴权接口错误地拖进刷新流程。
         val requestAuth = request.header(AUTH_HEADER) ?: return null
         val currentAccess = tokenStore.accessToken()
         if (currentAccess.isNullOrBlank()) return null
 
         synchronized(refreshLock) {
+            // 进入锁后再次读取，确保拿到的是其他线程可能刚刷新过的新 token。
             val latestAccess = tokenStore.accessToken()
             val latestRefresh = tokenStore.refreshToken()
             if (latestAccess.isNullOrBlank() || latestRefresh.isNullOrBlank()) return null
 
+            // 当前失败请求如果已经不是最新 token 了，只需替换请求头再重放，不必再次刷新。
             if (requestAuth != bearer(latestAccess)) {
                 return request.newBuilder()
                     .header(AUTH_HEADER, bearer(latestAccess))
@@ -57,6 +71,7 @@ class TokenRefreshAuthenticator(
 
             return when (val refreshed = refreshTokens(latestRefresh)) {
                 is RefreshResult.Success -> {
+                    // 刷新成功后立即同步会话状态，让后续请求都能读到最新 token。
                     sessionManager.updateTokens(refreshed.tokens.accessToken, refreshed.tokens.refreshToken)
                     request.newBuilder()
                         .header(AUTH_HEADER, bearer(refreshed.tokens.accessToken))
@@ -64,6 +79,7 @@ class TokenRefreshAuthenticator(
                 }
 
                 RefreshResult.RefreshTokenInvalid -> {
+                    // refresh token 已失效时不要继续重试，直接让上层进入会话失效流程。
                     sessionManager.refreshTokenInvalid()
                     null
                 }
@@ -74,6 +90,7 @@ class TokenRefreshAuthenticator(
     }
 
     private fun refreshTokens(refreshToken: String): RefreshResult {
+        // 刷新接口固定挂在业务域名下，避免依赖外层 Retrofit 配置和拦截链导致循环调用。
         val url = "${config.baseUrl.trimEnd('/')}/api/auth/refresh"
         val payload = gson.toJson(RefreshRequestDto(refreshToken))
         val body = payload.toRequestBody(JSON)
@@ -83,6 +100,7 @@ class TokenRefreshAuthenticator(
             .build()
 
         refreshClient.newCall(request).execute().use { response ->
+            // 服务端约定 403 表示 refresh token 不再可用，需要强制重新登录。
             if (response.code == 403) return RefreshResult.RefreshTokenInvalid
             if (!response.isSuccessful) return RefreshResult.Failed
             val raw = response.body.string()
@@ -108,7 +126,9 @@ class TokenRefreshAuthenticator(
     private fun bearer(token: String): String = "Bearer $token"
 
     private companion object {
+        // 鉴权相关请求统一复用同一个头名称，避免魔法字符串散落在重试逻辑里。
         const val AUTH_HEADER = "Authorization"
+        // 刷新请求在这里手工拼 JSON 请求体，因此需要显式声明媒体类型。
         val JSON = "application/json; charset=utf-8".toMediaType()
     }
 

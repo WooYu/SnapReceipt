@@ -29,10 +29,22 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
+/**
+ * 区分“对象存储直传客户端”和“业务接口客户端”。
+ *
+ * 上传客户端不需要鉴权拦截器、自动刷新 token 或默认业务头，
+ * 否则预签名上传地址很容易因为多余请求头而失败。
+ */
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class UploadClient
 
+/**
+ * 网络依赖注入模块。
+ *
+ * 这里集中定义网络层的公共配置、鉴权链、Retrofit 实例以及上传专用客户端，
+ * 方便排查线上问题时快速确认“请求到底经过了哪些拦截器和超时策略”。
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkClientModule {
@@ -53,6 +65,7 @@ object NetworkClientModule {
 
     @Provides
     @Singleton
+    // 统一收敛网络配置，避免超时和默认请求头在多个创建点发生漂移。
     fun provideNetworkConfig(): NetworkConfig = NetworkConfig(
         baseUrl = AppConfig.baseUrl,
         enableLogging = AppConfig.isDebug,
@@ -103,6 +116,7 @@ object NetworkClientModule {
     @Provides
     @Singleton
     @UploadClient
+    // 预签名上传只做原始 PUT，不挂鉴权和自动刷新逻辑，避免污染对象存储签名请求。
     fun provideUploadOkHttpClient(config: NetworkConfig): OkHttpClient =
         OkHttpClient.Builder()
             .connectTimeout(config.connectTimeoutSec, TimeUnit.SECONDS)
