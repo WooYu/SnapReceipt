@@ -16,6 +16,11 @@ import com.skybound.space.core.network.auth.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+/**
+ * 应用主容器页。
+ *
+ * 负责承载底部导航和主导航图，同时统一处理会话失效后的登录跳转。
+ */
 @AndroidEntryPoint
 class MainActivity : BaseActivity<MainViewModel>() {
     override val viewModel: MainViewModel by viewModels()
@@ -54,10 +59,18 @@ class MainActivity : BaseActivity<MainViewModel>() {
         }
     }
 
+    /**
+     * 控制底部导航显隐，供内部页面在全屏编辑等场景下临时隐藏导航栏。
+     */
     fun setBottomNavVisible(visible: Boolean) {
         binding.bottomNav.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
+    /**
+     * 显示全局 loading 遮罩。
+     *
+     * @param messageRes 可选提示文案资源；为空时仅显示默认 loading
+     */
     fun showGlobalLoadingOverlay(@StringRes messageRes: Int? = null) {
         if (messageRes != null) {
             showGlobalLoading(getString(messageRes))
@@ -66,10 +79,18 @@ class MainActivity : BaseActivity<MainViewModel>() {
         }
     }
 
+    /**
+     * 隐藏全局 loading 遮罩。
+     */
     fun hideGlobalLoadingOverlay() {
         hideGlobalLoading()
     }
 
+    /**
+     * 会话过期时统一跳回登录页，并清理当前主流程页面。
+     *
+     * @param event 会话失效事件
+     */
     override fun onSessionExpired(event: SessionEvent) {
         startActivity(
             android.content.Intent(this, LoginActivity::class.java).apply {

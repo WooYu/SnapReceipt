@@ -25,6 +25,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * 首页收据列表 ViewModel。
+ *
+ * 负责协调三类场景：
+ * 1. 收据列表的首屏加载、下拉刷新、分页加载；
+ * 2. 本地即时增删改，保证从详情页返回后列表能立即响应；
+ * 3. 拍照/相册上传后的 OCR 识别流程和埋点上报。
+ */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val fetchReceiptsUseCase: FetchReceiptsUseCase,
@@ -46,14 +54,29 @@ class HomeViewModel @Inject constructor(
         loadReceipts()
     }
 
+    /**
+     * 触发首页首屏或显式刷新加载。
+     *
+     * 固定从第一页开始，并展示页面级 loading。
+     */
     fun loadReceipts() {
         fetchPage(page = 1, reset = true, showLoading = true)
     }
 
+    /**
+     * 下拉刷新入口。
+     *
+     * 与 [loadReceipts] 的区别是保留当前列表内容，仅显示刷新态。
+     */
     fun refresh() {
         fetchPage(page = 1, reset = true, refreshing = true)
     }
 
+    /**
+     * 加载下一页数据。
+     *
+     * 只有在当前不处于任意加载态且服务端仍有更多数据时才会触发。
+     */
     fun loadMore() {
         if (!hasMore || _uiState.value.loadingMore || _uiState.value.loading || _uiState.value.refreshing) return
         fetchPage(page = nextPage, reset = false, loadingMore = true)
@@ -111,6 +134,15 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * 分页拉取收据列表。
+     *
+     * @param page 目标页码
+     * @param reset 是否重置现有列表；`true` 时用新数据覆盖旧列表，`false` 时追加到尾部
+     * @param showLoading 是否展示页面主 loading
+     * @param refreshing 是否展示下拉刷新态
+     * @param loadingMore 是否展示底部分页加载态
+     */
     private fun fetchPage(
         page: Int,
         reset: Boolean,
@@ -150,6 +182,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * 删除指定收据并在成功后刷新列表。
+     *
+     * @param receipt 待删除收据；要求内部包含有效 receiptId
+     */
     fun deleteReceipt(receipt: ReceiptEntity) {
         viewModelScope.launch(dispatchers.io) {
             val id = receipt.receiptId ?: return@launch
@@ -163,6 +200,11 @@ class HomeViewModel @Inject constructor(
         // No-op: remote save happens in InvoiceDetails.
     }
 
+    /**
+     * 更新指定收据并在成功后刷新列表。
+     *
+     * @param receipt 待更新收据；必须带有 receiptId
+     */
     fun updateReceipt(receipt: ReceiptEntity) {
         viewModelScope.launch(dispatchers.io) {
             if (receipt.receiptId == null) return@launch
@@ -172,6 +214,16 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * 处理裁剪完成后的图片上传识别流程。
+     *
+     * 流程：
+     * 1. 上报上传开始埋点；
+     * 2. 调用 [UploadAndScanReceiptUseCase] 串行执行申请地址、上传、扫描；
+     * 3. 成功时通知页面打开详情页，失败时触发扫描失败弹窗。
+     *
+     * @param imagePath 裁剪后图片本地路径
+     */
     fun processCroppedImage(imagePath: String) {
         viewModelScope.launch(dispatchers.io) {
             val startedAt = SystemClock.elapsedRealtime()
@@ -233,6 +285,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * 统一收口列表加载相关的错误状态。
+     *
+     * @param throwable 失败异常；其 message 会用于页面错误文案展示
+     */
     private fun updateError(throwable: Throwable) {
         _uiState.update {
             it.copy(

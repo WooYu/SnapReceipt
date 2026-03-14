@@ -43,6 +43,15 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import kotlinx.coroutines.launch
 
+/**
+ * 首页收据列表页面。
+ *
+ * 主要职责：
+ * 1. 渲染收据列表及分页状态；
+ * 2. 处理拍照、相册选图、裁剪与 OCR 发起；
+ * 3. 接收详情页返回结果并同步更新首页列表；
+ * 4. 承担首页级埋点与首屏耗时记录。
+ */
 @AndroidEntryPoint
 class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     companion object {
@@ -162,6 +171,9 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         super.onViewCreated(view, savedInstanceState)
     }
 
+    /**
+     * 初始化头部渐变背景，保持首页顶部视觉风格统一。
+     */
     private fun setupHeaderBackground() {
         val startColor = ContextCompat.getColor(requireContext(), R.color.colorPrimary)
         val endColor = ContextCompat.getColor(requireContext(), R.color.colorPrimaryGradientEnd)
@@ -175,8 +187,12 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     }
 
     /**
-     * Renders UI state.
-     * Data is submitted before state to prevent auto-scroll when footer appears.
+     * 根据 [HomeUiState] 渲染页面。
+     *
+     * 这里刻意先提交列表数据，再更新 footer/loading 状态，
+     * 以避免 RecyclerView 因 footer 状态变化产生意外滚动。
+     *
+     * @param state 当前首页 UI 状态
      */
     private fun renderState(state: HomeUiState) {
         tryConsumePendingHomeRefresh(state)
@@ -203,6 +219,11 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         binding.cardUpload.isEnabled = !isRecognizing
     }
 
+    /**
+     * 请求首页刷新；若当前正处于加载态，则先挂起，待本轮加载结束后再消费。
+     *
+     * @param trigger 触发刷新的来源标记，便于日志排查是哪个入口触发了刷新
+     */
     private fun requestHomeRefreshOrDefer(trigger: String) {
         val currentState = viewModel.uiState.value
         LogHelper.d(
@@ -226,6 +247,11 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         }
     }
 
+    /**
+     * 尝试消费上一轮被延迟的刷新请求。
+     *
+     * @param state 当前页面状态；仅在不处于加载态时才会真正执行刷新/重载
+     */
     private fun tryConsumePendingHomeRefresh(state: HomeUiState) {
         if (!pendingHomeRefreshAfterLoad) return
         if (state.loading || state.refreshing) return
@@ -241,6 +267,9 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         }
     }
 
+    /**
+     * 初始化列表适配器和列表控件回调。
+     */
     private fun setupAdapter() {
         adapter = HomeReceiptAdapter { receipt ->
             openReceiptForEdit(receipt)
@@ -260,11 +289,19 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         }
     }
 
+    /**
+     * 绑定拍照和相册上传入口。
+     */
     private fun setupListeners() {
         binding.cardScan.setOnClickListener { openCameraWithPermission() }
         binding.cardUpload.setOnClickListener { pickImageFromGallery() }
     }
 
+    /**
+     * 监听来自详情页/其他页面的首页刷新事件。
+     *
+     * 这里优先做本地即时更新，只有无法准确增量更新时才退回整页刷新。
+     */
     private fun observeRefreshEvents() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -292,6 +329,11 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         }
     }
 
+    /**
+     * 打开已保存收据详情页进行编辑。
+     *
+     * @param receipt 当前列表中被点击的收据
+     */
     private fun openReceiptForEdit(receipt: ReceiptEntity) {
         // 从列表点击打开已保存的收据进行编辑
         // 标记来源为 SOURCE_RECEIPTS_LIST，用于判断初始状态（预览或编辑）
@@ -303,6 +345,9 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         invoiceDetailsLauncher.launch(intent)
     }
 
+    /**
+     * 打开相机前先检查相机权限。
+     */
     private fun openCameraWithPermission() {
         if (!PermissionManager.needsPermission(requireContext(), Permissions.CAMERA)) {
             openCamera()
@@ -317,6 +362,9 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         )
     }
 
+    /**
+     * 启动系统拍照，并预先创建缓存文件接收拍照结果。
+     */
     private fun openCamera() {
         pendingCaptureSource = "camera"
         trackCaptureEvent(MonitoringNames.Events.receiptCaptureStart, source = pendingCaptureSource)
@@ -330,6 +378,9 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         takePictureLauncher.launch(uri)
     }
 
+    /**
+     * 打开系统图库选择图片。
+     */
     private fun pickImageFromGallery() {
         pendingCaptureSource = "gallery"
         trackCaptureEvent(MonitoringNames.Events.receiptCaptureStart, source = pendingCaptureSource)
@@ -340,6 +391,11 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         )
     }
 
+    /**
+     * 启动图片裁剪流程。
+     *
+     * @param sourceUri 拍照或相册选择得到的原始图片 URI
+     */
     private fun startCrop(sourceUri: Uri) {
         val safeSource = resolveCropSourceUri(sourceUri) ?: run {
             trackCaptureEvent(
@@ -368,6 +424,11 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         cropLauncher.launch(intent)
     }
 
+    /**
+     * 处理裁剪成功的图片结果，并把本地路径交给 ViewModel 发起上传识别。
+     *
+     * @param uri 裁剪后的输出文件 URI
+     */
     private fun handleCroppedImage(uri: Uri) {
         val path = uri.path ?: return
         trackCaptureEvent(MonitoringNames.Events.receiptCaptureSuccess, source = pendingCaptureSource)
@@ -375,6 +436,14 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         viewModel.processCroppedImage(path)
     }
 
+    /**
+     * 为裁剪组件准备可安全访问的输入 URI。
+     *
+     * 某些 `content://` URI 在第三方裁剪库中无法长期持有，这里会先拷贝到缓存文件。
+     *
+     * @param sourceUri 原始图片 URI
+     * @return 可直接交给 UCrop 使用的 URI；失败时返回 `null`
+     */
     private fun resolveCropSourceUri(sourceUri: Uri): Uri? {
         if (sourceUri.scheme != ContentResolver.SCHEME_CONTENT) return sourceUri
         return runCatching {
@@ -391,6 +460,11 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         }.getOrNull()
     }
 
+    /**
+     * 处理来自 ViewModel 的一次性事件。
+     *
+     * @param event 首页自定义事件
+     */
     override fun onCustomEvent(event: UiEvent.Custom) {
         when (event.type) {
             HomeEventKeys.PREFILL_READY -> {
@@ -410,6 +484,11 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         }
     }
 
+    /**
+     * 扫描成功后直接打开新增收据详情页。
+     *
+     * @param receipt OCR 识别得到的预填收据
+     */
     private fun openInvoiceDetails(receipt: ReceiptEntity) {
         // 扫描成功后打开新增的收据填写详情
         // 标记来源为 SOURCE_SCAN，用于直接进入编辑状态（不经过预览）
@@ -421,6 +500,12 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         invoiceDetailsLauncher.launch(intent)
     }
 
+    /**
+     * 把页面状态转换成 [StatefulListLayout] 需要的状态模型。
+     *
+     * @param state 当前首页 UI 状态
+     * @return 列表容器可直接消费的状态对象
+     */
     private fun buildListState(state: HomeUiState): StatefulListLayout.State {
         val contentState = when {
             state.loading && !state.hasLoaded -> StatefulListLayout.ContentState.LOADING
@@ -439,6 +524,11 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         )
     }
 
+    /**
+     * 仅统计首页首次可见且数据已就绪的首屏耗时。
+     *
+     * @param state 当前首页 UI 状态
+     */
     private fun maybeTrackFirstScreenLoad(state: HomeUiState) {
         if (hasTrackedFirstScreenLoad || firstScreenStartedAtMs <= 0L) return
         if (state.loading || !state.hasLoaded) return
@@ -450,6 +540,13 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         )
     }
 
+    /**
+     * 统一上报拍照/选图相关埋点。
+     *
+     * @param eventName 事件名
+     * @param source 来源，如 `camera` / `gallery`
+     * @param extraAttributes 额外埋点属性
+     */
     private fun trackCaptureEvent(
         eventName: String,
         source: String?,
@@ -462,6 +559,13 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         TrackManager.track(eventName, attributes)
     }
 
+    /**
+     * 处理详情页返回结果并同步首页列表。
+     *
+     * @param operationType 详情页执行的操作类型：新增、更新、删除
+     * @param receipt 操作后的收据对象；新增和更新成功时通常会返回
+     * @param receiptId 删除场景下返回的收据 ID
+     */
     private suspend fun handleInvoiceResult(
         operationType: String?,
         receipt: ReceiptEntity?,

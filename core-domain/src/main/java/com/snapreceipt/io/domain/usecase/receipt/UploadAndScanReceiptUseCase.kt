@@ -9,6 +9,9 @@ import javax.inject.Inject
 
 /**
  * 上传本地图片并触发扫码识别的组合用例。
+ *
+ * 该用例把“申请上传地址”“上传对象存储”“调用 OCR 扫描”三段异步流程串成一个原子操作，
+ * 让 UI 层只关注阶段进度和最终结果，不需要直接感知底层多个仓库/接口。
  */
 class UploadAndScanReceiptUseCase @Inject constructor(
     private val receiptRepository: ReceiptRemoteRepository,
@@ -29,6 +32,7 @@ class UploadAndScanReceiptUseCase @Inject constructor(
      *
      * @param filePath 本地图片路径
      * @param onProgress 进度回调（阶段变更时调用）
+     * @return 成功时返回识别后的 [ReceiptEntity]；失败时把任一步骤异常透传给调用方
      */
     suspend operator fun invoke(
         filePath: String,
