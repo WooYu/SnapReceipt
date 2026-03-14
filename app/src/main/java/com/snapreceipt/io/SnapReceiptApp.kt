@@ -3,11 +3,22 @@ package com.snapreceipt.io
 import android.app.Application
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.snapreceipt.io.config.settings.AppSettings
 import com.snapreceipt.io.config.settings.SettingsManager
 import com.snapreceipt.io.di.AppDiConfig
+import com.snapreceipt.io.monitoring.MonitoringConfig
+import com.snapreceipt.io.monitoring.diagnostic.DiagnosticLogManager
+import com.snapreceipt.io.monitoring.firebase.FirebaseAnalyticsReporter
+import com.snapreceipt.io.monitoring.firebase.FirebaseCrashReporter
+import com.snapreceipt.io.monitoring.firebase.FirebasePerformanceReporter
+import com.skybound.space.core.CoreFoundation
 import com.skybound.space.core.config.AppConfig
 import com.skybound.space.core.di.AppInjector
 import com.skybound.space.core.di.DiEnvironment
+import com.skybound.space.core.monitoring.ExceptionMonitorManager
+import com.skybound.space.core.monitoring.MonitoringNames
+import com.skybound.space.core.monitoring.PerformanceMonitorManager
+import com.skybound.space.core.monitoring.TrackManager
 import com.skybound.space.core.util.LogHelper
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.flow.collectLatest
@@ -33,20 +44,41 @@ class SnapReceiptApp : Application() {
     @Inject
     lateinit var settingsManager: SettingsManager
 
+    @Inject
+    lateinit var analyticsReporter: FirebaseAnalyticsReporter
+
+    @Inject
+    lateinit var crashReporter: FirebaseCrashReporter
+
+    @Inject
+    lateinit var performanceReporter: FirebasePerformanceReporter
+
+    @Inject
+    lateinit var diagnosticLogManager: DiagnosticLogManager
+
     override fun onCreate() {
         super.onCreate()
         
         // ── 1. 创建 DI 配置并统一初始化 ───────────────────────
         val diConfig = AppDiConfig(this)
         val isDebugEnv = diConfig.environment == DiEnvironment.DEV
-        
-        // 从 DiEnvironment 统一初始化（编译期配置）
-        AppConfig.init(isDebug = isDebugEnv)
-        LogHelper.init(isDebug = isDebugEnv)
+        val startupSettings = settingsManager.readMonitoringSnapshot().toAppSettings()
+        val initialDebugMode = MonitoringConfig.resolveDebugLogging(isDebugEnv, startupSettings)
+
+        CoreFoundation.init {
+            isDebug = initialDebugMode
+            crashReporter = this@SnapReceiptApp.crashReporter
+            performanceReporter = this@SnapReceiptApp.performanceReporter
+            analyticsReporter = this@SnapReceiptApp.analyticsReporter
+            logReporter = { level, tag, message, throwable ->
+                routeLog(level, tag, message, throwable)
+            }
+        }
+        applyMonitoringSettings(baselineDebug = isDebugEnv, settings = startupSettings)
         
         LogHelper.i(
             "AppConfig",
-            "Initialized: env=${diConfig.environment} debug=$isDebugEnv baseUrl=${AppConfig.baseUrl} version=${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
+            "Initialized: env=${diConfig.environment} debug=$initialDebugMode baseUrl=${AppConfig.baseUrl} version=${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
         )
         
         // ── 2. 应用依赖注入配置 ──────────────────────────────
@@ -68,29 +100,51 @@ class SnapReceiptApp : Application() {
      * @param baselineDebug 编译期基线配置（来自 DiEnvironment）
      */
     private fun subscribeToSettingsChanges(baselineDebug: Boolean) {
-        val allowRuntimeDebugOverride = BuildConfig.DEBUG
         ProcessLifecycleOwner.get().lifecycleScope.launch {
             settingsManager.settings.collectLatest { settings ->
-                // 计算最终的调试模式状态
-                val runtimeOverride = if (allowRuntimeDebugOverride) {
-                    settings.enableDebugLogging
-                } else {
-                    null
-                }
-                val finalDebugMode = runtimeOverride ?: baselineDebug
-                
-                // 动态更新 LogHelper 和 AppConfig
-                LogHelper.updateDebugMode(finalDebugMode)
-                AppConfig.updateDebugMode(finalDebugMode)
-                
-                // 记录覆盖状态（便于排查）
-                if (runtimeOverride != null) {
+                settingsManager.syncMonitoringSnapshot(settings)
+                applyMonitoringSettings(baselineDebug = baselineDebug, settings = settings)
+
+                if (settings.enableDebugLogging != null || settings.enableDiagnosticFileLogging) {
                     LogHelper.i(
                         "AppSettings",
-                        "Debug logging overridden: baseline=$baselineDebug override=$runtimeOverride final=$finalDebugMode"
+                        "Debug logging updated: baseline=$baselineDebug override=${settings.enableDebugLogging} diagnostic=${settings.enableDiagnosticFileLogging} final=${MonitoringConfig.resolveDebugLogging(baselineDebug, settings)}"
                     )
                 }
             }
+        }
+    }
+
+    private fun applyMonitoringSettings(baselineDebug: Boolean, settings: AppSettings) {
+        val finalDebugMode = MonitoringConfig.resolveDebugLogging(baselineDebug, settings)
+        diagnosticLogManager.setEnabled(settings.enableDiagnosticFileLogging)
+        ExceptionMonitorManager.setEnabled(settings.enableCrashReporting)
+        PerformanceMonitorManager.setEnabled(
+            MonitoringConfig.resolvePerformanceEnabled(settings.enableCrashReporting)
+        )
+        TrackManager.setEnabled(settings.enableAnalytics)
+        LogHelper.updateDebugMode(finalDebugMode)
+        AppConfig.updateDebugMode(finalDebugMode)
+    }
+
+    private fun routeLog(level: String, tag: String, message: String, throwable: Throwable?) {
+        diagnosticLogManager.append(level, tag, message, throwable)
+
+        if (level != "W" && level != "E") {
+            return
+        }
+
+        ExceptionMonitorManager.log(level, tag, message, throwable)
+        if (throwable != null) {
+            ExceptionMonitorManager.report(
+                throwable,
+                metadata = mapOf(
+                    MonitoringNames.CrashMetadata.logLevel to level,
+                    MonitoringNames.CrashMetadata.logTag to tag,
+                    MonitoringNames.CrashMetadata.logMessage to
+                        message.take(MonitoringConfig.Crash.logMessageMaxLength)
+                )
+            )
         }
     }
 }

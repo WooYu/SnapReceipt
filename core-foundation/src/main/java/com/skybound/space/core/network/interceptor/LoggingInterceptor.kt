@@ -23,5 +23,10 @@ class LoggingInterceptor(
         redactedHeaders.forEach { delegate.redactHeader(it) }
     }
 
-    override fun intercept(chain: Interceptor.Chain): Response = delegate.intercept(chain)
+    override fun intercept(chain: Interceptor.Chain): Response {
+        if (!LogHelper.isDebug) {
+            return chain.proceed(chain.request())
+        }
+        return delegate.intercept(chain)
+    }
 }

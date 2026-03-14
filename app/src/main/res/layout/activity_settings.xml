@@ -14,18 +14,78 @@
         app:layout_constraintTop_toTopOf="parent"
         app:ptbTitleText="@string/settings" />
 
-    <com.snapreceipt.io.ui.widget.MeMenuItemView
-        android:id="@+id/menu_clear_cache"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/settings_scroll"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_surface_card_large"
-        android:layout_marginStart="@dimen/page_start_margin"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="@dimen/page_end_margin"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:fillViewport="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/page_header"
-        app:mmivTitle="@string/clear_cache" />
+        app:layout_constraintBottom_toTopOf="@id/logout_btn">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp">
+
+            <com.snapreceipt.io.ui.widget.MeMenuItemView
+                android:id="@+id/menu_diagnostic_logging"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/page_start_margin"
+                android:layout_marginEnd="@dimen/page_end_margin"
+                android:background="@drawable/bg_surface_card_large"
+                app:mmivShowArrow="false"
+                app:mmivTitle="@string/diagnostic_logging_mode" />
+
+            <com.snapreceipt.io.ui.widget.MeMenuItemView
+                android:id="@+id/menu_export_diagnostics"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/page_start_margin"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="@dimen/page_end_margin"
+                android:background="@drawable/bg_surface_card_large"
+                app:mmivTitle="@string/export_diagnostic_logs" />
+
+            <com.snapreceipt.io.ui.widget.MeMenuItemView
+                android:id="@+id/menu_crash_reporting"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/page_start_margin"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="@dimen/page_end_margin"
+                android:background="@drawable/bg_surface_card_large"
+                app:mmivShowArrow="false"
+                app:mmivTitle="@string/crash_reporting" />
+
+            <com.snapreceipt.io.ui.widget.MeMenuItemView
+                android:id="@+id/menu_analytics_reporting"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/page_start_margin"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="@dimen/page_end_margin"
+                android:background="@drawable/bg_surface_card_large"
+                app:mmivShowArrow="false"
+                app:mmivTitle="@string/analytics_reporting" />
+
+            <com.snapreceipt.io.ui.widget.MeMenuItemView
+                android:id="@+id/menu_clear_cache"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/page_start_margin"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="@dimen/page_end_margin"
+                android:background="@drawable/bg_surface_card_large"
+                app:mmivTitle="@string/clear_cache" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <com.snapreceipt.io.ui.widget.PrimaryActionButton
         android:id="@+id/logout_btn"

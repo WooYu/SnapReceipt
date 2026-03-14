@@ -17,7 +17,6 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    implementation(libs.security.crypto)
     ksp(libs.room.compiler)
 
     testImplementation(libs.junit)

@@ -5,14 +5,19 @@ import android.content.ContentResolver
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
+import androidx.core.content.IntentCompat
+import androidx.core.os.BundleCompat
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.FragmentHomeBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
@@ -29,11 +34,14 @@ import com.skybound.space.base.presentation.observeState
 import com.skybound.space.base.platform.permission.FragmentPermissionHelper
 import com.skybound.space.base.platform.permission.PermissionManager
 import com.skybound.space.base.platform.permission.Permissions
+import com.skybound.space.core.monitoring.MonitoringNames
+import com.skybound.space.core.monitoring.PerformanceMonitorManager
+import com.skybound.space.core.monitoring.TrackManager
 import com.skybound.space.core.util.LogHelper
 import com.yalantis.ucrop.UCrop
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
@@ -53,7 +61,9 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     private var shouldScrollToTopOnNextRender = false
     private var pendingHomeRefreshAfterLoad = false
     private var pendingHomeRefreshReason: String? = null
-    private var refreshEventsJob: Job? = null
+    private var firstScreenStartedAtMs: Long = 0L
+    private var hasTrackedFirstScreenLoad = false
+    private var pendingCaptureSource: String? = null
 
     private lateinit var permissionHelper: FragmentPermissionHelper
 
@@ -63,58 +73,17 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            // Activity 返回成功，获取操作类型和数据
-            val operationType = result.data?.getStringExtra(InvoiceDetailsArgsCodec.EXTRA_OPERATION_TYPE)
-            val receipt = result.data?.getParcelableExtra<ReceiptEntity>(InvoiceDetailsArgsCodec.EXTRA_RECEIPT)
-            val receiptId = result.data?.getLongExtra(InvoiceDetailsArgsCodec.EXTRA_RECEIPT_ID, -1L)
-            
-            // 根据操作类型，选择本地快速更新或全量刷新
-            lifecycleScope.launchWhenResumed {
-                when (operationType) {
-                    InvoiceDetailsArgsCodec.OPERATION_TYPE_ADD -> {
-                        // 新增：插入列表头部
-                        val hasValidId = receipt?.receiptId?.let { it > 0L } == true
-                        if (receipt != null && hasValidId) {
-                            LogHelper.d(LOG_TAG, "invoice result add -> local insert + markReceiptsDirty")
-                            viewModel.addReceiptLocally(receipt)
-                            shouldScrollToTopOnNextRender = true
-                            refreshViewModel.notifyReceiptsItemAdded(receipt)
-                        } else {
-                            LogHelper.d(LOG_TAG, "invoice result add missing payload/id -> full refresh")
-                            requestHomeRefreshOrDefer("invoice_details_result_add_missing_payload_or_id")
-                            refreshViewModel.notifyReceiptsFullRefresh()
-                        }
-                    }
-                    InvoiceDetailsArgsCodec.OPERATION_TYPE_UPDATE -> {
-                        // 编辑：更新列表中的项
-                        val hasValidId = receipt?.receiptId?.let { it > 0L } == true
-                        if (receipt != null && hasValidId) {
-                            LogHelper.d(LOG_TAG, "invoice result update -> local update + markReceiptsDirty")
-                            viewModel.updateReceiptLocally(receipt)
-                            // 后台增量刷新，确保服务端数据一致
-                            refreshViewModel.notifyReceiptsItemUpdated(receipt)
-                        } else {
-                            LogHelper.d(LOG_TAG, "invoice result update missing payload/id -> full refresh")
-                            requestHomeRefreshOrDefer("invoice_details_result_update_missing_payload_or_id")
-                            refreshViewModel.notifyReceiptsFullRefresh()
-                        }
-                    }
-                    InvoiceDetailsArgsCodec.OPERATION_TYPE_DELETE -> {
-                        // 删除：移除列表中的项
-                        if (receiptId != null && receiptId > 0) {
-                            LogHelper.d(LOG_TAG, "invoice result delete -> local delete + markReceiptsDirty")
-                            viewModel.deleteReceiptLocally(receiptId)
-                            refreshViewModel.notifyReceiptsItemDeleted(receiptId)
-                        } else {
-                            refreshViewModel.notifyReceiptsFullRefresh()
-                        }
-                    }
-                    else -> {
-                        // 未知操作或来自其他来源，执行全量刷新
-                        requestHomeRefreshOrDefer("invoice_details_result_unknown_operation")
-                        refreshViewModel.notifyReceiptsFullRefresh()
-                    }
-                }
+            val data = result.data ?: return@registerForActivityResult
+            lifecycleScope.launch {
+                handleInvoiceResult(
+                    operationType = data.getStringExtra(InvoiceDetailsArgsCodec.EXTRA_OPERATION_TYPE),
+                    receipt = IntentCompat.getParcelableExtra(
+                        data,
+                        InvoiceDetailsArgsCodec.EXTRA_RECEIPT,
+                        ReceiptEntity::class.java
+                    ),
+                    receiptId = data.getLongExtra(InvoiceDetailsArgsCodec.EXTRA_RECEIPT_ID, -1L)
+                )
             }
         }
     }
@@ -125,6 +94,8 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         val uri = pendingCameraUri
         if (success && uri != null) {
             startCrop(uri)
+        } else if (!success) {
+            pendingCaptureSource = null
         }
     }
 
@@ -133,6 +104,8 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     ) { uri ->
         if (uri != null) {
             startCrop(uri)
+        } else {
+            pendingCaptureSource = null
         }
     }
 
@@ -143,15 +116,25 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
             val output = UCrop.getOutput(result.data ?: return@registerForActivityResult)
             if (output != null) {
                 handleCroppedImage(output)
+            } else {
+                pendingCaptureSource = null
             }
         } else if (result.resultCode == UCrop.RESULT_ERROR) {
             val error = UCrop.getError(result.data ?: return@registerForActivityResult)
             LogHelper.e("Crop", "Crop failed", error)
+            trackCaptureEvent(
+                eventName = MonitoringNames.Events.receiptCaptureFail,
+                source = pendingCaptureSource,
+                extraAttributes = mapOf(MonitoringNames.Params.reason to "crop_error")
+            )
+            pendingCaptureSource = null
             Toast.makeText(
                 requireContext(),
                 error?.localizedMessage ?: getString(R.string.image_crop_failed),
                 Toast.LENGTH_SHORT
             ).show()
+        } else {
+            pendingCaptureSource = null
         }
     }
 
@@ -162,45 +145,9 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
 
     override fun onResume() {
         super.onResume()
-        refreshEventsJob?.cancel()
-
         if (refreshViewModel.consumeHomeDirty()) {
             requestHomeRefreshOrDefer("on_resume_consume_home_dirty")
         }
-
-        // 监听来自 ListRefreshViewModel 的刷新事件
-        // - ItemAdded: 扫描成功新增，本地已插入，这里处理后台增量刷新
-        // - ItemUpdated: 编辑后更新，本地已更新，这里处理后台增量刷新
-        // - ItemDeleted: 删除后，本地已移除，这里处理后台增量刷新
-        // - FullRefresh: 全量刷新，重新加载整个列表
-        refreshEventsJob = lifecycleScope.launchWhenResumed {
-            refreshViewModel.refreshHomeEvent.collect { event ->
-                when (event) {
-                    is HomeRefreshEvent.ItemAdded -> {
-                        LogHelper.d(LOG_TAG, "event item_added -> local insert")
-                        viewModel.addReceiptLocally(event.receipt)
-                    }
-                    is HomeRefreshEvent.ItemUpdated -> {
-                        LogHelper.d(LOG_TAG, "event item_updated -> local update")
-                        viewModel.updateReceiptLocally(event.receipt)
-                    }
-                    is HomeRefreshEvent.ItemDeleted -> {
-                        LogHelper.d(LOG_TAG, "event item_deleted -> local delete")
-                        viewModel.deleteReceiptLocally(event.receiptId)
-                    }
-                    is HomeRefreshEvent.FullRefresh -> {
-                        refreshViewModel.consumeHomeDirty()
-                        requestHomeRefreshOrDefer("home_refresh_event_full_refresh")
-                    }
-                }
-            }
-        }
-    }
-
-    override fun onPause() {
-        refreshEventsJob?.cancel()
-        refreshEventsJob = null
-        super.onPause()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -208,6 +155,9 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         setupHeaderBackground()
         setupAdapter()
         setupListeners()
+        observeRefreshEvents()
+        firstScreenStartedAtMs = SystemClock.elapsedRealtime()
+        hasTrackedFirstScreenLoad = false
         observeState(viewModel.uiState) { renderState(it) }
         super.onViewCreated(view, savedInstanceState)
     }
@@ -233,6 +183,8 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
 
         // Submit data first (async), then update footer state in callback
         adapter.setReceipts(state.receipts) {
+            val binding = _binding ?: return@setReceipts
+            maybeTrackFirstScreenLoad(state)
             if (shouldScrollToTopOnNextRender && state.receipts.isNotEmpty()) {
                 binding.statefulList.recyclerView.scrollToPosition(0)
                 shouldScrollToTopOnNextRender = false
@@ -313,6 +265,33 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
         binding.cardUpload.setOnClickListener { pickImageFromGallery() }
     }
 
+    private fun observeRefreshEvents() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                refreshViewModel.refreshHomeEvent.collect { event ->
+                    when (event) {
+                        is HomeRefreshEvent.ItemAdded -> {
+                            LogHelper.d(LOG_TAG, "event item_added -> local insert")
+                            viewModel.addReceiptLocally(event.receipt)
+                        }
+                        is HomeRefreshEvent.ItemUpdated -> {
+                            LogHelper.d(LOG_TAG, "event item_updated -> local update")
+                            viewModel.updateReceiptLocally(event.receipt)
+                        }
+                        is HomeRefreshEvent.ItemDeleted -> {
+                            LogHelper.d(LOG_TAG, "event item_deleted -> local delete")
+                            viewModel.deleteReceiptLocally(event.receiptId)
+                        }
+                        is HomeRefreshEvent.FullRefresh -> {
+                            refreshViewModel.consumeHomeDirty()
+                            requestHomeRefreshOrDefer("home_refresh_event_full_refresh")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private fun openReceiptForEdit(receipt: ReceiptEntity) {
         // 从列表点击打开已保存的收据进行编辑
         // 标记来源为 SOURCE_RECEIPTS_LIST，用于判断初始状态（预览或编辑）
@@ -339,6 +318,8 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     }
 
     private fun openCamera() {
+        pendingCaptureSource = "camera"
+        trackCaptureEvent(MonitoringNames.Events.receiptCaptureStart, source = pendingCaptureSource)
         val photoFile = File(requireContext().cacheDir, "scan_${System.currentTimeMillis()}.jpg")
         val uri = FileProvider.getUriForFile(
             requireContext(),
@@ -350,6 +331,8 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     }
 
     private fun pickImageFromGallery() {
+        pendingCaptureSource = "gallery"
+        trackCaptureEvent(MonitoringNames.Events.receiptCaptureStart, source = pendingCaptureSource)
         pickImageLauncher.launch(
             androidx.activity.result.PickVisualMediaRequest(
                 ActivityResultContracts.PickVisualMedia.ImageOnly
@@ -359,6 +342,14 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
 
     private fun startCrop(sourceUri: Uri) {
         val safeSource = resolveCropSourceUri(sourceUri) ?: run {
+            trackCaptureEvent(
+                eventName = MonitoringNames.Events.receiptCaptureFail,
+                source = pendingCaptureSource,
+                extraAttributes = mapOf(
+                    MonitoringNames.Params.reason to "prepare_crop_source_failed"
+                )
+            )
+            pendingCaptureSource = null
             Toast.makeText(requireContext(), getString(R.string.image_crop_failed), Toast.LENGTH_SHORT).show()
             return
         }
@@ -379,6 +370,8 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
 
     private fun handleCroppedImage(uri: Uri) {
         val path = uri.path ?: return
+        trackCaptureEvent(MonitoringNames.Events.receiptCaptureSuccess, source = pendingCaptureSource)
+        pendingCaptureSource = null
         viewModel.processCroppedImage(path)
     }
 
@@ -401,7 +394,12 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
     override fun onCustomEvent(event: UiEvent.Custom) {
         when (event.type) {
             HomeEventKeys.PREFILL_READY -> {
-                val receipt = event.payload?.getParcelable(HomeEventKeys.EXTRA_ARGS) as? ReceiptEntity
+                val payload = event.payload ?: return
+                val receipt = BundleCompat.getParcelable(
+                    payload,
+                    HomeEventKeys.EXTRA_ARGS,
+                    ReceiptEntity::class.java
+                )
                 if (receipt != null) {
                     openInvoiceDetails(receipt)
                 }
@@ -439,5 +437,75 @@ class HomeFragment : BaseFragment<HomeViewModel>(R.layout.fragment_home) {
             noMore = showNoMore,
             errorText = state.error
         )
+    }
+
+    private fun maybeTrackFirstScreenLoad(state: HomeUiState) {
+        if (hasTrackedFirstScreenLoad || firstScreenStartedAtMs <= 0L) return
+        if (state.loading || !state.hasLoaded) return
+
+        hasTrackedFirstScreenLoad = true
+        PerformanceMonitorManager.trackScreenLoad(
+            screenName = MonitoringNames.Traces.homeFirstScreen,
+            durationMs = SystemClock.elapsedRealtime() - firstScreenStartedAtMs
+        )
+    }
+
+    private fun trackCaptureEvent(
+        eventName: String,
+        source: String?,
+        extraAttributes: Map<String, String> = emptyMap()
+    ) {
+        val attributes = buildMap {
+            source?.let { put(MonitoringNames.Params.source, it) }
+            putAll(extraAttributes)
+        }
+        TrackManager.track(eventName, attributes)
+    }
+
+    private suspend fun handleInvoiceResult(
+        operationType: String?,
+        receipt: ReceiptEntity?,
+        receiptId: Long
+    ) {
+        when (operationType) {
+            InvoiceDetailsArgsCodec.OPERATION_TYPE_ADD -> {
+                val hasValidId = receipt?.receiptId?.let { it > 0L } == true
+                if (receipt != null && hasValidId) {
+                    LogHelper.d(LOG_TAG, "invoice result add -> local insert + markReceiptsDirty")
+                    viewModel.addReceiptLocally(receipt)
+                    shouldScrollToTopOnNextRender = true
+                    refreshViewModel.notifyReceiptsItemAdded(receipt)
+                } else {
+                    LogHelper.d(LOG_TAG, "invoice result add missing payload/id -> full refresh")
+                    requestHomeRefreshOrDefer("invoice_details_result_add_missing_payload_or_id")
+                    refreshViewModel.notifyReceiptsFullRefresh()
+                }
+            }
+            InvoiceDetailsArgsCodec.OPERATION_TYPE_UPDATE -> {
+                val hasValidId = receipt?.receiptId?.let { it > 0L } == true
+                if (receipt != null && hasValidId) {
+                    LogHelper.d(LOG_TAG, "invoice result update -> local update + markReceiptsDirty")
+                    viewModel.updateReceiptLocally(receipt)
+                    refreshViewModel.notifyReceiptsItemUpdated(receipt)
+                } else {
+                    LogHelper.d(LOG_TAG, "invoice result update missing payload/id -> full refresh")
+                    requestHomeRefreshOrDefer("invoice_details_result_update_missing_payload_or_id")
+                    refreshViewModel.notifyReceiptsFullRefresh()
+                }
+            }
+            InvoiceDetailsArgsCodec.OPERATION_TYPE_DELETE -> {
+                if (receiptId > 0L) {
+                    LogHelper.d(LOG_TAG, "invoice result delete -> local delete + markReceiptsDirty")
+                    viewModel.deleteReceiptLocally(receiptId)
+                    refreshViewModel.notifyReceiptsItemDeleted(receiptId)
+                } else {
+                    refreshViewModel.notifyReceiptsFullRefresh()
+                }
+            }
+            else -> {
+                requestHomeRefreshOrDefer("invoice_details_result_unknown_operation")
+                refreshViewModel.notifyReceiptsFullRefresh()
+            }
+        }
     }
 }

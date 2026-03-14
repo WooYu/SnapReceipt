@@ -2,17 +2,20 @@ pluginManagement {
     includeBuild("build-logic")
 
     repositories {
-        maven("https://maven.aliyun.com/repository/google")
-        maven("https://mirrors.tencent.com/nexus/repository/maven-public")
         google()
         mavenCentral()
         gradlePluginPortal()
+        maven("https://maven.aliyun.com/repository/google")
+        maven("https://mirrors.tencent.com/nexus/repository/maven-public")
     }
 }
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        google()
+        mavenCentral()
+        maven("https://jitpack.io")
         maven("https://maven.aliyun.com/repository/google") {
             name = "AliyunGoogleMirror"
             content {
@@ -29,9 +32,6 @@ dependencyResolutionManagement {
                 includeGroupByRegex("com\\.google(\\..+)?")
             }
         }
-        google()
-        mavenCentral()
-        maven("https://jitpack.io")
     }
 }
 

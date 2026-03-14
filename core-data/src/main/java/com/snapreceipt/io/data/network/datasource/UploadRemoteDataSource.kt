@@ -1,6 +1,9 @@
 package com.snapreceipt.io.data.network.datasource
 
+import android.os.SystemClock
 import com.snapreceipt.io.data.base.BaseRemoteDataSource
+import com.skybound.space.core.monitoring.PerformanceMonitorManager
+import com.skybound.space.core.monitoring.MonitoringNames
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
 import com.skybound.space.core.network.NetworkError
 import com.skybound.space.core.network.NetworkResult
@@ -21,6 +24,7 @@ class UploadRemoteDataSource(
         file: File,
         contentType: String = "image/jpeg"
     ): NetworkResult<Unit> = withContext(dispatchers.io) {
+        val startedAt = SystemClock.elapsedRealtime()
         if (!file.exists()) {
             return@withContext NetworkResult.Failure(
                 NetworkError.Unexpected("File not found: ${file.path}")
@@ -48,6 +52,11 @@ class UploadRemoteDataSource(
         } catch (throwable: Throwable) {
             NetworkResult.Failure(
                 NetworkError.Unexpected(throwable.message ?: "Unexpected", throwable)
+            )
+        } finally {
+            PerformanceMonitorManager.trackApiCall(
+                endpoint = MonitoringNames.Traces.uploadPutObjectStorage,
+                durationMs = SystemClock.elapsedRealtime() - startedAt
             )
         }
     }

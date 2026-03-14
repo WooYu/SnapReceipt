@@ -115,7 +115,8 @@ object LogHelper {
      */
     private fun log(level: String, tag: String, message: String, throwable: Throwable?) {
         val transformed = messageTransformer?.invoke(message) ?: message
-        val moduleMessage = if (tag.isBlank()) transformed else "[$tag] $transformed"
+        val reportTag = tag.ifBlank { ROOT_TAG }
+        val moduleMessage = if (tag.isBlank()) transformed else "[$reportTag] $transformed"
         
         // Debug 模式输出到 Logcat
         if (isDebug) {
@@ -129,7 +130,7 @@ object LogHelper {
         }
         
         // 无论 Debug 与否，都上报到 reporter（用于崩溃收集）
-        reporter?.invoke(level, ROOT_TAG, moduleMessage, throwable)
+        reporter?.invoke(level, reportTag, transformed, throwable)
     }
 
     /**

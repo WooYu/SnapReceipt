@@ -108,10 +108,6 @@ object NetworkClientModule {
             .connectTimeout(config.connectTimeoutSec, TimeUnit.SECONDS)
             .readTimeout(config.readTimeoutSec, TimeUnit.SECONDS)
             .writeTimeout(config.writeTimeoutSec, TimeUnit.SECONDS)
-            .apply {
-                if (config.enableLogging) {
-                    addInterceptor(LoggingInterceptor(HttpLoggingInterceptor.Level.HEADERS))
-                }
-            }
+            .addInterceptor(LoggingInterceptor(HttpLoggingInterceptor.Level.HEADERS))
             .build()
 }

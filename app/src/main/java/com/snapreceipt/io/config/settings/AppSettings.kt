@@ -1,5 +1,7 @@
 package com.snapreceipt.io.config.settings
 
+import com.snapreceipt.io.monitoring.MonitoringConfig
+
 /**
  * 应用设置数据模型
  * 
@@ -24,10 +26,13 @@ data class AppSettings(
     val enableNotifications: Boolean = true,
     
     /** 是否启用崩溃报告上传 */
-    val enableCrashReporting: Boolean = true,
+    val enableCrashReporting: Boolean = MonitoringConfig.Defaults.crashReportingEnabled,
     
     /** 是否启用数据分析（埋点统计） */
-    val enableAnalytics: Boolean = true,
+    val enableAnalytics: Boolean = MonitoringConfig.Defaults.analyticsEnabled,
+
+    /** 是否启用本地诊断日志落盘 */
+    val enableDiagnosticFileLogging: Boolean = MonitoringConfig.Defaults.diagnosticFileLoggingEnabled,
     
     /** 应用主题名称（"Light" / "Dark" / "Auto"） */
     val appTheme: String = "Light",
@@ -44,7 +49,7 @@ data class AppSettings(
      * 
      * 生效范围：
      * - LogHelper.d/i/w/e 日志输出
-     * - NetworkConfig.enableLogging（网络请求日志）
+     * - LoggingInterceptor 运行时网络请求日志
      * - AppConfig.isDebug 标志位
      */
     val enableDebugLogging: Boolean? = null

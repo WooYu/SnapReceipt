@@ -1,6 +1,7 @@
 package com.snapreceipt.io.ui.home
 
 import android.os.Bundle
+import android.os.SystemClock
 import androidx.lifecycle.viewModelScope
 import com.snapreceipt.io.R
 import com.snapreceipt.io.domain.model.ReceiptEntity
@@ -12,6 +13,9 @@ import com.snapreceipt.io.domain.usecase.receipt.UploadAndScanReceiptUseCase
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
+import com.skybound.space.core.monitoring.MonitoringNames
+import com.skybound.space.core.monitoring.PerformanceMonitorManager
+import com.skybound.space.core.monitoring.TrackManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -170,6 +174,8 @@ class HomeViewModel @Inject constructor(
 
     fun processCroppedImage(imagePath: String) {
         viewModelScope.launch(dispatchers.io) {
+            val startedAt = SystemClock.elapsedRealtime()
+            TrackManager.track(MonitoringNames.Events.receiptUploadStart)
             _uiState.update {
                 it.copy(
                     recognitionStatusResId = R.string.uploading_receipt
@@ -187,6 +193,11 @@ class HomeViewModel @Inject constructor(
                 }
             )
                 .onSuccess { scan ->
+                    PerformanceMonitorManager.trackApiCall(
+                        endpoint = MonitoringNames.Traces.receiptUploadPipeline,
+                        durationMs = SystemClock.elapsedRealtime() - startedAt
+                    )
+                    TrackManager.track(MonitoringNames.Events.receiptUploadSuccess)
                     _uiState.update {
                         it.copy(recognitionStatusResId = null)
                     }
@@ -202,7 +213,18 @@ class HomeViewModel @Inject constructor(
                         )
                     )
                 }
-                .onFailure {
+                .onFailure { throwable ->
+                    PerformanceMonitorManager.trackApiCall(
+                        endpoint = MonitoringNames.Traces.receiptUploadPipeline,
+                        durationMs = SystemClock.elapsedRealtime() - startedAt
+                    )
+                    TrackManager.track(
+                        MonitoringNames.Events.receiptUploadFail,
+                        attributes = mapOf(
+                            MonitoringNames.Params.reason to
+                                (throwable.message ?: throwable.javaClass.simpleName).take(120)
+                        )
+                    )
                     _uiState.update {
                         it.copy(recognitionStatusResId = null)
                     }

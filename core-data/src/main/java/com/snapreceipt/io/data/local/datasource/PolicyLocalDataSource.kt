@@ -1,12 +1,11 @@
 package com.snapreceipt.io.data.local.datasource
 
 import android.content.Context
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
 import com.snapreceipt.io.data.base.BaseLocalDataSource
 import com.snapreceipt.io.domain.model.PolicyEntity
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
+import com.skybound.space.core.security.SecureStringPreferences
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -16,15 +15,7 @@ class PolicyLocalDataSource @Inject constructor(
     dispatchers: CoroutineDispatchersProvider
 ) : BaseLocalDataSource(dispatchers) {
 
-    private val prefs = EncryptedSharedPreferences.create(
-        context,
-        PREFS_NAME,
-        MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build(),
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-    )
+    private val prefs = SecureStringPreferences(context, PREFS_NAME)
 
     suspend fun getPolicySync(): PolicyEntity? = withIo { readPolicy() }
 
@@ -36,7 +27,7 @@ class PolicyLocalDataSource @Inject constructor(
     }
 
     private fun writePolicy(policy: PolicyEntity) {
-        prefs.edit().putString(KEY_POLICY, gson.toJson(policy)).apply()
+        prefs.putString(KEY_POLICY, gson.toJson(policy))
     }
 
     private companion object {

@@ -201,6 +201,17 @@
     <string name="language">Language</string>
     <string name="storage">Storage</string>
     <string name="clear_cache">Clear Cache</string>
+    <string name="diagnostic_logging_mode">Diagnostic logging mode</string>
+    <string name="export_diagnostic_logs">Export diagnostic logs</string>
+    <string name="crash_reporting">Crash reporting</string>
+    <string name="analytics_reporting">Analytics reporting</string>
+    <string name="settings_switch_on">On</string>
+    <string name="settings_switch_off">Off</string>
+    <string name="setting_enabled_feedback">%1$s enabled</string>
+    <string name="setting_disabled_feedback">%1$s disabled</string>
+    <string name="share_diagnostic_logs">Share diagnostic logs</string>
+    <string name="diagnostic_log_export_empty">No diagnostic logs available yet</string>
+    <string name="diagnostic_log_export_failed">Unable to prepare diagnostic logs</string>
 
     <!-- ══════════════ Feedback ══════════════ -->
     <string name="feedback">Feedback</string>

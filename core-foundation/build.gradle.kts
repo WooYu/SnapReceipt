@@ -16,7 +16,6 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.coroutines.core)
     implementation(libs.lifecycle.runtime.ktx)
-    implementation(libs.security.crypto)
     implementation(libs.timber)
     implementation("javax.inject:javax.inject:1")
 

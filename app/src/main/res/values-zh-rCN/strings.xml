@@ -201,6 +201,17 @@
     <string name="language">语言</string>
     <string name="storage">存储</string>
     <string name="clear_cache">清空缓存</string>
+    <string name="diagnostic_logging_mode">诊断日志模式</string>
+    <string name="export_diagnostic_logs">导出诊断日志</string>
+    <string name="crash_reporting">崩溃上报</string>
+    <string name="analytics_reporting">分析上报</string>
+    <string name="settings_switch_on">开</string>
+    <string name="settings_switch_off">关</string>
+    <string name="setting_enabled_feedback">%1$s已开启</string>
+    <string name="setting_disabled_feedback">%1$s已关闭</string>
+    <string name="share_diagnostic_logs">分享诊断日志</string>
+    <string name="diagnostic_log_export_empty">暂无可导出的诊断日志</string>
+    <string name="diagnostic_log_export_failed">诊断日志导出失败</string>
 
     <!-- ══════════════ Feedback ══════════════ -->
     <string name="feedback">反馈</string>

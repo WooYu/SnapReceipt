@@ -34,8 +34,8 @@ class NetworkManager(
             .readTimeout(config.readTimeoutSec, TimeUnit.SECONDS)
             .writeTimeout(config.writeTimeoutSec, TimeUnit.SECONDS)
             .addInterceptor(DefaultHeadersInterceptor(config.defaultHeaders))
+            .addInterceptor(LoggingInterceptor())
             .apply {
-                if (config.enableLogging) addInterceptor(LoggingInterceptor())
                 extraInterceptors.forEach { addInterceptor(it) }
             }
             .apply {

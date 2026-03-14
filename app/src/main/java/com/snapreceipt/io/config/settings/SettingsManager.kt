@@ -1,10 +1,14 @@
 package com.snapreceipt.io.config.settings
 
 import android.content.Context
+import android.content.SharedPreferences
+import androidx.core.content.edit as editSharedPreferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.snapreceipt.io.monitoring.MonitoringConfig
+import com.snapreceipt.io.monitoring.MonitoringSettingsSnapshot
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -51,10 +55,20 @@ class SettingsManager @Inject constructor(
         private val NOTIFICATIONS_KEY = booleanPreferencesKey("notifications")
         private val CRASH_REPORTING_KEY = booleanPreferencesKey("crash_reporting")
         private val ANALYTICS_KEY = booleanPreferencesKey("analytics")
+        private val DIAGNOSTIC_FILE_LOGGING_KEY = booleanPreferencesKey("diagnostic_file_logging")
         private val APP_THEME_KEY = stringPreferencesKey("app_theme")
         private val LAST_SYNC_TIME_KEY = stringPreferencesKey("last_sync_time")
         private val DEBUG_LOGGING_KEY = stringPreferencesKey("debug_logging")  // "true" / "false" / null
         private val ONBOARDING_COMPLETED_KEY = booleanPreferencesKey("onboarding_completed")
+        private const val MONITORING_SNAPSHOT_PREFS = "monitoring_settings_snapshot"
+        private const val SNAPSHOT_CRASH_REPORTING_KEY = "crash_reporting"
+        private const val SNAPSHOT_ANALYTICS_KEY = "analytics"
+        private const val SNAPSHOT_DIAGNOSTIC_FILE_LOGGING_KEY = "diagnostic_file_logging"
+        private const val SNAPSHOT_DEBUG_LOGGING_KEY = "debug_logging"
+    }
+
+    private val monitoringSnapshotPrefs: SharedPreferences by lazy(LazyThreadSafetyMode.NONE) {
+        context.getSharedPreferences(MONITORING_SNAPSHOT_PREFS, Context.MODE_PRIVATE)
     }
     
     /**
@@ -78,12 +92,52 @@ class SettingsManager @Inject constructor(
             language = preferences[LANGUAGE_KEY] ?: "English",
             fontSize = (preferences[FONT_SIZE_KEY] ?: "14.0").toFloatOrNull() ?: 14f,
             enableNotifications = preferences[NOTIFICATIONS_KEY] ?: true,
-            enableCrashReporting = preferences[CRASH_REPORTING_KEY] ?: true,
-            enableAnalytics = preferences[ANALYTICS_KEY] ?: true,
+            enableCrashReporting = preferences[CRASH_REPORTING_KEY]
+                ?: MonitoringConfig.Defaults.crashReportingEnabled,
+            enableAnalytics = preferences[ANALYTICS_KEY]
+                ?: MonitoringConfig.Defaults.analyticsEnabled,
+            enableDiagnosticFileLogging = preferences[DIAGNOSTIC_FILE_LOGGING_KEY]
+                ?: MonitoringConfig.Defaults.diagnosticFileLoggingEnabled,
             appTheme = preferences[APP_THEME_KEY] ?: "Light",
             lastSyncTime = (preferences[LAST_SYNC_TIME_KEY] ?: "0").toLongOrNull() ?: 0L,
             enableDebugLogging = preferences[DEBUG_LOGGING_KEY]?.toBooleanStrictOrNull()
         )
+    }
+
+    fun readMonitoringSnapshot(): MonitoringSettingsSnapshot {
+        return MonitoringSettingsSnapshot(
+            crashReportingEnabled = monitoringSnapshotPrefs.getBoolean(
+                SNAPSHOT_CRASH_REPORTING_KEY,
+                MonitoringConfig.Defaults.crashReportingEnabled
+            ),
+            analyticsEnabled = monitoringSnapshotPrefs.getBoolean(
+                SNAPSHOT_ANALYTICS_KEY,
+                MonitoringConfig.Defaults.analyticsEnabled
+            ),
+            diagnosticFileLoggingEnabled = monitoringSnapshotPrefs.getBoolean(
+                SNAPSHOT_DIAGNOSTIC_FILE_LOGGING_KEY,
+                MonitoringConfig.Defaults.diagnosticFileLoggingEnabled
+            ),
+            debugLoggingOverride = monitoringSnapshotPrefs
+                .getString(SNAPSHOT_DEBUG_LOGGING_KEY, null)
+                ?.toBooleanStrictOrNull()
+        )
+    }
+
+    fun syncMonitoringSnapshot(settings: AppSettings) {
+        updateMonitoringSnapshot {
+            putBoolean(SNAPSHOT_CRASH_REPORTING_KEY, settings.enableCrashReporting)
+            putBoolean(SNAPSHOT_ANALYTICS_KEY, settings.enableAnalytics)
+            putBoolean(
+                SNAPSHOT_DIAGNOSTIC_FILE_LOGGING_KEY,
+                settings.enableDiagnosticFileLogging
+            )
+            if (settings.enableDebugLogging == null) {
+                remove(SNAPSHOT_DEBUG_LOGGING_KEY)
+            } else {
+                putString(SNAPSHOT_DEBUG_LOGGING_KEY, settings.enableDebugLogging.toString())
+            }
+        }
     }
     
     // ── 设置更新方法（所有写操作都是 suspend 函数） ────────────
@@ -121,12 +175,28 @@ class SettingsManager @Inject constructor(
         context.settingsDataStore.edit { preferences ->
             preferences[CRASH_REPORTING_KEY] = enabled
         }
+        updateMonitoringSnapshot {
+            putBoolean(SNAPSHOT_CRASH_REPORTING_KEY, enabled)
+        }
     }
     
     /** 设置数据分析（埋点）开关 */
     suspend fun setAnalytics(enabled: Boolean) {
         context.settingsDataStore.edit { preferences ->
             preferences[ANALYTICS_KEY] = enabled
+        }
+        updateMonitoringSnapshot {
+            putBoolean(SNAPSHOT_ANALYTICS_KEY, enabled)
+        }
+    }
+
+    /** 设置本地诊断日志落盘开关 */
+    suspend fun setDiagnosticFileLogging(enabled: Boolean) {
+        context.settingsDataStore.edit { preferences ->
+            preferences[DIAGNOSTIC_FILE_LOGGING_KEY] = enabled
+        }
+        updateMonitoringSnapshot {
+            putBoolean(SNAPSHOT_DIAGNOSTIC_FILE_LOGGING_KEY, enabled)
         }
     }
     
@@ -161,6 +231,13 @@ class SettingsManager @Inject constructor(
                 preferences[DEBUG_LOGGING_KEY] = enabled.toString()
             }
         }
+        updateMonitoringSnapshot {
+            if (enabled == null) {
+                remove(SNAPSHOT_DEBUG_LOGGING_KEY)
+            } else {
+                putString(SNAPSHOT_DEBUG_LOGGING_KEY, enabled.toString())
+            }
+        }
     }
 
     /** 设置是否已完成首启引导页 */
@@ -180,5 +257,14 @@ class SettingsManager @Inject constructor(
         context.settingsDataStore.edit { preferences ->
             preferences.clear()
         }
+        updateMonitoringSnapshot {
+            clear()
+        }
+    }
+
+    private fun updateMonitoringSnapshot(
+        update: SharedPreferences.Editor.() -> Unit
+    ) {
+        monitoringSnapshotPrefs.editSharedPreferences(commit = true, action = update)
     }
 }

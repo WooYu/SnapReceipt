@@ -32,11 +32,7 @@ class TokenRefreshAuthenticator(
             .connectTimeout(5, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
             .writeTimeout(10, TimeUnit.SECONDS)
-            .apply {
-                if (config.enableLogging) {
-                    addInterceptor(LoggingInterceptor(HttpLoggingInterceptor.Level.HEADERS))
-                }
-            }
+            .addInterceptor(LoggingInterceptor(HttpLoggingInterceptor.Level.HEADERS))
             .build()
     }
 
@@ -89,7 +85,7 @@ class TokenRefreshAuthenticator(
         refreshClient.newCall(request).execute().use { response ->
             if (response.code == 403) return RefreshResult.RefreshTokenInvalid
             if (!response.isSuccessful) return RefreshResult.Failed
-            val raw = response.body?.string() ?: return RefreshResult.Failed
+            val raw = response.body.string()
             val type = object : TypeToken<BaseResponse<AuthTokensDto>>() {}.type
             val envelope: BaseResponse<AuthTokensDto> = gson.fromJson(raw, type)
             if (envelope.code == 403) return RefreshResult.RefreshTokenInvalid

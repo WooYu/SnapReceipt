@@ -2,10 +2,13 @@ package com.snapreceipt.io.ui.receipts
 
 import android.content.Context
 import android.os.Bundle
+import android.os.SystemClock
 import androidx.lifecycle.viewModelScope
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.presentation.viewmodel.BaseViewModel
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
+import com.skybound.space.core.monitoring.PerformanceMonitorManager
+import com.skybound.space.core.monitoring.TrackManager
 import com.skybound.space.core.util.DateFormatUtil
 import com.skybound.space.core.util.LogHelper
 import com.snapreceipt.io.R
@@ -26,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import com.skybound.space.core.monitoring.MonitoringNames
 import javax.inject.Inject
 
 @HiltViewModel
@@ -271,11 +275,25 @@ class ReceiptsViewModel @Inject constructor(
         if (ids.isEmpty() || _uiState.value.exporting) return
         _uiState.update { it.copy(exporting = true) }
         viewModelScope.launch(dispatchers.io) {
+            val startedAt = SystemClock.elapsedRealtime()
+            TrackManager.track(
+                MonitoringNames.Events.exportStart,
+                attributes = mapOf(MonitoringNames.Params.selectedCount to ids.size.toString())
+            )
             val result = exportReceiptsRemoteUseCase(ids)
             result.onSuccess {
+                val durationMs = SystemClock.elapsedRealtime() - startedAt
+                PerformanceMonitorManager.trackApiCall(
+                    MonitoringNames.Traces.receiptExportPipeline,
+                    durationMs
+                )
                 _uiState.update { it.copy(selectedIds = emptySet()) }
                 val exportUrl = it.trim()
                 if (exportUrl.isBlank()) {
+                    TrackManager.track(
+                        MonitoringNames.Events.exportFail,
+                        attributes = mapOf(MonitoringNames.Params.reason to "empty_export_url")
+                    )
                     emitEvent(
                         com.skybound.space.base.presentation.UiEvent.Toast(
                             message = "",
@@ -286,6 +304,10 @@ class ReceiptsViewModel @Inject constructor(
                     val payload = Bundle().apply {
                         putString(ReceiptsEventKeys.EXPORT_URL, exportUrl)
                     }
+                    TrackManager.track(
+                        MonitoringNames.Events.exportSuccess,
+                        attributes = mapOf(MonitoringNames.Params.selectedCount to ids.size.toString())
+                    )
                     emitEvent(
                         com.skybound.space.base.presentation.UiEvent.Custom(
                             ReceiptsEventKeys.SHOW_EXPORT_SUCCESS,
@@ -293,7 +315,20 @@ class ReceiptsViewModel @Inject constructor(
                         )
                     )
                 }
-            }.onFailure { updateError(it) }
+            }.onFailure {
+                PerformanceMonitorManager.trackApiCall(
+                    MonitoringNames.Traces.receiptExportPipeline,
+                    SystemClock.elapsedRealtime() - startedAt
+                )
+                TrackManager.track(
+                    MonitoringNames.Events.exportFail,
+                    attributes = mapOf(
+                        MonitoringNames.Params.reason to
+                            (it.message ?: it.javaClass.simpleName).take(120)
+                    )
+                )
+                updateError(it)
+            }
             _uiState.update { it.copy(exporting = false) }
         }
     }
@@ -351,6 +386,7 @@ class ReceiptsViewModel @Inject constructor(
             )
         }
         val query = applyDefaultDateFilter(currentQuery.copy(pageNum = page, pageSize = pageSize))
+        val requestStartedAt = SystemClock.elapsedRealtime()
         LogHelper.d(
             LOG_TAG,
             "fetchPage page=$page reset=$reset showLoading=$showLoading refreshing=$refreshing loadingMore=$loadingMore query=$query"
@@ -359,6 +395,19 @@ class ReceiptsViewModel @Inject constructor(
         fetchJob = viewModelScope.launch(dispatchers.io) {
             fetchReceiptsUseCase(query)
                 .onSuccess { receipts ->
+                    val durationMs = SystemClock.elapsedRealtime() - requestStartedAt
+                    PerformanceMonitorManager.trackApiCall(
+                        MonitoringNames.Traces.receiptListRefresh,
+                        durationMs
+                    )
+                    TrackManager.track(
+                        MonitoringNames.Events.receiptListLoadSuccess,
+                        attributes = mapOf(
+                            MonitoringNames.Params.page to page.toString(),
+                            MonitoringNames.Params.reset to reset.toString(),
+                            MonitoringNames.Params.resultCount to receipts.size.toString()
+                        )
+                    )
                     val rawMerged = if (reset) receipts else lastFetchedReceipts + receipts
                     lastFetchedReceipts = rawMerged
                     hasMore = receipts.size >= pageSize
@@ -384,6 +433,19 @@ class ReceiptsViewModel @Inject constructor(
                     }
                 }
                 .onFailure {
+                    PerformanceMonitorManager.trackApiCall(
+                        MonitoringNames.Traces.receiptListRefresh,
+                        SystemClock.elapsedRealtime() - requestStartedAt
+                    )
+                    TrackManager.track(
+                        MonitoringNames.Events.receiptListLoadFail,
+                        attributes = mapOf(
+                            MonitoringNames.Params.page to page.toString(),
+                            MonitoringNames.Params.reset to reset.toString(),
+                            MonitoringNames.Params.reason to
+                                (it.message ?: it.javaClass.simpleName).take(120)
+                        )
+                    )
                     LogHelper.e(LOG_TAG, "fetchPage failed", it)
                     updateError(it)
                 }
