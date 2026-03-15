@@ -17,26 +17,42 @@ val localProps = Properties().apply {
     if (f.exists()) FileInputStream(f).use { load(it) }
 }
 fun localOrEnv(key: String): String? =
-    localProps.getProperty(key) ?: System.getenv(key)
+    localProps.getProperty(key)?.takeIf { it.isNotBlank() } ?: System.getenv(key)?.takeIf { it.isNotBlank() }
+
+val appId = project.property("app.applicationId") as String
+val versionCodeValue = (project.property("app.versionCode") as String).toInt()
+val versionNameValue = project.property("app.versionName") as String
+val releaseArtifactBaseName = "SnapReceipt-release-v${versionNameValue}-${versionCodeValue}"
+
+val releaseStoreFilePath = localOrEnv("SNAPRECEIPT_RELEASE_STORE_FILE")
+val releaseStoreFile = releaseStoreFilePath?.let { file(it) }
+val releaseStorePassword = localOrEnv("SNAPRECEIPT_RELEASE_STORE_PASSWORD")
+val releaseKeyAlias = localOrEnv("SNAPRECEIPT_RELEASE_KEY_ALIAS")
+val releaseKeyPassword = localOrEnv("SNAPRECEIPT_RELEASE_KEY_PASSWORD")
+val releaseSigningReady =
+    releaseStoreFile?.isFile == true &&
+        listOf(releaseStorePassword, releaseKeyAlias, releaseKeyPassword).all { !it.isNullOrBlank() }
+
+val releaseSigningIssue = when {
+    releaseStoreFilePath.isNullOrBlank() ->
+        "SNAPRECEIPT_RELEASE_STORE_FILE is missing."
+    releaseStoreFile?.isFile != true ->
+        "Keystore file not found: ${releaseStoreFile?.absolutePath ?: releaseStoreFilePath}"
+    releaseStorePassword.isNullOrBlank() ->
+        "SNAPRECEIPT_RELEASE_STORE_PASSWORD is missing."
+    releaseKeyAlias.isNullOrBlank() ->
+        "SNAPRECEIPT_RELEASE_KEY_ALIAS is missing."
+    releaseKeyPassword.isNullOrBlank() ->
+        "SNAPRECEIPT_RELEASE_KEY_PASSWORD is missing."
+    else -> null
+}
+
+val isReleaseTaskRequested = gradle.startParameter.taskNames.any { it.contains("Release", ignoreCase = true) }
 
 android {
-    val appId = project.property("app.applicationId") as String
-    val versionCodeValue = (project.property("app.versionCode") as String).toInt()
-    val versionNameValue = project.property("app.versionName") as String
-
-    val releaseStoreFilePath = localOrEnv("SNAPRECEIPT_RELEASE_STORE_FILE")
-    val releaseStorePassword = localOrEnv("SNAPRECEIPT_RELEASE_STORE_PASSWORD")
-    val releaseKeyAlias = localOrEnv("SNAPRECEIPT_RELEASE_KEY_ALIAS")
-    val releaseKeyPassword = localOrEnv("SNAPRECEIPT_RELEASE_KEY_PASSWORD")
-    val releaseSigningReady = listOf(
-        releaseStoreFilePath, releaseStorePassword, releaseKeyAlias, releaseKeyPassword
-    ).all { !it.isNullOrBlank() }
-
-    if (gradle.startParameter.taskNames.any { it.contains("Release", ignoreCase = true) }
-        && !releaseSigningReady
-    ) {
+    if (isReleaseTaskRequested && !releaseSigningReady) {
         throw GradleException(
-            "Missing release signing configuration. " +
+            "Invalid release signing configuration. ${releaseSigningIssue ?: ""} " +
                 "Set SNAPRECEIPT_RELEASE_STORE_FILE, SNAPRECEIPT_RELEASE_STORE_PASSWORD, " +
                 "SNAPRECEIPT_RELEASE_KEY_ALIAS, SNAPRECEIPT_RELEASE_KEY_PASSWORD " +
                 "in local.properties or as environment variables."
@@ -54,7 +70,7 @@ android {
     signingConfigs {
         if (releaseSigningReady) {
             create("release") {
-                storeFile = file(releaseStoreFilePath!!)
+                storeFile = releaseStoreFile!!
                 storePassword = releaseStorePassword
                 keyAlias = releaseKeyAlias
                 keyPassword = releaseKeyPassword
@@ -96,12 +112,35 @@ android {
         outputs.all {
             val output = this as com.android.build.gradle.internal.api.ApkVariantOutputImpl
             output.outputFileName = if (buildType.name == "release") {
-                "SnapReceipt-release-v${vName}-${vCode}.apk"
+                "$releaseArtifactBaseName.apk"
             } else {
                 "SnapReceipt-debug-v${vName}-${vCode}-${date}.apk"
             }
         }
     }
+}
+
+val versionedReleaseBundle = tasks.register("versionedReleaseBundle") {
+    val sourceBundle = layout.buildDirectory.file("outputs/bundle/release/app-release.aab")
+    val targetBundle = layout.buildDirectory.file("outputs/bundle/release/$releaseArtifactBaseName.aab")
+
+    inputs.file(sourceBundle)
+    outputs.file(targetBundle)
+
+    doLast {
+        val sourceFile = sourceBundle.get().asFile
+        if (!sourceFile.exists()) {
+            throw GradleException("Release bundle not found: ${sourceFile.absolutePath}")
+        }
+
+        val targetFile = targetBundle.get().asFile
+        targetFile.parentFile.mkdirs()
+        sourceFile.copyTo(targetFile, overwrite = true)
+    }
+}
+
+tasks.matching { it.name == "bundleRelease" }.configureEach {
+    finalizedBy(versionedReleaseBundle)
 }
 
 dependencies {
