@@ -212,6 +212,8 @@
     <string name="share_diagnostic_logs">Share diagnostic logs</string>
     <string name="diagnostic_log_export_empty">No diagnostic logs available yet</string>
     <string name="diagnostic_log_export_failed">Unable to prepare diagnostic logs</string>
+    <string name="testing_options_unlock_countdown">%1$d more taps to show testing options</string>
+    <string name="testing_options_unlocked">Testing options unlocked</string>
 
     <!-- ══════════════ Feedback ══════════════ -->
     <string name="feedback">Feedback</string>

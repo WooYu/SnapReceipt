@@ -33,6 +33,9 @@ data class AppSettings(
 
     /** 是否启用本地诊断日志落盘 */
     val enableDiagnosticFileLogging: Boolean = MonitoringConfig.Defaults.diagnosticFileLoggingEnabled,
+
+    /** 是否显示内部测试项（通过隐藏入口解锁） */
+    val showInternalTestingOptions: Boolean = false,
     
     /** 应用主题名称（"Light" / "Dark" / "Auto"） */
     val appTheme: String = "Light",

@@ -56,6 +56,7 @@ class SettingsManager @Inject constructor(
         private val CRASH_REPORTING_KEY = booleanPreferencesKey("crash_reporting")
         private val ANALYTICS_KEY = booleanPreferencesKey("analytics")
         private val DIAGNOSTIC_FILE_LOGGING_KEY = booleanPreferencesKey("diagnostic_file_logging")
+        private val INTERNAL_TESTING_OPTIONS_ENABLED_KEY = booleanPreferencesKey("internal_testing_options_enabled")
         private val APP_THEME_KEY = stringPreferencesKey("app_theme")
         private val LAST_SYNC_TIME_KEY = stringPreferencesKey("last_sync_time")
         private val DEBUG_LOGGING_KEY = stringPreferencesKey("debug_logging")  // "true" / "false" / null
@@ -98,6 +99,7 @@ class SettingsManager @Inject constructor(
                 ?: MonitoringConfig.Defaults.analyticsEnabled,
             enableDiagnosticFileLogging = preferences[DIAGNOSTIC_FILE_LOGGING_KEY]
                 ?: MonitoringConfig.Defaults.diagnosticFileLoggingEnabled,
+            showInternalTestingOptions = preferences[INTERNAL_TESTING_OPTIONS_ENABLED_KEY] ?: false,
             appTheme = preferences[APP_THEME_KEY] ?: "Light",
             lastSyncTime = (preferences[LAST_SYNC_TIME_KEY] ?: "0").toLongOrNull() ?: 0L,
             enableDebugLogging = preferences[DEBUG_LOGGING_KEY]?.toBooleanStrictOrNull()
@@ -197,6 +199,13 @@ class SettingsManager @Inject constructor(
         }
         updateMonitoringSnapshot {
             putBoolean(SNAPSHOT_DIAGNOSTIC_FILE_LOGGING_KEY, enabled)
+        }
+    }
+
+    /** 设置是否显示内部测试项 */
+    suspend fun setInternalTestingOptionsEnabled(enabled: Boolean) {
+        context.settingsDataStore.edit { preferences ->
+            preferences[INTERNAL_TESTING_OPTIONS_ENABLED_KEY] = enabled
         }
     }
     

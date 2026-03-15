@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -108,9 +109,17 @@ class SettingsActivity : BaseActivity<BaseViewModel>() {
     }
 
     private fun renderSettings(settings: AppSettings) {
+        renderInternalTestingOptions(settings.showInternalTestingOptions)
         binding.menuDiagnosticLogging.setValueText(toggleStateText(settings.enableDiagnosticFileLogging))
         binding.menuCrashReporting.setValueText(toggleStateText(settings.enableCrashReporting))
         binding.menuAnalyticsReporting.setValueText(toggleStateText(settings.enableAnalytics))
+    }
+
+    private fun renderInternalTestingOptions(visible: Boolean) {
+        binding.menuDiagnosticLogging.isVisible = visible
+        binding.menuExportDiagnostics.isVisible = visible
+        binding.menuCrashReporting.isVisible = visible
+        binding.menuAnalyticsReporting.isVisible = visible
     }
 
     override fun onDestroy() {
