@@ -36,6 +36,9 @@ data class AppSettings(
 
     /** 是否显示内部测试项（通过隐藏入口解锁） */
     val showInternalTestingOptions: Boolean = false,
+
+    /** 内部测试项自动隐藏时间戳（毫秒，0 表示未解锁） */
+    val internalTestingOptionsVisibleUntilMillis: Long = 0L,
     
     /** 应用主题名称（"Light" / "Dark" / "Auto"） */
     val appTheme: String = "Light",

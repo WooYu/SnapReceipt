@@ -1,9 +1,13 @@
 package com.snapreceipt.io.ui.me.settings
 
+import android.app.usage.StorageStatsManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.os.Process
 import android.widget.Toast
+import android.os.storage.StorageManager
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -11,6 +15,7 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.bumptech.glide.Glide
 import com.snapreceipt.io.config.settings.AppSettings
 import com.snapreceipt.io.config.settings.SettingsManager
 import com.snapreceipt.io.monitoring.diagnostic.DiagnosticLogManager
@@ -22,11 +27,15 @@ import com.snapreceipt.io.databinding.ActivitySettingsBinding
 import com.snapreceipt.io.ui.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.io.File
 import java.util.Locale
+import android.content.pm.PackageManager
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -45,6 +54,7 @@ class SettingsActivity : BaseActivity<BaseViewModel>() {
     private var _binding: ActivitySettingsBinding? = null
     private val binding get() = _binding!!
     private var currentSettings: AppSettings = AppSettings()
+    private var hideInternalTestingOptionsJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,6 +71,7 @@ class SettingsActivity : BaseActivity<BaseViewModel>() {
         binding.menuClearCache.setOnClickListener {
             lifecycleScope.launch {
                 withContext(Dispatchers.IO) { clearAppCache() }
+                Glide.get(this@SettingsActivity).clearMemory()
                 Toast.makeText(
                     this@SettingsActivity,
                     getString(R.string.clear_cache),
@@ -109,10 +120,30 @@ class SettingsActivity : BaseActivity<BaseViewModel>() {
     }
 
     private fun renderSettings(settings: AppSettings) {
-        renderInternalTestingOptions(settings.showInternalTestingOptions)
+        syncInternalTestingOptionsVisibility(settings)
         binding.menuDiagnosticLogging.setValueText(toggleStateText(settings.enableDiagnosticFileLogging))
         binding.menuCrashReporting.setValueText(toggleStateText(settings.enableCrashReporting))
         binding.menuAnalyticsReporting.setValueText(toggleStateText(settings.enableAnalytics))
+    }
+
+    private fun syncInternalTestingOptionsVisibility(settings: AppSettings) {
+        hideInternalTestingOptionsJob?.cancel()
+        val nowMillis = System.currentTimeMillis()
+        val remainingMillis = settings.internalTestingOptionsVisibleUntilMillis - nowMillis
+        val visible = settings.showInternalTestingOptions && remainingMillis > 0L
+        renderInternalTestingOptions(visible)
+        if (!visible) {
+            if (settings.internalTestingOptionsVisibleUntilMillis > 0L) {
+                lifecycleScope.launch {
+                    settingsManager.clearExpiredInternalTestingOptions(nowMillis)
+                }
+            }
+            return
+        }
+        hideInternalTestingOptionsJob = lifecycleScope.launch {
+            delay(remainingMillis)
+            settingsManager.clearExpiredInternalTestingOptions()
+        }
     }
 
     private fun renderInternalTestingOptions(visible: Boolean) {
@@ -130,6 +161,8 @@ class SettingsActivity : BaseActivity<BaseViewModel>() {
         _binding?.menuAnalyticsReporting?.setOnClickListener(null)
         _binding?.menuExportDiagnostics?.setOnClickListener(null)
         _binding?.logoutBtn?.setOnClickListener(null)
+        hideInternalTestingOptionsJob?.cancel()
+        hideInternalTestingOptionsJob = null
         _binding = null
         super.onDestroy()
     }
@@ -196,16 +229,48 @@ class SettingsActivity : BaseActivity<BaseViewModel>() {
 
     private fun updateCacheSize() {
         lifecycleScope.launch {
-            val sizeBytes = withContext(Dispatchers.IO) {
-                directorySize(cacheDir) + (externalCacheDir?.let { directorySize(it) } ?: 0L)
-            }
+            val sizeBytes = withContext(Dispatchers.IO) { resolveCacheSizeBytes() }
             binding.menuClearCache.setValueText(formatSize(sizeBytes))
         }
     }
 
     private fun clearAppCache() {
         deleteContents(cacheDir)
+        deleteContents(codeCacheDir)
         externalCacheDir?.let { deleteContents(it) }
+        Glide.get(this).clearDiskCache()
+    }
+
+    private fun resolveCacheSizeBytes(): Long {
+        val storageStatsSize = querySystemReportedCacheSize()
+        if (storageStatsSize != null) return storageStatsSize
+        return resolveLocalCacheSize()
+    }
+
+    private fun resolveLocalCacheSize(): Long {
+        return directorySize(cacheDir) +
+            directorySize(codeCacheDir) +
+            (externalCacheDir?.let { directorySize(it) } ?: 0L)
+    }
+
+    private fun querySystemReportedCacheSize(): Long? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return null
+        val storageStatsManager = getSystemService(StorageStatsManager::class.java) ?: return null
+        val storageManager = getSystemService(StorageManager::class.java) ?: return null
+        return try {
+            val storageUuid = storageManager.getUuidForPath(filesDir)
+            storageStatsManager.queryStatsForPackage(
+                storageUuid,
+                packageName,
+                Process.myUserHandle()
+            ).cacheBytes
+        } catch (_: IOException) {
+            null
+        } catch (_: PackageManager.NameNotFoundException) {
+            null
+        } catch (_: SecurityException) {
+            null
+        }
     }
 
     private fun deleteContents(dir: File) {

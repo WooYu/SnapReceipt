@@ -15,6 +15,7 @@ import com.snapreceipt.io.domain.usecase.config.FetchPolicyUseCase
 import com.snapreceipt.io.ui.common.PolicyWebViewActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -129,10 +130,13 @@ class AboutUsActivity : BaseActivity<BaseViewModel>() {
 
         testingOptionsTapCount = 0
         lifecycleScope.launch {
-            settingsManager.setInternalTestingOptionsEnabled(true)
+            settingsManager.unlockInternalTestingOptions(TESTING_OPTIONS_VISIBLE_DURATION_MILLIS)
             Toast.makeText(
                 this@AboutUsActivity,
-                getString(R.string.testing_options_unlocked),
+                getString(
+                    R.string.testing_options_unlocked_temporary,
+                    TESTING_OPTIONS_VISIBLE_DURATION_MINUTES
+                ),
                 Toast.LENGTH_SHORT
             ).show()
         }
@@ -141,5 +145,8 @@ class AboutUsActivity : BaseActivity<BaseViewModel>() {
     companion object {
         private const val TESTING_OPTIONS_UNLOCK_TAP_COUNT = 7
         private const val TESTING_OPTIONS_HINT_THRESHOLD = 3
+        private const val TESTING_OPTIONS_VISIBLE_DURATION_MINUTES = 30L
+        private val TESTING_OPTIONS_VISIBLE_DURATION_MILLIS =
+            TimeUnit.MINUTES.toMillis(TESTING_OPTIONS_VISIBLE_DURATION_MINUTES)
     }
 }

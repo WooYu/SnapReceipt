@@ -213,7 +213,7 @@
     <string name="diagnostic_log_export_empty">No diagnostic logs available yet</string>
     <string name="diagnostic_log_export_failed">Unable to prepare diagnostic logs</string>
     <string name="testing_options_unlock_countdown">%1$d more taps to show testing options</string>
-    <string name="testing_options_unlocked">Testing options unlocked</string>
+    <string name="testing_options_unlocked_temporary">Testing options unlocked for %1$d minutes</string>
 
     <!-- ══════════════ Feedback ══════════════ -->
     <string name="feedback">Feedback</string>

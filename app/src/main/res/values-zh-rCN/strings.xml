@@ -213,7 +213,7 @@
     <string name="diagnostic_log_export_empty">暂无可导出的诊断日志</string>
     <string name="diagnostic_log_export_failed">诊断日志导出失败</string>
     <string name="testing_options_unlock_countdown">再点击%1$d次即可显示测试开关</string>
-    <string name="testing_options_unlocked">测试开关已显示</string>
+    <string name="testing_options_unlocked_temporary">测试开关已显示，%1$d分钟后自动隐藏</string>
 
     <!-- ══════════════ Feedback ══════════════ -->
     <string name="feedback">反馈</string>

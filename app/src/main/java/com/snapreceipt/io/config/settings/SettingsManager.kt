@@ -57,6 +57,8 @@ class SettingsManager @Inject constructor(
         private val ANALYTICS_KEY = booleanPreferencesKey("analytics")
         private val DIAGNOSTIC_FILE_LOGGING_KEY = booleanPreferencesKey("diagnostic_file_logging")
         private val INTERNAL_TESTING_OPTIONS_ENABLED_KEY = booleanPreferencesKey("internal_testing_options_enabled")
+        private val INTERNAL_TESTING_OPTIONS_VISIBLE_UNTIL_KEY =
+            stringPreferencesKey("internal_testing_options_visible_until")
         private val APP_THEME_KEY = stringPreferencesKey("app_theme")
         private val LAST_SYNC_TIME_KEY = stringPreferencesKey("last_sync_time")
         private val DEBUG_LOGGING_KEY = stringPreferencesKey("debug_logging")  // "true" / "false" / null
@@ -88,6 +90,11 @@ class SettingsManager @Inject constructor(
      * ```
      */
     val settings: Flow<AppSettings> = context.settingsDataStore.data.map { preferences ->
+        val internalTestingOptionsVisibleUntilMillis =
+            (preferences[INTERNAL_TESTING_OPTIONS_VISIBLE_UNTIL_KEY] ?: "0")
+                .toLongOrNull()
+                ?: 0L
+        val now = System.currentTimeMillis()
         AppSettings(
             isDarkMode = preferences[DARK_MODE_KEY] ?: false,
             language = preferences[LANGUAGE_KEY] ?: "English",
@@ -99,7 +106,9 @@ class SettingsManager @Inject constructor(
                 ?: MonitoringConfig.Defaults.analyticsEnabled,
             enableDiagnosticFileLogging = preferences[DIAGNOSTIC_FILE_LOGGING_KEY]
                 ?: MonitoringConfig.Defaults.diagnosticFileLoggingEnabled,
-            showInternalTestingOptions = preferences[INTERNAL_TESTING_OPTIONS_ENABLED_KEY] ?: false,
+            showInternalTestingOptions = (preferences[INTERNAL_TESTING_OPTIONS_ENABLED_KEY] ?: false) &&
+                internalTestingOptionsVisibleUntilMillis > now,
+            internalTestingOptionsVisibleUntilMillis = internalTestingOptionsVisibleUntilMillis,
             appTheme = preferences[APP_THEME_KEY] ?: "Light",
             lastSyncTime = (preferences[LAST_SYNC_TIME_KEY] ?: "0").toLongOrNull() ?: 0L,
             enableDebugLogging = preferences[DEBUG_LOGGING_KEY]?.toBooleanStrictOrNull()
@@ -202,10 +211,33 @@ class SettingsManager @Inject constructor(
         }
     }
 
-    /** 设置是否显示内部测试项 */
-    suspend fun setInternalTestingOptionsEnabled(enabled: Boolean) {
+    /** 解锁内部测试项，并在有效期结束后自动隐藏 */
+    suspend fun unlockInternalTestingOptions(durationMillis: Long) {
+        val visibleUntilMillis = System.currentTimeMillis() + durationMillis
         context.settingsDataStore.edit { preferences ->
-            preferences[INTERNAL_TESTING_OPTIONS_ENABLED_KEY] = enabled
+            preferences[INTERNAL_TESTING_OPTIONS_ENABLED_KEY] = true
+            preferences[INTERNAL_TESTING_OPTIONS_VISIBLE_UNTIL_KEY] = visibleUntilMillis.toString()
+        }
+    }
+
+    /** 清除内部测试项显示状态 */
+    suspend fun clearInternalTestingOptions() {
+        context.settingsDataStore.edit { preferences ->
+            preferences.remove(INTERNAL_TESTING_OPTIONS_ENABLED_KEY)
+            preferences.remove(INTERNAL_TESTING_OPTIONS_VISIBLE_UNTIL_KEY)
+        }
+    }
+
+    /** 若内部测试项已过期，则清除其显示状态 */
+    suspend fun clearExpiredInternalTestingOptions(nowMillis: Long = System.currentTimeMillis()) {
+        val preferences = context.settingsDataStore.data.first()
+        val isEnabled = preferences[INTERNAL_TESTING_OPTIONS_ENABLED_KEY] ?: false
+        val visibleUntilMillis =
+            (preferences[INTERNAL_TESTING_OPTIONS_VISIBLE_UNTIL_KEY] ?: "0").toLongOrNull() ?: 0L
+        if (!isEnabled || visibleUntilMillis <= 0L || visibleUntilMillis > nowMillis) return
+        context.settingsDataStore.edit { mutablePreferences ->
+            mutablePreferences.remove(INTERNAL_TESTING_OPTIONS_ENABLED_KEY)
+            mutablePreferences.remove(INTERNAL_TESTING_OPTIONS_VISIBLE_UNTIL_KEY)
         }
     }
     
