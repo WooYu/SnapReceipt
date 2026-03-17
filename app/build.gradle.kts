@@ -7,9 +7,6 @@ plugins {
     id("skybound.android.application")
     id("skybound.android.hilt")
     id("kotlin-parcelize")
-    alias(libs.plugins.google.services)
-    alias(libs.plugins.firebase.crashlytics)
-    alias(libs.plugins.firebase.perf)
 }
 
 val localProps = Properties().apply {
@@ -173,10 +170,6 @@ dependencies {
     implementation(libs.glide)
     implementation(libs.swiperefreshlayout)
     implementation(libs.ucrop)
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.analytics)
-    implementation(libs.firebase.crashlytics)
-    implementation(libs.firebase.perf)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

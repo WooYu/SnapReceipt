@@ -8,9 +8,6 @@ import com.snapreceipt.io.config.settings.SettingsManager
 import com.snapreceipt.io.di.AppDiConfig
 import com.snapreceipt.io.monitoring.MonitoringConfig
 import com.snapreceipt.io.monitoring.diagnostic.DiagnosticLogManager
-import com.snapreceipt.io.monitoring.firebase.FirebaseAnalyticsReporter
-import com.snapreceipt.io.monitoring.firebase.FirebaseCrashReporter
-import com.snapreceipt.io.monitoring.firebase.FirebasePerformanceReporter
 import com.skybound.space.core.CoreFoundation
 import com.skybound.space.core.config.AppConfig
 import com.skybound.space.core.di.AppInjector
@@ -45,15 +42,6 @@ class SnapReceiptApp : Application() {
     lateinit var settingsManager: SettingsManager
 
     @Inject
-    lateinit var analyticsReporter: FirebaseAnalyticsReporter
-
-    @Inject
-    lateinit var crashReporter: FirebaseCrashReporter
-
-    @Inject
-    lateinit var performanceReporter: FirebasePerformanceReporter
-
-    @Inject
     lateinit var diagnosticLogManager: DiagnosticLogManager
 
     override fun onCreate() {
@@ -67,9 +55,6 @@ class SnapReceiptApp : Application() {
 
         CoreFoundation.init {
             isDebug = initialDebugMode
-            crashReporter = this@SnapReceiptApp.crashReporter
-            performanceReporter = this@SnapReceiptApp.performanceReporter
-            analyticsReporter = this@SnapReceiptApp.analyticsReporter
             logReporter = { level, tag, message, throwable ->
                 routeLog(level, tag, message, throwable)
             }
