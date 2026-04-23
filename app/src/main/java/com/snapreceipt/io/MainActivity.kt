@@ -2,14 +2,14 @@ package com.snapreceipt.io
 
 import android.os.Bundle
 import android.view.View
-import androidx.annotation.StringRes
 import androidx.activity.viewModels
+import androidx.annotation.StringRes
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.snapreceipt.io.databinding.ActivityMainBinding
+import com.snapreceipt.io.ui.common.navigateToLoginOnSessionExpired
 import com.snapreceipt.io.ui.invoice.InvoiceDetailsArgsCodec
 import com.snapreceipt.io.ui.main.MainViewModel
-import com.snapreceipt.io.ui.login.LoginActivity
 import com.skybound.space.base.presentation.BaseActivity
 import com.skybound.space.core.network.auth.SessionEvent
 import com.skybound.space.core.network.auth.SessionManager
@@ -86,17 +86,5 @@ class MainActivity : BaseActivity<MainViewModel>() {
         hideGlobalLoading()
     }
 
-    /**
-     * 会话过期时统一跳回登录页，并清理当前主流程页面。
-     *
-     * @param event 会话失效事件
-     */
-    override fun onSessionExpired(event: SessionEvent) {
-        startActivity(
-            android.content.Intent(this, LoginActivity::class.java).apply {
-                addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-        )
-        finish()
-    }
+    override fun onSessionExpired(event: SessionEvent) = navigateToLoginOnSessionExpired(event)
 }

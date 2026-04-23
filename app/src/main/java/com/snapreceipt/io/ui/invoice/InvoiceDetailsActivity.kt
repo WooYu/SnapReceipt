@@ -21,9 +21,9 @@ import com.snapreceipt.io.MainActivity
 import com.snapreceipt.io.R
 import com.snapreceipt.io.databinding.ActivityInvoiceDetailsBinding
 import com.snapreceipt.io.domain.model.ReceiptEntity
+import com.snapreceipt.io.ui.common.navigateToLoginOnSessionExpired
 import com.snapreceipt.io.ui.invoice.bottomsheet.InvoiceCategoryBottomSheet
 import com.snapreceipt.io.ui.invoice.bottomsheet.TitleTypeBottomSheet
-import com.snapreceipt.io.ui.login.LoginActivity
 import com.snapreceipt.io.ui.main.ListRefreshViewModel
 import com.snapreceipt.io.ui.widget.datepicker.DateTimePickerBottomSheet
 import com.snapreceipt.io.util.ReceiptTypeHelper
@@ -570,13 +570,6 @@ class InvoiceDetailsActivity : BaseActivity<InvoiceDetailsViewModel>() {
     private fun parseDateTime(date: String, time: String): Long? =
         DateFormatUtil.parseApiDateTime(date, time)
 
-    override fun onSessionExpired(event: SessionEvent) {
-        startActivity(
-            Intent(this, LoginActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-        )
-        finish()
-    }
+    override fun onSessionExpired(event: SessionEvent) = navigateToLoginOnSessionExpired(event)
 
 }

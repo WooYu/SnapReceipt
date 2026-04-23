@@ -16,6 +16,7 @@
     <string name="no_content">No content</string>
 
     <!-- ══════════════ Login ══════════════ -->
+    <string name="session_expired_message">Your session has expired. Please log in again.</string>
     <string name="login">Log In</string>
     <string name="login_welcome_title">Welcome to Invoice Assistant</string>
     <string name="login_welcome_subtitle">Track your daily expenses effortlessly</string>

@@ -16,6 +16,7 @@
     <string name="no_content">暂无内容</string>
 
     <!-- ══════════════ Login ══════════════ -->
+    <string name="session_expired_message">登录已过期，请重新登录。</string>
     <string name="login">登录</string>
     <string name="login_welcome_title">欢迎使用发票助手</string>
     <string name="login_welcome_subtitle">轻松追踪您的日常开支</string>
