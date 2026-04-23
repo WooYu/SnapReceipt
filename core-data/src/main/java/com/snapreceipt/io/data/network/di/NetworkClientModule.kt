@@ -10,6 +10,7 @@ import com.skybound.space.core.network.auth.EncryptedAuthTokenStore
 import com.skybound.space.core.network.auth.SessionManager
 import com.skybound.space.core.network.interceptor.AuthInterceptor
 import com.skybound.space.core.network.interceptor.AuthFailureInterceptor
+import com.skybound.space.core.network.interceptor.EnvelopeAuthCodeInterceptor
 import com.skybound.space.core.network.interceptor.ExportTimeoutInterceptor
 import com.skybound.space.core.network.interceptor.LoggingInterceptor
 import com.snapreceipt.io.data.network.auth.TokenRefreshAuthenticator
@@ -38,6 +39,16 @@ import javax.inject.Singleton
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class UploadClient
+
+/**
+ * 区分“application interceptor”和“network interceptor”。
+ *
+ * network interceptor 必须早于 OkHttp 内部的 RetryAndFollowUpInterceptor 生效,
+ * 才能让 Authenticator 看到被改写后的 401,进而触发静默刷新。
+ */
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class NetworkInterceptors
 
 /**
  * 网络依赖注入模块。
@@ -98,12 +109,26 @@ object NetworkClientModule {
         ExportTimeoutInterceptor(timeoutSec = config.exportTimeoutSec)
 
     @Provides
+    @NetworkInterceptors
+    @IntoSet
+    // 响应里的 envelope code(401/403)要早于 Authenticator 决策前抬升为 HTTP 状态码,
+    // 因此必须走 network interceptor 链而不是 application interceptor 链。
+    fun provideEnvelopeAuthCodeInterceptor(): Interceptor =
+        EnvelopeAuthCodeInterceptor()
+
+    @Provides
     @Singleton
     fun provideNetworkManager(
         config: NetworkConfig,
         extraInterceptors: Set<@JvmSuppressWildcards Interceptor>,
-        authenticator: Authenticator
-    ): NetworkManager = NetworkManager(config, extraInterceptors.toList(), authenticator)
+        authenticator: Authenticator,
+        @NetworkInterceptors networkInterceptors: Set<@JvmSuppressWildcards Interceptor>
+    ): NetworkManager = NetworkManager(
+        config = config,
+        extraInterceptors = extraInterceptors.toList(),
+        authenticator = authenticator,
+        networkInterceptors = networkInterceptors.toList()
+    )
 
     @Provides
     @Singleton

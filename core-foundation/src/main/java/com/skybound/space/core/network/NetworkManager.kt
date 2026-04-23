@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit
 class NetworkManager(
     private val config: NetworkConfig,
     private val extraInterceptors: List<okhttp3.Interceptor> = emptyList(),
+    private val networkInterceptors: List<okhttp3.Interceptor> = emptyList(),
     private val authenticator: Authenticator? = null,
     private val converterFactory: Converter.Factory = GsonConverterFactory.create()
 ) {
@@ -37,6 +38,11 @@ class NetworkManager(
             .addInterceptor(LoggingInterceptor())
             .apply {
                 extraInterceptors.forEach { addInterceptor(it) }
+            }
+            .apply {
+                // network interceptor 必须早于 RetryAndFollowUpInterceptor 看到响应,
+                // 否则 Authenticator 无法收到我们重写后的 401 状态。
+                networkInterceptors.forEach { addNetworkInterceptor(it) }
             }
             .apply {
                 if (authenticator != null) authenticator(authenticator)

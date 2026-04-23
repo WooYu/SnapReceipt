@@ -20,6 +20,9 @@ dependencies {
     implementation("javax.inject:javax.inject:1")
 
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.truth)
 
     testFixturesImplementation(libs.coroutines.core)
     testFixturesImplementation(libs.coroutines.test)

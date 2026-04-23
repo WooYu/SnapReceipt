@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.skybound.space.base.presentation.UiEvent
 import com.skybound.space.base.presentation.UiState
 import com.skybound.space.core.dispatcher.CoroutineDispatchersProvider
+import com.skybound.space.core.network.ApiException
 import com.skybound.space.core.util.LogHelper
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -106,6 +107,12 @@ abstract class BaseViewModel(
     open fun handleError(throwable: Throwable) {
         if (throwable is CancellationException) {
             LogHelper.d("BaseViewModel", "Coroutine cancelled: ${throwable.message}")
+            return
+        }
+        if (throwable is ApiException &&
+            (throwable.code == ApiException.CODE_UNAUTHORIZED || throwable.code == ApiException.CODE_FORBIDDEN)
+        ) {
+            // SessionManager/Authenticator 会统一处理跳转,这里不再弹 toast
             return
         }
         emitEvent(
