@@ -234,6 +234,9 @@
     <string name="privacy_policy_label">隐私政策</string>
     <string name="terms_of_service">服务条款</string>
 
+    <!-- ══════════════ Session / Auth ══════════════ -->
+    <string name="session_refresh_failed">会话异常，请重试</string>
+
     <!-- ══════════════ Messages & Loading ══════════════ -->
     <string name="loading">加载中…</string>
     <string name="loading_please_wait">请稍候</string>

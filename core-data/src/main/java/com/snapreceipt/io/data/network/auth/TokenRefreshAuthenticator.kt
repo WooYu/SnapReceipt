@@ -36,6 +36,10 @@ class TokenRefreshAuthenticator(
 ) : Authenticator {
 
     private val refreshLock = Any()
+    // 记录最近一次刷新失败时使用的 refresh token。N 个并发 401 同时失败时,
+    // 后续线程进锁后仍看到相同 latestAccess 会再次打 /api/auth/refresh,
+    // 用此标记短路避免对后端发起 N 次相同 refresh token 的重复调用。
+    private var lastFailedRefreshToken: String? = null
     private val refreshClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
             // 刷新 token 是兜底请求，超时要更短，避免卡住整个请求重试链路。
@@ -69,8 +73,12 @@ class TokenRefreshAuthenticator(
                     .build()
             }
 
+            // 同一把 refresh token 刚刚失败过,不再对后端发起重复请求;等下轮新 token 注入后再重试。
+            if (lastFailedRefreshToken == latestRefresh) return null
+
             return when (val refreshed = refreshTokens(latestRefresh)) {
                 is RefreshResult.Success -> {
+                    lastFailedRefreshToken = null
                     // 刷新成功后立即同步会话状态，让后续请求都能读到最新 token。
                     sessionManager.updateTokens(refreshed.tokens.accessToken, refreshed.tokens.refreshToken)
                     request.newBuilder()
@@ -79,12 +87,17 @@ class TokenRefreshAuthenticator(
                 }
 
                 RefreshResult.RefreshTokenInvalid -> {
+                    lastFailedRefreshToken = latestRefresh
                     // refresh token 已失效时不要继续重试，直接让上层进入会话失效流程。
                     sessionManager.refreshTokenInvalid()
                     null
                 }
 
-                RefreshResult.Failed -> null
+                RefreshResult.Failed -> {
+                    lastFailedRefreshToken = latestRefresh
+                    sessionManager.accessTokenRefreshFailed()
+                    null
+                }
             }
         }
     }

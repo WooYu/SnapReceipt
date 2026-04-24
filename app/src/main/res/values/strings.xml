@@ -234,6 +234,9 @@
     <string name="privacy_policy_label">Privacy Policy</string>
     <string name="terms_of_service">Terms of Service</string>
 
+    <!-- ══════════════ Session / Auth ══════════════ -->
+    <string name="session_refresh_failed">Session error, please retry</string>
+
     <!-- ══════════════ Messages & Loading ══════════════ -->
     <string name="loading">Loading…</string>
     <string name="loading_please_wait">Please wait</string>

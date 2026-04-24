@@ -11,6 +11,8 @@ import com.snapreceipt.io.ui.invoice.InvoiceDetailsArgsCodec
 import com.snapreceipt.io.ui.main.MainViewModel
 import com.snapreceipt.io.ui.login.LoginActivity
 import com.skybound.space.base.presentation.BaseActivity
+import com.skybound.space.base.presentation.UiEvent
+import com.skybound.space.base.presentation.UiEventDispatcher
 import com.skybound.space.core.network.auth.SessionEvent
 import com.skybound.space.core.network.auth.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -98,5 +100,9 @@ class MainActivity : BaseActivity<MainViewModel>() {
             }
         )
         finish()
+    }
+
+    override fun onAccessTokenRefreshFailed() {
+        UiEventDispatcher.dispatch(this, UiEvent.Toast(message = "", resId = R.string.session_refresh_failed))
     }
 }
