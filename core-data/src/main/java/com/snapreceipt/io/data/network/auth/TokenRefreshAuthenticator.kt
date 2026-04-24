@@ -222,7 +222,9 @@ class TokenRefreshAuthenticator(
 
     private companion object {
         private const val TAG = "Auth"
-        private const val TRANSIENT_REFRESH_FAILURE_DEBOUNCE_MS = 2500
+        // 刷新请求超时上限约 15s，但网络抖动下失败通常在 2s 内。
+        // 2500ms 覆盖同一批并发 401 的全部响应到达时间，避免对后端重复发起相同 refresh token 请求。
+        private const val TRANSIENT_REFRESH_FAILURE_DEBOUNCE_MS = 2500L
         // 鉴权相关请求统一复用同一个头名称，避免魔法字符串散落在重试逻辑里。
         const val AUTH_HEADER = "Authorization"
         // 刷新请求在这里手工拼 JSON 请求体，因此需要显式声明媒体类型。

@@ -58,7 +58,10 @@ class EnvelopeAuthCodeInterceptor : Interceptor {
         val msg = obj.get(FIELD_MSG)?.asString?.takeIf { it.isNotBlank() }
             ?: obj.get(FIELD_MESSAGE)?.asString ?: ""
         Pair(code, msg)
-    }.getOrNull()
+    }.getOrElse { e ->
+        LogHelper.w(TAG, "peekAuthInfo failed: ${e.javaClass.simpleName}: ${e.message}")
+        null
+    }
 
     private fun MediaType.isJsonLike(): Boolean {
         if (subtype.equals("json", ignoreCase = true)) return true

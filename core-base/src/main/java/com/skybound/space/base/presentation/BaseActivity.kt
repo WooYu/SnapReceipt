@@ -28,6 +28,7 @@ abstract class BaseActivity<VM : com.skybound.space.base.presentation.viewmodel.
     protected open val viewModel: VM? = null
     protected open val sessionManager: SessionManager? = null
     private var sessionEventHandled = false
+    private var refreshFailHandled = false
     private var loadingDialogController: LoadingDialogController? = null
     protected open val useDefaultNavigationBarInsets: Boolean = true
 
@@ -86,6 +87,7 @@ abstract class BaseActivity<VM : com.skybound.space.base.presentation.viewmodel.
     override fun onResume() {
         super.onResume()
         sessionEventHandled = false
+        refreshFailHandled = false
     }
 
     // -- UiEventDispatcher.Host --
@@ -107,6 +109,8 @@ abstract class BaseActivity<VM : com.skybound.space.base.presentation.viewmodel.
      */
     open fun onAccessTokenRefreshFailed() {
         if (isFinishing || isDestroyed) return
+        if (refreshFailHandled) return
+        refreshFailHandled = true
         UiEventDispatcher.dispatch(
             this,
             UiEvent.Toast(message = "", resId = R.string.base_session_refresh_failed)
