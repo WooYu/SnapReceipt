@@ -63,6 +63,10 @@ class SessionManager @Inject constructor(
             LogHelper.d("Auth", "refreshTokenInvalid ignored: already invalidated")
             return
         }
+        LogHelper.w(
+            "Auth",
+            "refreshTokenInvalid -> clear tokens and emit RequireLogin. access=${tokenSuffix(tokenStore.accessToken())} refresh=${tokenSuffix(tokenStore.refreshToken())}"
+        )
         // 会话彻底失效,吸收可能在途的 AccessTokenRefreshFailed,避免 Toast 与跳登录同屏出现。
         refreshFailNotified.set(true)
         tokenStore.clear()
@@ -70,8 +74,15 @@ class SessionManager @Inject constructor(
     }
 
     fun accessTokenRefreshFailed() {
-        if (sessionInvalidated.get()) return
-        if (!refreshFailNotified.compareAndSet(false, true)) return
+        if (sessionInvalidated.get()) {
+            LogHelper.d("Auth", "accessTokenRefreshFailed ignored: session already invalidated")
+            return
+        }
+        if (!refreshFailNotified.compareAndSet(false, true)) {
+            LogHelper.d("Auth", "accessTokenRefreshFailed ignored: already notified in this session")
+            return
+        }
+        LogHelper.w("Auth", "Emit AccessTokenRefreshFailed event")
         _events.tryEmit(SessionEvent.AccessTokenRefreshFailed)
     }
 
@@ -81,4 +92,7 @@ class SessionManager @Inject constructor(
         tokenStore.clear()
         _events.tryEmit(SessionEvent.LoggedOut)
     }
+
+    private fun tokenSuffix(token: String?): String =
+        token?.takeLast(6)?.let { "***$it" } ?: "<null>"
 }

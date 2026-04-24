@@ -9,6 +9,7 @@ import com.skybound.space.core.network.NetworkConfig
 import com.skybound.space.core.network.auth.AuthTokenStore
 import com.skybound.space.core.network.auth.SessionManager
 import com.skybound.space.core.network.interceptor.LoggingInterceptor
+import com.skybound.space.core.util.LogHelper
 import okhttp3.Authenticator
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -53,22 +54,41 @@ class TokenRefreshAuthenticator(
 
     override fun authenticate(route: Route?, response: Response): Request? {
         // OkHttp 会把 priorResponse 串起来，这里限制最多走两次，防止刷新失败后无限重放。
-        if (responseCount(response) >= 2) return null
+        if (responseCount(response) >= 2) {
+            LogHelper.w(TAG, "Skip refresh: retry limit reached for ${requestPath(response.request)}")
+            return null
+        }
 
         val request = response.request
         // 仅处理本来就带鉴权头的请求，避免把无鉴权接口错误地拖进刷新流程。
-        val requestAuth = request.header(AUTH_HEADER) ?: return null
+        val requestAuth = request.header(AUTH_HEADER) ?: run {
+            LogHelper.d(TAG, "Skip refresh: request has no Authorization header, path=${requestPath(request)}")
+            return null
+        }
         val currentAccess = tokenStore.accessToken()
-        if (currentAccess.isNullOrBlank()) return null
+        if (currentAccess.isNullOrBlank()) {
+            LogHelper.w(TAG, "Skip refresh: access token missing in store, path=${requestPath(request)}")
+            return null
+        }
 
         synchronized(refreshLock) {
             // 进入锁后再次读取，确保拿到的是其他线程可能刚刷新过的新 token。
             val latestAccess = tokenStore.accessToken()
             val latestRefresh = tokenStore.refreshToken()
-            if (latestAccess.isNullOrBlank() || latestRefresh.isNullOrBlank()) return null
+            if (latestAccess.isNullOrBlank() || latestRefresh.isNullOrBlank()) {
+                LogHelper.w(
+                    TAG,
+                    "Skip refresh in lock: token missing access=${tokenSuffix(latestAccess)} refresh=${tokenSuffix(latestRefresh)} path=${requestPath(request)}"
+                )
+                return null
+            }
 
             // 当前失败请求如果已经不是最新 token 了，只需替换请求头再重放，不必再次刷新。
             if (requestAuth != bearer(latestAccess)) {
+                LogHelper.i(
+                    TAG,
+                    "Reuse latest access token for replay. latestAccess=${tokenSuffix(latestAccess)} path=${requestPath(request)}"
+                )
                 return request.newBuilder()
                     .header(AUTH_HEADER, bearer(latestAccess))
                     .build()
@@ -79,8 +99,13 @@ class TokenRefreshAuthenticator(
             if (lastFailedRefreshToken == latestRefresh) {
                 val elapsed = System.currentTimeMillis() - lastFailedRefreshAtMs
                 if (elapsed < TRANSIENT_REFRESH_FAILURE_DEBOUNCE_MS) {
+                    LogHelper.w(
+                        TAG,
+                        "Skip refresh: debounce short-circuit elapsed=${elapsed}ms refresh=${tokenSuffix(latestRefresh)} path=${requestPath(request)}"
+                    )
                     return null
                 }
+                LogHelper.i(TAG, "Refresh debounce window elapsed, allowing retry. refresh=${tokenSuffix(latestRefresh)}")
                 lastFailedRefreshToken = null
             }
 
@@ -90,6 +115,10 @@ class TokenRefreshAuthenticator(
                     lastFailedRefreshAtMs = 0L
                     // 刷新成功后立即同步会话状态，让后续请求都能读到最新 token。
                     sessionManager.updateTokens(refreshed.tokens.accessToken, refreshed.tokens.refreshToken)
+                    LogHelper.i(
+                        TAG,
+                        "Refresh success. access=${tokenSuffix(refreshed.tokens.accessToken)} refresh=${tokenSuffix(refreshed.tokens.refreshToken)} path=${requestPath(request)}"
+                    )
                     request.newBuilder()
                         .header(AUTH_HEADER, bearer(refreshed.tokens.accessToken))
                         .build()
@@ -99,6 +128,10 @@ class TokenRefreshAuthenticator(
                     lastFailedRefreshToken = latestRefresh
                     lastFailedRefreshAtMs = System.currentTimeMillis()
                     // refresh token 已失效时不要继续重试，直接让上层进入会话失效流程。
+                    LogHelper.w(
+                        TAG,
+                        "Refresh token invalid. trigger RequireLogin refresh=${tokenSuffix(latestRefresh)} path=${requestPath(request)}"
+                    )
                     sessionManager.refreshTokenInvalid()
                     null
                 }
@@ -106,6 +139,10 @@ class TokenRefreshAuthenticator(
                 RefreshResult.Failed -> {
                     lastFailedRefreshToken = latestRefresh
                     lastFailedRefreshAtMs = System.currentTimeMillis()
+                    LogHelper.w(
+                        TAG,
+                        "Refresh request failed. notify AccessTokenRefreshFailed refresh=${tokenSuffix(latestRefresh)} path=${requestPath(request)}"
+                    )
                     sessionManager.accessTokenRefreshFailed()
                     null
                 }
@@ -123,17 +160,49 @@ class TokenRefreshAuthenticator(
             .post(body)
             .build()
 
-        refreshClient.newCall(request).execute().use { response ->
-            // 服务端约定 403 表示 refresh token 不再可用，需要强制重新登录。
-            if (response.code == 403) return RefreshResult.RefreshTokenInvalid
-            if (!response.isSuccessful) return RefreshResult.Failed
-            val raw = response.body.string()
-            val type = object : TypeToken<BaseResponse<AuthTokensDto>>() {}.type
-            val envelope: BaseResponse<AuthTokensDto> = gson.fromJson(raw, type)
-            if (envelope.code == 403) return RefreshResult.RefreshTokenInvalid
-            if (!envelope.isSuccess()) return RefreshResult.Failed
-            val tokens = envelope.data ?: return RefreshResult.Failed
-            return RefreshResult.Success(tokens)
+        return runCatching {
+            refreshClient.newCall(request).execute().use { response ->
+                // 服务端约定 403 表示 refresh token 不再可用，需要强制重新登录。
+                if (response.code == 403) {
+                    LogHelper.w(
+                        TAG,
+                        "Refresh API returns HTTP 403. refresh=${tokenSuffix(refreshToken)}"
+                    )
+                    return@use RefreshResult.RefreshTokenInvalid
+                }
+                if (!response.isSuccessful) {
+                    LogHelper.w(
+                        TAG,
+                        "Refresh API failed with HTTP ${response.code}. refresh=${tokenSuffix(refreshToken)}"
+                    )
+                    return@use RefreshResult.Failed
+                }
+                val raw = response.body.string()
+                val type = object : TypeToken<BaseResponse<AuthTokensDto>>() {}.type
+                val envelope: BaseResponse<AuthTokensDto> = gson.fromJson(raw, type)
+                if (envelope.code == 403) {
+                    LogHelper.w(
+                        TAG,
+                        "Refresh API envelope code=403. refresh=${tokenSuffix(refreshToken)}"
+                    )
+                    return@use RefreshResult.RefreshTokenInvalid
+                }
+                if (!envelope.isSuccess()) {
+                    LogHelper.w(
+                        TAG,
+                        "Refresh API envelope failed. code=${envelope.code} msg=${envelope.message}"
+                    )
+                    return@use RefreshResult.Failed
+                }
+                val tokens = envelope.data ?: run {
+                    LogHelper.w(TAG, "Refresh API envelope missing token data.")
+                    return@use RefreshResult.Failed
+                }
+                return@use RefreshResult.Success(tokens)
+            }
+        }.getOrElse { throwable ->
+            LogHelper.e(TAG, "Refresh exception: ${throwable.javaClass.simpleName}", throwable)
+            RefreshResult.Failed
         }
     }
 
@@ -148,8 +217,11 @@ class TokenRefreshAuthenticator(
     }
 
     private fun bearer(token: String): String = "Bearer $token"
+    private fun tokenSuffix(token: String?): String = token?.takeLast(6)?.let { "***$it" } ?: "<null>"
+    private fun requestPath(request: Request): String = request.url.encodedPath
 
     private companion object {
+        private const val TAG = "Auth"
         private const val TRANSIENT_REFRESH_FAILURE_DEBOUNCE_MS = 2500
         // 鉴权相关请求统一复用同一个头名称，避免魔法字符串散落在重试逻辑里。
         const val AUTH_HEADER = "Authorization"
