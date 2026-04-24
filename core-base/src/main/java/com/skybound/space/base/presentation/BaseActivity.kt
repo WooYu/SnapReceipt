@@ -69,9 +69,14 @@ abstract class BaseActivity<VM : com.skybound.space.base.presentation.viewmodel.
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 manager.events.collect { event ->
-                    if (sessionEventHandled) return@collect
-                    sessionEventHandled = true
-                    onSessionExpired(event)
+                    when (event) {
+                        SessionEvent.AccessTokenRefreshFailed -> onAccessTokenRefreshFailed()
+                        SessionEvent.RequireLogin, SessionEvent.LoggedOut -> {
+                            if (sessionEventHandled) return@collect
+                            sessionEventHandled = true
+                            onSessionExpired(event)
+                        }
+                    }
                 }
             }
         }
@@ -93,6 +98,8 @@ abstract class BaseActivity<VM : com.skybound.space.base.presentation.viewmodel.
     override fun onCustomEvent(event: UiEvent.Custom) {}
 
     open fun onSessionExpired(event: SessionEvent) {}
+
+    open fun onAccessTokenRefreshFailed() {}
 
     override fun showGlobalLoading(message: CharSequence?) {
         if (isFinishing || isDestroyed) return
