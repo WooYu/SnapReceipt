@@ -40,6 +40,7 @@ class TokenRefreshAuthenticator(
     // 后续线程进锁后仍看到相同 latestAccess 会再次打 /api/auth/refresh,
     // 用此标记短路避免对后端发起 N 次相同 refresh token 的重复调用。
     private var lastFailedRefreshToken: String? = null
+    private var lastFailedRefreshAtMs: Long = 0L
     private val refreshClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
             // 刷新 token 是兜底请求，超时要更短，避免卡住整个请求重试链路。
@@ -73,12 +74,20 @@ class TokenRefreshAuthenticator(
                     .build()
             }
 
-            // 同一把 refresh token 刚刚失败过,不再对后端发起重复请求;等下轮新 token 注入后再重试。
-            if (lastFailedRefreshToken == latestRefresh) return null
+            // 同一把 refresh token 在短时间窗口内刚失败过: 并发 401 风暴去抖。
+            // 超过窗口后清空标记,允许网络抖动后的再次静默刷新。
+            if (lastFailedRefreshToken == latestRefresh) {
+                val elapsed = System.currentTimeMillis() - lastFailedRefreshAtMs
+                if (elapsed < TRANSIENT_REFRESH_FAILURE_DEBOUNCE_MS) {
+                    return null
+                }
+                lastFailedRefreshToken = null
+            }
 
             return when (val refreshed = refreshTokens(latestRefresh)) {
                 is RefreshResult.Success -> {
                     lastFailedRefreshToken = null
+                    lastFailedRefreshAtMs = 0L
                     // 刷新成功后立即同步会话状态，让后续请求都能读到最新 token。
                     sessionManager.updateTokens(refreshed.tokens.accessToken, refreshed.tokens.refreshToken)
                     request.newBuilder()
@@ -88,6 +97,7 @@ class TokenRefreshAuthenticator(
 
                 RefreshResult.RefreshTokenInvalid -> {
                     lastFailedRefreshToken = latestRefresh
+                    lastFailedRefreshAtMs = System.currentTimeMillis()
                     // refresh token 已失效时不要继续重试，直接让上层进入会话失效流程。
                     sessionManager.refreshTokenInvalid()
                     null
@@ -95,6 +105,7 @@ class TokenRefreshAuthenticator(
 
                 RefreshResult.Failed -> {
                     lastFailedRefreshToken = latestRefresh
+                    lastFailedRefreshAtMs = System.currentTimeMillis()
                     sessionManager.accessTokenRefreshFailed()
                     null
                 }
@@ -139,6 +150,7 @@ class TokenRefreshAuthenticator(
     private fun bearer(token: String): String = "Bearer $token"
 
     private companion object {
+        private const val TRANSIENT_REFRESH_FAILURE_DEBOUNCE_MS = 2500
         // 鉴权相关请求统一复用同一个头名称，避免魔法字符串散落在重试逻辑里。
         const val AUTH_HEADER = "Authorization"
         // 刷新请求在这里手工拼 JSON 请求体，因此需要显式声明媒体类型。

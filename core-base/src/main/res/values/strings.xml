@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="base_session_refresh_failed">Session error, please retry</string>
+</resources>

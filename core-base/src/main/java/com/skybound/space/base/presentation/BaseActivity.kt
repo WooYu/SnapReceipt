@@ -15,6 +15,7 @@ import com.google.android.material.color.MaterialColors
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.skybound.space.base.R
 import com.skybound.space.core.network.auth.SessionEvent
 import com.skybound.space.core.network.auth.SessionManager
 import kotlinx.coroutines.launch
@@ -99,7 +100,18 @@ abstract class BaseActivity<VM : com.skybound.space.base.presentation.viewmodel.
 
     open fun onSessionExpired(event: SessionEvent) {}
 
-    open fun onAccessTokenRefreshFailed() {}
+    /**
+     * 静默刷新 access token 失败（网络或业务失败，非 refresh 作废）时提示用户。
+     * 任意注入 [sessionManager] 的 Activity 在 STARTED 时都会收到事件，默认在此统一 Toast，
+     * 避免仅 MainActivity 在前台时子页用户无反馈。
+     */
+    open fun onAccessTokenRefreshFailed() {
+        if (isFinishing || isDestroyed) return
+        UiEventDispatcher.dispatch(
+            this,
+            UiEvent.Toast(message = "", resId = R.string.base_session_refresh_failed)
+        )
+    }
 
     override fun showGlobalLoading(message: CharSequence?) {
         if (isFinishing || isDestroyed) return
